@@ -660,11 +660,20 @@ function generateColor(rand1, rand2, rand3) {
 
 The ibira.js project demonstrates referential transparency in several areas:
 
-- **Cache Key Generation**: `getCacheKey()` is a pure function
+- **Cache Key Generation**: `getCacheKey()` is a pure function that always returns the same key for the same URL
+- **Cache Entry Creation**: `_createCacheEntry(data, currentTime)` is a pure function that creates cache entries deterministically
+- **Cache Validation**: `_isCacheEntryValid(cacheEntry, currentTime)` is a pure function that validates cache entries without side effects
+- **Expired Keys Detection**: `_getExpiredCacheKeys(cache, currentTime)` is a pure function that identifies expired entries without mutating the cache
 - **Data Transformation**: Uses immutable data transformations when processing API responses
 - **Cache Operations**: Designed with immutability in mind
 - **Observer Management**: Uses immutable array patterns (spread operator, filter) for subscribe/unsubscribe operations
 - **API Response Processing**: Pure functions for parsing and formatting data
+
+**Key Improvements for Referential Transparency:**
+- All time-dependent operations now accept `currentTime` as a parameter instead of calling `Date.now()` internally
+- Pure helper functions return values instead of mutating state
+- Side effects are isolated in wrapper functions that call pure helpers
+- Tests verify deterministic behavior with same inputs
 
 ### Academic Papers
 
