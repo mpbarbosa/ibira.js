@@ -89,7 +89,7 @@ Each action should perform one specific, well-defined task.
 - name: Validate JavaScript
   uses: ./.github/actions/validate-js
   with:
-    files: 'src/guia.js src/guia_ibge.js'
+    files: 'src/ibira.js'
 ```
 
 **What it does**:
@@ -192,20 +192,21 @@ Documentation files are organized by topic with clear, focused content.
 
 **Doesn't contain**: Architecture details, API documentation, deployment info
 
-## Real-World Example: PR #121 Refactoring
+## Real-World Example: Cohesive API Fetching Architecture
 
-The AddressDataExtractor refactoring (PR #121) is an excellent example of improving cohesion:
+The ibira.js library demonstrates high cohesion through its focused class design:
 
 ### Before: Low Cohesion (Multiple Responsibilities)
 
 ```javascript
-class AddressDataExtractor {
+class APIDataManager {
   // Mixed responsibilities:
-  - Extract address data from API responses
-  - Cache addresses for performance
-  - Detect address changes
-  - Manage callbacks
-  - Handle expiration and eviction
+  - Fetch data from API endpoints
+  - Cache API responses for performance
+  - Manage observer subscriptions
+  - Handle concurrent requests
+  - Coordinate multiple fetchers
+  - Prevent duplicate requests
 }
 ```
 
@@ -213,31 +214,33 @@ class AddressDataExtractor {
 - Too many responsibilities in one class
 - Hard to understand what it does
 - Difficult to test independently
-- Changes to caching affect extraction logic
+- Changes to caching affect fetching logic
+- Observer management mixed with coordination
 
 ### After: High Cohesion (Single Responsibilities)
 
 ```javascript
-// ✅ Focused on extraction
-class AddressExtractor {
-  - Extract address from raw data
-  - Standardize to Brazilian format
-  - Parse UF codes
+// ✅ Focused on individual API fetching
+class IbiraAPIFetcher {
+  - Fetch data from a single URL
+  - Handle loading and error states
+  - Manage observer subscriptions
+  - Provide basic caching per instance
 }
 
-// ✅ Focused on caching and change detection
-class AddressCache {
-  - Cache address data
-  - Manage cache lifecycle
-  - Detect changes between addresses
-  - Handle callbacks for changes
+// ✅ Focused on coordinating multiple fetchers
+class IbiraAPIFetchManager {
+  - Coordinate multiple IbiraAPIFetcher instances
+  - Prevent duplicate concurrent requests
+  - Manage centralized cache across fetchers
+  - Handle race conditions
 }
 ```
 
 **Benefits Achieved**:
 1. **Improved Cohesion**: Each class has a single, well-defined responsibility
 2. **Better Maintainability**: Clear separation makes code easier to understand
-3. **Enhanced Testability**: Each concern can be tested independently (34 tests passing)
+3. **Enhanced Testability**: Each concern can be tested independently
 4. **Easier to Extend**: New features can be added without affecting other concerns
 
 ## Best Practices for High Cohesion
@@ -587,23 +590,27 @@ High cohesion makes testing easier:
 
 ```javascript
 // ✅ High cohesion = Easy to test
-describe('AddressExtractor', () => {
-  test('extracts UF from ISO code', () => {
-    const result = AddressExtractor.extractSiglaUF('BR-SP');
-    expect(result).toBe('SP');
+describe('IbiraAPIFetcher', () => {
+  test('fetches data from API endpoint', async () => {
+    const fetcher = new IbiraAPIFetcher('https://api.example.com/data');
+    await fetcher.fetchData();
+    expect(fetcher.data).toBeDefined();
   });
   
-  // All tests focus on extraction - one responsibility
+  // All tests focus on fetching - one responsibility
 });
 
-describe('AddressCache', () => {
-  test('caches address data', () => {
-    const cache = AddressCache.getInstance();
-    cache.getBrazilianStandardAddress(data);
-    // Verify caching behavior
+describe('IbiraAPIFetchManager', () => {
+  test('prevents duplicate concurrent requests', async () => {
+    const manager = new IbiraAPIFetchManager();
+    const url = 'https://api.example.com/data';
+    const promise1 = manager.fetch(url);
+    const promise2 = manager.fetch(url);
+    // Verify both resolve to same promise
+    expect(promise1).toBe(promise2);
   });
   
-  // All tests focus on caching - different responsibility
+  // All tests focus on coordination - different responsibility
 });
 ```
 
@@ -612,17 +619,16 @@ describe('AddressCache', () => {
 ### Within This Repository
 
 - [LOW_COUPLING_GUIDE.md](./LOW_COUPLING_GUIDE.md) - Complementary principles for loose coupling
-- [REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md) - Real examples of improving cohesion (PR #121)
 - [CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md) - Reviewing for cohesion
 - [REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md) - Pure functions and single responsibility
 - [TDD_GUIDE.md](./TDD_GUIDE.md) - Testing cohesive components
 - [UNIT_TEST_GUIDE.md](./UNIT_TEST_GUIDE.md) - Testing focused units
+- [JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md) - JavaScript coding standards
 
 ### Architecture Examples
-- [CLASS_DIAGRAM.md](../docs/architecture/CLASS_DIAGRAM.md) - Architecture showing cohesive classes
-- [WEBGEOCODINGMANAGER_REFACTORING.md](../docs/architecture/WEBGEOCODINGMANAGER_REFACTORING.md) - PR #189 cohesion improvements
-- [WEB_GEOCODING_MANAGER.md](../docs/architecture/WEB_GEOCODING_MANAGER.md) - Coordinator with focused responsibilities
-- [REFERENCE_PLACE.md](../docs/architecture/REFERENCE_PLACE.md) - Single-purpose class example
+- [src/ibira.js](../src/ibira.js) - Main library showing cohesive class design
+  - `IbiraAPIFetcher` - Focused on individual API fetching operations
+  - `IbiraAPIFetchManager` - Focused on coordinating multiple fetchers
 
 ### External Resources
 
