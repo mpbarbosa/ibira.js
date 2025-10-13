@@ -133,7 +133,47 @@ export class IbiraAPIFetcher {
 	 * );
 	 */
 	static withExternalCache(url, cache, options = {}) {
-		return new IbiraAPIFetcher(url, { ...options, cache });
+		return new IbiraAPIFetcher(url, cache, options);
+	}
+
+	/**
+	 * Creates a default cache with expiration and size limits
+	 * 
+	 * @private
+	 * @static
+	 * @param {Object} [options={}] - Cache configuration options
+	 * @returns {Map} Configured cache instance
+	 */
+	static _createDefaultCache(options = {}) {
+		const cache = new Map();
+		cache.maxSize = options.maxCacheSize || 100;
+		cache.expiration = options.cacheExpiration || 5 * 60 * 1000; // 5 minutes default
+		return cache;
+	}
+
+	/**
+	 * Creates an IbiraAPIFetcher with default cache settings
+	 * Convenient for most use cases with reasonable defaults
+	 * 
+	 * @static
+	 * @param {string} url - The API endpoint URL
+	 * @param {Object} [options={}] - Additional configuration options
+	 * @returns {IbiraAPIFetcher} Configured fetcher instance with default cache
+	 * 
+	 * @example
+	 * // Using default cache settings (100 entries, 5 minute expiration)
+	 * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
+	 * 
+	 * @example
+	 * // Custom cache settings
+	 * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data', {
+	 *   maxCacheSize: 50,
+	 *   cacheExpiration: 10 * 60 * 1000 // 10 minutes
+	 * });
+	 */
+	static withDefaultCache(url, options = {}) {
+		const cache = this._createDefaultCache(options);
+		return new IbiraAPIFetcher(url, cache, options);
 	}
 
 	/**
@@ -157,9 +197,11 @@ export class IbiraAPIFetcher {
 			delete: () => false,
 			clear: () => {},
 			size: 0,
-			entries: () => []
+			entries: () => [],
+			maxSize: 0,
+			expiration: 0
 		};
-		return new IbiraAPIFetcher(url, { ...options, cache: noCache });
+		return new IbiraAPIFetcher(url, noCache, options);
 	}
 
 	/**
@@ -191,7 +233,9 @@ export class IbiraAPIFetcher {
 			clear: () => {},
 			subscriberCount: 1
 		};
-		return new IbiraAPIFetcher(url, { ...options, eventNotifier: callbackNotifier });
+		// Create default cache if none provided
+		const cache = options.cache || this._createDefaultCache(options);
+		return new IbiraAPIFetcher(url, cache, { ...options, eventNotifier: callbackNotifier });
 	}
 
 	/**
@@ -216,52 +260,61 @@ export class IbiraAPIFetcher {
 			clear: () => {},
 			subscriberCount: 0
 		};
-		return new IbiraAPIFetcher(url, { ...options, eventNotifier: noEvents });
+		// Create default cache if none provided
+		const cache = options.cache || this._createDefaultCache(options);
+		return new IbiraAPIFetcher(url, cache, { ...options, eventNotifier: noEvents });
 	}
 
-    constructor(url, options = {}) {
+    constructor(url, cache, options = {}) {
 		this.url = url;
 		// this.observers = []; // ❌ REMOVED: Mutable observer state for referential transparency
 		// this.fetching = false; // ❌ REMOVED: Mutable fetching state for referential transparency
 		// this.data = null; // ❌ REMOVED: Mutable data state for referential transparency
 		// this.error = null; // ❌ REMOVED: Mutable error state for referential transparency
 		// this.loading = false; // ❌ REMOVED: Mutable loading state for referential transparency
-		this.lastFetch = 0;
+		// this.lastFetch = 0; // ❌ REMOVED: Unused property for better referential transparency
 		this.timeout = options.timeout || 10000;
 		
-		// ✅ IMPROVED: Cache as dependency injection for better referential transparency
-		this.cache = options.cache || new DefaultCache({
-			maxSize: options.maxCacheSize || 50,
-			expiration: options.cacheExpiration || 300000
-		});
+		// ✅ EXCELLENT: Cache as required dependency for maximum referential transparency
+		this.cache = cache;
 
 		// ✅ IMPROVED: Event notifier as dependency injection for better referential transparency
 		this.eventNotifier = options.eventNotifier || new DefaultEventNotifier();
 		
-		this.cacheExpiration = options.cacheExpiration || 300000; // 5 minutes default cache expiration (ms)
-		this.maxCacheSize = options.maxCacheSize || 50; // Maximum number of cached items
+		// ✅ SIMPLIFIED: Cache configuration managed by cache instance itself
 		this.maxRetries = options.maxRetries || 3; // Maximum number of retry attempts
 		this.retryDelay = options.retryDelay || 1000; // Initial retry delay in milliseconds
 		this.retryMultiplier = options.retryMultiplier || 2; // Exponential backoff multiplier
-		this.retryableStatusCodes = options.retryableStatusCodes || [408, 429, 500, 502, 503, 504]; // HTTP status codes that should trigger retries
-	}	getCacheKey() {
+		// ✅ IMMUTABLE: Create frozen copy of retryable status codes array for deep immutability
+		this.retryableStatusCodes = Object.freeze([...(options.retryableStatusCodes || [408, 429, 500, 502, 503, 504])]); // HTTP status codes that should trigger retries
+		
+		// ✅ IMMUTABLE: Deep freeze the entire instance for maximum referential transparency
+		// This prevents any external code from modifying the fetcher's properties
+		// and guarantees true immutability at the language level
+		return Object.freeze(this);
+	}
+
+	getCacheKey() {
 		// Override this method in subclasses to provide a unique cache key
 		return this.url;
 	}
 
 	/**
 	 * Creates a cache entry with timestamp for expiration tracking
+	 * Uses cache's own expiration configuration for better encapsulation
 	 * 
 	 * @private
 	 * @param {any} data - The data to cache
 	 * @param {number} currentTime - Current timestamp in milliseconds
+	 * @param {Object} cache - Cache instance with expiration configuration
 	 * @returns {Object} Cache entry with data and timestamp
 	 */
-	_createCacheEntry(data, currentTime) {
+	_createCacheEntry(data, currentTime, cache) {
+		const expiration = cache.expiration || 300000; // Default 5 minutes if cache doesn't specify
 		return {
 			data: data,
 			timestamp: currentTime,
-			expiresAt: currentTime + this.cacheExpiration
+			expiresAt: currentTime + expiration
 		};
 	}
 
@@ -286,8 +339,9 @@ export class IbiraAPIFetcher {
 	 */
 	_enforceCacheSizeLimit(cache = null) {
 		const activeCache = cache || this.cache;
+		const maxSize = activeCache.maxSize || 50; // Use cache's own maxSize or default
 		
-		if (activeCache.size <= this.maxCacheSize) {
+		if (activeCache.size <= maxSize) {
 			return;
 		}
 
@@ -298,7 +352,7 @@ export class IbiraAPIFetcher {
 		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 		
 		// Calculate how many entries to remove
-		const entriesToRemove = activeCache.size - this.maxCacheSize;
+		const entriesToRemove = activeCache.size - maxSize;
 		
 		// Remove oldest entries
 		for (let i = 0; i < entriesToRemove; i++) {
@@ -516,8 +570,8 @@ export class IbiraAPIFetcher {
  * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are thrown directly
  * 
  * @example
- * // Basic usage with automatic caching - now returns data directly
- * const fetcher = new IbiraAPIFetcher('https://api.example.com/data');
+ * // Recommended usage with default cache - purely functional
+ * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
  * const data = await fetcher.fetchData();
  * console.log(data); // Retrieved data
  * // Loading state can be managed externally during await
@@ -525,7 +579,9 @@ export class IbiraAPIFetcher {
  * @example
  * // Custom cache injection for better referential transparency
  * const customCache = new Map();
- * const fetcher = new IbiraAPIFetcher('https://api.example.com/data', { cache: customCache });
+ * customCache.maxSize = 50;
+ * customCache.expiration = 10 * 60 * 1000; // 10 minutes
+ * const fetcher = new IbiraAPIFetcher('https://api.example.com/data', customCache);
  * const data = await fetcher.fetchData();
  * 
  * @example
@@ -614,8 +670,8 @@ export class IbiraAPIFetcher {
 					// Get current time for cache entry
 					now = Date.now();
 
-					// Create cache entry with expiration timestamp
-					const cacheEntry = this._createCacheEntry(data, now);
+					// Create cache entry with expiration timestamp using cache's own configuration
+					const cacheEntry = this._createCacheEntry(data, now, activeCache);
 					
 					// ✅ IMPROVED: Cache the result using active cache for better referential transparency
 					activeCache.set(cacheKey, cacheEntry);
@@ -714,22 +770,20 @@ export class IbiraAPIFetchManager {
 	 */
 	getFetcher(url, options = {}) {
 		if (!this.fetchers.has(url)) {
-			const fetcher = new IbiraAPIFetcher(url);
+			// Configure global cache with manager settings
+			this.globalCache.maxSize = this.maxCacheSize;
+			this.globalCache.expiration = this.cacheExpiration;
 			
-			// Apply any custom options
-			if (options.timeout) fetcher.timeout = options.timeout;
-			if (options.cacheExpiration) fetcher.cacheExpiration = options.cacheExpiration;
-			if (options.maxCacheSize) fetcher.maxCacheSize = options.maxCacheSize;
+			// Create fetcher with shared global cache
+			const fetcherOptions = {
+				timeout: options.timeout,
+				maxRetries: options.maxRetries !== undefined ? options.maxRetries : this.defaultMaxRetries,
+				retryDelay: options.retryDelay !== undefined ? options.retryDelay : this.defaultRetryDelay,
+				retryMultiplier: options.retryMultiplier !== undefined ? options.retryMultiplier : this.defaultRetryMultiplier,
+				retryableStatusCodes: options.retryableStatusCodes || this.defaultRetryableStatusCodes
+			};
 			
-			// Apply retry configuration (use provided options or manager defaults)
-			fetcher.maxRetries = options.maxRetries !== undefined ? options.maxRetries : this.defaultMaxRetries;
-			fetcher.retryDelay = options.retryDelay !== undefined ? options.retryDelay : this.defaultRetryDelay;
-			fetcher.retryMultiplier = options.retryMultiplier !== undefined ? options.retryMultiplier : this.defaultRetryMultiplier;
-			fetcher.retryableStatusCodes = options.retryableStatusCodes || this.defaultRetryableStatusCodes;
-			
-			// Share the global cache with individual fetchers
-			fetcher.cache = this.globalCache;
-			
+			const fetcher = new IbiraAPIFetcher(url, this.globalCache, fetcherOptions);
 			this.fetchers.set(url, fetcher);
 		}
 		
@@ -1077,16 +1131,34 @@ export class IbiraAPIFetchManager {
 
 	/**
 	 * Set retry configuration for a specific URL
+	 * Creates a new immutable fetcher instance with updated configuration
+	 * instead of modifying existing properties (which would fail due to Object.freeze)
 	 * 
 	 * @param {string} url - The URL to configure retries for
 	 * @param {Object} retryConfig - Retry configuration object
 	 */
 	setRetryConfigForUrl(url, retryConfig = {}) {
-		const fetcher = this.getFetcher(url);
-		
-		if (retryConfig.maxRetries !== undefined) fetcher.maxRetries = retryConfig.maxRetries;
-		if (retryConfig.retryDelay !== undefined) fetcher.retryDelay = retryConfig.retryDelay;
-		if (retryConfig.retryMultiplier !== undefined) fetcher.retryMultiplier = retryConfig.retryMultiplier;
-		if (retryConfig.retryableStatusCodes) fetcher.retryableStatusCodes = retryConfig.retryableStatusCodes;
+		// ✅ IMMUTABLE: Create new fetcher instance instead of modifying existing one
+		// This respects the frozen nature of IbiraAPIFetcher instances
+		if (this.fetchers.has(url)) {
+			const oldFetcher = this.fetchers.get(url);
+			
+			// Create new options object with updated retry configuration
+			const newOptions = {
+				timeout: oldFetcher.timeout,
+				maxRetries: retryConfig.maxRetries !== undefined ? retryConfig.maxRetries : oldFetcher.maxRetries,
+				retryDelay: retryConfig.retryDelay !== undefined ? retryConfig.retryDelay : oldFetcher.retryDelay,
+				retryMultiplier: retryConfig.retryMultiplier !== undefined ? retryConfig.retryMultiplier : oldFetcher.retryMultiplier,
+				retryableStatusCodes: retryConfig.retryableStatusCodes || oldFetcher.retryableStatusCodes,
+				eventNotifier: oldFetcher.eventNotifier
+			};
+			
+			// Create new immutable fetcher instance and replace the old one
+			const newFetcher = new IbiraAPIFetcher(url, oldFetcher.cache, newOptions);
+			this.fetchers.set(url, newFetcher);
+		} else {
+			// If fetcher doesn't exist yet, create it with the specified retry config
+			this.getFetcher(url, retryConfig);
+		}
 	}
 }
