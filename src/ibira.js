@@ -12,7 +12,7 @@
 // Version object for unstable development status
 const VERSION = {
 	major: 0,
-	minor: 1,
+	minor: 2,
 	patch: 0,
 	prerelease: "alpha", // Indicates unstable development
 	toString: function () {
@@ -26,7 +26,7 @@ export class IbiraAPIFetcher {
 		this.url = url;
 		this.observers = [];
 		this.fetching = false;
-		this.data = null;
+		// this.data = null; // ❌ REMOVED: Mutable data state for referential transparency
 		this.error = null;
 		this.loading = false;
 		this.lastFetch = 0;
@@ -251,11 +251,15 @@ export class IbiraAPIFetcher {
  * and manage data from external APIs while providing a smooth user experience through intelligent 
  * caching and proper state management.
  * 
+ * **Referential Transparency Improvement:**
+ * This method now returns the fetched data directly instead of storing it in instance state,
+ * making it more referentially transparent by reducing mutable state and side effects.
+ * 
  * **Caching Strategy:**
  * The method starts by generating a cache key using getCacheKey(), which by default returns the URL 
  * but can be overridden in subclasses for more sophisticated caching strategies. It immediately 
  * checks if the data already exists in the cache - if it does, it retrieves the cached data and 
- * returns early, avoiding unnecessary network requests. This caching mechanism significantly 
+ * returns it directly, avoiding unnecessary network requests. This caching mechanism significantly 
  * improves performance by reducing redundant API calls.
  * 
  * **Loading State Management:**
@@ -268,14 +272,14 @@ export class IbiraAPIFetcher {
  * the response is successful using `response.ok` and throws a meaningful error if the request fails. 
  * The method follows the JSON API pattern by calling `response.json()` to parse the response data.
  * 
- * **Data Storage:**
- * Upon successful retrieval, it stores the data both in the instance (`this.data`) and in the cache 
- * for future use, ensuring consistent data availability across the application.
+ * **Data Return:**
+ * Upon successful retrieval, the method returns the data directly and caches it for future use,
+ * ensuring consistent data availability without storing it in instance state.
  * 
  * **Error Handling:**
  * The error handling is comprehensive, catching any network errors, parsing errors, or HTTP errors 
  * and storing them in `this.error` for the calling code to handle appropriately. This provides 
- * a clean separation of
+ * a clean separation between error state and data flow.
  * 
  * **Cleanup Guarantee:**
  * The `finally` block ensures that `this.loading` is always reset to `false`, regardless of whether 
@@ -283,29 +287,28 @@ export class IbiraAPIFetcher {
  * which is a common source of bugs in data fetching implementations.
  * 
  * @async
- * @returns {Promise<void>} Resolves when data is fetched and stored, or retrieved from cache
+ * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
  * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are caught and stored in this.error
  * 
  * @example
- * // Basic usage with automatic caching
- * const fetcher = new APIFetcher('https://api.example.com/data');
- * await fetcher.fetchData();
- * console.log(fetcher.data); // Retrieved data
+ * // Basic usage with automatic caching - now returns data directly
+ * const fetcher = new IbiraAPIFetcher('https://api.example.com/data');
+ * const data = await fetcher.fetchData();
+ * console.log(data); // Retrieved data
  * console.log(fetcher.loading); // false after completion
  * 
  * @example
  * // Error handling
  * try {
- *   await fetcher.fetchData();
- *   if (fetcher.error) {
- *     console.error('Fetch failed:', fetcher.error.message);
- *   }
+ *   const data = await fetcher.fetchData();
+ *   console.log('Success:', data);
  * } catch (error) {
- *   console.error('Unexpected error:', error);
+ *   console.error('Fetch failed:', error.message);
+ *   // Also check fetcher.error for stored error state
  * }
  * 
  * @see {@link getCacheKey} - Override this method for custom cache key generation
- * @since 0.8.3-alpha
+ * @since 0.1.0-alpha
  * @author Marcelo Pereira Barbosa
  */
 	async fetchData() {
@@ -322,10 +325,9 @@ export class IbiraAPIFetcher {
 		if (this.cache.has(cacheKey)) {
 			const cacheEntry = this.cache.get(cacheKey);
 			if (this._isCacheEntryValid(cacheEntry, now)) {
-				this.data = cacheEntry.data;
 				// Update timestamp for LRU tracking
 				cacheEntry.timestamp = now;
-				return; // Early return with cached data improves performance
+				return cacheEntry.data; // ✅ Return cached data directly (more referentially transparent)
 			} else {
 				// Remove expired entry
 				this.cache.delete(cacheKey);
@@ -348,9 +350,6 @@ export class IbiraAPIFetcher {
 				// Perform the network request
 				const data = await this._performSingleRequest(abortController);
 
-				// Store data in instance for immediate access
-				this.data = data;
-
 				// Get current time for cache entry
 				now = Date.now();
 
@@ -367,10 +366,10 @@ export class IbiraAPIFetcher {
 				this.error = null;
 
 				// Notify observers of successful fetch
-				this.notifyObservers('success', this.data);
+				this.notifyObservers('success', data);
 
-				// Success - exit retry loop
-				return;
+				// ✅ Return data directly instead of storing in instance state
+				return data;
 
 			} catch (error) {
 				lastError = error;
@@ -412,6 +411,9 @@ export class IbiraAPIFetcher {
 		// Always reset loading state regardless of success/failure
 		// This prevents UI from getting stuck in loading state
 		this.loading = false;
+
+		// ✅ Throw error instead of returning undefined (more referentially transparent)
+		throw lastError;
 	}
 }
 
@@ -630,13 +632,8 @@ export class IbiraAPIFetchManager {
 	 * @returns {Promise<any>} Promise that resolves to the fetched data
 	 */
 	async _executeFetch(fetcher) {
-		await fetcher.fetchData();
-		
-		if (fetcher.error) {
-			throw fetcher.error;
-		}
-		
-		return fetcher.data;
+		// ✅ fetchData() now returns data directly, no need to check fetcher.data
+		return await fetcher.fetchData();
 	}
 
 	/**
