@@ -20,9 +20,113 @@ const VERSION = {
 	},
 };
 
+/**
+ * Default cache implementation for IbiraAPIFetcher
+ * Provides basic Map-based caching with expiration and size limits
+ */
+class DefaultCache {
+	constructor(options = {}) {
+		this.storage = new Map();
+		this.maxSize = options.maxSize || 50;
+		this.expiration = options.expiration || 300000; // 5 minutes
+	}
+
+	has(key) {
+		return this.storage.has(key);
+	}
+
+	get(key) {
+		return this.storage.get(key);
+	}
+
+	set(key, value) {
+		this.storage.set(key, value);
+		this._enforceSizeLimit();
+	}
+
+	delete(key) {
+		return this.storage.delete(key);
+	}
+
+	clear() {
+		this.storage.clear();
+	}
+
+	get size() {
+		return this.storage.size;
+	}
+
+	entries() {
+		return this.storage.entries();
+	}
+
+	_enforceSizeLimit() {
+		if (this.storage.size <= this.maxSize) {
+			return;
+		}
+
+		const entries = Array.from(this.storage.entries());
+		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+		
+		const entriesToRemove = this.storage.size - this.maxSize;
+		for (let i = 0; i < entriesToRemove; i++) {
+			this.storage.delete(entries[i][0]);
+		}
+	}
+}
+
 export class IbiraAPIFetcher {
 
-    constructor(url) {
+	/**
+	 * Creates an IbiraAPIFetcher with a purely functional cache approach
+	 * This method provides better referential transparency by explicitly managing cache externally
+	 * 
+	 * @static
+	 * @param {string} url - The API endpoint URL
+	 * @param {Object} cache - External cache instance (must implement Map-like interface)
+	 * @param {Object} [options={}] - Additional configuration options
+	 * @returns {IbiraAPIFetcher} Configured fetcher instance with external cache
+	 * 
+	 * @example
+	 * // Purely functional approach with external cache
+	 * const sharedCache = new Map();
+	 * const fetcher = IbiraAPIFetcher.withExternalCache(
+	 *   'https://api.example.com/data',
+	 *   sharedCache,
+	 *   { timeout: 5000 }
+	 * );
+	 */
+	static withExternalCache(url, cache, options = {}) {
+		return new IbiraAPIFetcher(url, { ...options, cache });
+	}
+
+	/**
+	 * Creates an IbiraAPIFetcher with no caching for maximum referential transparency
+	 * Every call will result in a fresh network request
+	 * 
+	 * @static
+	 * @param {string} url - The API endpoint URL  
+	 * @param {Object} [options={}] - Additional configuration options
+	 * @returns {IbiraAPIFetcher} Configured fetcher instance with no cache
+	 * 
+	 * @example
+	 * // No cache - purely functional, always fresh data
+	 * const fetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
+	 */
+	static withoutCache(url, options = {}) {
+		const noCache = {
+			has: () => false,
+			get: () => null,
+			set: () => {},
+			delete: () => false,
+			clear: () => {},
+			size: 0,
+			entries: () => []
+		};
+		return new IbiraAPIFetcher(url, { ...options, cache: noCache });
+	}
+
+    constructor(url, options = {}) {
 		this.url = url;
 		this.observers = [];
 		// this.fetching = false; // ❌ REMOVED: Mutable fetching state for referential transparency
@@ -30,14 +134,20 @@ export class IbiraAPIFetcher {
 		// this.error = null; // ❌ REMOVED: Mutable error state for referential transparency
 		// this.loading = false; // ❌ REMOVED: Mutable loading state for referential transparency
 		this.lastFetch = 0;
-		this.timeout = 10000;
-		this.cache = new Map();
-		this.cacheExpiration = 300000; // 5 minutes default cache expiration (ms)
-		this.maxCacheSize = 50; // Maximum number of cached items
-		this.maxRetries = 3; // Maximum number of retry attempts
-		this.retryDelay = 1000; // Initial retry delay in milliseconds
-		this.retryMultiplier = 2; // Exponential backoff multiplier
-		this.retryableStatusCodes = [408, 429, 500, 502, 503, 504]; // HTTP status codes that should trigger retries
+		this.timeout = options.timeout || 10000;
+		
+		// ✅ IMPROVED: Cache as dependency injection for better referential transparency
+		this.cache = options.cache || new DefaultCache({
+			maxSize: options.maxCacheSize || 50,
+			expiration: options.cacheExpiration || 300000
+		});
+		
+		this.cacheExpiration = options.cacheExpiration || 300000; // 5 minutes default cache expiration (ms)
+		this.maxCacheSize = options.maxCacheSize || 50; // Maximum number of cached items
+		this.maxRetries = options.maxRetries || 3; // Maximum number of retry attempts
+		this.retryDelay = options.retryDelay || 1000; // Initial retry delay in milliseconds
+		this.retryMultiplier = options.retryMultiplier || 2; // Exponential backoff multiplier
+		this.retryableStatusCodes = options.retryableStatusCodes || [408, 429, 500, 502, 503, 504]; // HTTP status codes that should trigger retries
 	}	getCacheKey() {
 		// Override this method in subclasses to provide a unique cache key
 		return this.url;
@@ -76,24 +186,27 @@ export class IbiraAPIFetcher {
 	 * Uses LRU (Least Recently Used) eviction strategy
 	 * 
 	 * @private
+	 * @param {Object} [cache] - Optional cache instance, defaults to this.cache
 	 */
-	_enforceCacheSizeLimit() {
-		if (this.cache.size <= this.maxCacheSize) {
+	_enforceCacheSizeLimit(cache = null) {
+		const activeCache = cache || this.cache;
+		
+		if (activeCache.size <= this.maxCacheSize) {
 			return;
 		}
 
 		// Convert cache entries to array for sorting
-		const entries = Array.from(this.cache.entries());
+		const entries = Array.from(activeCache.entries());
 		
 		// Sort by timestamp (oldest first)
 		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 		
 		// Calculate how many entries to remove
-		const entriesToRemove = this.cache.size - this.maxCacheSize;
+		const entriesToRemove = activeCache.size - this.maxCacheSize;
 		
 		// Remove oldest entries
 		for (let i = 0; i < entriesToRemove; i++) {
-			this.cache.delete(entries[i][0]);
+			activeCache.delete(entries[i][0]);
 		}
 	}
 
@@ -124,13 +237,15 @@ export class IbiraAPIFetcher {
 	 * Should be called periodically to prevent memory leaks
 	 * 
 	 * @private
+	 * @param {Object} [cache] - Optional cache instance, defaults to this.cache
 	 */
-	_cleanupExpiredCache() {
+	_cleanupExpiredCache(cache = null) {
+		const activeCache = cache || this.cache;
 		const now = Date.now();
-		const expiredKeys = this._getExpiredCacheKeys(this.cache, now);
+		const expiredKeys = this._getExpiredCacheKeys(activeCache, now);
 
 		// Remove expired entries
-		expiredKeys.forEach(key => this.cache.delete(key));
+		expiredKeys.forEach(key => activeCache.delete(key));
 	}
 
 	/**
@@ -257,6 +372,12 @@ export class IbiraAPIFetcher {
  * state management has been removed from instance state and delegated to external observers
  * or the calling code, further improving referential transparency.
  * 
+ * **Enhanced Cache Strategy:**
+ * Cache is now externalized as a dependency injection, making the class more testable and 
+ * allowing different caching strategies. The cache can be passed during construction or 
+ * defaults to a built-in implementation. This improves referential transparency by making
+ * cache dependencies explicit rather than hidden internal state.
+ * 
  * **Caching Strategy:**
  * The method starts by generating a cache key using getCacheKey(), which by default returns the URL 
  * but can be overridden in subclasses for more sophisticated caching strategies. It immediately 
@@ -289,6 +410,7 @@ export class IbiraAPIFetcher {
  * providing a cleaner separation of concerns and improved testability.
  * 
  * @async
+ * @param {Object} [cacheOverride] - Optional cache instance to use instead of the default
  * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
  * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are thrown directly
  * 
@@ -298,6 +420,12 @@ export class IbiraAPIFetcher {
  * const data = await fetcher.fetchData();
  * console.log(data); // Retrieved data
  * // Loading state can be managed externally during await
+ * 
+ * @example
+ * // Custom cache injection for better referential transparency
+ * const customCache = new Map();
+ * const fetcher = new IbiraAPIFetcher('https://api.example.com/data', { cache: customCache });
+ * const data = await fetcher.fetchData();
  * 
  * @example
  * // Error handling with external loading state management
@@ -325,26 +453,29 @@ export class IbiraAPIFetcher {
  * @since 0.1.0-alpha
  * @author Marcelo Pereira Barbosa
  */
-	async fetchData() {
+	async fetchData(cacheOverride = null) {
+		// ✅ IMPROVED: Use provided cache or fall back to instance cache for better referential transparency
+		const activeCache = cacheOverride || this.cache;
+		
 		// Generate cache key for this request (can be overridden in subclasses)
 		const cacheKey = this.getCacheKey();
 
 		// Clean up expired cache entries before checking cache
-		this._cleanupExpiredCache();
+		this._cleanupExpiredCache(activeCache);
 
 		// Get current time once for consistency
 		let now = Date.now();
 
 		// Check cache first - if valid data exists, return immediately to avoid network request
-		if (this.cache.has(cacheKey)) {
-			const cacheEntry = this.cache.get(cacheKey);
+		if (activeCache.has(cacheKey)) {
+			const cacheEntry = activeCache.get(cacheKey);
 			if (this._isCacheEntryValid(cacheEntry, now)) {
 				// Update timestamp for LRU tracking
 				cacheEntry.timestamp = now;
 				return cacheEntry.data; // ✅ Return cached data directly (more referentially transparent)
 			} else {
 				// Remove expired entry
-				this.cache.delete(cacheKey);
+				activeCache.delete(cacheKey);
 			}
 		}
 
@@ -369,11 +500,11 @@ export class IbiraAPIFetcher {
 					// Create cache entry with expiration timestamp
 					const cacheEntry = this._createCacheEntry(data, now);
 					
-					// Cache the result for future requests with same cache key
-					this.cache.set(cacheKey, cacheEntry);
+					// ✅ IMPROVED: Cache the result using active cache for better referential transparency
+					activeCache.set(cacheKey, cacheEntry);
 					
 					// Enforce cache size limits after adding new entry
-					this._enforceCacheSizeLimit();
+					this._enforceCacheSizeLimit(activeCache);
 
 					// Notify observers of successful fetch
 					this.notifyObservers('success', data);
