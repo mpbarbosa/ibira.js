@@ -22,7 +22,7 @@ const VERSION = {
 
 export class IbiraAPIFetcher {
 
-    constructor(url) {
+	constructor(url) {
 		this.url = url;
 		this.observers = [];
 		this.fetching = false;
@@ -32,11 +32,183 @@ export class IbiraAPIFetcher {
 		this.lastFetch = 0;
 		this.timeout = 10000;
 		this.cache = new Map();
-	}
-
-	getCacheKey() {
+		this.cacheExpiration = 300000; // 5 minutes default cache expiration (ms)
+		this.maxCacheSize = 50; // Maximum number of cached items
+		this.maxRetries = 3; // Maximum number of retry attempts
+		this.retryDelay = 1000; // Initial retry delay in milliseconds
+		this.retryMultiplier = 2; // Exponential backoff multiplier
+		this.retryableStatusCodes = [408, 429, 500, 502, 503, 504]; // HTTP status codes that should trigger retries
+	}	getCacheKey() {
 		// Override this method in subclasses to provide a unique cache key
 		return this.url;
+	}
+
+	/**
+	 * Creates a cache entry with timestamp for expiration tracking
+	 * 
+	 * @private
+	 * @param {any} data - The data to cache
+	 * @returns {Object} Cache entry with data and timestamp
+	 */
+	_createCacheEntry(data) {
+		return {
+			data: data,
+			timestamp: Date.now(),
+			expiresAt: Date.now() + this.cacheExpiration
+		};
+	}
+
+	/**
+	 * Checks if a cache entry is still valid (not expired)
+	 * 
+	 * @private
+	 * @param {Object} cacheEntry - The cache entry to check
+	 * @returns {boolean} True if the entry is still valid
+	 */
+	_isCacheEntryValid(cacheEntry) {
+		return cacheEntry && Date.now() < cacheEntry.expiresAt;
+	}
+
+	/**
+	 * Enforces cache size limits by removing oldest entries
+	 * Uses LRU (Least Recently Used) eviction strategy
+	 * 
+	 * @private
+	 */
+	_enforceCacheSizeLimit() {
+		if (this.cache.size <= this.maxCacheSize) {
+			return;
+		}
+
+		// Convert cache entries to array for sorting
+		const entries = Array.from(this.cache.entries());
+		
+		// Sort by timestamp (oldest first)
+		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+		
+		// Calculate how many entries to remove
+		const entriesToRemove = this.cache.size - this.maxCacheSize;
+		
+		// Remove oldest entries
+		for (let i = 0; i < entriesToRemove; i++) {
+			this.cache.delete(entries[i][0]);
+		}
+	}
+
+	/**
+	 * Cleans up expired cache entries
+	 * Should be called periodically to prevent memory leaks
+	 * 
+	 * @private
+	 */
+	_cleanupExpiredCache() {
+		const now = Date.now();
+		const expiredKeys = [];
+
+		// Find all expired entries
+		for (const [key, entry] of this.cache.entries()) {
+			if (now >= entry.expiresAt) {
+				expiredKeys.push(key);
+			}
+		}
+
+		// Remove expired entries
+		expiredKeys.forEach(key => this.cache.delete(key));
+	}
+
+	/**
+	 * Determines if an error is retryable based on error type and status code
+	 * 
+	 * @private
+	 * @param {Error} error - The error to check
+	 * @returns {boolean} True if the error is retryable
+	 */
+	_isRetryableError(error) {
+		// Network errors (no response received)
+		if (error.name === 'TypeError' && error.message.includes('fetch')) {
+			return true;
+		}
+
+		// Timeout errors
+		if (error.name === 'AbortError' || error.message.includes('timeout')) {
+			return true;
+		}
+
+		// HTTP status code errors
+		if (error.message.includes('HTTP error! status:')) {
+			const statusMatch = error.message.match(/status: (\d+)/);
+			if (statusMatch) {
+				const statusCode = parseInt(statusMatch[1]);
+				return this.retryableStatusCodes.includes(statusCode);
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Calculates the delay for the next retry attempt using exponential backoff
+	 * 
+	 * @private
+	 * @param {number} attempt - The current attempt number (0-based)
+	 * @returns {number} Delay in milliseconds
+	 */
+	_calculateRetryDelay(attempt) {
+		const delay = this.retryDelay * Math.pow(this.retryMultiplier, attempt);
+		// Add jitter to prevent thundering herd (±25% random variation)
+		const jitter = delay * 0.25 * (Math.random() - 0.5);
+		return Math.max(100, delay + jitter); // Minimum 100ms delay
+	}
+
+	/**
+	 * Sleeps for the specified number of milliseconds
+	 * 
+	 * @private
+	 * @param {number} ms - Milliseconds to sleep
+	 * @returns {Promise<void>} Promise that resolves after the delay
+	 */
+	_sleep(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+	/**
+	 * Performs a single network request with timeout handling
+	 * 
+	 * @private
+	 * @param {AbortController} abortController - Controller for request cancellation
+	 * @returns {Promise<any>} Promise that resolves to the fetched data
+	 */
+	async _performSingleRequest(abortController) {
+		// Create fetch options with timeout
+		const fetchOptions = {
+			signal: abortController.signal
+		};
+
+		// Set up timeout
+		const timeoutId = setTimeout(() => {
+			abortController.abort();
+		}, this.timeout);
+
+		try {
+			// Perform network request using modern Fetch API
+			const response = await fetch(this.url, fetchOptions);
+
+			// Clear timeout on successful response
+			clearTimeout(timeoutId);
+
+			// Check if HTTP request was successful (status 200-299)
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			// Parse JSON response data
+			const data = await response.json();
+			return data;
+
+		} catch (error) {
+			clearTimeout(timeoutId);
+			throw error;
+		}
 	}
 
 	subscribe(observer) {
@@ -123,43 +295,100 @@ export class IbiraAPIFetcher {
 		// Generate cache key for this request (can be overridden in subclasses)
 		const cacheKey = this.getCacheKey();
 
-		// Check cache first - if data exists, return immediately to avoid network request
+		// Clean up expired cache entries before checking cache
+		this._cleanupExpiredCache();
+
+		// Check cache first - if valid data exists, return immediately to avoid network request
 		if (this.cache.has(cacheKey)) {
-			this.data = this.cache.get(cacheKey);
-			return; // Early return with cached data improves performance
+			const cacheEntry = this.cache.get(cacheKey);
+			if (this._isCacheEntryValid(cacheEntry)) {
+				this.data = cacheEntry.data;
+				// Update timestamp for LRU tracking
+				cacheEntry.timestamp = Date.now();
+				return; // Early return with cached data improves performance
+			} else {
+				// Remove expired entry
+				this.cache.delete(cacheKey);
+			}
 		}
 
 		// Set loading state to indicate network operation in progress
 		// UI can use this to show loading spinners or disable interactions
 		this.loading = true;
 
-		try {
-			// Perform network request using modern Fetch API
-			const response = await fetch(this.url);
+		let lastError = null;
+		let attempt = 0;
 
-			// Check if HTTP request was successful (status 200-299)
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
+		// Retry loop with exponential backoff
+		while (attempt <= this.maxRetries) {
+			try {
+				// Create a new AbortController for each attempt
+				const abortController = new AbortController();
+				
+				// Perform the network request
+				const data = await this._performSingleRequest(abortController);
+
+				// Store data in instance for immediate access
+				this.data = data;
+
+				// Create cache entry with expiration timestamp
+				const cacheEntry = this._createCacheEntry(data);
+				
+				// Cache the result for future requests with same cache key
+				this.cache.set(cacheKey, cacheEntry);
+				
+				// Enforce cache size limits after adding new entry
+				this._enforceCacheSizeLimit();
+
+				// Clear any previous errors on successful fetch
+				this.error = null;
+
+				// Notify observers of successful fetch
+				this.notifyObservers('success', this.data);
+
+				// Success - exit retry loop
+				return;
+
+			} catch (error) {
+				lastError = error;
+				attempt++;
+
+				// Check if this error is retryable and we have attempts left
+				if (attempt <= this.maxRetries && this._isRetryableError(error)) {
+					// Calculate delay for next attempt
+					const delay = this._calculateRetryDelay(attempt - 1);
+					
+					// Notify observers of retry attempt
+					this.notifyObservers('retry', {
+						attempt: attempt,
+						maxRetries: this.maxRetries,
+						error: error,
+						retryIn: delay
+					});
+
+					// Wait before retrying
+					await this._sleep(delay);
+					continue;
+				}
+
+				// Error is not retryable or we've exhausted all retries
+				break;
 			}
-
-			// Parse JSON response data
-			const data = await response.json();
-
-			// Store data in instance for immediate access
-			this.data = data;
-
-			// Cache the result for future requests with same cache key
-			this.cache.set(cacheKey, data);
-
-		} catch (error) {
-			// Comprehensive error handling: network errors, HTTP errors, JSON parsing errors
-			// Store error for calling code to handle appropriately
-			this.error = error;
-		} finally {
-			// Always reset loading state regardless of success/failure
-			// This prevents UI from getting stuck in loading state
-			this.loading = false;
 		}
+
+		// All retry attempts failed - store the last error
+		this.error = lastError;
+		
+		// Notify observers of final failure
+		this.notifyObservers('error', {
+			error: lastError,
+			attempts: attempt,
+			maxRetries: this.maxRetries
+		});
+
+		// Always reset loading state regardless of success/failure
+		// This prevents UI from getting stuck in loading state
+		this.loading = false;
 	}
 }
 
@@ -181,12 +410,23 @@ export class IbiraAPIFetcher {
  */
 export class IbiraAPIFetchManager {
 	
-	constructor() {
+	constructor(options = {}) {
 		this.fetchers = new Map(); // Store fetcher instances by URL
 		this.pendingRequests = new Map(); // Track ongoing requests to prevent duplicates
 		this.globalCache = new Map(); // Shared cache across all fetchers
-		this.maxCacheSize = 100; // Prevent unbounded cache growth
-		this.cacheExpiration = 300000; // 5 minutes default cache expiration
+		this.maxCacheSize = options.maxCacheSize || 100; // Prevent unbounded cache growth
+		this.cacheExpiration = options.cacheExpiration || 300000; // 5 minutes default cache expiration
+		this.cleanupInterval = options.cleanupInterval || 60000; // 1 minute cleanup interval
+		this.lastCleanup = Date.now();
+		
+		// Retry configuration for all fetchers
+		this.defaultMaxRetries = options.maxRetries || 3;
+		this.defaultRetryDelay = options.retryDelay || 1000;
+		this.defaultRetryMultiplier = options.retryMultiplier || 2;
+		this.defaultRetryableStatusCodes = options.retryableStatusCodes || [408, 429, 500, 502, 503, 504];
+		
+		// Start periodic cleanup
+		this._startPeriodicCleanup();
 	}
 
 	/**
@@ -202,6 +442,14 @@ export class IbiraAPIFetchManager {
 			
 			// Apply any custom options
 			if (options.timeout) fetcher.timeout = options.timeout;
+			if (options.cacheExpiration) fetcher.cacheExpiration = options.cacheExpiration;
+			if (options.maxCacheSize) fetcher.maxCacheSize = options.maxCacheSize;
+			
+			// Apply retry configuration (use provided options or manager defaults)
+			fetcher.maxRetries = options.maxRetries !== undefined ? options.maxRetries : this.defaultMaxRetries;
+			fetcher.retryDelay = options.retryDelay !== undefined ? options.retryDelay : this.defaultRetryDelay;
+			fetcher.retryMultiplier = options.retryMultiplier !== undefined ? options.retryMultiplier : this.defaultRetryMultiplier;
+			fetcher.retryableStatusCodes = options.retryableStatusCodes || this.defaultRetryableStatusCodes;
 			
 			// Share the global cache with individual fetchers
 			fetcher.cache = this.globalCache;
@@ -210,6 +458,94 @@ export class IbiraAPIFetchManager {
 		}
 		
 		return this.fetchers.get(url);
+	}
+
+	/**
+	 * Starts periodic cleanup of expired cache entries
+	 * 
+	 * @private
+	 */
+	_startPeriodicCleanup() {
+		this.cleanupTimer = setInterval(() => {
+			this._performPeriodicCleanup();
+		}, this.cleanupInterval);
+	}
+
+	/**
+	 * Performs periodic cleanup of expired cache entries and enforces size limits
+	 * 
+	 * @private
+	 */
+	_performPeriodicCleanup() {
+		const now = Date.now();
+		const expiredKeys = [];
+
+		// Find all expired entries
+		for (const [key, entry] of this.globalCache.entries()) {
+			if (now >= entry.expiresAt) {
+				expiredKeys.push(key);
+			}
+		}
+
+		// Remove expired entries
+		expiredKeys.forEach(key => this.globalCache.delete(key));
+
+		// Enforce cache size limits using LRU strategy
+		this._enforceCacheSizeLimit();
+		
+		this.lastCleanup = now;
+	}
+
+	/**
+	 * Enforces cache size limits by removing oldest entries
+	 * Uses LRU (Least Recently Used) eviction strategy
+	 * 
+	 * @private
+	 */
+	_enforceCacheSizeLimit() {
+		if (this.globalCache.size <= this.maxCacheSize) {
+			return;
+		}
+
+		// Convert cache entries to array for sorting
+		const entries = Array.from(this.globalCache.entries());
+		
+		// Sort by timestamp (oldest first)
+		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+		
+		// Calculate how many entries to remove
+		const entriesToRemove = this.globalCache.size - this.maxCacheSize;
+		
+		// Remove oldest entries
+		for (let i = 0; i < entriesToRemove; i++) {
+			this.globalCache.delete(entries[i][0]);
+		}
+	}
+
+	/**
+	 * Creates a cache entry with timestamp for expiration tracking
+	 * 
+	 * @private
+	 * @param {any} data - The data to cache
+	 * @returns {Object} Cache entry with data and timestamp
+	 */
+	_createCacheEntry(data) {
+		return {
+			data: data,
+			timestamp: Date.now(),
+			expiresAt: Date.now() + this.cacheExpiration
+		};
+	}
+
+	/**
+	 * Checks if a cache entry is still valid (not expired)
+	 * 
+	 * @private
+	 * @param {Object} cacheEntry - The cache entry to check
+	 * @returns {boolean} True if the entry is still valid
+	 */
+	_isCacheEntryValid(cacheEntry) {
+		return cacheEntry && Date.now() < cacheEntry.expiresAt;
 	}
 
 	/**
@@ -313,12 +649,25 @@ export class IbiraAPIFetchManager {
 	 * Get cached data for a specific URL without triggering a fetch
 	 * 
 	 * @param {string} url - The URL to get cached data for
-	 * @returns {any|null} Cached data or null if not found
+	 * @returns {any|null} Cached data or null if not found or expired
 	 */
 	getCachedData(url) {
 		const fetcher = this.getFetcher(url);
 		const cacheKey = fetcher.getCacheKey();
-		return this.globalCache.get(cacheKey) || null;
+		const cacheEntry = this.globalCache.get(cacheKey);
+		
+		if (cacheEntry && this._isCacheEntryValid(cacheEntry)) {
+			// Update timestamp for LRU tracking
+			cacheEntry.timestamp = Date.now();
+			return cacheEntry.data;
+		}
+		
+		// Remove expired entry if it exists
+		if (cacheEntry) {
+			this.globalCache.delete(cacheKey);
+		}
+		
+		return null;
 	}
 
 	/**
@@ -341,6 +690,12 @@ export class IbiraAPIFetchManager {
 	 * Call this when the manager is no longer needed
 	 */
 	destroy() {
+		// Stop periodic cleanup timer
+		if (this.cleanupTimer) {
+			clearInterval(this.cleanupTimer);
+			this.cleanupTimer = null;
+		}
+		
 		// Clear all pending requests
 		this.pendingRequests.clear();
 		
@@ -357,11 +712,98 @@ export class IbiraAPIFetchManager {
 	 * @returns {Object} Statistics object with current state information
 	 */
 	getStats() {
+		const now = Date.now();
+		let expiredEntries = 0;
+		
+		// Count expired entries
+		for (const [key, entry] of this.globalCache.entries()) {
+			if (now >= entry.expiresAt) {
+				expiredEntries++;
+			}
+		}
+		
 		return {
 			activeFetchers: this.fetchers.size,
 			pendingRequests: this.pendingRequests.size,
 			cacheSize: this.globalCache.size,
-			maxCacheSize: this.maxCacheSize
+			maxCacheSize: this.maxCacheSize,
+			expiredEntries: expiredEntries,
+			cacheUtilization: Math.round((this.globalCache.size / this.maxCacheSize) * 100),
+			lastCleanup: new Date(this.lastCleanup).toISOString(),
+			cacheExpiration: this.cacheExpiration
 		};
+	}
+
+	/**
+	 * Manually trigger cache cleanup
+	 * Useful for testing or when you want to force cleanup
+	 */
+	triggerCleanup() {
+		this._performPeriodicCleanup();
+	}
+
+	/**
+	 * Set cache expiration time for new entries
+	 * 
+	 * @param {number} milliseconds - Cache expiration time in milliseconds
+	 */
+	setCacheExpiration(milliseconds) {
+		this.cacheExpiration = milliseconds;
+	}
+
+	/**
+	 * Set maximum cache size
+	 * 
+	 * @param {number} size - Maximum number of cache entries
+	 */
+	setMaxCacheSize(size) {
+		this.maxCacheSize = size;
+		// Immediately enforce the new limit
+		this._enforceCacheSizeLimit();
+	}
+
+	/**
+	 * Set default retry configuration for new fetchers
+	 * 
+	 * @param {Object} retryConfig - Retry configuration object
+	 * @param {number} [retryConfig.maxRetries] - Maximum number of retry attempts
+	 * @param {number} [retryConfig.retryDelay] - Initial retry delay in milliseconds
+	 * @param {number} [retryConfig.retryMultiplier] - Exponential backoff multiplier
+	 * @param {number[]} [retryConfig.retryableStatusCodes] - HTTP status codes that should trigger retries
+	 */
+	setRetryConfig(retryConfig = {}) {
+		if (retryConfig.maxRetries !== undefined) this.defaultMaxRetries = retryConfig.maxRetries;
+		if (retryConfig.retryDelay !== undefined) this.defaultRetryDelay = retryConfig.retryDelay;
+		if (retryConfig.retryMultiplier !== undefined) this.defaultRetryMultiplier = retryConfig.retryMultiplier;
+		if (retryConfig.retryableStatusCodes) this.defaultRetryableStatusCodes = retryConfig.retryableStatusCodes;
+	}
+
+	/**
+	 * Get current retry configuration
+	 * 
+	 * @returns {Object} Current retry configuration
+	 */
+	getRetryConfig() {
+		return {
+			maxRetries: this.defaultMaxRetries,
+			retryDelay: this.defaultRetryDelay,
+			retryMultiplier: this.defaultRetryMultiplier,
+			retryableStatusCodes: [...this.defaultRetryableStatusCodes]
+		};
+	}
+
+	/**
+	 * Set retry configuration for a specific URL
+	 * 
+	 * @param {string} url - The URL to configure retries for
+	 * @param {Object} retryConfig - Retry configuration object
+	 */
+	setRetryConfigForUrl(url, retryConfig = {}) {
+		const fetcher = this.getFetcher(url);
+		
+		if (retryConfig.maxRetries !== undefined) fetcher.maxRetries = retryConfig.maxRetries;
+		if (retryConfig.retryDelay !== undefined) fetcher.retryDelay = retryConfig.retryDelay;
+		if (retryConfig.retryMultiplier !== undefined) fetcher.retryMultiplier = retryConfig.retryMultiplier;
+		if (retryConfig.retryableStatusCodes) fetcher.retryableStatusCodes = retryConfig.retryableStatusCodes;
 	}
 }
