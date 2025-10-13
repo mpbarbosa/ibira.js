@@ -26,17 +26,29 @@ class IbiraAPIFetcher {
         return this.url;
     }
 
-    _createCacheEntry(data) {
+    _createCacheEntry(data, currentTime) {
         return {
             data: data,
-            timestamp: Date.now(),
-            expiresAt: Date.now() + this.cacheExpiration
+            timestamp: currentTime,
+            expiresAt: currentTime + this.cacheExpiration
         };
     }
 
-    _isCacheEntryValid(cacheEntry) {
+    _isCacheEntryValid(cacheEntry, currentTime) {
         if (!cacheEntry) return false;
-        return Date.now() < cacheEntry.expiresAt;
+        return currentTime < cacheEntry.expiresAt;
+    }
+
+    _getExpiredCacheKeys(cache, currentTime) {
+        const expiredKeys = [];
+
+        for (const [key, entry] of cache.entries()) {
+            if (currentTime >= entry.expiresAt) {
+                expiredKeys.push(key);
+            }
+        }
+
+        return expiredKeys;
     }
 
     _enforceCacheSizeLimit() {
@@ -55,13 +67,7 @@ class IbiraAPIFetcher {
 
     _cleanupExpiredCache() {
         const now = Date.now();
-        const expiredKeys = [];
-
-        for (const [key, entry] of this.cache.entries()) {
-            if (now >= entry.expiresAt) {
-                expiredKeys.push(key);
-            }
-        }
+        const expiredKeys = this._getExpiredCacheKeys(this.cache, now);
 
         expiredKeys.forEach(key => this.cache.delete(key));
     }
@@ -142,11 +148,13 @@ class IbiraAPIFetcher {
         const cacheKey = this.getCacheKey();
         this._cleanupExpiredCache();
 
+        let now = Date.now();
+
         if (this.cache.has(cacheKey)) {
             const cacheEntry = this.cache.get(cacheKey);
-            if (this._isCacheEntryValid(cacheEntry)) {
+            if (this._isCacheEntryValid(cacheEntry, now)) {
                 this.data = cacheEntry.data;
-                cacheEntry.timestamp = Date.now();
+                cacheEntry.timestamp = now;
                 return;
             } else {
                 this.cache.delete(cacheKey);
@@ -164,7 +172,8 @@ class IbiraAPIFetcher {
                 const data = await this._performSingleRequest(abortController);
 
                 this.data = data;
-                const cacheEntry = this._createCacheEntry(data);
+                now = Date.now();
+                const cacheEntry = this._createCacheEntry(data, now);
                 this.cache.set(cacheKey, cacheEntry);
                 this._enforceCacheSizeLimit();
 
@@ -388,54 +397,56 @@ describe('IbiraAPIFetcher', () => {
         describe('_createCacheEntry', () => {
             test('should create cache entry with timestamp and expiration', () => {
                 const testData = { test: 'data' };
-                const beforeTime = Date.now();
+                const currentTime = Date.now();
                 
-                const entry = fetcher._createCacheEntry(testData);
-                
-                const afterTime = Date.now();
+                const entry = fetcher._createCacheEntry(testData, currentTime);
                 
                 expect(entry.data).toBe(testData);
-                expect(entry.timestamp).toBeGreaterThanOrEqual(beforeTime);
-                expect(entry.timestamp).toBeLessThanOrEqual(afterTime);
-                expect(entry.expiresAt).toBe(entry.timestamp + fetcher.cacheExpiration);
+                expect(entry.timestamp).toBe(currentTime);
+                expect(entry.expiresAt).toBe(currentTime + fetcher.cacheExpiration);
             });
         });
 
         describe('_isCacheEntryValid', () => {
             test('should return true for valid cache entry', () => {
+                const now = Date.now();
                 const entry = {
                     data: mockData,
-                    timestamp: Date.now(),
-                    expiresAt: Date.now() + 1000
+                    timestamp: now,
+                    expiresAt: now + 1000
                 };
                 
-                expect(fetcher._isCacheEntryValid(entry)).toBe(true);
+                expect(fetcher._isCacheEntryValid(entry, now)).toBe(true);
             });
 
             test('should return false for expired cache entry', () => {
+                const now = Date.now();
                 const entry = {
                     data: mockData,
-                    timestamp: Date.now() - 2000,
-                    expiresAt: Date.now() - 1000
+                    timestamp: now - 2000,
+                    expiresAt: now - 1000
                 };
                 
-                expect(fetcher._isCacheEntryValid(entry)).toBe(false);
+                expect(fetcher._isCacheEntryValid(entry, now)).toBe(false);
             });
 
             test('should return false for null entry', () => {
-                expect(fetcher._isCacheEntryValid(null)).toBe(false);
+                const now = Date.now();
+                expect(fetcher._isCacheEntryValid(null, now)).toBe(false);
             });
 
             test('should return false for undefined entry', () => {
-                expect(fetcher._isCacheEntryValid(undefined)).toBe(false);
+                const now = Date.now();
+                expect(fetcher._isCacheEntryValid(undefined, now)).toBe(false);
             });
         });
 
         describe('_enforceCacheSizeLimit', () => {
             test('should not remove entries when under limit', () => {
                 // Add entries under the limit
+                const now = Date.now();
                 for (let i = 0; i < 10; i++) {
-                    const entry = fetcher._createCacheEntry({ id: i });
+                    const entry = fetcher._createCacheEntry({ id: i }, now + i);
                     fetcher.cache.set(`key${i}`, entry);
                 }
                 
@@ -716,8 +727,9 @@ describe('IbiraAPIFetcher', () => {
                 fetcher.maxCacheSize = 2;
                 
                 // Fill cache to limit
+                const now = Date.now();
                 for (let i = 0; i < 2; i++) {
-                    const entry = fetcher._createCacheEntry({ id: i });
+                    const entry = fetcher._createCacheEntry({ id: i }, now + i);
                     fetcher.cache.set(`existing${i}`, entry);
                 }
                 
@@ -941,18 +953,20 @@ describe('IbiraAPIFetcher', () => {
     describe('Configuration', () => {
         test('should allow custom cache expiration', () => {
             fetcher.cacheExpiration = 600000; // 10 minutes
+            const now = Date.now();
             
-            const entry = fetcher._createCacheEntry(mockData);
+            const entry = fetcher._createCacheEntry(mockData, now);
             
-            expect(entry.expiresAt).toBe(entry.timestamp + 600000);
+            expect(entry.expiresAt).toBe(now + 600000);
         });
 
         test('should allow custom max cache size', () => {
             fetcher.maxCacheSize = 10;
+            const now = Date.now();
             
             // Add entries beyond the limit
             for (let i = 0; i < 15; i++) {
-                const entry = fetcher._createCacheEntry({ id: i });
+                const entry = fetcher._createCacheEntry({ id: i }, now + i);
                 fetcher.cache.set(`key${i}`, entry);
             }
             
@@ -1015,10 +1029,11 @@ describe('IbiraAPIFetcher', () => {
 
         test('should handle very large cache', () => {
             fetcher.maxCacheSize = 1000;
+            const now = Date.now();
             
             // Add many entries
             for (let i = 0; i < 1500; i++) {
-                const entry = fetcher._createCacheEntry({ id: i });
+                const entry = fetcher._createCacheEntry({ id: i }, now + i);
                 fetcher.cache.set(`key${i}`, entry);
             }
             
@@ -1044,6 +1059,178 @@ describe('IbiraAPIFetcher', () => {
             fetcher._enforceCacheSizeLimit();
             
             expect(fetcher.cache.size).toBe(2);
+        });
+    });
+
+    describe('Referential Transparency', () => {
+        describe('_createCacheEntry', () => {
+            test('should be deterministic with same inputs', () => {
+                const testData = { test: 'data' };
+                const currentTime = 1000000;
+                
+                const entry1 = fetcher._createCacheEntry(testData, currentTime);
+                const entry2 = fetcher._createCacheEntry(testData, currentTime);
+                
+                expect(entry1).toEqual(entry2);
+                expect(entry1.timestamp).toBe(entry2.timestamp);
+                expect(entry1.expiresAt).toBe(entry2.expiresAt);
+            });
+
+            test('should not mutate input data', () => {
+                const testData = { test: 'data', nested: { value: 123 } };
+                const originalData = JSON.parse(JSON.stringify(testData));
+                const currentTime = Date.now();
+                
+                fetcher._createCacheEntry(testData, currentTime);
+                
+                expect(testData).toEqual(originalData);
+            });
+
+            test('should produce different results with different currentTime', () => {
+                const testData = { test: 'data' };
+                const time1 = 1000000;
+                const time2 = 2000000;
+                
+                const entry1 = fetcher._createCacheEntry(testData, time1);
+                const entry2 = fetcher._createCacheEntry(testData, time2);
+                
+                expect(entry1.timestamp).not.toBe(entry2.timestamp);
+                expect(entry1.expiresAt).not.toBe(entry2.expiresAt);
+            });
+        });
+
+        describe('_isCacheEntryValid', () => {
+            test('should be deterministic with same inputs', () => {
+                const entry = {
+                    data: mockData,
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                };
+                const currentTime = 1500000;
+                
+                const result1 = fetcher._isCacheEntryValid(entry, currentTime);
+                const result2 = fetcher._isCacheEntryValid(entry, currentTime);
+                
+                expect(result1).toBe(result2);
+                expect(result1).toBe(true);
+            });
+
+            test('should not mutate cache entry', () => {
+                const entry = {
+                    data: mockData,
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                };
+                const originalEntry = JSON.parse(JSON.stringify(entry));
+                const currentTime = 1500000;
+                
+                fetcher._isCacheEntryValid(entry, currentTime);
+                
+                expect(entry).toEqual(originalEntry);
+            });
+
+            test('should produce consistent results for boundary conditions', () => {
+                const entry = {
+                    data: mockData,
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                };
+                
+                // Before expiration
+                expect(fetcher._isCacheEntryValid(entry, 1999999)).toBe(true);
+                // At expiration
+                expect(fetcher._isCacheEntryValid(entry, 2000000)).toBe(false);
+                // After expiration
+                expect(fetcher._isCacheEntryValid(entry, 2000001)).toBe(false);
+            });
+        });
+
+        describe('_getExpiredCacheKeys', () => {
+            test('should be deterministic with same inputs', () => {
+                const cache = new Map();
+                const currentTime = 1500000;
+                
+                cache.set('valid1', {
+                    data: { id: 1 },
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                });
+                cache.set('expired1', {
+                    data: { id: 2 },
+                    timestamp: 500000,
+                    expiresAt: 1000000
+                });
+                
+                const result1 = fetcher._getExpiredCacheKeys(cache, currentTime);
+                const result2 = fetcher._getExpiredCacheKeys(cache, currentTime);
+                
+                expect(result1).toEqual(result2);
+                expect(result1).toEqual(['expired1']);
+            });
+
+            test('should not mutate cache map', () => {
+                const cache = new Map();
+                const currentTime = 1500000;
+                
+                cache.set('valid1', {
+                    data: { id: 1 },
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                });
+                cache.set('expired1', {
+                    data: { id: 2 },
+                    timestamp: 500000,
+                    expiresAt: 1000000
+                });
+                
+                const originalSize = cache.size;
+                const originalKeys = Array.from(cache.keys());
+                
+                fetcher._getExpiredCacheKeys(cache, currentTime);
+                
+                expect(cache.size).toBe(originalSize);
+                expect(Array.from(cache.keys())).toEqual(originalKeys);
+            });
+
+            test('should return empty array for cache with no expired entries', () => {
+                const cache = new Map();
+                const currentTime = 1000000;
+                
+                cache.set('valid1', {
+                    data: { id: 1 },
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                });
+                cache.set('valid2', {
+                    data: { id: 2 },
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                });
+                
+                const result = fetcher._getExpiredCacheKeys(cache, currentTime);
+                
+                expect(result).toEqual([]);
+            });
+
+            test('should return all keys for fully expired cache', () => {
+                const cache = new Map();
+                const currentTime = 3000000;
+                
+                cache.set('expired1', {
+                    data: { id: 1 },
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                });
+                cache.set('expired2', {
+                    data: { id: 2 },
+                    timestamp: 1000000,
+                    expiresAt: 2000000
+                });
+                
+                const result = fetcher._getExpiredCacheKeys(cache, currentTime);
+                
+                expect(result.sort()).toEqual(['expired1', 'expired2']);
+            });
         });
     });
 });
