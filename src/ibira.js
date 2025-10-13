@@ -27,7 +27,7 @@ export class IbiraAPIFetcher {
 		this.observers = [];
 		this.fetching = false;
 		// this.data = null; // ❌ REMOVED: Mutable data state for referential transparency
-		this.error = null;
+		// this.error = null; // ❌ REMOVED: Mutable error state for referential transparency
 		this.loading = false;
 		this.lastFetch = 0;
 		this.timeout = 10000;
@@ -278,8 +278,8 @@ export class IbiraAPIFetcher {
  * 
  * **Error Handling:**
  * The error handling is comprehensive, catching any network errors, parsing errors, or HTTP errors 
- * and storing them in `this.error` for the calling code to handle appropriately. This provides 
- * a clean separation between error state and data flow.
+ * and throwing them directly for the calling code to handle. This provides a clean functional 
+ * approach where errors flow through exceptions rather than mutable state, improving referential transparency.
  * 
  * **Cleanup Guarantee:**
  * The `finally` block ensures that `this.loading` is always reset to `false`, regardless of whether 
@@ -288,7 +288,7 @@ export class IbiraAPIFetcher {
  * 
  * @async
  * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
- * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are caught and stored in this.error
+ * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are thrown directly
  * 
  * @example
  * // Basic usage with automatic caching - now returns data directly
@@ -298,13 +298,13 @@ export class IbiraAPIFetcher {
  * console.log(fetcher.loading); // false after completion
  * 
  * @example
- * // Error handling
+ * // Error handling - errors are thrown directly, no need to check error state
  * try {
  *   const data = await fetcher.fetchData();
  *   console.log('Success:', data);
  * } catch (error) {
  *   console.error('Fetch failed:', error.message);
- *   // Also check fetcher.error for stored error state
+ *   // Error information is contained in the thrown error object
  * }
  * 
  * @see {@link getCacheKey} - Override this method for custom cache key generation
@@ -334,86 +334,83 @@ export class IbiraAPIFetcher {
 			}
 		}
 
-		// Set loading state to indicate network operation in progress
-		// UI can use this to show loading spinners or disable interactions
-		this.loading = true;
+		try {
+			// Set loading state to indicate network operation in progress
+			// UI can use this to show loading spinners or disable interactions
+			this.loading = true;
 
-		let lastError = null;
-		let attempt = 0;
+			let lastError = null;
+			let attempt = 0;
 
-		// Retry loop with exponential backoff
-		while (attempt <= this.maxRetries) {
-			try {
-				// Create a new AbortController for each attempt
-				const abortController = new AbortController();
-				
-				// Perform the network request
-				const data = await this._performSingleRequest(abortController);
-
-				// Get current time for cache entry
-				now = Date.now();
-
-				// Create cache entry with expiration timestamp
-				const cacheEntry = this._createCacheEntry(data, now);
-				
-				// Cache the result for future requests with same cache key
-				this.cache.set(cacheKey, cacheEntry);
-				
-				// Enforce cache size limits after adding new entry
-				this._enforceCacheSizeLimit();
-
-				// Clear any previous errors on successful fetch
-				this.error = null;
-
-				// Notify observers of successful fetch
-				this.notifyObservers('success', data);
-
-				// ✅ Return data directly instead of storing in instance state
-				return data;
-
-			} catch (error) {
-				lastError = error;
-				attempt++;
-
-				// Check if this error is retryable and we have attempts left
-				if (attempt <= this.maxRetries && this._isRetryableError(error)) {
-					// Calculate delay for next attempt
-					const delay = this._calculateRetryDelay(attempt - 1);
+			// Retry loop with exponential backoff
+			while (attempt <= this.maxRetries) {
+				try {
+					// Create a new AbortController for each attempt
+					const abortController = new AbortController();
 					
-					// Notify observers of retry attempt
-					this.notifyObservers('retry', {
-						attempt: attempt,
-						maxRetries: this.maxRetries,
-						error: error,
-						retryIn: delay
-					});
+					// Perform the network request
+					const data = await this._performSingleRequest(abortController);
 
-					// Wait before retrying
-					await this._sleep(delay);
-					continue;
+					// Get current time for cache entry
+					now = Date.now();
+
+					// Create cache entry with expiration timestamp
+					const cacheEntry = this._createCacheEntry(data, now);
+					
+					// Cache the result for future requests with same cache key
+					this.cache.set(cacheKey, cacheEntry);
+					
+					// Enforce cache size limits after adding new entry
+					this._enforceCacheSizeLimit();
+
+					// Notify observers of successful fetch
+					this.notifyObservers('success', data);
+
+					// ✅ Return data directly instead of storing in instance state
+					return data;
+
+				} catch (error) {
+					lastError = error;
+					attempt++;
+
+					// Check if this error is retryable and we have attempts left
+					if (attempt <= this.maxRetries && this._isRetryableError(error)) {
+						// Calculate delay for next attempt
+						const delay = this._calculateRetryDelay(attempt - 1);
+						
+						// Notify observers of retry attempt
+						this.notifyObservers('retry', {
+							attempt: attempt,
+							maxRetries: this.maxRetries,
+							error: error,
+							retryIn: delay
+						});
+
+						// Wait before retrying
+						await this._sleep(delay);
+						continue;
+					}
+
+					// Error is not retryable or we've exhausted all retries
+					break;
 				}
-
-				// Error is not retryable or we've exhausted all retries
-				break;
 			}
+
+			// All retry attempts failed - notify observers and throw error
+			this.notifyObservers('error', {
+				error: lastError,
+				attempts: attempt,
+				maxRetries: this.maxRetries
+			});
+
+			// ✅ Throw error directly instead of storing it (more referentially transparent)
+			throw lastError;
+
+		} finally {
+			// Always reset loading state regardless of success/failure
+			// This prevents UI from getting stuck in loading state
+			this.loading = false;
 		}
-
-		// All retry attempts failed - store the last error
-		this.error = lastError;
-		
-		// Notify observers of final failure
-		this.notifyObservers('error', {
-			error: lastError,
-			attempts: attempt,
-			maxRetries: this.maxRetries
-		});
-
-		// Always reset loading state regardless of success/failure
-		// This prevents UI from getting stuck in loading state
-		this.loading = false;
-
-		// ✅ Throw error instead of returning undefined (more referentially transparent)
-		throw lastError;
 	}
 }
 
