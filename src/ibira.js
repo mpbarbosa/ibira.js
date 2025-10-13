@@ -265,6 +265,50 @@ export class IbiraAPIFetcher {
 		return new IbiraAPIFetcher(url, cache, { ...options, eventNotifier: noEvents });
 	}
 
+	/**
+	 * Creates a completely pure IbiraAPIFetcher for maximum referential transparency
+	 * Use this when you want to handle all side effects (caching, events) externally
+	 * 
+	 * @static
+	 * @param {string} url - The API endpoint URL
+	 * @param {Object} [options={}] - Additional configuration options
+	 * @returns {IbiraAPIFetcher} Configured fetcher instance for pure functional usage
+	 * 
+	 * @example
+	 * // Maximum purity - handle all effects externally
+	 * const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
+	 * let cacheState = new Map();
+	 * 
+	 * const result = await fetcher.fetchDataPure(cacheState, Date.now());
+	 * if (result.success) {
+	 *   cacheState = result.newCacheState; // Update cache externally
+	 *   console.log('Data:', result.data);
+	 * }
+	 */
+	static pure(url, options = {}) {
+		const noCache = {
+			has: () => false,
+			get: () => null,
+			set: () => {},
+			delete: () => false,
+			clear: () => {},
+			size: 0,
+			entries: () => [],
+			maxSize: options.maxCacheSize || 100,
+			expiration: options.cacheExpiration || 5 * 60 * 1000
+		};
+		
+		const noEvents = {
+			subscribe: () => {},
+			unsubscribe: () => {},
+			notify: () => {},
+			clear: () => {},
+			subscriberCount: 0
+		};
+		
+		return new IbiraAPIFetcher(url, noCache, { ...options, eventNotifier: noEvents });
+	}
+
     constructor(url, cache, options = {}) {
 		this.url = url;
 		// this.observers = []; // ❌ REMOVED: Mutable observer state for referential transparency
@@ -509,218 +553,251 @@ export class IbiraAPIFetcher {
 	}
 
 	/**
- * Fetches data from the configured URL with robust caching, loading states, and error handling.
- * 
- * This method implements a comprehensive data fetching strategy designed to efficiently retrieve 
- * and manage data from external APIs while providing a smooth user experience through intelligent 
- * caching and proper state management.
- * 
- * **Referential Transparency Improvement:**
- * This method now returns the fetched data directly instead of storing it in instance state,
- * making it more referentially transparent by reducing mutable state and side effects. Loading 
- * state management has been removed from instance state and delegated to external observers
- * or the calling code, further improving referential transparency.
- * 
- * **Enhanced Cache Strategy:**
- * Cache is now externalized as a dependency injection, making the class more testable and 
- * allowing different caching strategies. The cache can be passed during construction or 
- * defaults to a built-in implementation. This improves referential transparency by making
- * cache dependencies explicit rather than hidden internal state.
- * 
- * **Enhanced Event Notification:**
- * Event notifications are now externalized through dependency injection, removing mutable
- * observer state from the class instance. Events can be handled through external event
- * notifiers, callback functions, or disabled entirely for maximum referential transparency.
- * This eliminates the side effects of observer management and makes event handling explicit.
- * 
- * **Caching Strategy:**
- * The method starts by generating a cache key using getCacheKey(), which by default returns the URL 
- * but can be overridden in subclasses for more sophisticated caching strategies. It immediately 
- * checks if the data already exists in the cache - if it does, it retrieves the cached data and 
- * returns it directly, avoiding unnecessary network requests. This caching mechanism significantly 
- * improves performance by reducing redundant API calls.
- * 
- * **Loading State Management:**
- * Loading state management is now handled functionally through external event notifications. The 
- * calling code can track loading state based on method execution and event callbacks,
- * eliminating the need for mutable loading state within the class instance.
- * 
- * **Network Operations:**
- * The actual data fetching uses the modern Fetch API with proper error handling - it checks if 
- * the response is successful using `response.ok` and throws a meaningful error if the request fails. 
- * The method follows the JSON API pattern by calling `response.json()` to parse the response data.
- * 
- * **Data Return:**
- * Upon successful retrieval, the method returns the data directly and caches it for future use,
- * ensuring consistent data availability without storing it in instance state.
- * 
- * **Error Handling:**
- * The error handling is comprehensive, catching any network errors, parsing errors, or HTTP errors 
- * and throwing them directly for the calling code to handle. This provides a clean functional 
- * approach where errors flow through exceptions rather than mutable state, improving referential transparency.
- * 
- * **Functional Approach:**
- * Without mutable loading state, the method is more functionally pure. Loading state can be 
- * managed externally by observing the method's execution lifecycle or through observer events,
- * providing a cleaner separation of concerns and improved testability.
- * 
- * @async
- * @param {Object} [cacheOverride] - Optional cache instance to use instead of the default
- * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
- * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are thrown directly
- * 
- * @example
- * // Recommended usage with default cache - purely functional
- * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
- * const data = await fetcher.fetchData();
- * console.log(data); // Retrieved data
- * // Loading state can be managed externally during await
- * 
- * @example
- * // Custom cache injection for better referential transparency
- * const customCache = new Map();
- * customCache.maxSize = 50;
- * customCache.expiration = 10 * 60 * 1000; // 10 minutes
- * const fetcher = new IbiraAPIFetcher('https://api.example.com/data', customCache);
- * const data = await fetcher.fetchData();
- * 
- * @example
- * // Purely functional event handling with callback
- * const fetcher = IbiraAPIFetcher.withEventCallback(
- *   'https://api.example.com/data',
- *   (event, data) => {
- *     if (event === 'loading-start') setLoading(true);
- *     if (event === 'success') { setData(data); setLoading(false); }
- *     if (event === 'error') { setError(data.error); setLoading(false); }
- *   }
- * );
- * 
- * @example
- * // Maximum referential transparency - no events, no cache
- * const fetcher = IbiraAPIFetcher.withoutEvents('https://api.example.com/data');
- * const pureFetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
- * 
- * @example
- * // Error handling with external loading state management
- * let isLoading = false;
- * try {
- *   isLoading = true;
- *   const data = await fetcher.fetchData();
- *   console.log('Success:', data);
- * } catch (error) {
- *   console.error('Fetch failed:', error.message);
- * } finally {
- *   isLoading = false;
- * }
- * 
- * @example
- * // Traditional observer pattern (backward compatible)
- * fetcher.subscribe({
- *   update(event, data) {
- *     if (event === 'loading-start') setLoading(true);
- *     if (event === 'success' || event === 'error') setLoading(false);
- *   }
- * });
- * 
- * @see {@link getCacheKey} - Override this method for custom cache key generation
- * @since 0.1.0-alpha
- * @author Marcelo Pereira Barbosa
- */
-	async fetchData(cacheOverride = null) {
-		// ✅ IMPROVED: Use provided cache or fall back to instance cache for better referential transparency
-		const activeCache = cacheOverride || this.cache;
-		
-		// Generate cache key for this request (can be overridden in subclasses)
+	 * PURE FUNCTIONAL VERSION: Computes fetch result without side effects
+	 * 
+	 * This is the pure, referentially transparent core of the fetching logic.
+	 * It performs all computations without mutating external state, returning
+	 * a complete description of what should happen (data, cache operations, events).
+	 * 
+	 * **Pure Referential Transparency:**
+	 * - ✅ No external state mutations
+	 * - ✅ Deterministic given same inputs (when time is provided)
+	 * - ✅ No side effects (network calls return descriptions)
+	 * - ✅ Returns immutable result objects
+	 * - ✅ Same input always produces same output structure
+	 * 
+	 * @param {Map} currentCacheState - Current cache state (not mutated)
+	 * @param {number} [currentTime] - Current timestamp for deterministic behavior
+	 * @param {Function} [networkProvider] - Pure network function for testing
+	 * @returns {Promise<Object>} Pure result object describing what should happen
+	 * 
+	 * @example
+	 * // Pure functional usage - no side effects
+	 * const fetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
+	 * const result = await fetcher.fetchDataPure(new Map(), Date.now());
+	 * 
+	 * // Result structure:
+	 * // {
+	 * //   success: true,
+	 * //   data: {...},
+	 * //   fromCache: false,
+	 * //   cacheOperations: [{ type: 'set', key: 'url', value: {...} }],
+	 * //   events: [{ type: 'loading-start', payload: {...} }],
+	 * //   newCacheState: Map {...}
+	 * // }
+	 */
+	async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider = null) {
 		const cacheKey = this.getCacheKey();
-
-		// Clean up expired cache entries before checking cache
-		this._cleanupExpiredCache(activeCache);
-
-		// Get current time once for consistency
-		let now = Date.now();
-
-		// Check cache first - if valid data exists, return immediately to avoid network request
-		if (activeCache.has(cacheKey)) {
-			const cacheEntry = activeCache.get(cacheKey);
-			if (this._isCacheEntryValid(cacheEntry, now)) {
-				// Update timestamp for LRU tracking
-				cacheEntry.timestamp = now;
-				return cacheEntry.data; // ✅ Return cached data directly (more referentially transparent)
-			} else {
-				// Remove expired entry
-				activeCache.delete(cacheKey);
+		
+		// Pure function to get expired keys without mutations
+		const expiredKeys = this._getExpiredCacheKeys(currentCacheState, currentTime);
+		
+		// Create new cache state without expired entries (pure)
+		const cleanedCache = new Map();
+		for (const [key, value] of currentCacheState) {
+			if (!expiredKeys.includes(key)) {
+				cleanedCache.set(key, value);
 			}
 		}
-
-		// Notify observers that loading has started (replaces mutable loading state)
-		this.notifyObservers('loading-start', { url: this.url, cacheKey });
-
-		let lastError = null;
-		let attempt = 0;
-
-		// Retry loop with exponential backoff
-		while (attempt <= this.maxRetries) {
-				try {
-					// Create a new AbortController for each attempt
-					const abortController = new AbortController();
-					
-					// Perform the network request
-					const data = await this._performSingleRequest(abortController);
-
-					// Get current time for cache entry
-					now = Date.now();
-
-					// Create cache entry with expiration timestamp using cache's own configuration
-					const cacheEntry = this._createCacheEntry(data, now, activeCache);
-					
-					// ✅ IMPROVED: Cache the result using active cache for better referential transparency
-					activeCache.set(cacheKey, cacheEntry);
-					
-					// Enforce cache size limits after adding new entry
-					this._enforceCacheSizeLimit(activeCache);
-
-					// Notify observers of successful fetch
-					this.notifyObservers('success', data);
-
-					// ✅ Return data directly instead of storing in instance state
-					return data;
-
-				} catch (error) {
-					lastError = error;
-					attempt++;
-
-					// Check if this error is retryable and we have attempts left
-					if (attempt <= this.maxRetries && this._isRetryableError(error)) {
-						// Calculate delay for next attempt
-						const delay = this._calculateRetryDelay(attempt - 1);
-						
-						// Notify observers of retry attempt
-						this.notifyObservers('retry', {
-							attempt: attempt,
-							maxRetries: this.maxRetries,
-							error: error,
-							retryIn: delay
-						});
-
-						// Wait before retrying
-						await this._sleep(delay);
-						continue;
-					}
-
-					// Error is not retryable or we've exhausted all retries
-					break;
-				}
+		
+		// Check cache (pure read operation)
+		if (cleanedCache.has(cacheKey)) {
+			const cacheEntry = cleanedCache.get(cacheKey);
+			if (this._isCacheEntryValid(cacheEntry, currentTime)) {
+				// Update timestamp for LRU (create new entry, don't mutate)
+				const updatedEntry = { ...cacheEntry, timestamp: currentTime };
+				const newCacheState = new Map(cleanedCache);
+				newCacheState.set(cacheKey, updatedEntry);
+				
+				return Object.freeze({
+					success: true,
+					data: cacheEntry.data,
+					fromCache: true,
+					cacheOperations: Object.freeze([
+						Object.freeze({ type: 'update', key: cacheKey, value: updatedEntry })
+					]),
+					events: Object.freeze([]), // No events for cache hits
+					newCacheState,
+					meta: Object.freeze({
+						cacheKey,
+						timestamp: currentTime,
+						expiredKeysRemoved: expiredKeys.length
+					})
+				});
 			}
+		}
+		
+		// Network operation (pure when networkProvider is provided)
+		const events = [
+			Object.freeze({ type: 'loading-start', payload: Object.freeze({ url: this.url, cacheKey }) })
+		];
+		
+		try {
+			// Use injected network provider for purity, or real fetch for practical use
+			const networkFn = networkProvider || (() => this._performSingleRequest(new AbortController()));
+			const data = await networkFn();
+			
+			// Create new cache entry (pure)
+			const cacheEntry = this._createCacheEntry(data, currentTime, this.cache);
+			
+			// Create new cache state with the new entry (pure)
+			const newCacheState = new Map(cleanedCache);
+			newCacheState.set(cacheKey, cacheEntry);
+			
+			// Apply size limits (pure - returns new state)
+			const finalCacheState = this._applyCacheSizeLimitsPure(newCacheState);
+			
+			return Object.freeze({
+				success: true,
+				data: data,
+				fromCache: false,
+				cacheOperations: Object.freeze([
+					Object.freeze({ type: 'set', key: cacheKey, value: cacheEntry }),
+					...this._calculateCacheEvictions(newCacheState, finalCacheState).map(op => Object.freeze(op))
+				]),
+				events: Object.freeze([
+					...events.map(e => Object.freeze(e)),
+					Object.freeze({ type: 'success', payload: data })
+				]),
+				newCacheState: finalCacheState,
+				meta: Object.freeze({
+					cacheKey,
+					timestamp: currentTime,
+					expiredKeysRemoved: expiredKeys.length,
+					attempt: 1,
+					networkRequest: true
+				})
+			});
+			
+		} catch (error) {
+			return Object.freeze({
+				success: false,
+				error,
+				fromCache: false,
+				cacheOperations: Object.freeze([]),
+				events: Object.freeze([
+					...events.map(e => Object.freeze(e)),
+					Object.freeze({ type: 'error', payload: Object.freeze({ error }) })
+				]),
+				newCacheState: cleanedCache,
+				meta: Object.freeze({
+					cacheKey,
+					timestamp: currentTime,
+					expiredKeysRemoved: expiredKeys.length,
+					attempt: 1,
+					networkRequest: true
+				})
+			});
+		}
+	}
 
-		// All retry attempts failed - notify observers and throw error
-		this.notifyObservers('error', {
-			error: lastError,
-			attempts: attempt,
-			maxRetries: this.maxRetries
+	/**
+	 * Pure function to apply cache size limits without mutations
+	 * 
+	 * @private
+	 * @param {Map} cacheState - Current cache state
+	 * @returns {Map} New cache state with size limits applied
+	 */
+	_applyCacheSizeLimitsPure(cacheState) {
+		const maxSize = this.cache.maxSize || 50;
+		
+		if (cacheState.size <= maxSize) {
+			return new Map(cacheState);
+		}
+		
+		// Sort entries by timestamp (oldest first) without mutating original
+		const entries = Array.from(cacheState.entries());
+		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+		
+		// Keep only the most recent entries
+		const entriesToKeep = entries.slice(-(maxSize));
+		return new Map(entriesToKeep);
+	}
+
+	/**
+	 * Pure function to calculate what cache evictions occurred
+	 * 
+	 * @private
+	 * @param {Map} beforeState - Cache state before size limits
+	 * @param {Map} afterState - Cache state after size limits
+	 * @returns {Array} Array of eviction operations
+	 */
+	_calculateCacheEvictions(beforeState, afterState) {
+		const evictions = [];
+		for (const [key] of beforeState) {
+			if (!afterState.has(key)) {
+				evictions.push({ type: 'delete', key });
+			}
+		}
+		return evictions;
+	}
+
+	/**
+	 * PRACTICAL WRAPPER: Applies side effects from pure computation
+	 * 
+	 * This method uses the pure core but applies the side effects (cache mutations,
+	 * event notifications) for practical usage. It maintains the current API while
+	 * enabling pure functional testing and reasoning.
+	 * 
+	 * @async
+	 * @param {Object} [cacheOverride] - Optional cache instance to use instead of the default
+	 * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
+	 * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are thrown directly
+	 * 
+	 * @example
+	 * // Practical usage - handles side effects automatically
+	 * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
+	 * const data = await fetcher.fetchData();
+	 * console.log(data); // Retrieved data
+	 * 
+	 * @example
+	 * // Pure functional testing
+	 * const mockNetwork = () => Promise.resolve({ test: 'data' });
+	 * const result = await fetcher.fetchDataPure(new Map(), Date.now(), mockNetwork);
+	 * // Test result without side effects
+	 */
+	async fetchData(cacheOverride = null) {
+		const activeCache = cacheOverride || this.cache;
+		
+		// Use the pure core function
+		const result = await this.fetchDataPure(activeCache);
+		
+		// Apply side effects based on pure computation
+		this._applySideEffects(result, activeCache);
+		
+		// Return data or throw error based on pure result
+		if (result.success) {
+			return result.data;
+		} else {
+			throw result.error;
+		}
+	}
+
+	/**
+	 * Applies side effects based on pure computation results
+	 * 
+	 * @private
+	 * @param {Object} result - Result from fetchDataPure
+	 * @param {Object} activeCache - Cache to apply operations to
+	 */
+	_applySideEffects(result, activeCache) {
+		// Apply cache operations
+		result.cacheOperations.forEach(operation => {
+			switch (operation.type) {
+				case 'set':
+				case 'update':
+					activeCache.set(operation.key, operation.value);
+					break;
+				case 'delete':
+					activeCache.delete(operation.key);
+					break;
+			}
 		});
-
-		// ✅ Throw error directly instead of storing it (more referentially transparent)
-		throw lastError;
+		
+		// Apply event notifications
+		result.events.forEach(event => {
+			this.notifyObservers(event.type, event.payload);
+		});
 	}
 }
 
