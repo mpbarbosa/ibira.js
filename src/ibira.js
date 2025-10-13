@@ -25,10 +25,10 @@ export class IbiraAPIFetcher {
     constructor(url) {
 		this.url = url;
 		this.observers = [];
-		this.fetching = false;
+		// this.fetching = false; // ❌ REMOVED: Mutable fetching state for referential transparency
 		// this.data = null; // ❌ REMOVED: Mutable data state for referential transparency
 		// this.error = null; // ❌ REMOVED: Mutable error state for referential transparency
-		this.loading = false;
+		// this.loading = false; // ❌ REMOVED: Mutable loading state for referential transparency
 		this.lastFetch = 0;
 		this.timeout = 10000;
 		this.cache = new Map();
@@ -253,7 +253,9 @@ export class IbiraAPIFetcher {
  * 
  * **Referential Transparency Improvement:**
  * This method now returns the fetched data directly instead of storing it in instance state,
- * making it more referentially transparent by reducing mutable state and side effects.
+ * making it more referentially transparent by reducing mutable state and side effects. Loading 
+ * state management has been removed from instance state and delegated to external observers
+ * or the calling code, further improving referential transparency.
  * 
  * **Caching Strategy:**
  * The method starts by generating a cache key using getCacheKey(), which by default returns the URL 
@@ -263,9 +265,9 @@ export class IbiraAPIFetcher {
  * improves performance by reducing redundant API calls.
  * 
  * **Loading State Management:**
- * When a cache miss occurs, the method sets `this.loading = true` to indicate that a network 
- * operation is in progress. This loading state can be used by the UI to show loading spinners 
- * or disable user interactions, providing immediate feedback to users.
+ * Loading state management is now handled functionally through observer notifications. The 
+ * calling code or observers can track loading state based on method execution and observer
+ * events, eliminating the need for mutable loading state within the class instance.
  * 
  * **Network Operations:**
  * The actual data fetching uses the modern Fetch API with proper error handling - it checks if 
@@ -281,10 +283,10 @@ export class IbiraAPIFetcher {
  * and throwing them directly for the calling code to handle. This provides a clean functional 
  * approach where errors flow through exceptions rather than mutable state, improving referential transparency.
  * 
- * **Cleanup Guarantee:**
- * The `finally` block ensures that `this.loading` is always reset to `false`, regardless of whether 
- * the operation succeeded or failed. This prevents the UI from getting stuck in a loading state, 
- * which is a common source of bugs in data fetching implementations.
+ * **Functional Approach:**
+ * Without mutable loading state, the method is more functionally pure. Loading state can be 
+ * managed externally by observing the method's execution lifecycle or through observer events,
+ * providing a cleaner separation of concerns and improved testability.
  * 
  * @async
  * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
@@ -295,17 +297,29 @@ export class IbiraAPIFetcher {
  * const fetcher = new IbiraAPIFetcher('https://api.example.com/data');
  * const data = await fetcher.fetchData();
  * console.log(data); // Retrieved data
- * console.log(fetcher.loading); // false after completion
+ * // Loading state can be managed externally during await
  * 
  * @example
- * // Error handling - errors are thrown directly, no need to check error state
+ * // Error handling with external loading state management
+ * let isLoading = false;
  * try {
+ *   isLoading = true;
  *   const data = await fetcher.fetchData();
  *   console.log('Success:', data);
  * } catch (error) {
  *   console.error('Fetch failed:', error.message);
- *   // Error information is contained in the thrown error object
+ * } finally {
+ *   isLoading = false;
  * }
+ * 
+ * @example
+ * // Loading state management via observers
+ * fetcher.subscribe({
+ *   update(event, data) {
+ *     if (event === 'loading-start') setLoading(true);
+ *     if (event === 'success' || event === 'error') setLoading(false);
+ *   }
+ * });
  * 
  * @see {@link getCacheKey} - Override this method for custom cache key generation
  * @since 0.1.0-alpha
@@ -334,16 +348,14 @@ export class IbiraAPIFetcher {
 			}
 		}
 
-		try {
-			// Set loading state to indicate network operation in progress
-			// UI can use this to show loading spinners or disable interactions
-			this.loading = true;
+		// Notify observers that loading has started (replaces mutable loading state)
+		this.notifyObservers('loading-start', { url: this.url, cacheKey });
 
-			let lastError = null;
-			let attempt = 0;
+		let lastError = null;
+		let attempt = 0;
 
-			// Retry loop with exponential backoff
-			while (attempt <= this.maxRetries) {
+		// Retry loop with exponential backoff
+		while (attempt <= this.maxRetries) {
 				try {
 					// Create a new AbortController for each attempt
 					const abortController = new AbortController();
@@ -396,21 +408,15 @@ export class IbiraAPIFetcher {
 				}
 			}
 
-			// All retry attempts failed - notify observers and throw error
-			this.notifyObservers('error', {
-				error: lastError,
-				attempts: attempt,
-				maxRetries: this.maxRetries
-			});
+		// All retry attempts failed - notify observers and throw error
+		this.notifyObservers('error', {
+			error: lastError,
+			attempts: attempt,
+			maxRetries: this.maxRetries
+		});
 
-			// ✅ Throw error directly instead of storing it (more referentially transparent)
-			throw lastError;
-
-		} finally {
-			// Always reset loading state regardless of success/failure
-			// This prevents UI from getting stuck in loading state
-			this.loading = false;
-		}
+		// ✅ Throw error directly instead of storing it (more referentially transparent)
+		throw lastError;
 	}
 }
 
@@ -669,14 +675,15 @@ export class IbiraAPIFetchManager {
 	}
 
 	/**
-	 * Get the current loading state for a specific URL
+	 * Check if there's a pending request for a specific URL
 	 * 
-	 * @param {string} url - The URL to check loading state for
-	 * @returns {boolean} Whether the fetcher is currently loading
+	 * @param {string} url - The URL to check pending status for
+	 * @returns {boolean} Whether there's a pending request for this URL
 	 */
 	isLoading(url) {
-		const fetcher = this.fetchers.get(url);
-		return fetcher ? fetcher.loading : false;
+		const fetcher = this.getFetcher(url);
+		const cacheKey = fetcher.getCacheKey();
+		return this.pendingRequests.has(cacheKey);
 	}
 
 	/**
