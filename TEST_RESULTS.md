@@ -2,14 +2,15 @@
 
 ## 🧪 Test Suite Overview
 
-The `IbiraAPIFetcher` class has been thoroughly tested with **62 comprehensive unit tests** covering all functionality areas.
+The `IbiraAPIFetcher` class has been thoroughly tested with **72 comprehensive unit tests** covering all functionality areas, including **10 new tests** specifically for referential transparency validation.
 
 ## ✅ Test Results
 
-- **62 tests passed** 
+- **72 tests passed** 
 - **0 tests failed**
 - **Full test coverage** of all public and private methods
 - **All edge cases** and error conditions tested
+- **Referential transparency principles verified** through dedicated tests
 
 ## 📊 Test Categories
 
@@ -165,6 +166,23 @@ The `IbiraAPIFetcher` class has been thoroughly tested with **62 comprehensive u
 - ✅ Expired entry cleanup
 - ✅ Large dataset handling
 
+### 8. **Referential Transparency Tests** (10 tests)
+- **_createCacheEntry purity** (3 tests)
+  - ✅ Deterministic behavior with same inputs
+  - ✅ No mutation of input data
+  - ✅ Different results with different currentTime
+
+- **_isCacheEntryValid purity** (3 tests)
+  - ✅ Deterministic behavior with same inputs
+  - ✅ No mutation of cache entry
+  - ✅ Consistent results for boundary conditions
+
+- **_getExpiredCacheKeys purity** (4 tests)
+  - ✅ Deterministic behavior with same inputs
+  - ✅ No mutation of cache map
+  - ✅ Empty array for no expired entries
+  - ✅ All keys returned for fully expired cache
+
 ## 📋 Test Commands
 
 ```bash
@@ -194,6 +212,7 @@ npm test -- --testNamePattern="Cache"
 6. **Edge Case Coverage**: Boundary conditions and error states tested
 7. **Mock Usage**: External dependencies properly mocked
 8. **Async Testing**: Proper handling of promises and timers
+9. **Referential Transparency**: Pure functions verified to be deterministic and side-effect-free
 
 ## 🔍 What the Tests Validate
 

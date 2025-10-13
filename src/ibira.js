@@ -48,13 +48,14 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @private
 	 * @param {any} data - The data to cache
+	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {Object} Cache entry with data and timestamp
 	 */
-	_createCacheEntry(data) {
+	_createCacheEntry(data, currentTime) {
 		return {
 			data: data,
-			timestamp: Date.now(),
-			expiresAt: Date.now() + this.cacheExpiration
+			timestamp: currentTime,
+			expiresAt: currentTime + this.cacheExpiration
 		};
 	}
 
@@ -63,10 +64,11 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @private
 	 * @param {Object} cacheEntry - The cache entry to check
+	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {boolean} True if the entry is still valid
 	 */
-	_isCacheEntryValid(cacheEntry) {
-		return cacheEntry && Date.now() < cacheEntry.expiresAt;
+	_isCacheEntryValid(cacheEntry, currentTime) {
+		return cacheEntry && currentTime < cacheEntry.expiresAt;
 	}
 
 	/**
@@ -96,6 +98,28 @@ export class IbiraAPIFetcher {
 	}
 
 	/**
+	 * Identifies expired cache entries that should be removed
+	 * This is a pure function that returns keys to delete without mutating state
+	 * 
+	 * @private
+	 * @param {Map} cache - The cache map to check
+	 * @param {number} currentTime - Current timestamp in milliseconds
+	 * @returns {string[]} Array of cache keys that have expired
+	 */
+	_getExpiredCacheKeys(cache, currentTime) {
+		const expiredKeys = [];
+
+		// Find all expired entries
+		for (const [key, entry] of cache.entries()) {
+			if (currentTime >= entry.expiresAt) {
+				expiredKeys.push(key);
+			}
+		}
+
+		return expiredKeys;
+	}
+
+	/**
 	 * Cleans up expired cache entries
 	 * Should be called periodically to prevent memory leaks
 	 * 
@@ -103,14 +127,7 @@ export class IbiraAPIFetcher {
 	 */
 	_cleanupExpiredCache() {
 		const now = Date.now();
-		const expiredKeys = [];
-
-		// Find all expired entries
-		for (const [key, entry] of this.cache.entries()) {
-			if (now >= entry.expiresAt) {
-				expiredKeys.push(key);
-			}
-		}
+		const expiredKeys = this._getExpiredCacheKeys(this.cache, now);
 
 		// Remove expired entries
 		expiredKeys.forEach(key => this.cache.delete(key));
@@ -298,13 +315,16 @@ export class IbiraAPIFetcher {
 		// Clean up expired cache entries before checking cache
 		this._cleanupExpiredCache();
 
+		// Get current time once for consistency
+		let now = Date.now();
+
 		// Check cache first - if valid data exists, return immediately to avoid network request
 		if (this.cache.has(cacheKey)) {
 			const cacheEntry = this.cache.get(cacheKey);
-			if (this._isCacheEntryValid(cacheEntry)) {
+			if (this._isCacheEntryValid(cacheEntry, now)) {
 				this.data = cacheEntry.data;
 				// Update timestamp for LRU tracking
-				cacheEntry.timestamp = Date.now();
+				cacheEntry.timestamp = now;
 				return; // Early return with cached data improves performance
 			} else {
 				// Remove expired entry
@@ -331,8 +351,11 @@ export class IbiraAPIFetcher {
 				// Store data in instance for immediate access
 				this.data = data;
 
+				// Get current time for cache entry
+				now = Date.now();
+
 				// Create cache entry with expiration timestamp
-				const cacheEntry = this._createCacheEntry(data);
+				const cacheEntry = this._createCacheEntry(data, now);
 				
 				// Cache the result for future requests with same cache key
 				this.cache.set(cacheKey, cacheEntry);
@@ -472,20 +495,35 @@ export class IbiraAPIFetchManager {
 	}
 
 	/**
+	 * Identifies expired cache entries that should be removed
+	 * This is a pure function that returns keys to delete without mutating state
+	 * 
+	 * @private
+	 * @param {Map} cache - The cache map to check
+	 * @param {number} currentTime - Current timestamp in milliseconds
+	 * @returns {string[]} Array of cache keys that have expired
+	 */
+	_getExpiredCacheKeys(cache, currentTime) {
+		const expiredKeys = [];
+
+		// Find all expired entries
+		for (const [key, entry] of cache.entries()) {
+			if (currentTime >= entry.expiresAt) {
+				expiredKeys.push(key);
+			}
+		}
+
+		return expiredKeys;
+	}
+
+	/**
 	 * Performs periodic cleanup of expired cache entries and enforces size limits
 	 * 
 	 * @private
 	 */
 	_performPeriodicCleanup() {
 		const now = Date.now();
-		const expiredKeys = [];
-
-		// Find all expired entries
-		for (const [key, entry] of this.globalCache.entries()) {
-			if (now >= entry.expiresAt) {
-				expiredKeys.push(key);
-			}
-		}
+		const expiredKeys = this._getExpiredCacheKeys(this.globalCache, now);
 
 		// Remove expired entries
 		expiredKeys.forEach(key => this.globalCache.delete(key));
@@ -527,13 +565,14 @@ export class IbiraAPIFetchManager {
 	 * 
 	 * @private
 	 * @param {any} data - The data to cache
+	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {Object} Cache entry with data and timestamp
 	 */
-	_createCacheEntry(data) {
+	_createCacheEntry(data, currentTime) {
 		return {
 			data: data,
-			timestamp: Date.now(),
-			expiresAt: Date.now() + this.cacheExpiration
+			timestamp: currentTime,
+			expiresAt: currentTime + this.cacheExpiration
 		};
 	}
 
@@ -542,10 +581,11 @@ export class IbiraAPIFetchManager {
 	 * 
 	 * @private
 	 * @param {Object} cacheEntry - The cache entry to check
+	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {boolean} True if the entry is still valid
 	 */
-	_isCacheEntryValid(cacheEntry) {
-		return cacheEntry && Date.now() < cacheEntry.expiresAt;
+	_isCacheEntryValid(cacheEntry, currentTime) {
+		return cacheEntry && currentTime < cacheEntry.expiresAt;
 	}
 
 	/**
@@ -656,9 +696,10 @@ export class IbiraAPIFetchManager {
 		const cacheKey = fetcher.getCacheKey();
 		const cacheEntry = this.globalCache.get(cacheKey);
 		
-		if (cacheEntry && this._isCacheEntryValid(cacheEntry)) {
+		const now = Date.now();
+		if (cacheEntry && this._isCacheEntryValid(cacheEntry, now)) {
 			// Update timestamp for LRU tracking
-			cacheEntry.timestamp = Date.now();
+			cacheEntry.timestamp = now;
 			return cacheEntry.data;
 		}
 		
@@ -713,21 +754,14 @@ export class IbiraAPIFetchManager {
 	 */
 	getStats() {
 		const now = Date.now();
-		let expiredEntries = 0;
-		
-		// Count expired entries
-		for (const [key, entry] of this.globalCache.entries()) {
-			if (now >= entry.expiresAt) {
-				expiredEntries++;
-			}
-		}
+		const expiredKeys = this._getExpiredCacheKeys(this.globalCache, now);
 		
 		return {
 			activeFetchers: this.fetchers.size,
 			pendingRequests: this.pendingRequests.size,
 			cacheSize: this.globalCache.size,
 			maxCacheSize: this.maxCacheSize,
-			expiredEntries: expiredEntries,
+			expiredEntries: expiredKeys.length,
 			cacheUtilization: Math.round((this.globalCache.size / this.maxCacheSize) * 100),
 			lastCleanup: new Date(this.lastCleanup).toISOString(),
 			cacheExpiration: this.cacheExpiration
