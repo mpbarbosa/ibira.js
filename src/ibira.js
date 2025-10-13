@@ -22,7 +22,7 @@ const VERSION = {
 
 export class IbiraAPIFetcher {
 
-	constructor(url) {
+    constructor(url) {
 		this.url = url;
 		this.observers = [];
 		this.fetching = false;

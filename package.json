@@ -1,0 +1,64 @@
+{
+  "name": "ibira.js",
+  "version": "0.1.0-alpha",
+  "description": "A JavaScript library for fetching and caching API data with observer pattern support",
+  "main": "src/ibira.js",
+
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
+    "validate": "node -c src/ibira.js",
+    "test:all": "npm run validate && npm test"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/**/*.test.js",
+      "!**/node_modules/**"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 75,
+        "functions": 75,
+        "lines": 75,
+        "statements": 75
+      }
+    }
+  },
+  "keywords": [
+    "api",
+    "fetch",
+    "cache",
+    "observer",
+    "javascript",
+    "http",
+    "rest",
+    "async"
+  ],
+  "author": "Marcelo Pereira Barbosa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mpbarbosa/ibira.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mpbarbosa/ibira.js/issues"
+  },
+  "homepage": "https://github.com/mpbarbosa/ibira.js#readme",
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
