@@ -75,6 +75,42 @@ class DefaultCache {
 	}
 }
 
+/**
+ * Default event notification system for IbiraAPIFetcher
+ * Provides backward compatibility with the observer pattern while enabling external management
+ */
+class DefaultEventNotifier {
+	constructor() {
+		this.observers = [];
+	}
+
+	subscribe(observer) {
+		if (observer) {
+			this.observers = [...this.observers, observer];
+		}
+	}
+
+	unsubscribe(observer) {
+		this.observers = this.observers.filter((o) => o !== observer);
+	}
+
+	notify(...args) {
+		this.observers.forEach((observer) => {
+			if (observer && typeof observer.update === 'function') {
+				observer.update(...args);
+			}
+		});
+	}
+
+	clear() {
+		this.observers = [];
+	}
+
+	get subscriberCount() {
+		return this.observers.length;
+	}
+}
+
 export class IbiraAPIFetcher {
 
 	/**
@@ -126,9 +162,66 @@ export class IbiraAPIFetcher {
 		return new IbiraAPIFetcher(url, { ...options, cache: noCache });
 	}
 
+	/**
+	 * Creates an IbiraAPIFetcher with external event notification for maximum referential transparency
+	 * Events are handled through callback functions instead of mutable observer state
+	 * 
+	 * @static
+	 * @param {string} url - The API endpoint URL
+	 * @param {Function} eventCallback - Function to handle events (event, data) => void
+	 * @param {Object} [options={}] - Additional configuration options
+	 * @returns {IbiraAPIFetcher} Configured fetcher instance with callback-based events
+	 * 
+	 * @example
+	 * // Purely functional event handling
+	 * const fetcher = IbiraAPIFetcher.withEventCallback(
+	 *   'https://api.example.com/data',
+	 *   (event, data) => {
+	 *     if (event === 'loading-start') setLoading(true);
+	 *     if (event === 'success') setData(data);
+	 *     if (event === 'error') setError(data.error);
+	 *   }
+	 * );
+	 */
+	static withEventCallback(url, eventCallback, options = {}) {
+		const callbackNotifier = {
+			subscribe: () => {}, // No-op for external callback
+			unsubscribe: () => {}, // No-op for external callback
+			notify: eventCallback,
+			clear: () => {},
+			subscriberCount: 1
+		};
+		return new IbiraAPIFetcher(url, { ...options, eventNotifier: callbackNotifier });
+	}
+
+	/**
+	 * Creates an IbiraAPIFetcher with no event notifications for maximum referential transparency
+	 * No side effects from event notifications - purely functional data fetching
+	 * 
+	 * @static
+	 * @param {string} url - The API endpoint URL
+	 * @param {Object} [options={}] - Additional configuration options
+	 * @returns {IbiraAPIFetcher} Configured fetcher instance with no event notifications
+	 * 
+	 * @example
+	 * // Pure functional approach - no event side effects
+	 * const fetcher = IbiraAPIFetcher.withoutEvents('https://api.example.com/data');
+	 * const data = await fetcher.fetchData(); // No event notifications
+	 */
+	static withoutEvents(url, options = {}) {
+		const noEvents = {
+			subscribe: () => {},
+			unsubscribe: () => {},
+			notify: () => {}, // Silent - no event notifications
+			clear: () => {},
+			subscriberCount: 0
+		};
+		return new IbiraAPIFetcher(url, { ...options, eventNotifier: noEvents });
+	}
+
     constructor(url, options = {}) {
 		this.url = url;
-		this.observers = [];
+		// this.observers = []; // ❌ REMOVED: Mutable observer state for referential transparency
 		// this.fetching = false; // ❌ REMOVED: Mutable fetching state for referential transparency
 		// this.data = null; // ❌ REMOVED: Mutable data state for referential transparency
 		// this.error = null; // ❌ REMOVED: Mutable error state for referential transparency
@@ -141,6 +234,9 @@ export class IbiraAPIFetcher {
 			maxSize: options.maxCacheSize || 50,
 			expiration: options.cacheExpiration || 300000
 		});
+
+		// ✅ IMPROVED: Event notifier as dependency injection for better referential transparency
+		this.eventNotifier = options.eventNotifier || new DefaultEventNotifier();
 		
 		this.cacheExpiration = options.cacheExpiration || 300000; // 5 minutes default cache expiration (ms)
 		this.maxCacheSize = options.maxCacheSize || 50; // Maximum number of cached items
@@ -344,19 +440,18 @@ export class IbiraAPIFetcher {
 	}
 
 	subscribe(observer) {
-		if (observer) {
-			this.observers = [...this.observers, observer];
-		}
+		// ✅ IMPROVED: Delegate to external event notifier for better referential transparency
+		this.eventNotifier.subscribe(observer);
 	}
 
 	unsubscribe(observer) {
-		this.observers = this.observers.filter((o) => o !== observer);
+		// ✅ IMPROVED: Delegate to external event notifier for better referential transparency
+		this.eventNotifier.unsubscribe(observer);
 	}
 
 	notifyObservers(...args) {
-		this.observers.forEach((observer) => {
-			observer.update(...args);
-		});
+		// ✅ IMPROVED: Delegate to external event notifier for better referential transparency
+		this.eventNotifier.notify(...args);
 	}
 
 	/**
@@ -378,6 +473,12 @@ export class IbiraAPIFetcher {
  * defaults to a built-in implementation. This improves referential transparency by making
  * cache dependencies explicit rather than hidden internal state.
  * 
+ * **Enhanced Event Notification:**
+ * Event notifications are now externalized through dependency injection, removing mutable
+ * observer state from the class instance. Events can be handled through external event
+ * notifiers, callback functions, or disabled entirely for maximum referential transparency.
+ * This eliminates the side effects of observer management and makes event handling explicit.
+ * 
  * **Caching Strategy:**
  * The method starts by generating a cache key using getCacheKey(), which by default returns the URL 
  * but can be overridden in subclasses for more sophisticated caching strategies. It immediately 
@@ -386,9 +487,9 @@ export class IbiraAPIFetcher {
  * improves performance by reducing redundant API calls.
  * 
  * **Loading State Management:**
- * Loading state management is now handled functionally through observer notifications. The 
- * calling code or observers can track loading state based on method execution and observer
- * events, eliminating the need for mutable loading state within the class instance.
+ * Loading state management is now handled functionally through external event notifications. The 
+ * calling code can track loading state based on method execution and event callbacks,
+ * eliminating the need for mutable loading state within the class instance.
  * 
  * **Network Operations:**
  * The actual data fetching uses the modern Fetch API with proper error handling - it checks if 
@@ -428,6 +529,22 @@ export class IbiraAPIFetcher {
  * const data = await fetcher.fetchData();
  * 
  * @example
+ * // Purely functional event handling with callback
+ * const fetcher = IbiraAPIFetcher.withEventCallback(
+ *   'https://api.example.com/data',
+ *   (event, data) => {
+ *     if (event === 'loading-start') setLoading(true);
+ *     if (event === 'success') { setData(data); setLoading(false); }
+ *     if (event === 'error') { setError(data.error); setLoading(false); }
+ *   }
+ * );
+ * 
+ * @example
+ * // Maximum referential transparency - no events, no cache
+ * const fetcher = IbiraAPIFetcher.withoutEvents('https://api.example.com/data');
+ * const pureFetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
+ * 
+ * @example
  * // Error handling with external loading state management
  * let isLoading = false;
  * try {
@@ -441,7 +558,7 @@ export class IbiraAPIFetcher {
  * }
  * 
  * @example
- * // Loading state management via observers
+ * // Traditional observer pattern (backward compatible)
  * fetcher.subscribe({
  *   update(event, data) {
  *     if (event === 'loading-start') setLoading(true);
