@@ -648,9 +648,9 @@ describe('IbiraAPIFetchManager', () => {
 
 ## Version History
 
-- **v1.0** (Current): Initial high-cohesion guide for .github configuration
+- **v1.0** (Current): High-cohesion guide adapted for ibira.js
   - Principles and benefits explained
-  - Real examples from PR #121 refactoring
+  - Real examples from ibira.js API fetching architecture
   - Best practices for workflows, actions, and templates
   - Integration with low coupling principles
   - Testing and measurement guidelines
