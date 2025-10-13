@@ -1,4 +1,4 @@
-# JavaScript Best Practices Guide for Guia.js
+# JavaScript Best Practices Guide for ibira.js
 
 ## Table of Contents
 
@@ -22,7 +22,7 @@
 
 ## Introduction
 
-This guide outlines JavaScript best practices specifically for the Guia.js project, with a strong emphasis on **functional programming**, **referential transparency**, and **immutability**. Following these practices ensures code quality, maintainability, and alignment with project principles.
+This guide outlines JavaScript best practices specifically for the ibira.js project, with a strong emphasis on **functional programming**, **referential transparency**, and **immutability**. Following these practices ensures code quality, maintainability, and alignment with project principles.
 
 ### Guiding Principles
 
@@ -66,7 +66,7 @@ const sym = Symbol('id');    // Symbol
 const bigNum = 9007199254740991n; // BigInt
 
 // Reference type (mutable by default)
-const obj = { name: 'Guia' }; // Object (includes arrays, functions, etc.)
+const obj = { name: 'ibira' }; // Object (includes arrays, functions, etc.)
 ```
 
 **Best Practice**: Always know whether you're working with primitives (immutable) or objects (mutable).
@@ -78,7 +78,7 @@ The value of `this` depends on how a function is called:
 ```javascript
 // ❌ Avoid: 'this' can be confusing
 const obj = {
-    name: 'Guia',
+    name: 'ibira',
     greet: function() {
         return `Hello from ${this.name}`;
     }
@@ -89,8 +89,8 @@ greet(); // undefined - 'this' is lost!
 
 // ✅ Prefer: Arrow functions or explicit binding
 const obj = {
-    name: 'Guia',
-    greet: () => `Hello from Guia`  // Lexical this
+    name: 'ibira',
+    greet: () => `Hello from ibira`  // Lexical this
 };
 
 // Or use pure functions that don't rely on 'this'
@@ -228,21 +228,21 @@ When side effects are necessary, isolate them:
 
 ```javascript
 // ✅ Good: Pure logic separated from I/O
-const extractAddressData = (rawData) => {
+const extractResponseData = (rawData) => {
     // Pure transformation
     return {
-        street: rawData.address?.road || '',
-        neighborhood: rawData.address?.suburb || '',
-        city: rawData.address?.city || ''
+        id: rawData.id || '',
+        name: rawData.name || '',
+        value: rawData.value || ''
     };
 };
 
-const fetchAndExtractAddress = async (lat, lon) => {
+const fetchAndExtractData = async (url) => {
     // Impure: I/O operation isolated to single function
-    const rawData = await fetch(`/api/geocode?lat=${lat}&lon=${lon}`).then(r => r.json());
+    const rawData = await fetch(url).then(r => r.json());
     
     // Call pure function for data transformation
-    return extractAddressData(rawData);
+    return extractResponseData(rawData);
 };
 ```
 
@@ -254,19 +254,19 @@ const fetchAndExtractAddress = async (lat, lon) => {
 
 ```javascript
 // ❌ Bad: Mutation
-const updateAddress = (address, city) => {
-    address.city = city; // Mutates original!
-    return address;
+const updateData = (data, value) => {
+    data.value = value; // Mutates original!
+    return data;
 };
 
 // ✅ Good: Create new object
-const updateAddress = (address, city) => {
-    return { ...address, city }; // New object with updated city
+const updateData = (data, value) => {
+    return { ...data, value }; // New object with updated value
 };
 
 // ✅ Also good: Explicit object creation
-const updateAddress = (address, city) => {
-    return Object.assign({}, address, { city });
+const updateData = (data, value) => {
+    return Object.assign({}, data, { value });
 };
 ```
 
@@ -306,19 +306,19 @@ For nested structures, ensure deep immutability:
 
 ```javascript
 // ❌ Shallow copy doesn't protect nested objects
-const updateNestedAddress = (person, city) => {
-    const newPerson = { ...person };
-    newPerson.address.city = city; // Still mutates!
-    return newPerson;
+const updateNestedData = (response, value) => {
+    const newResponse = { ...response };
+    newResponse.data.value = value; // Still mutates!
+    return newResponse;
 };
 
 // ✅ Deep immutability with spread operator
-const updateNestedAddress = (person, city) => {
+const updateNestedData = (response, value) => {
     return {
-        ...person,
-        address: {
-            ...person.address,
-            city
+        ...response,
+        data: {
+            ...response.data,
+            value
         }
     };
 };
@@ -331,16 +331,18 @@ const updateNestedAddress = (person, city) => {
 Protect against external mutations in constructors:
 
 ```javascript
-// From GeoPosition class example
-class GeoPosition {
-    constructor(position) {
+// From IbiraAPIFetcher class example
+class IbiraAPIFetcher {
+    constructor(url) {
         // ✅ Defensive copy - don't share reference
-        this.latitude = position.coords.latitude;
-        this.longitude = position.coords.longitude;
-        this.accuracy = position.coords.accuracy;
+        this.url = url;
+        this.data = null;
+        this.error = null;
+        this.loading = false;
+        this.cache = new Map();
         // ... copy all properties individually
         
-        // ❌ Would be bad: this.coords = position.coords; (shares reference)
+        // ❌ Would be bad: this.config = config; (shares reference if config is an object)
     }
 }
 ```
@@ -371,10 +373,10 @@ counter++; // Reassignment needed
 
 ```javascript
 // ❌ Bad: var has function scope and hoisting issues
-var name = 'Guia';
+var name = 'ibira';
 
 // ✅ Good: const/let have block scope
-const name = 'Guia';
+const name = 'ibira';
 ```
 
 ### 3. One Declaration Per Line
@@ -449,36 +451,36 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 
 ```javascript
 // ❌ Bad: Function does too much
-const processAddress = (rawData) => {
-    const street = rawData.address?.road || '';
-    const number = rawData.address?.house_number || '';
-    const city = rawData.address?.city || '';
-    const formatted = `${street}, ${number}, ${city}`;
-    console.log('Address processed:', formatted);
-    saveToDatabase(formatted);
+const processApiResponse = (rawData) => {
+    const id = rawData.id || '';
+    const name = rawData.name || '';
+    const value = rawData.value || '';
+    const formatted = `${id}: ${name} = ${value}`;
+    console.log('Response processed:', formatted);
+    saveToCache(formatted);
     return formatted;
 };
 
 // ✅ Good: Separate concerns
-const extractAddress = (rawData) => ({
-    street: rawData.address?.road || '',
-    number: rawData.address?.house_number || '',
-    city: rawData.address?.city || ''
+const extractData = (rawData) => ({
+    id: rawData.id || '',
+    name: rawData.name || '',
+    value: rawData.value || ''
 });
 
-const formatAddress = (address) =>
-    `${address.street}, ${address.number}, ${address.city}`;
+const formatData = (data) =>
+    `${data.id}: ${data.name} = ${data.value}`;
 
-const processAddress = (rawData) => {
-    const address = extractAddress(rawData);
-    return formatAddress(address);
+const processApiResponse = (rawData) => {
+    const data = extractData(rawData);
+    return formatData(data);
 };
 
 // Side effects isolated
-const processAndSaveAddress = async (rawData) => {
-    const formatted = processAddress(rawData);
-    console.log('Address processed:', formatted);
-    await saveToDatabase(formatted);
+const processAndCacheResponse = async (rawData) => {
+    const formatted = processApiResponse(rawData);
+    console.log('Response processed:', formatted);
+    await saveToCache(formatted);
     return formatted;
 };
 ```
@@ -569,8 +571,8 @@ Math.max(...numbers); // 3
 
 ```javascript
 // ✅ Property shorthand
-const name = 'Guia';
-const version = '0.8.5';
+const name = 'ibira';
+const version = '0.1.0-alpha';
 const obj = { name, version };
 // Same as: { name: name, version: version }
 
@@ -1270,7 +1272,7 @@ test('calculateDistance works', () => {
 
 ## Resources
 
-### Guia.js Documentation
+### ibira.js Documentation
 
 - **[REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md)** - Deep dive into pure functions
 - **[CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)** - Code review checklist
@@ -1307,8 +1309,7 @@ test('calculateDistance works', () => {
 - For code review: [CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)
 - For testing: [UNIT_TEST_GUIDE.md](./UNIT_TEST_GUIDE.md), [TDD_GUIDE.md](./TDD_GUIDE.md)
 - For functional programming: [REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md)
-- For architecture: [docs/architecture/CLASS_DIAGRAM.md](../docs/architecture/CLASS_DIAGRAM.md)
 
 ---
 
-*This guide is part of the Guia.js project documentation. For questions or suggestions, please open an issue.*
+*This guide is part of the ibira.js project documentation. For questions or suggestions, please open an issue.*

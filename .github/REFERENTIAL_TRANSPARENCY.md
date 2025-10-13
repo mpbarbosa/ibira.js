@@ -1,4 +1,4 @@
-# Referential Transparency in Guia.js
+# Referential Transparency in ibira.js
 
 ## Table of Contents
 
@@ -653,26 +653,18 @@ function generateColor(rand1, rand2, rand3) {
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Immutability principles and guidelines
 - [CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md) - Review checklist for referential transparency
 - [LOW_COUPLING_GUIDE.md](./LOW_COUPLING_GUIDE.md) - Architectural principles
-- [HIGH_COHESION_GUIDE.md](./HIGH_COHESION_GUIDE.md) - Single responsibility principle
 - [TDD_GUIDE.md](./TDD_GUIDE.md) - Test-driven development with pure functions
 - [UNIT_TEST_GUIDE.md](./UNIT_TEST_GUIDE.md) - Testing referentially transparent code
 
 ### In This Project
 
-The Guia.js project demonstrates referential transparency in several areas:
+The ibira.js project demonstrates referential transparency in several areas:
 
-- **Distance Calculations**: `calculateDistance()` is a pure function
-- **Address Formatting**: Uses immutable data transformations
-- **Reference Place Types**: Frozen objects prevent mutations
+- **Cache Key Generation**: `getCacheKey()` is a pure function
+- **Data Transformation**: Uses immutable data transformations when processing API responses
 - **Cache Operations**: Designed with immutability in mind
-- **Observer Management**: `ObserverSubject` uses immutable array patterns (spread operator, filter) for subscribe/unsubscribe operations
-
-For architecture examples:
-- [CLASS_DIAGRAM.md](../docs/architecture/CLASS_DIAGRAM.md) - Overall architecture showing pure functions
-- [GEO_POSITION.md](../docs/architecture/GEO_POSITION.md) - Example of immutable data classes
-- [REFERENCE_PLACE.md](../docs/architecture/REFERENCE_PLACE.md) - Frozen objects for immutability
-- [POSITION_MANAGER.md](../docs/architecture/POSITION_MANAGER.md) - ObserverSubject immutable observer management
-- [WEBGEOCODINGMANAGER_REFACTORING.md](../docs/architecture/WEBGEOCODINGMANAGER_REFACTORING.md) - Refactoring toward better separation of concerns
+- **Observer Management**: Uses immutable array patterns (spread operator, filter) for subscribe/unsubscribe operations
+- **API Response Processing**: Pure functions for parsing and formatting data
 
 ### Academic Papers
 
