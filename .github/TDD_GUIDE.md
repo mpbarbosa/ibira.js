@@ -1,4 +1,4 @@
-# Test Driven Development (TDD) Guide for Guia.js
+# Test Driven Development (TDD) Guide for ibira.js
 
 ## Table of Contents
 
@@ -83,21 +83,26 @@ TDD naturally encourages:
 **Goal**: Define what you want to build
 
 ```javascript
-// __tests__/AddressFormatter.test.js
-describe('AddressFormatter', () => {
-    test('should format Brazilian address with all components', () => {
-        const address = {
-            street: 'Avenida Paulista',
-            number: '1578',
-            neighborhood: 'Bela Vista',
-            city: 'São Paulo',
-            state: 'SP',
-            zipCode: '01310-200'
+// __tests__/ApiResponseParser.test.js
+describe('ApiResponseParser', () => {
+    test('should parse API response with all data fields', () => {
+        const response = {
+            status: 'success',
+            data: {
+                id: '123',
+                name: 'Test Item',
+                value: 42
+            },
+            timestamp: '2025-01-08T10:00:00Z'
         };
         
-        const formatted = formatBrazilianAddress(address);
+        const parsed = parseApiResponse(response);
         
-        expect(formatted).toBe('Avenida Paulista, 1578, Bela Vista, São Paulo - SP, 01310-200');
+        expect(parsed).toEqual({
+            id: '123',
+            name: 'Test Item',
+            value: 42
+        });
     });
 });
 ```
@@ -117,12 +122,16 @@ describe('AddressFormatter', () => {
 **Goal**: Implement the simplest solution that makes the test pass
 
 ```javascript
-// src/AddressFormatter.js
-function formatBrazilianAddress(address) {
-    return `${address.street}, ${address.number}, ${address.neighborhood}, ${address.city} - ${address.state}, ${address.zipCode}`;
+// src/ApiResponseParser.js
+function parseApiResponse(response) {
+    return {
+        id: response.data.id,
+        name: response.data.name,
+        value: response.data.value
+    };
 }
 
-module.exports = { formatBrazilianAddress };
+module.exports = { parseApiResponse };
 ```
 
 **What to do:**
@@ -141,21 +150,19 @@ module.exports = { formatBrazilianAddress };
 **Goal**: Clean up the code while keeping tests green
 
 ```javascript
-// src/AddressFormatter.js
-function formatBrazilianAddress(address) {
-    // Refactored: handle missing components
-    const components = [
-        address.street,
-        address.number,
-        address.neighborhood,
-        [address.city, address.state].filter(Boolean).join(' - '),
-        address.zipCode
-    ].filter(Boolean);
+// src/ApiResponseParser.js
+function parseApiResponse(response) {
+    // Refactored: handle missing fields safely
+    if (!response || !response.data) return null;
     
-    return components.join(', ');
+    return {
+        id: response.data.id || '',
+        name: response.data.name || '',
+        value: response.data.value ?? 0
+    };
 }
 
-module.exports = { formatBrazilianAddress };
+module.exports = { parseApiResponse };
 ```
 
 **What to do:**
@@ -830,18 +837,16 @@ When opening a PR:
 
 ### Internal Documentation
 
-- **[TESTING.md](../TESTING.md)** - Test suite overview and configuration
 - **[UNIT_TEST_GUIDE.md](./UNIT_TEST_GUIDE.md)** - Unit testing best practices
 - **[REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md)** - Pure functions guide
 - **[CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)** - Code review checklist
-- **[GITHUB_ACTIONS_GUIDE.md](../docs/github/GITHUB_ACTIONS_GUIDE.md)** - CI/CD workflow guide
+- **[JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md)** - JavaScript best practices
 - **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines
 
 ### Architecture Examples
-- **[CLASS_DIAGRAM.md](../docs/architecture/CLASS_DIAGRAM.md)** - Complete class architecture
-- **[GEO_POSITION.md](../docs/architecture/GEO_POSITION.md)** - Example of well-tested class
-- **[REFERENCE_PLACE.md](../docs/architecture/REFERENCE_PLACE.md)** - TDD implementation example
-- **[WEBGEOCODINGMANAGER_REFACTORING.md](../docs/architecture/WEBGEOCODINGMANAGER_REFACTORING.md)** - Refactoring with tests
+- **IbiraAPIFetcher** - Well-tested class for API data fetching
+- **IbiraAPIFetchManager** - TDD implementation example for managing multiple fetch operations
+- **Observer Pattern** - Refactoring with tests for subscribe/unsubscribe operations
 
 ### Jest Documentation
 
@@ -867,7 +872,7 @@ When opening a PR:
 **Version**: 1.0.0  
 **Last Updated**: 2025-01-08  
 **Status**: ✅ Ready for use  
-**Maintained by**: Guia.js Team
+**Maintained by**: ibira.js Team
 
 ---
 

@@ -1,4 +1,4 @@
-# Unit Testing Guide for Guia.js
+# Unit Testing Guide for ibira.js
 
 ## Table of Contents
 
@@ -51,7 +51,7 @@ Unit tests catch bugs at the function level before they propagate:
 ```javascript
 // Bug found immediately during development
 test('should handle null input', () => {
-    expect(formatAddress(null)).toBe('');  // FAIL: TypeError!
+    expect(parseApiResponse(null)).toBe(null);  // FAIL: TypeError!
 });
 ```
 
@@ -61,15 +61,14 @@ Unit tests serve as executable documentation:
 
 ```javascript
 // Test shows exactly how to use the function
-test('should format Brazilian address with all components', () => {
-    const address = {
-        street: 'Avenida Paulista',
-        number: '1578',
-        city: 'São Paulo',
-        state: 'SP'
+test('should parse API response with all fields', () => {
+    const response = {
+        status: 'success',
+        data: { id: '123', value: 42 },
+        timestamp: '2025-01-08T10:00:00Z'
     };
     
-    expect(formatAddress(address)).toBe('Avenida Paulista, 1578, São Paulo - SP');
+    expect(parseApiResponse(response)).toEqual({ id: '123', value: 42 });
 });
 ```
 
@@ -79,8 +78,8 @@ Unit tests enable confident refactoring:
 
 ```javascript
 // Before refactoring: Tests are green ✅
-test('calculateDistance works correctly', () => {
-    expect(calculateDistance(coord1, coord2)).toBeCloseTo(357.4, 1);
+test('getCacheKey works correctly', () => {
+    expect(getCacheKey('https://api.example.com', { id: '123' })).toBe('https://api.example.com?id=123');
 });
 
 // After refactoring: Tests still green ✅
@@ -113,25 +112,25 @@ Each test should verify a single behavior:
 
 ✅ **Good:**
 ```javascript
-test('should return 0 for same coordinates', () => {
-    const coord = { lat: -23.5, lon: -46.6 };
-    expect(calculateDistance(coord, coord)).toBe(0);
+test('should return URL for empty params', () => {
+    const url = 'https://api.example.com';
+    expect(getCacheKey(url, {})).toBe(url);
 });
 
-test('should calculate positive distance for different coordinates', () => {
-    const sp = { lat: -23.5, lon: -46.6 };
-    const rio = { lat: -22.9, lon: -43.2 };
-    expect(calculateDistance(sp, rio)).toBeGreaterThan(0);
+test('should include params in cache key', () => {
+    const url = 'https://api.example.com';
+    const params = { id: '123' };
+    expect(getCacheKey(url, params)).toContain('id=123');
 });
 ```
 
 ❌ **Avoid:**
 ```javascript
-test('distance calculation', () => {
+test('cache key generation', () => {
     // Testing multiple behaviors in one test
-    expect(calculateDistance(coord, coord)).toBe(0);
-    expect(calculateDistance(sp, rio)).toBeGreaterThan(0);
-    expect(calculateDistance(sp, bh)).toBeCloseTo(500, 0);
+    expect(getCacheKey(url, {})).toBe(url);
+    expect(getCacheKey(url, { id: '123' })).toContain('id=123');
+    expect(getCacheKey(url, { a: '1', b: '2' })).toBe('https://api.example.com?a=1&b=2');
 });
 ```
 
@@ -226,13 +225,12 @@ test('calculates distance quickly', () => {
 ### Project Structure
 
 ```
-guia_js/
+ibira.js/
 ├── src/
-│   ├── guia.js              # Source code
-│   └── guia_ibge.js         # IBGE module
+│   └── ibira.js             # Source code
 ├── __tests__/
 │   ├── utils.test.js        # Unit tests for utilities
-│   ├── CurrentPosition.test.js
+│   ├── IbiraAPIFetcher.test.js
 │   ├── Immutability.test.js
 │   └── ...
 ├── package.json             # Jest configuration
@@ -363,44 +361,39 @@ Unit testing and referential transparency are natural partners. Pure functions a
 
 ```javascript
 // src/utils.js - Pure function
-function calculateDistance(coord1, coord2) {
-    const R = 6371; // Earth's radius in km
-    const dLat = toRadians(coord2.lat - coord1.lat);
-    const dLon = toRadians(coord2.lon - coord1.lon);
-    
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(toRadians(coord1.lat)) * Math.cos(toRadians(coord2.lat)) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+function getCacheKey(url, params = {}) {
+    const sortedKeys = Object.keys(params).sort();
+    const paramString = sortedKeys
+        .map(key => `${key}=${params[key]}`)
+        .join('&');
+    return paramString ? `${url}?${paramString}` : url;
 }
 
 // __tests__/utils.test.js - Easy to test!
-describe('calculateDistance', () => {
-    test('should calculate distance between São Paulo and Rio', () => {
-        const sp = { lat: -23.550520, lon: -46.633308 };
-        const rio = { lat: -22.906847, lon: -43.172896 };
+describe('getCacheKey', () => {
+    test('should generate cache key with sorted params', () => {
+        const url = 'https://api.example.com/data';
+        const params = { id: '123', type: 'json' };
         
-        const distance = calculateDistance(sp, rio);
+        const key = getCacheKey(url, params);
         
-        expect(distance).toBeCloseTo(357.4, 1);
+        expect(key).toBe('https://api.example.com/data?id=123&type=json');
     });
     
-    test('should return 0 for same coordinates', () => {
-        const coord = { lat: -23.5, lon: -46.6 };
+    test('should return URL only when params is empty', () => {
+        const url = 'https://api.example.com/data';
         
-        expect(calculateDistance(coord, coord)).toBe(0);
+        expect(getCacheKey(url, {})).toBe(url);
     });
     
-    test('should be commutative (same result regardless of order)', () => {
-        const sp = { lat: -23.5, lon: -46.6 };
-        const rio = { lat: -22.9, lon: -43.2 };
+    test('should be deterministic (same params produce same key)', () => {
+        const url = 'https://api.example.com';
+        const params = { a: '1', b: '2' };
         
-        const distance1 = calculateDistance(sp, rio);
-        const distance2 = calculateDistance(rio, sp);
+        const key1 = getCacheKey(url, params);
+        const key2 = getCacheKey(url, params);
         
-        expect(distance1).toBe(distance2);
+        expect(key1).toBe(key2);
     });
 });
 ```
@@ -1431,18 +1424,16 @@ npm test -- --coverage --collectCoverageFrom="src/utils.js"
 
 ### Internal Documentation
 
-- **[TESTING.md](../TESTING.md)** - Overall testing guide and setup
 - **[TDD_GUIDE.md](./TDD_GUIDE.md)** - Test-driven development approach
 - **[REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md)** - Pure functions and testing
 - **[CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)** - Review checklist for tests
+- **[JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md)** - JavaScript best practices
 - **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines
-- **[docs/github/GITHUB_ACTIONS_GUIDE.md](../docs/github/GITHUB_ACTIONS_GUIDE.md)** - CI/CD integration
 
 ### Architecture Examples with Tests
-- **[CLASS_DIAGRAM.md](../docs/architecture/CLASS_DIAGRAM.md)** - Complete class architecture and test organization
-- **[GEO_POSITION.md](../docs/architecture/GEO_POSITION.md)** - Well-tested GeoPosition class example
-- **[REFERENCE_PLACE.md](../docs/architecture/REFERENCE_PLACE.md)** - ReferencePlace with comprehensive test coverage
-- **[WEB_GEOCODING_MANAGER.md](../docs/architecture/WEB_GEOCODING_MANAGER.md)** - Complex class with unit tests
+- **IbiraAPIFetcher** - Well-tested class for API data fetching with caching
+- **IbiraAPIFetchManager** - Comprehensive test coverage for managing multiple fetch operations
+- **Observer Pattern** - Unit tests for subscribe/unsubscribe operations
 
 ### Jest Documentation
 
@@ -1470,7 +1461,7 @@ npm test -- --coverage --collectCoverageFrom="src/utils.js"
 **Version**: 1.0.0  
 **Last Updated**: 2025-01-09  
 **Status**: ✅ Ready for use  
-**Maintained by**: Guia.js Team
+**Maintained by**: ibira.js Team
 
 ---
 

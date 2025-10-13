@@ -1,10 +1,10 @@
-# Low Coupling Guide for .github Configuration
+# Low Coupling Guide for ibira.js
 
-This document explains the low-coupling principles applied to the `.github` folder configuration and how to maintain them.
+This document explains the low-coupling principles applied to the ibira.js project and how to maintain them.
 
 ## Overview
 
-Low coupling in the `.github` folder means minimizing dependencies between configuration files, workflows, and templates. This makes the repository easier to maintain and allows components to evolve independently.
+Low coupling in the ibira.js project means minimizing dependencies between modules, components, and configuration files. This makes the repository easier to maintain and allows components to evolve independently.
 
 ## Principles Applied
 
@@ -40,7 +40,7 @@ Validates JavaScript syntax for specified files.
 - name: Validate JavaScript
   uses: ./.github/actions/validate-js
   with:
-    files: 'src/guia.js src/guia_ibge.js'
+    files: 'src/ibira.js'
 ```
 
 **Benefits**:
@@ -212,16 +212,15 @@ node-version: '18'
 ## Related Documentation
 
 ### Project Guidelines
-- [HIGH_COHESION_GUIDE.md](./HIGH_COHESION_GUIDE.md) - Complementary principle for cohesive components
 - [REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md) - Pure functions reduce coupling
 - [CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md) - Review checklist including coupling concerns
 - [TDD_GUIDE.md](./TDD_GUIDE.md) - Testing approach for loosely coupled code
-- [REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md) - Major refactoring examples
+- [JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md) - JavaScript best practices
 
 ### Architecture Examples
-- [CLASS_DIAGRAM.md](../docs/architecture/CLASS_DIAGRAM.md) - Overall architecture showing low coupling
-- [WEBGEOCODINGMANAGER_REFACTORING.md](../docs/architecture/WEBGEOCODINGMANAGER_REFACTORING.md) - Reducing coupling example
-- [WEB_GEOCODING_MANAGER.md](../docs/architecture/WEB_GEOCODING_MANAGER.md) - Dependency injection pattern
+- ibira.js uses the observer pattern to minimize coupling between components
+- The IbiraAPIFetcher class is designed to work independently with minimal dependencies
+- The cache system is isolated from the fetch operations
 
 ### External References
 - [GitHub Actions: Reusing workflows](https://docs.github.com/en/actions/using-workflows/reusing-workflows)
