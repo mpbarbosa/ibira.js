@@ -995,6 +995,11 @@ export class IbiraAPIFetchManager {
 	 * 
 	 * @param {string} url - The API endpoint URL
 	 * @param {Object} options - Configuration options
+	 * options.timeout - Request timeout in milliseconds
+	 * options.maxRetries - Maximum number of retry attempts
+	 * options.retryDelay - Initial retry delay in milliseconds
+	 * options.retryMultiplier - Exponential backoff multiplier
+	 * options.retryableStatusCodes - Array of HTTP status codes that should trigger retries
 	 * @returns {Promise<any>} Promise that resolves to the fetched data
 	 */
 	async fetch(url, options = {}) {
