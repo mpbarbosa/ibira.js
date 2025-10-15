@@ -7,6 +7,7 @@
 // Author: Marcelo Pereira Barbosa
 // License: MIT
 
+export {  IbiraAPIFetchManager } from './ibira.js';
 
 // Semantic Versioning 2.0.0 - see https://semver.org/
 // Version object for unstable development status
