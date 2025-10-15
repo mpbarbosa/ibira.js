@@ -132,10 +132,15 @@ describe('IbiraAPIFetcher', () => {
             const result = await fetcher.fetchDataPure(testCache);
             
             expect(result.success).toBeDefined();
+            expect(result.success).toBe(true);
             expect(result.data).toBeDefined();
+            expect(result.data).toEqual(mockData);
             expect(result.fromCache).toBeDefined();
+            expect(result.fromCache).toBe(false);
             expect(result.cacheOperations).toBeDefined();
+            expect(result.cacheOperations).toBeInstanceOf(Array);
             expect(result.events).toBeDefined();
+            expect(Object.isFrozen(result)).toBe(true);
             expect(Array.isArray(result.events)).toBe(true);
             expect(Array.isArray(result.cacheOperations)).toBe(true);
             
@@ -241,7 +246,9 @@ describe('IbiraAPIFetcher', () => {
             const cacheEntry = cache.get(testUrl);
             expect(cacheEntry.data).toEqual(mockData);
             expect(cacheEntry.timestamp).toBeDefined();
+            expect(cacheEntry.timestamp).toBeLessThanOrEqual(Date.now());
             expect(cacheEntry.expiresAt).toBeDefined();
+            expect(cacheEntry.expiresAt).toBeGreaterThan(cacheEntry.timestamp);
         });
 
         test('should return cached data when available and valid', async () => {

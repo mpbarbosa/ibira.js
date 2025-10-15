@@ -813,7 +813,21 @@ export class IbiraAPIFetcher {
  * - Centralized cache management across all fetchers
  * - Race condition protection for multiple simultaneous calls
  * - Cleanup and lifecycle management of fetch operations
+ *
+ * @class IbiraAPIFetchManager
+ * @example
+ *  * Example usage:
+ * ```javascript
+ * const manager = new IbiraAPIFetchManager({ maxCacheSize: 200 });
+ * const fetcher1 = manager.getFetcher('https://api.example.com/data1');
+ * const fetcher2 = manager.getFetcher('https://api.example.com/data2');
  * 
+ * // Fetch data concurrently
+ * const [data1, data2] = await Promise.all([fetcher1.fetchData(), fetcher2.fetchData()]);
+ *
+ * // Process the fetched data
+ * console.log(data1, data2);
+ * @Copiloted
  * @since 0.1.0-alpha
  * @author Marcelo Pereira Barbosa
  */
