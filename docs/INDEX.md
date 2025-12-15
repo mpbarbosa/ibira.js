@@ -61,6 +61,14 @@
 3. **[IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md)** - Complete class documentation with examples
 4. **[referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md)** - See the formal proof and test results
 
+### 🌐 CDN Delivery
+
+**ibira.js** is available via jsDelivr CDN for easy browser integration:
+
+- **Production URL:** `https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.0-alpha/src/index.js`
+- **Documentation:** See README.md CDN section or run `./cdn-delivery.sh`
+- **Generated URLs:** Check `cdn-urls.txt` for all available CDN options
+
 ### Quick Navigation
 
 | Priority | Document | Achievement Aspect |
@@ -116,6 +124,8 @@ ibira.js/
 ├── babel.config.mjs                # 🔄 Babel configuration for ES modules
 ├── package.json                    # 📋 NPM package configuration
 ├── package-lock.json               # 🔒 NPM dependency lock file
+├── cdn-delivery.sh                 # 🌐 jsDelivr CDN URL generator script
+├── cdn-urls.txt                    # 📝 Generated CDN URLs reference
 ├── test-runner.js                  # 🏃 Custom test runner
 ├── test_pure_fetcher.js            # 🧪 Pure function validation tests
 ├── README.md                       # 📖 Project overview and quick start
@@ -278,6 +288,23 @@ The project emphasizes test-driven development and comprehensive unit testing.
 
 ---
 
+## 🌐 CDN Delivery Tools
+
+### CDN Generation Scripts
+
+| File | Purpose | Usage |
+|------|---------|-------|
+| `cdn-delivery.sh` | Generates jsDelivr CDN URLs for various delivery options | Run `./cdn-delivery.sh` to see all available CDN URLs |
+| `cdn-urls.txt` | Pre-generated CDN URLs for quick reference | Contains production, development, and version-range URLs |
+
+**CDN Features:**
+- ✅ Multiple version strategies (specific, range, branch)
+- ✅ SRI (Subresource Integrity) support
+- ✅ ES Module and script tag examples
+- ✅ Worldwide CDN distribution (750+ locations)
+- ✅ Automatic minification and compression
+- ✅ HTTP/2 and HTTP/3 support
+
 ## ⚙️ Configuration Files
 
 ### Repository Configuration
@@ -285,6 +312,7 @@ The project emphasizes test-driven development and comprehensive unit testing.
 | File | Purpose | Notes |
 |------|---------|-------|
 | `.gitignore` | Specifies files to exclude from Git | Currently ignores `.vscode/` directory |
+| `babel.config.mjs` | Babel transpilation configuration | ES module support for Jest tests |
 
 ### Future Configuration
 
@@ -461,7 +489,7 @@ This index should be updated whenever:
 - Project structure changes
 - Configuration files are added
 
-**Last Updated:** 2025-10-13  
+**Last Updated:** 2025-12-15  
 **Maintainer:** Project maintainers
 
 ---

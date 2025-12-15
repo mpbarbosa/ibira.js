@@ -1,0 +1,28 @@
+jsDelivr CDN URLs for mpbarbosa/ibira.js v0.2.0-alpha
+Generated: Mon Dec 15 13:07:30 -03 2025
+=============================================================================
+
+PRODUCTION (Recommended - Specific Version):
+https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.0-alpha/src/index.js
+
+DEVELOPMENT (Latest from branch):
+https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@main/src/index.js
+
+VERSION RANGE (Auto-update patches):
+https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2/src/index.js
+
+NPM CDN (if published to npm):
+https://cdn.jsdelivr.net/npm/ibira.js@0.2.0-alpha/src/index.js
+
+HTML USAGE:
+<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.0-alpha/src/index.js"></script>
+
+ES MODULE:
+<script type="module">
+  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.0-alpha/src/index.js';
+</script>
+
+PACKAGE INFO API:
+https://data.jsdelivr.com/v1/package/gh/mpbarbosa/ibira.js@0.2.0-alpha
+
+=============================================================================
