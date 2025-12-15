@@ -2,7 +2,7 @@
 
 > Biblioteca JavaScript pública com código para operações básicas como fetch em APIs
 
-**Version:** 0.1.0-alpha  
+**Version:** 0.2.0-alpha  
 **Status:** 🚧 Early Development
 
 ---
