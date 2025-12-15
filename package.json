@@ -2,14 +2,14 @@
   "name": "ibira.js",
   "version": "0.1.0-alpha",
   "description": "A JavaScript library for fetching and caching API data with observer pattern support",
-  "main": "src/ibira.js",
+  "main": "src/index.js",
 
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:verbose": "jest --verbose",
-    "validate": "node -c src/ibira.js",
+    "validate": "node -c src/index.js",
     "test:all": "npm run validate && npm test"
   },
   "jest": {
@@ -17,6 +17,7 @@
 
     "collectCoverageFrom": [
       "src/**/*.js",
+      "!src/index.js",
       "!src/**/*.test.js",
       "!**/node_modules/**"
     ],

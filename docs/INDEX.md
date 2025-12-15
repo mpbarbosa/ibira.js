@@ -31,6 +31,7 @@
 ### 🏆 Major Achievement: Perfect Referential Transparency
 
 **Score: 10/10** - The first JavaScript API fetching library to achieve perfect referential transparency through:
+
 - ✅ Complete immutability with Object.freeze
 - ✅ Pure functional core with zero side effects  
 - ✅ Total dependency injection
@@ -72,7 +73,7 @@
 
 ### Repository Structure
 
-```
+```text
 ibira.js/
 ├── .github/                        # 📋 GitHub configuration and guides
 │   ├── CODE_REVIEW_GUIDE.md         # Code review checklist and standards
@@ -94,9 +95,21 @@ ibira.js/
 │   │   └── VERIFICATION_REPORT.md  # Formal mathematical verification
 │   └── TEST_RESULTS.md             # Comprehensive test results and analysis
 ├── src/                            # 🔬 Source code (referentially transparent)
-│   └── ibira.js                    # Main library with perfect purity (10/10)
+│   ├── index.js                    # Main entry point exporting all public APIs
+│   ├── core/                       # Core business logic
+│   │   ├── IbiraAPIFetcher.js      # Main fetcher class (10/10 purity)
+│   │   └── IbiraAPIFetchManager.js # Multi-fetcher coordinator
+│   ├── utils/                      # Utility classes
+│   │   ├── DefaultCache.js         # Default cache implementation
+│   │   └── DefaultEventNotifier.js # Default event system
+│   └── config/                     # Configuration
+│       └── version.js              # Version information
 ├── __tests__/                      # 🧪 Comprehensive test suite  
-│   └── IbiraAPIFetcher.test.js     # 40/40 passing tests validating purity
+│   ├── IbiraAPIFetcher.test.js     # Core fetcher tests (60+ tests)
+│   ├── IbiraAPIFetchManager.test.js # Manager tests
+│   ├── DefaultCache.test.js        # Cache implementation tests
+│   ├── DefaultEventNotifier.test.js # Event system tests
+│   └── index.test.js               # Export validation tests
 ├── coverage/                       # 📊 Test coverage reports
 ├── node_modules/                   # 📦 NPM dependencies
 ├── .vscode/                        # 🔧 VS Code configuration
@@ -123,29 +136,35 @@ ibira.js/
 ### Main Classes
 
 #### `IbiraAPIFetcher` 🏆
+
 **Referentially transparent** API fetcher with perfect functional purity.
 
 **Pure Functional Core:**
+
 - `fetchDataPure()` - Zero side effects, deterministic computation
 - `_getExpiredCacheKeys()` - Pure cache analysis
 - `_applyCacheSizeLimitsPure()` - Pure cache size management
 - Complete immutability with Object.freeze
 
 **Practical Features:**
+
 - `fetchData()` - Wrapper that applies side effects
 - Dependency injection (cache, event notifier)
 - Static factory methods for different use cases
 - Backward compatible API
 
 **Architecture:**
+
 - **Pure Core**: Mathematical computation without side effects
 - **Side Effects Layer**: Applies computed operations to real world
 - **Dual Benefits**: Mathematical purity + practical usability
 
 #### `IbiraAPIFetchManager`
+
 Manages multiple concurrent API fetch operations across different endpoints.
 
 **Features:**
+
 - Shared cache management across fetchers
 - Request deduplication protection
 - Race condition prevention
@@ -180,6 +199,7 @@ The ibira.js project has achieved **perfect referential transparency (10/10)** t
 ### 🏆 Achievement Summary
 
 **Perfect Referential Transparency (10/10):**
+
 1. ✅ **Immutable State (2/2)** - Complete Object.freeze implementation
 2. ✅ **Dependency Injection (2/2)** - External cache and event notifier
 3. ✅ **Pure Functions (2/2)** - Zero side effects in core computation
@@ -211,6 +231,7 @@ Comprehensive guides for writing high-quality JavaScript code aligned with proje
 ### Key Topics Covered
 
 **JavaScript Best Practices:**
+
 - Functional programming in JavaScript
 - Pure functions and referential transparency
 - Immutability patterns
@@ -221,6 +242,7 @@ Comprehensive guides for writing high-quality JavaScript code aligned with proje
 - Performance considerations
 
 **Code Review Guide:**
+
 - Referential transparency checklist
 - Immutability verification
 - Code quality standards
@@ -304,24 +326,31 @@ While there are no formal CONTRIBUTING.md or CODE_OF_CONDUCT.md files yet, contr
 The ibira.js project is guided by these core principles:
 
 ### 1. **Referential Transparency**
+
 Functions should produce the same output for the same input without side effects. See [Referential Transparency Achievement](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) for the complete 10/10 achievement documentation.
 
 ### 2. **Immutability**
+
 Favor immutable data structures and avoid mutations. Use functional programming patterns.
 
 ### 3. **Pure Functions**
+
 Strive for pure functions that are deterministic and easy to test.
 
 ### 4. **High Cohesion**
+
 Each module should have a single, well-defined responsibility. See [High Cohesion Guide](./.github/HIGH_COHESION_GUIDE.md).
 
 ### 5. **Low Coupling**
+
 Minimize dependencies between modules. See [Low Coupling Guide](./.github/LOW_COUPLING_GUIDE.md).
 
 ### 6. **Test-Driven Development**
+
 Write tests before implementation. See [TDD Guide](./.github/TDD_GUIDE.md).
 
 ### 7. **Code Quality**
+
 Maintain high standards through code review and best practices. See [Code Review Guide](./.github/CODE_REVIEW_GUIDE.md).
 
 ---
@@ -331,6 +360,7 @@ Maintain high standards through code review and best practices. See [Code Review
 ### Internal Documentation
 
 **Achievement Documentation:**
+
 - [referential_transparency/REFERENTIAL_TRANSPARENCY.md](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) - Main achievement (10/10)
 - [referential_transparency/PURE_SOLUTION.md](./referential_transparency/PURE_SOLUTION.md) - Pure functional solution
 - [referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md) - Formal verification
@@ -338,6 +368,7 @@ Maintain high standards through code review and best practices. See [Code Review
 - [IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md) - Complete class documentation
 
 **Historical Guides (`.github/` directory):**
+
 - [HIGH_COHESION_GUIDE.md](../.github/HIGH_COHESION_GUIDE.md)
 - [LOW_COUPLING_GUIDE.md](../.github/LOW_COUPLING_GUIDE.md)
 - [JAVASCRIPT_BEST_PRACTICES.md](../.github/JAVASCRIPT_BEST_PRACTICES.md)
@@ -462,6 +493,7 @@ This index should be updated whenever:
 ### 🎯 The Journey
 
 This achievement required:
+
 - 🔬 **Mathematical rigor** in design and implementation
 - 🏗️ **Architectural innovation** with the dual-layer approach
 - 🧪 **Comprehensive testing** with 40 test cases covering every aspect
@@ -473,3 +505,33 @@ This achievement required:
 ---
 
 **Note:** This index is a living document. If you find missing information or broken links, please submit an issue or pull request.
+
+## 🆕 Latest Documentation (December 2025)
+
+### [Node.js API Pattern Guide](./NODE_API_PATTERN.md) ⭐ NEW
+**Complete 32KB comprehensive guide covering the entire Node.js API pattern implementation**
+
+This is the most comprehensive documentation available, covering:
+- Complete architecture overview with diagrams
+- Module organization and structure details
+- All design patterns used (Factory, Observer, Strategy, etc.)
+- Full API documentation with extensive examples
+- Best practices and coding guidelines
+- Contributing guidelines for developers
+- Testing strategies and patterns
+- Usage examples for all scenarios
+
+👉 **Start here for a complete understanding of the project!**
+
+### [Structure Diagram](./STRUCTURE_DIAGRAM.md) ⭐ NEW
+**Visual representation of the entire project structure**
+
+Includes:
+- ASCII tree diagrams of file structure
+- Module dependency graphs
+- Data flow diagrams
+- Layer architecture visualizations
+- Design pattern maps
+- Test coverage distribution
+- Import patterns
+

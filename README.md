@@ -24,16 +24,16 @@ For comprehensive documentation, guides, and resources, see **[INDEX.md](./INDEX
 ## 🚀 Quick Start
 
 ```javascript
-import { IbiraAPIFetcher, IbiraAPIFetchManager } from './src/ibira.js';
+import { IbiraAPIFetcher, IbiraAPIFetchManager } from 'ibira.js';
 
 // Simple usage with IbiraAPIFetcher
-const fetcher = new IbiraAPIFetcher('https://api.example.com/data');
-await fetcher.fetchData();
-console.log(fetcher.data);
+const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
+const data = await fetcher.fetchData();
+console.log(data);
 
 // Advanced usage with IbiraAPIFetchManager
 const manager = new IbiraAPIFetchManager();
-const data = await manager.fetch('https://api.example.com/data');
+const result = await manager.fetch('https://api.example.com/data');
 ```
 
 ## 📖 Key Resources
