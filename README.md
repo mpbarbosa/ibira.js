@@ -2,7 +2,7 @@
 
 > Biblioteca JavaScript pública com código para operações básicas como fetch em APIs
 
-**Version:** 0.2.0-alpha  
+**Version:** 0.2.1-alpha  
 **Status:** 🚧 Early Development
 
 ---
@@ -44,10 +44,10 @@ Load **ibira.js** directly from jsDelivr CDN without installation:
 
 ```html
 <!-- Load specific version (recommended for production) -->
-<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.0-alpha/src/index.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.1-alpha/src/index.js"></script>
 
 <!-- Load with SRI (Subresource Integrity) for security -->
-<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.0-alpha/src/index.js"
+<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.1-alpha/src/index.js"
         integrity="sha384-HASH_HERE"
         crossorigin="anonymous"></script>
 ```
@@ -56,13 +56,13 @@ Load **ibira.js** directly from jsDelivr CDN without installation:
 
 ```html
 <script type="module">
-  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.0-alpha/src/index.js';
+  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.1-alpha/src/index.js';
 </script>
 ```
 
 ### Version Options
 
-- **Specific version:** `@0.2.0-alpha` (recommended for production)
+- **Specific version:** `@0.2.1-alpha` (recommended for production)
 - **Latest patch:** `@0.2` (auto-updates to latest 0.2.x)
 - **Latest minor:** `@0` (auto-updates to latest 0.x.x)
 - **Latest from branch:** `@main` (development, auto-updates)

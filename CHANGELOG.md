@@ -5,6 +5,38 @@ All notable changes to the ibira.js project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1-alpha] - 2025-12-15
+
+### 🌐 CDN Delivery Support
+
+#### New Features
+- **ADDED**: `cdn-delivery.sh` - jsDelivr CDN URL generator script (224 lines)
+- **ADDED**: `cdn-urls.txt` - Pre-generated CDN URL reference file
+- **ADDED**: CDN delivery section in README.md with usage examples
+- **ADDED**: jsDelivr integration with multiple version strategies
+
+#### CDN Features
+- ✅ Specific version URLs for production (`@0.2.1-alpha`)
+- ✅ Version range URLs for auto-updates (`@0.2`, `@0`)
+- ✅ Branch URLs for development (`@main`)
+- ✅ SRI (Subresource Integrity) support
+- ✅ ES Module and script tag examples
+- ✅ Worldwide CDN distribution (750+ locations)
+- ✅ Automatic minification and compression (Brotli/Gzip)
+- ✅ HTTP/2 and HTTP/3 support
+
+#### Documentation Updates
+- **UPDATED**: docs/INDEX.md with CDN Delivery Tools section
+- **UPDATED**: Repository structure documentation with new files
+- **FIXED**: INDEX.md path references in README.md (`./INDEX.md` → `./docs/INDEX.md`)
+- **UPDATED**: Last modified date in INDEX.md to 2025-12-15
+- **ADDED**: babel.config.mjs to configuration files documentation
+
+#### Quality Assurance
+- **VERIFIED**: All tests passing (151 passed, 1 skipped out of 152 total)
+- **VERIFIED**: Coverage remains excellent (90.45% statements, 82.14% branches, 91.72% lines)
+- **VERIFIED**: No breaking changes, fully backward compatible
+
 ## [0.2.0-alpha] - 2025-12-15
 
 ### 🎯 Major Changes

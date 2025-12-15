@@ -1,6 +1,6 @@
 {
   "name": "ibira.js",
-  "version": "0.2.0-alpha",
+  "version": "0.2.1-alpha",
   "description": "A JavaScript library for fetching and caching API data with observer pattern support",
   "main": "src/index.js",
 

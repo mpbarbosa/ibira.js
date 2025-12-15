@@ -8,7 +8,7 @@
 export const VERSION = {
 	major: 0,
 	minor: 2,
-	patch: 0,
+	patch: 1,
 	prerelease: "alpha", // Indicates unstable development
 	toString: function () {
 		return `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;
