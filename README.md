@@ -101,4 +101,4 @@ MIT License - Copyright (c) 2025 Marcelo Pereira Barbosa
 ## 🔗 Links
 
 - **Repository:** https://github.com/mpbarbosa/ibira.js
-- **Documentation Index:** [INDEX.md](./INDEX.md)
+- **Documentation Index:** [INDEX.md](./docs/INDEX.md)

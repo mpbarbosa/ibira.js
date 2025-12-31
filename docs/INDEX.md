@@ -448,7 +448,11 @@ The project is in active early development. Current focus areas:
 
 ### Version History
 
-- **0.2.0-alpha** - Initial implementation with core features
+| Version | Release Date | Status | Key Features |
+|---------|--------------|--------|--------------|
+| 0.2.1-alpha | 2025-12-15 | Latest | CDN delivery support, documentation updates |
+| 0.2.0-alpha | 2025-12-15 | Superseded | Modular architecture, 90%+ test coverage |
+| 0.1.0-alpha | 2025-12-14 | Superseded | Initial release, referential transparency |
 
 ---
 

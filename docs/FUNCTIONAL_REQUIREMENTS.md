@@ -1,7 +1,7 @@
 # Functional Requirements Specification
 
 **Project**: ibira.js  
-**Version**: 0.2.0-alpha  
+**Version**: 0.2.1-alpha  
 **Date**: December 15, 2025  
 **Status**: Active Development  
 **Document Version**: 1.0.0  
@@ -1610,7 +1610,7 @@ For version 1.0.0 release, the following must be met:
 - ⏳ TypeScript definitions (planned)
 - ⏳ Published to NPM (planned)
 
-### 11.2 Current Status (v0.2.0-alpha)
+### 11.2 Current Status (v0.2.1-alpha)
 
 | Category | Status | Notes |
 |----------|--------|-------|

@@ -2,7 +2,7 @@
 
 **Document Version:** 1.0.0  
 **Date:** December 15, 2025  
-**Project:** ibira.js v0.2.0-alpha  
+**Project:** ibira.js v0.2.1-alpha  
 
 ---
 
@@ -447,7 +447,7 @@ export const VERSION = {
 import { VERSION } from 'ibira.js';
 
 console.log(`ibira.js v${VERSION.toString()}`);
-// Output: ibira.js v0.2.0-alpha
+// Output: ibira.js v0.2.1-alpha
 
 console.log(`Major version: ${VERSION.major}`);
 // Output: Major version: 0

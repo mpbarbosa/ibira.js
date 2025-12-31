@@ -1,7 +1,7 @@
 # Node.js API Pattern Implementation Status
 
 **Implementation Date**: December 15, 2025  
-**Project**: ibira.js v0.2.0-alpha  
+**Project**: ibira.js v0.2.1-alpha  
 **Pattern**: Node.js API Pattern
 
 ---
@@ -393,7 +393,7 @@ The ibira.js project has been successfully restructured to follow the Node.js AP
 
 **Implemented By**: GitHub Copilot CLI  
 **Date**: December 15, 2025  
-**Version**: 0.2.0-alpha  
+**Version**: 0.2.1-alpha  
 **Pattern**: Node.js API Pattern v1.0
 
 ---

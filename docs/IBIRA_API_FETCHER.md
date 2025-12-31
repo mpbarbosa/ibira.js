@@ -966,7 +966,7 @@ interface PureResult {
 
 ## Version Information
 
-- **Version**: 0.2.0-alpha
+- **Version**: 0.2.1-alpha
 - **License**: MIT
 - **Repository**: https://github.com/mpbarbosa/ibira.js
 - **Author**: Marcelo Pereira Barbosa
