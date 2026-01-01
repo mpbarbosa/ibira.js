@@ -1,42 +1,106 @@
-// IbiraAPIFetchManager.js
-// Manages multiple concurrent API fetch operations
-// Copyright (c) 2025 Marcelo Pereira Barbosa
-// License: MIT
+/**
+ * @fileoverview Manager for coordinating multiple concurrent API fetch operations
+ * @module core/IbiraAPIFetchManager
+ * @license MIT
+ * @copyright 2025 Marcelo Pereira Barbosa
+ */
 
 import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
 
 /**
+ * @typedef {Object} ManagerOptions
+ * @property {number} [maxCacheSize=100] - Maximum number of cache entries
+ * @property {number} [cacheExpiration=300000] - Cache expiration time in milliseconds (default: 5 minutes)
+ * @property {number} [cleanupInterval=60000] - Interval for periodic cache cleanup in milliseconds (default: 1 minute)
+ * @property {number} [maxRetries=3] - Default maximum retry attempts for fetchers
+ * @property {number} [retryDelay=1000] - Default initial retry delay in milliseconds
+ * @property {number} [retryMultiplier=2] - Default exponential backoff multiplier for retries
+ * @property {number[]} [retryableStatusCodes=[408, 429, 500, 502, 503, 504]] - Default HTTP status codes that trigger retries
+ */
+
+/**
+ * @typedef {Object} ManagerStats
+ * @property {number} activeFetchers - Number of active fetcher instances
+ * @property {number} pendingRequests - Number of pending requests
+ * @property {number} cacheSize - Current number of cached entries
+ * @property {number} maxCacheSize - Maximum cache size limit
+ * @property {number} expiredEntries - Number of expired entries not yet cleaned
+ * @property {number} cacheUtilization - Cache utilization percentage
+ * @property {string} lastCleanup - ISO timestamp of last cleanup
+ * @property {number} cacheExpiration - Cache expiration time in milliseconds
+ */
+
+/**
+ * @typedef {Object} RetryConfig
+ * @property {number} [maxRetries] - Maximum number of retry attempts
+ * @property {number} [retryDelay] - Initial retry delay in milliseconds
+ * @property {number} [retryMultiplier] - Exponential backoff multiplier
+ * @property {number[]} [retryableStatusCodes] - HTTP status codes that should trigger retries
+ */
+
+/**
  * IbiraAPIFetchManager - Manages multiple concurrent API fetch operations
  * 
- * This class is responsible for coordinating multiple IbiraAPIFetcher instances,
- * handling race conditions, preventing duplicate requests, and managing shared
- * caching across different endpoints.
+ * This class coordinates multiple IbiraAPIFetcher instances, handling race conditions,
+ * preventing duplicate requests, and managing shared caching across different endpoints.
+ * It provides a centralized way to manage API interactions in your application.
  * 
  * **Key Features:**
  * - Request deduplication to prevent concurrent identical requests
- * - Centralized cache management across all fetchers
+ * - Centralized cache management across all fetchers  
  * - Race condition protection for multiple simultaneous calls
- * - Cleanup and lifecycle management of fetch operations
- *
- * @class IbiraAPIFetchManager
- * @example
- *  * Example usage:
- * ```javascript
- * const manager = new IbiraAPIFetchManager({ maxCacheSize: 200 });
- * const fetcher1 = manager.getFetcher('https://api.example.com/data1');
- * const fetcher2 = manager.getFetcher('https://api.example.com/data2');
+ * - Automatic periodic cache cleanup
+ * - Per-URL and global retry configuration
+ * - Statistics and monitoring capabilities
+ * - Lifecycle management for cleanup
  * 
- * // Fetch data concurrently
- * const [data1, data2] = await Promise.all([fetcher1.fetchData(), fetcher2.fetchData()]);
- *
- * // Process the fetched data
- * console.log(data1, data2);
- * @Copiloted
+ * @class IbiraAPIFetchManager
  * @since 0.1.0-alpha
  * @author Marcelo Pereira Barbosa
+ * 
+ * @example
+ * // Create manager with custom settings
+ * const manager = new IbiraAPIFetchManager({
+ *   maxCacheSize: 200,
+ *   cacheExpiration: 10 * 60 * 1000 // 10 minutes
+ * });
+ * 
+ * // Fetch single URL
+ * const data = await manager.fetch('https://api.example.com/data');
+ * 
+ * @example
+ * // Fetch multiple URLs concurrently
+ * const urls = [
+ *   'https://api.example.com/users',
+ *   'https://api.example.com/posts'
+ * ];
+ * const results = await manager.fetchMultiple(urls);
+ * 
+ * @example
+ * // Subscribe to events
+ * manager.subscribe('https://api.example.com/data', {
+ *   update: (event, payload) => console.log(event, payload)
+ * });
+ * 
+ * @example
+ * // Clean up when done
+ * manager.destroy();
  */
 export class IbiraAPIFetchManager {
 	
+	/**
+	 * Creates a new IbiraAPIFetchManager instance
+	 * 
+	 * @param {ManagerOptions} [options={}] - Configuration options
+	 * 
+	 * @example
+	 * // Create manager with custom settings
+	 * const manager = new IbiraAPIFetchManager({
+	 *   maxCacheSize: 200,
+	 *   cacheExpiration: 10 * 60 * 1000, // 10 minutes
+	 *   maxRetries: 5
+	 * });
+	 */
 	constructor(options = {}) {
 		this.fetchers = new Map(); // Store fetcher instances by URL
 		this.pendingRequests = new Map(); // Track ongoing requests to prevent duplicates
@@ -60,8 +124,19 @@ export class IbiraAPIFetchManager {
 	 * Creates or retrieves a fetcher instance for the given URL
 	 * 
 	 * @param {string} url - The API endpoint URL
-	 * @param {Object} options - Configuration options for the fetcher
+	 * @param {Object} [options={}] - Configuration options for the fetcher
+	 * @param {number} [options.timeout] - Request timeout in milliseconds
+	 * @param {number} [options.maxRetries] - Maximum number of retry attempts
+	 * @param {number} [options.retryDelay] - Initial retry delay in milliseconds
+	 * @param {number} [options.retryMultiplier] - Exponential backoff multiplier
+	 * @param {number[]} [options.retryableStatusCodes] - HTTP status codes that should trigger retries
 	 * @returns {IbiraAPIFetcher} The fetcher instance for this URL
+	 * 
+	 * @example
+	 * const fetcher = manager.getFetcher('https://api.example.com/data', {
+	 *   timeout: 5000,
+	 *   maxRetries: 5
+	 * });
 	 */
 	getFetcher(url, options = {}) {
 		if (!this.fetchers.has(url)) {
@@ -197,14 +272,24 @@ export class IbiraAPIFetchManager {
 	 * are deduplicated, preventing unnecessary network requests and potential
 	 * race conditions.
 	 * 
+	 * @async
 	 * @param {string} url - The API endpoint URL
-	 * @param {Object} options - Configuration options
-	 * options.timeout - Request timeout in milliseconds
-	 * options.maxRetries - Maximum number of retry attempts
-	 * options.retryDelay - Initial retry delay in milliseconds
-	 * options.retryMultiplier - Exponential backoff multiplier
-	 * options.retryableStatusCodes - Array of HTTP status codes that should trigger retries
-	 * @returns {Promise<any>} Promise that resolves to the fetched data
+	 * @param {Object} [options={}] - Configuration options
+	 * @param {number} [options.timeout] - Request timeout in milliseconds
+	 * @param {number} [options.maxRetries] - Maximum number of retry attempts
+	 * @param {number} [options.retryDelay] - Initial retry delay in milliseconds
+	 * @param {number} [options.retryMultiplier] - Exponential backoff multiplier
+	 * @param {number[]} [options.retryableStatusCodes] - Array of HTTP status codes that should trigger retries
+	 * @returns {Promise<*>} Promise that resolves to the fetched data
+	 * @throws {Error} Network errors, HTTP errors, or JSON parsing errors
+	 * 
+	 * @example
+	 * try {
+	 *   const data = await manager.fetch('https://api.example.com/users');
+	 *   console.log(data);
+	 * } catch (error) {
+	 *   console.error('Fetch failed:', error);
+	 * }
 	 */
 	async fetch(url, options = {}) {
 		const fetcher = this.getFetcher(url, options);
@@ -233,8 +318,9 @@ export class IbiraAPIFetchManager {
 	 * Internal method to execute the actual fetch operation
 	 * 
 	 * @private
+	 * @async
 	 * @param {IbiraAPIFetcher} fetcher - The fetcher instance to use
-	 * @returns {Promise<any>} Promise that resolves to the fetched data
+	 * @returns {Promise<*>} Promise that resolves to the fetched data
 	 */
 	async _executeFetch(fetcher) {
 		// ✅ fetchData() now returns data directly, no need to check fetcher.data
@@ -244,9 +330,24 @@ export class IbiraAPIFetchManager {
 	/**
 	 * Fetches multiple URLs concurrently with proper coordination
 	 * 
+	 * @async
 	 * @param {string[]} urls - Array of URLs to fetch
-	 * @param {Object} options - Configuration options
-	 * @returns {Promise<any[]>} Promise that resolves to array of results
+	 * @param {Object} [options={}] - Configuration options applied to all fetchers
+	 * @returns {Promise<PromiseSettledResult[]>} Promise that resolves to array of results with status and value/reason
+	 * 
+	 * @example
+	 * const urls = [
+	 *   'https://api.example.com/users',
+	 *   'https://api.example.com/posts'
+	 * ];
+	 * const results = await manager.fetchMultiple(urls);
+	 * results.forEach(result => {
+	 *   if (result.status === 'fulfilled') {
+	 *     console.log('Success:', result.value);
+	 *   } else {
+	 *     console.error('Error:', result.reason);
+	 *   }
+	 * });
 	 */
 	async fetchMultiple(urls, options = {}) {
 		const promises = urls.map(url => this.fetch(url, options));
@@ -258,6 +359,14 @@ export class IbiraAPIFetchManager {
 	 * 
 	 * @param {string} url - The URL of the fetcher to subscribe to
 	 * @param {Object} observer - Observer object with update method
+	 * @param {Function} observer.update - Method called with (eventType, payload) on events
+	 * 
+	 * @example
+	 * manager.subscribe('https://api.example.com/data', {
+	 *   update: (eventType, payload) => {
+	 *     console.log('Event:', eventType, payload);
+	 *   }
+	 * });
 	 */
 	subscribe(url, observer) {
 		const fetcher = this.getFetcher(url);
@@ -281,6 +390,11 @@ export class IbiraAPIFetchManager {
 	 * 
 	 * @param {string} url - The URL to check pending status for
 	 * @returns {boolean} Whether there's a pending request for this URL
+	 * 
+	 * @example
+	 * if (manager.isLoading('https://api.example.com/data')) {
+	 *   console.log('Request in progress...');
+	 * }
 	 */
 	isLoading(url) {
 		const fetcher = this.getFetcher(url);
@@ -292,7 +406,15 @@ export class IbiraAPIFetchManager {
 	 * Get cached data for a specific URL without triggering a fetch
 	 * 
 	 * @param {string} url - The URL to get cached data for
-	 * @returns {any|null} Cached data or null if not found or expired
+	 * @returns {*|null} Cached data or null if not found or expired
+	 * 
+	 * @example
+	 * const cached = manager.getCachedData('https://api.example.com/data');
+	 * if (cached) {
+	 *   console.log('Using cached data:', cached);
+	 * } else {
+	 *   const fresh = await manager.fetch('https://api.example.com/data');
+	 * }
 	 */
 	getCachedData(url) {
 		const fetcher = this.getFetcher(url);
@@ -318,6 +440,14 @@ export class IbiraAPIFetchManager {
 	 * Clear cached data for a specific URL or all cached data
 	 * 
 	 * @param {string} [url] - Optional URL to clear cache for. If not provided, clears all cache
+	 * 
+	 * @example
+	 * // Clear specific URL cache
+	 * manager.clearCache('https://api.example.com/data');
+	 * 
+	 * @example
+	 * // Clear all cache
+	 * manager.clearCache();
 	 */
 	clearCache(url = null) {
 		if (url) {
@@ -332,6 +462,14 @@ export class IbiraAPIFetchManager {
 	/**
 	 * Clean up resources and cancel pending requests
 	 * Call this when the manager is no longer needed
+	 * 
+	 * @example
+	 * // Clean up when component unmounts
+	 * useEffect(() => {
+	 *   return () => {
+	 *     manager.destroy();
+	 *   };
+	 * }, []);
 	 */
 	destroy() {
 		// Stop periodic cleanup timer
@@ -353,7 +491,11 @@ export class IbiraAPIFetchManager {
 	/**
 	 * Get statistics about the current state of the manager
 	 * 
-	 * @returns {Object} Statistics object with current state information
+	 * @returns {ManagerStats} Statistics object with current state information
+	 * 
+	 * @example
+	 * const stats = manager.getStats();
+	 * console.log(`Cache: ${stats.cacheSize}/${stats.maxCacheSize} (${stats.cacheUtilization}%)`);
 	 */
 	getStats() {
 		const now = Date.now();
@@ -374,6 +516,10 @@ export class IbiraAPIFetchManager {
 	/**
 	 * Manually trigger cache cleanup
 	 * Useful for testing or when you want to force cleanup
+	 * 
+	 * @example
+	 * // Force cleanup before important operation
+	 * manager.triggerCleanup();
 	 */
 	triggerCleanup() {
 		this._performPeriodicCleanup();
@@ -383,6 +529,10 @@ export class IbiraAPIFetchManager {
 	 * Set cache expiration time for new entries
 	 * 
 	 * @param {number} milliseconds - Cache expiration time in milliseconds
+	 * 
+	 * @example
+	 * // Set cache expiration to 10 minutes
+	 * manager.setCacheExpiration(10 * 60 * 1000);
 	 */
 	setCacheExpiration(milliseconds) {
 		this.cacheExpiration = milliseconds;
@@ -392,6 +542,10 @@ export class IbiraAPIFetchManager {
 	 * Set maximum cache size
 	 * 
 	 * @param {number} size - Maximum number of cache entries
+	 * 
+	 * @example
+	 * // Increase cache size for better performance
+	 * manager.setMaxCacheSize(500);
 	 */
 	setMaxCacheSize(size) {
 		this.maxCacheSize = size;
@@ -402,11 +556,14 @@ export class IbiraAPIFetchManager {
 	/**
 	 * Set default retry configuration for new fetchers
 	 * 
-	 * @param {Object} retryConfig - Retry configuration object
-	 * @param {number} [retryConfig.maxRetries] - Maximum number of retry attempts
-	 * @param {number} [retryConfig.retryDelay] - Initial retry delay in milliseconds
-	 * @param {number} [retryConfig.retryMultiplier] - Exponential backoff multiplier
-	 * @param {number[]} [retryConfig.retryableStatusCodes] - HTTP status codes that should trigger retries
+	 * @param {RetryConfig} [retryConfig={}] - Retry configuration object
+	 * 
+	 * @example
+	 * manager.setRetryConfig({
+	 *   maxRetries: 5,
+	 *   retryDelay: 2000,
+	 *   retryMultiplier: 1.5
+	 * });
 	 */
 	setRetryConfig(retryConfig = {}) {
 		if (retryConfig.maxRetries !== undefined) this.defaultMaxRetries = retryConfig.maxRetries;
@@ -418,7 +575,11 @@ export class IbiraAPIFetchManager {
 	/**
 	 * Get current retry configuration
 	 * 
-	 * @returns {Object} Current retry configuration
+	 * @returns {RetryConfig} Current retry configuration
+	 * 
+	 * @example
+	 * const config = manager.getRetryConfig();
+	 * console.log(`Max retries: ${config.maxRetries}`);
 	 */
 	getRetryConfig() {
 		return {
@@ -435,7 +596,14 @@ export class IbiraAPIFetchManager {
 	 * instead of modifying existing properties (which would fail due to Object.freeze)
 	 * 
 	 * @param {string} url - The URL to configure retries for
-	 * @param {Object} retryConfig - Retry configuration object
+	 * @param {RetryConfig} [retryConfig={}] - Retry configuration object
+	 * 
+	 * @example
+	 * // Set higher retries for critical endpoint
+	 * manager.setRetryConfigForUrl('https://api.example.com/critical', {
+	 *   maxRetries: 10,
+	 *   retryDelay: 500
+	 * });
 	 */
 	setRetryConfigForUrl(url, retryConfig = {}) {
 		// ✅ IMMUTABLE: Create new fetcher instance instead of modifying existing one
