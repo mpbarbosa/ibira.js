@@ -1,5 +1,33 @@
 # IbiraAPIFetcher Class Documentation
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Achievement Highlights](#-achievement-highlights)
+3. [Installation](#installation)
+4. [Quick Start](#quick-start)
+   - [Basic Usage](#basic-usage-backward-compatible)
+   - [Pure Functional Usage](#pure-functional-usage)
+5. [Class Reference](#ibiraapifetcher-class-reference)
+   - [Constructor](#constructor)
+   - [Static Methods](#static-methods)
+   - [Instance Methods](#instance-methods)
+6. [IbiraAPIFetchManager](#ibiraapifetchmanager)
+7. [Configuration Options](#configuration-options)
+8. [Error Handling](#error-handling)
+9. [Events](#events)
+10. [Advanced Usage](#advanced-usage)
+11. [Browser Compatibility](#browser-compatibility)
+12. [TypeScript Support](#typescript-support)
+13. [Common Patterns](#common-patterns)
+    - [Multi-Endpoint Coordination](#pattern-1-multi-endpoint-coordination-with-shared-cache)
+    - [Custom Retry Strategy](#pattern-2-custom-retry-strategy-for-production)
+    - [Production Error Handling](#pattern-3-production-error-handling-by-status-code)
+    - [Event-Driven Architecture](#pattern-4-event-driven-architecture-with-observers)
+    - [Dynamic Configuration](#pattern-5-dynamic-configuration-management)
+14. [Contributing](#contributing)
+15. [License](#license)
+
 ## Overview
 
 The `IbiraAPIFetcher` class is a modern JavaScript API fetching library that achieves **perfect referential transparency (10/10)** while maintaining complete practical usability through an innovative dual-layer architecture.
@@ -14,23 +42,6 @@ The `IbiraAPIFetcher` class is a modern JavaScript API fetching library that ach
 - **🔄 100% Backward Compatible** - Existing code works unchanged
 - **🧪 Comprehensive Testing** - 40/40 passing tests validate purity
 - **⚡ High Performance** - Smart caching with LRU eviction
-
-## Quick Start
-
-### Basic Usage (Backward Compatible)
-```javascript
-import { IbiraAPIFetcher } from 'ibira.js';
-
-// Simple usage with default settings
-const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');
-
-try {
-    const users = await fetcher.fetchData();
-    console.log('Users:', users);
-} catch (error) {
-    console.error('Failed to fetch users:', error);
-}
-```
 
 ## Installation
 
@@ -50,8 +61,10 @@ const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users'
 try {
     const users = await fetcher.fetchData();
     console.log('Users:', users);
+    // Output: Users: [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }, ...]
 } catch (error) {
     console.error('Failed to fetch users:', error);
+    // Output: Failed to fetch users: HTTP error! status: 404
 }
 ```
 
@@ -68,8 +81,13 @@ const result = await fetcher.fetchDataPure(cacheState, Date.now());
 
 if (result.success) {
     console.log('Data:', result.data);
+    // Output: Data: [{ id: 1, name: 'John' }, ...]
+    
     console.log('Cache operations to apply:', result.cacheOperations);
+    // Output: Cache operations to apply: [{ type: 'set', key: 'https://...', value: {...} }]
+    
     console.log('Events to fire:', result.events);
+    // Output: Events to fire: [{ type: 'fetch:success', payload: {...} }]
     
     // Apply side effects manually if needed
     result.cacheOperations.forEach(op => {
@@ -89,9 +107,11 @@ if (result.success) {
     // Handle events
     result.events.forEach(event => {
         console.log(`Event: ${event.type}`, event.payload);
+        // Output: Event: fetch:success { url: '...', timestamp: ... }
     });
 } else {
     console.error('Request failed:', result.error);
+    // Output: Request failed: HTTP error! status: 500
 }
 ```
 
@@ -975,10 +995,8 @@ interface PureResult {
 
 ## Related Documentation
 
-- [Referential Transparency Achievement](./REFERENTIAL_TRANSPARENCY.md) - 🏆 Main achievement documentation
 - [Architecture Guide](./ARCHITECTURE.md) - Dual-layer system design
 - [Migration Guide](./MIGRATION_GUIDE.md) - Transformation process
-- [Verification Report](./VERIFICATION_REPORT.md) - Formal verification results
 - [Documentation Index](./INDEX.md) - Complete documentation overview
         // Implementation
     }
@@ -1118,15 +1136,463 @@ const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users'
 const users: User[] = await fetcher.fetchData();
 ```
 
+## Common Patterns
+
+This section provides practical examples for advanced use cases and production scenarios.
+
+### Pattern 1: Multi-Endpoint Coordination with Shared Cache
+
+Coordinate multiple API endpoints with a shared cache for optimal performance:
+
+```javascript
+import { IbiraAPIFetchManager, DefaultCache } from 'ibira.js';
+
+// Create a shared cache for multiple fetchers
+const sharedCache = new DefaultCache({ 
+    maxSize: 100, 
+    expiration: 600000 // 10 minutes
+});
+
+// Initialize manager with shared cache
+const manager = new IbiraAPIFetchManager({ cache: sharedCache });
+
+// Add multiple endpoints
+manager.addFetcher('users', 'https://api.example.com/users');
+manager.addFetcher('posts', 'https://api.example.com/posts');
+manager.addFetcher('comments', 'https://api.example.com/comments');
+
+// Fetch from multiple endpoints in parallel
+const results = await manager.fetchAll();
+console.log('Users:', results.users);
+console.log('Posts:', results.posts);
+console.log('Comments:', results.comments);
+
+// Check shared cache status
+console.log('Total cached items:', sharedCache.size);
+```
+
+**Benefits:**
+- Reduced memory footprint with shared cache
+- Consistent cache invalidation across endpoints
+- Coordinated parallel requests with single configuration
+
+### Pattern 2: Custom Retry Strategy for Production
+
+Configure sophisticated retry logic for different failure scenarios:
+
+```javascript
+import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
+
+// Custom retry configuration for production
+const productionFetcher = new IbiraAPIFetcher(
+    'https://api.example.com/critical-data',
+    {
+        cache: new DefaultCache({ expiration: 300000 }), // 5 min cache
+        eventNotifier: new DefaultEventNotifier(),
+        maxRetries: 5,              // Retry up to 5 times
+        retryDelay: 2000,           // Start with 2 second delay
+        timeout: 10000,             // 10 second timeout per request
+        enableCache: true,
+        headers: {
+            'Authorization': 'Bearer YOUR_TOKEN',
+            'Content-Type': 'application/json'
+        }
+    }
+);
+
+// Exponential backoff retry pattern
+async function fetchWithExponentialBackoff(fetcher, maxAttempts = 5) {
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const data = await fetcher.fetchData();
+            console.log(`✅ Success on attempt ${attempt}`);
+            return data;
+        } catch (error) {
+            lastError = error;
+            
+            if (attempt < maxAttempts) {
+                // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+                const delay = Math.pow(2, attempt - 1) * 1000;
+                console.log(`⚠️ Attempt ${attempt} failed, retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    
+    throw new Error(`Failed after ${maxAttempts} attempts: ${lastError.message}`);
+}
+
+// Usage
+try {
+    const data = await fetchWithExponentialBackoff(productionFetcher);
+    console.log('Data:', data);
+} catch (error) {
+    console.error('All retry attempts exhausted:', error);
+}
+```
+
+**Best Practices:**
+- Use exponential backoff to avoid overwhelming servers
+- Set reasonable timeouts to prevent hanging requests
+- Log retry attempts for monitoring and debugging
+- Consider circuit breaker pattern for repeated failures
+
+### Pattern 3: Production Error Handling by Status Code
+
+Handle different HTTP status codes with specific strategies:
+
+```javascript
+import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
+
+const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
+
+async function fetchWithStatusHandling() {
+    try {
+        const data = await fetcher.fetchData();
+        console.log('Success:', data);
+        return data;
+    } catch (error) {
+        // Network errors (fetch failures)
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            console.error('❌ Network Error: Check internet connection');
+            // Fallback to cached data or offline mode
+            return handleOfflineMode();
+        }
+        
+        // HTTP errors - parse status code
+        if (error.message.includes('HTTP error! status:')) {
+            const statusMatch = error.message.match(/status: (\d+)/);
+            const statusCode = statusMatch ? parseInt(statusMatch[1]) : 0;
+            
+            switch (statusCode) {
+                case 400:
+                    console.error('❌ Bad Request: Invalid parameters');
+                    // Log for debugging, notify user of invalid input
+                    return handleBadRequest(error);
+                    
+                case 401:
+                    console.error('🔒 Unauthorized: Token expired or invalid');
+                    // Redirect to login, refresh token
+                    return handleAuthError();
+                    
+                case 403:
+                    console.error('🚫 Forbidden: Insufficient permissions');
+                    // Show access denied message
+                    return handleForbidden();
+                    
+                case 404:
+                    console.error('🔍 Not Found: Resource doesn\'t exist');
+                    // Show "not found" UI
+                    return handleNotFound();
+                    
+                case 429:
+                    console.error('⏱️ Rate Limited: Too many requests');
+                    // Implement exponential backoff
+                    return handleRateLimit(error);
+                    
+                case 500:
+                case 502:
+                case 503:
+                case 504:
+                    console.error('🔧 Server Error: Backend issue');
+                    // Retry with backoff, show maintenance message
+                    return handleServerError(statusCode, error);
+                    
+                default:
+                    console.error(`⚠️ Unexpected Status ${statusCode}:`, error.message);
+                    return handleUnexpectedError(error);
+            }
+        }
+        
+        // Timeout errors
+        if (error.name === 'AbortError') {
+            console.error('⏰ Request Timeout: Server took too long to respond');
+            // Retry or notify user
+            return handleTimeout(error);
+        }
+        
+        // Unknown errors
+        console.error('❓ Unknown Error:', error);
+        return handleUnknownError(error);
+    }
+}
+
+// Error recovery functions
+function handleOfflineMode() {
+    console.log('📴 Entering offline mode...');
+    // Return cached data or show offline UI
+    return { offline: true, message: 'Working offline' };
+}
+
+function handleBadRequest(error) {
+    console.log('🔧 Handling bad request...');
+    // Validate and correct request parameters
+    return { error: 'Invalid request parameters' };
+}
+
+function handleAuthError() {
+    console.log('🔄 Refreshing authentication...');
+    // Trigger token refresh or redirect to login
+    window.location.href = '/login';
+}
+
+function handleForbidden() {
+    console.log('🚷 Access denied');
+    return { error: 'You do not have permission to access this resource' };
+}
+
+function handleNotFound() {
+    console.log('🗺️ Resource not found');
+    return { error: 'The requested resource was not found' };
+}
+
+async function handleRateLimit(error) {
+    console.log('⏸️ Backing off due to rate limit...');
+    // Wait before retrying
+    await new Promise(resolve => setTimeout(resolve, 60000)); // Wait 1 minute
+    return fetchWithStatusHandling(); // Retry
+}
+
+async function handleServerError(statusCode, error) {
+    console.log(`🔄 Retrying after server error (${statusCode})...`);
+    // Implement retry logic with exponential backoff
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+    return fetchWithStatusHandling(); // Retry
+}
+
+function handleTimeout(error) {
+    console.log('⏱️ Request timed out, retrying...');
+    return fetchWithStatusHandling(); // Retry
+}
+
+function handleUnexpectedError(error) {
+    console.log('❗ Logging unexpected error for analysis');
+    // Send to error tracking service (e.g., Sentry)
+    return { error: 'An unexpected error occurred' };
+}
+
+// Usage
+fetchWithStatusHandling().then(result => {
+    console.log('Final result:', result);
+});
+```
+
+**Key Strategies:**
+- **4xx errors**: Usually client issues - validate input, refresh auth
+- **5xx errors**: Server issues - implement retry with backoff
+- **Network errors**: Check connectivity, use cached data
+- **Timeouts**: Retry with longer timeout or notify user
+- **Rate limits**: Respect retry-after headers, implement backoff
+
+### Pattern 4: Event-Driven Architecture with Observers
+
+Monitor API state changes across your application:
+
+```javascript
+import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
+
+// Create custom observer for logging
+class APILogger {
+    update(event, data) {
+        const timestamp = new Date().toISOString();
+        console.log(`[${timestamp}] ${event}:`, data);
+        
+        // Send to analytics service
+        if (event === 'fetch:error') {
+            this.logErrorToService(data);
+        }
+    }
+    
+    logErrorToService(error) {
+        // Implementation for error tracking service
+        console.log('📊 Logging error to analytics:', error.message);
+    }
+}
+
+// Create custom observer for UI updates
+class UIUpdater {
+    constructor(loadingElement, errorElement) {
+        this.loadingElement = loadingElement;
+        this.errorElement = errorElement;
+    }
+    
+    update(event, data) {
+        switch (event) {
+            case 'fetch:start':
+                this.loadingElement.style.display = 'block';
+                this.errorElement.style.display = 'none';
+                break;
+                
+            case 'fetch:success':
+                this.loadingElement.style.display = 'none';
+                // Update UI with data
+                break;
+                
+            case 'fetch:error':
+                this.loadingElement.style.display = 'none';
+                this.errorElement.textContent = data.message;
+                this.errorElement.style.display = 'block';
+                break;
+                
+            case 'cache:hit':
+                console.log('✨ Data loaded from cache');
+                break;
+        }
+    }
+}
+
+// Setup fetcher with multiple observers
+const eventNotifier = new DefaultEventNotifier();
+const cache = new DefaultCache();
+
+const fetcher = new IbiraAPIFetcher(
+    'https://api.example.com/data',
+    { cache, eventNotifier }
+);
+
+// Subscribe multiple observers
+const logger = new APILogger();
+const uiUpdater = new UIUpdater(
+    document.getElementById('loading'),
+    document.getElementById('error')
+);
+
+eventNotifier.subscribe(logger);
+eventNotifier.subscribe(uiUpdater);
+
+// Fetch data - all observers will be notified
+await fetcher.fetchData();
+
+// Cleanup when component unmounts
+eventNotifier.unsubscribe(logger);
+eventNotifier.unsubscribe(uiUpdater);
+```
+
+**Observer Pattern Benefits:**
+- Decoupled components - observers don't know about each other
+- Easy to add/remove monitoring without modifying core logic
+- Supports multiple concerns (logging, UI, analytics) simultaneously
+- Clean separation of cross-cutting concerns
+
+### Pattern 5: Dynamic Configuration Management
+
+Adjust fetcher behavior based on runtime conditions:
+
+```javascript
+import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
+
+class AdaptiveFetcher {
+    constructor(baseUrl) {
+        this.baseUrl = baseUrl;
+        this.networkQuality = 'good'; // good, moderate, poor
+        this.fetcher = null;
+        this.updateFetcher();
+    }
+    
+    updateFetcher() {
+        const config = this.getConfigForNetworkQuality();
+        
+        this.fetcher = new IbiraAPIFetcher(
+            this.baseUrl,
+            {
+                cache: new DefaultCache(config.cache),
+                eventNotifier: new DefaultEventNotifier(),
+                maxRetries: config.maxRetries,
+                retryDelay: config.retryDelay,
+                timeout: config.timeout
+            }
+        );
+    }
+    
+    getConfigForNetworkQuality() {
+        switch (this.networkQuality) {
+            case 'good':
+                return {
+                    cache: { maxSize: 50, expiration: 300000 }, // 5 min
+                    maxRetries: 2,
+                    retryDelay: 1000,
+                    timeout: 5000
+                };
+                
+            case 'moderate':
+                return {
+                    cache: { maxSize: 100, expiration: 600000 }, // 10 min
+                    maxRetries: 4,
+                    retryDelay: 2000,
+                    timeout: 10000
+                };
+                
+            case 'poor':
+                return {
+                    cache: { maxSize: 150, expiration: 1800000 }, // 30 min
+                    maxRetries: 6,
+                    retryDelay: 3000,
+                    timeout: 15000
+                };
+                
+            default:
+                return this.getConfigForNetworkQuality(); // Default to good
+        }
+    }
+    
+    setNetworkQuality(quality) {
+        if (this.networkQuality !== quality) {
+            console.log(`📶 Network quality changed: ${this.networkQuality} → ${quality}`);
+            this.networkQuality = quality;
+            this.updateFetcher();
+        }
+    }
+    
+    async fetchData() {
+        return this.fetcher.fetchData();
+    }
+}
+
+// Usage
+const adaptiveFetcher = new AdaptiveFetcher('https://api.example.com/data');
+
+// Monitor network conditions (using Network Information API)
+if ('connection' in navigator) {
+    const connection = navigator.connection;
+    
+    function updateNetworkQuality() {
+        const effectiveType = connection.effectiveType;
+        
+        if (effectiveType === '4g') {
+            adaptiveFetcher.setNetworkQuality('good');
+        } else if (effectiveType === '3g') {
+            adaptiveFetcher.setNetworkQuality('moderate');
+        } else {
+            adaptiveFetcher.setNetworkQuality('poor');
+        }
+    }
+    
+    connection.addEventListener('change', updateNetworkQuality);
+    updateNetworkQuality(); // Initial check
+}
+
+// Fetch data with adaptive configuration
+const data = await adaptiveFetcher.fetchData();
+console.log('Data:', data);
+```
+
+**Adaptive Configuration Benefits:**
+- Optimizes performance based on network conditions
+- Extends cache lifetime on poor connections
+- Adjusts retry strategies dynamically
+- Improves user experience across varying network quality
+
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+Contributions are welcome! Please submit issues and pull requests on GitHub.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License
 
 ---
 
-**IbiraAPIFetcher v0.1.0-alpha**  
+**IbiraAPIFetcher v0.2.1-alpha**  
 *Achieving perfect referential transparency in JavaScript API fetching*

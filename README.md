@@ -77,6 +77,79 @@ Load **ibira.js** directly from jsDelivr CDN without installation:
 
 For more CDN options and examples, run `./cdn-delivery.sh` or visit [jsDelivr Documentation](https://www.jsdelivr.com/?docs=gh).
 
+## 🧪 Testing & Utilities
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+
+# Run tests with verbose output
+npm run test:verbose
+
+# Validate JavaScript syntax
+npm run validate
+
+# Validate and run tests
+npm run test:all
+```
+
+### Utility Scripts
+
+#### Test Runner Helper
+**Purpose:** Display available test commands and test structure  
+**Usage:** `./test-runner.js` or `node test-runner.js`  
+**Note:** Informational only - use `npm test` to run actual tests
+
+```bash
+./test-runner.js
+# Output: Test commands, structure, coverage info
+```
+
+#### Pure Referential Transparency Demonstration
+**Purpose:** Interactive demonstration of referential transparency principles  
+**Usage:** `./test_pure_fetcher.js` or `node test_pure_fetcher.js`  
+**Features:** 
+- 5 comprehensive deterministic tests
+- Proves 10/10 referential transparency score
+- Demonstrates zero side effects
+- Shows time-travel debugging capabilities
+
+```bash
+./test_pure_fetcher.js
+# Output: Live demonstration of pure functional programming
+```
+
+#### CDN Delivery Script
+**Purpose:** Generate CDN URLs for ibira.js distribution  
+**Prerequisites:**
+- Git installed and repository initialized
+- Node.js and npm available
+- Run from repository root
+
+**Usage:** `./cdn-delivery.sh`  
+**Output:** 
+- CDN URLs displayed in terminal
+- `cdn-urls.txt` file created with all URLs
+- Latest, specific version, and minified URLs
+
+```bash
+./cdn-delivery.sh
+# Output: CDN URLs + cdn-urls.txt file
+```
+
+**Troubleshooting:**
+- If git not found: `sudo apt-get install git` (Linux) or `brew install git` (macOS)
+- If permission denied: `chmod +x cdn-delivery.sh`
+- If version mismatch: Commit and push latest changes first
+
 ## 📖 Key Resources
 
 - **[Complete Documentation Index](./docs/INDEX.md)** - All guides and documentation

@@ -217,6 +217,44 @@ try {
 
 ---
 
+## NPM Scripts Reference
+
+### Test Commands
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `npm test` | Run all tests | Standard test execution |
+| `npm run test:watch` | Run tests in watch mode | During active development |
+| `npm run test:coverage` | Generate coverage report | Before commits, code reviews |
+| `npm run test:verbose` | Run tests with detailed output | Debugging test failures |
+| `npm run validate` | Validate JavaScript syntax | Quick syntax check without running tests |
+| `npm run test:all` | Validate syntax + run all tests | Pre-commit workflow, CI/CD |
+
+### Test Workflow Examples
+
+```bash
+# Development workflow
+npm run test:watch          # Watch mode while coding
+
+# Pre-commit checklist
+npm run validate            # 1. Check syntax
+npm run test:coverage       # 2. Run tests with coverage
+# If both pass, proceed with commit
+
+# CI/CD pipeline
+npm run test:all            # Single command for validation + tests
+```
+
+### Utility Scripts
+
+| Script | Command | Purpose |
+|--------|---------|---------|
+| `test-runner.js` | `./test-runner.js` | Display test commands and structure |
+| `test_pure_fetcher.js` | `./test_pure_fetcher.js` | Demonstrate referential transparency |
+| `cdn-delivery.sh` | `./cdn-delivery.sh` | Generate CDN URLs for distribution |
+
+---
+
 ## Testing
 
 ### Mock Network

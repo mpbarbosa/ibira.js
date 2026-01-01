@@ -235,8 +235,8 @@ Comprehensive guides for writing high-quality JavaScript code aligned with proje
 
 | Guide | Description | When to Use |
 |-------|-------------|-------------|
-| [**JavaScript Best Practices**](./.github/JAVASCRIPT_BEST_PRACTICES.md) | Comprehensive JavaScript coding standards | All development work - reference for code style, patterns, and conventions |
-| [**Code Review Guide**](./.github/CODE_REVIEW_GUIDE.md) | Checklist for reviewing code contributions | When reviewing pull requests or performing code audits |
+| [**JavaScript Best Practices**](../.github/JAVASCRIPT_BEST_PRACTICES.md) | Comprehensive JavaScript coding standards | All development work - reference for code style, patterns, and conventions |
+| [**Code Review Guide**](../.github/CODE_REVIEW_GUIDE.md) | Checklist for reviewing code contributions | When reviewing pull requests or performing code audits |
 
 ### Key Topics Covered
 
@@ -263,21 +263,64 @@ Comprehensive guides for writing high-quality JavaScript code aligned with proje
 
 ## 🧪 Testing & Quality
 
-The project emphasizes test-driven development and comprehensive unit testing.
+The project emphasizes test-driven development and comprehensive unit testing with 90%+ coverage.
 
 ### Testing Documentation
 
 | Guide | Description | Coverage |
 |-------|-------------|----------|
-| [**TDD Guide**](./.github/TDD_GUIDE.md) | Test-driven development methodology | Red-Green-Refactor cycle, TDD workflow, integration with CI/CD |
-| [**Unit Test Guide**](./.github/UNIT_TEST_GUIDE.md) | Comprehensive unit testing practices | Writing effective tests, mocking, async testing, Jest integration |
+| [**TESTING_WORKFLOW.md**](./TESTING_WORKFLOW.md) | Complete testing workflow guide | Automated & manual testing, CI/CD, workflows |
+| [**SCRIPTS_REFERENCE.md**](./SCRIPTS_REFERENCE.md) | Centralized scripts reference | All NPM scripts, utility scripts, shell scripts |
+| [**TEST_RESULTS.md**](./TEST_RESULTS.md) | Current test results and statistics | 152 tests, 90%+ coverage across all metrics |
+| [**UTILITY_SCRIPTS.md**](./UTILITY_SCRIPTS.md) | Test utility scripts documentation | test-runner.js, test_pure_fetcher.js, troubleshooting |
+| [**TROUBLESHOOTING.md**](./TROUBLESHOOTING.md) | Common issues and solutions | Installation, network, caching, errors, performance |
+| [**FAQ.md**](./FAQ.md) | Frequently asked questions | 50+ Q&A covering all aspects of the library |
+| [**TDD Guide**](../.github/TDD_GUIDE.md) | Test-driven development methodology | Red-Green-Refactor cycle, TDD workflow, integration with CI/CD |
+| [**Unit Test Guide**](../.github/UNIT_TEST_GUIDE.md) | Comprehensive unit testing practices | Writing effective tests, mocking, async testing, Jest integration |
+| [**QUICK_REFERENCE.md**](./QUICK_REFERENCE.md) | NPM scripts quick reference | Test commands table and workflow examples |
+
+### Test Suite Overview
+
+**Current Statistics:**
+- 📊 **Total Tests:** 152 (151 passing, 1 skipped)
+- ✅ **Statements:** 90.45% (target: 75%)
+- ✅ **Branches:** 82.14% (target: 75%)
+- ✅ **Functions:** 75.7% (target: 75%)
+- ✅ **Lines:** 91.72% (target: 75%)
+
+**Test Files:**
+- `IbiraAPIFetcher.test.js` - 60+ tests (core functionality)
+- `IbiraAPIFetchManager.test.js` - 40+ tests (manager coordination)
+- `DefaultCache.test.js` - 30+ tests (cache implementation)
+- `DefaultEventNotifier.test.js` - 35+ tests (event system)
+- `index.test.js` - Export validation tests
+
+### NPM Test Commands
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `npm test` | Run all tests | Standard test execution, pre-commit |
+| `npm run test:watch` | Watch mode | During active development |
+| `npm run test:coverage` | Generate coverage | Pre-commit, code review |
+| `npm run test:verbose` | Detailed output | Debugging test failures |
+| `npm run validate` | Syntax check only | Quick validation without tests |
+| `npm run test:all` | Validate + test | Pre-commit workflow, CI/CD |
+
+### Utility Test Scripts
+
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `./test-runner.js` | Display test information | Show commands, structure, coverage info |
+| `./test_pure_fetcher.js` | RT demonstration | Prove 10/10 referential transparency |
+
+See [TESTING_WORKFLOW.md](./TESTING_WORKFLOW.md) for complete workflows and [UTILITY_SCRIPTS.md](./UTILITY_SCRIPTS.md) for detailed script documentation.
 
 ### Testing Principles
 
 1. **Test-First Development** - Write tests before implementation
 2. **Isolation** - Test units independently
 3. **Clarity** - Tests serve as living documentation
-4. **Coverage** - Aim for high test coverage of critical paths
+4. **Coverage** - Maintain 90%+ coverage across all metrics
 5. **Fast Feedback** - Tests should run quickly
 
 ### Test Structure
@@ -341,9 +384,9 @@ While there are no formal CONTRIBUTING.md or CODE_OF_CONDUCT.md files yet, contr
 
 ### Before Submitting a PR
 
-- [ ] Read [JavaScript Best Practices](./.github/JAVASCRIPT_BEST_PRACTICES.md)
-- [ ] Write tests following [TDD Guide](./.github/TDD_GUIDE.md)
-- [ ] Ensure code passes [Code Review Guide](./.github/CODE_REVIEW_GUIDE.md) checklist
+- [ ] Read [JavaScript Best Practices](../.github/JAVASCRIPT_BEST_PRACTICES.md)
+- [ ] Write tests following [TDD Guide](../.github/TDD_GUIDE.md)
+- [ ] Ensure code passes [Code Review Guide](../.github/CODE_REVIEW_GUIDE.md) checklist
 - [ ] Verify referential transparency where applicable
 - [ ] Document any new features or changes
 
@@ -367,19 +410,19 @@ Strive for pure functions that are deterministic and easy to test.
 
 ### 4. **High Cohesion**
 
-Each module should have a single, well-defined responsibility. See [High Cohesion Guide](./.github/HIGH_COHESION_GUIDE.md).
+Each module should have a single, well-defined responsibility. See [High Cohesion Guide](../.github/HIGH_COHESION_GUIDE.md).
 
 ### 5. **Low Coupling**
 
-Minimize dependencies between modules. See [Low Coupling Guide](./.github/LOW_COUPLING_GUIDE.md).
+Minimize dependencies between modules. See [Low Coupling Guide](../.github/LOW_COUPLING_GUIDE.md).
 
 ### 6. **Test-Driven Development**
 
-Write tests before implementation. See [TDD Guide](./.github/TDD_GUIDE.md).
+Write tests before implementation. See [TDD Guide](../.github/TDD_GUIDE.md).
 
 ### 7. **Code Quality**
 
-Maintain high standards through code review and best practices. See [Code Review Guide](./.github/CODE_REVIEW_GUIDE.md).
+Maintain high standards through code review and best practices. See [Code Review Guide](../.github/CODE_REVIEW_GUIDE.md).
 
 ---
 

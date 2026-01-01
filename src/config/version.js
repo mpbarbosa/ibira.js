@@ -3,8 +3,16 @@
 // Copyright (c) 2025 Marcelo Pereira Barbosa
 // License: MIT
 
-// Semantic Versioning 2.0.0 - see https://semver.org/
-// Version object for unstable development status
+/**
+ * Semantic version object following SemVer 2.0.0 specification
+ * @see https://semver.org/
+ * @type {Object}
+ * @property {number} major - Major version number (breaking changes)
+ * @property {number} minor - Minor version number (new features, backward compatible)
+ * @property {number} patch - Patch version number (bug fixes)
+ * @property {string} prerelease - Prerelease identifier (alpha, beta, rc)
+ * @property {function} toString - Returns the full version string
+ */
 export const VERSION = {
 	major: 0,
 	minor: 2,

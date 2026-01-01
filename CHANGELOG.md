@@ -118,7 +118,7 @@ For contributors wanting to understand the new structure, see [MIGRATION.md](./M
 - Promise-based async/await API
 - Comprehensive error handling
 - Achieved perfect referential transparency (10/10)
-- 40+ passing tests for core functionality
+- 40 initial tests for core functionality (expanded to 152 tests in v0.2.0-alpha)
 
 ---
 
@@ -126,8 +126,9 @@ For contributors wanting to understand the new structure, see [MIGRATION.md](./M
 
 | Version | Release Date | Status | Key Features |
 |---------|--------------|--------|--------------|
-| 0.2.0-alpha | 2025-12-15 | Latest | Modular architecture, 90%+ test coverage |
-| 0.1.0-alpha | 2025-12-14 | Superseded | Initial release, referential transparency |
+| 0.2.1-alpha | 2025-12-15 | Latest | CDN delivery, production URLs |
+| 0.2.0-alpha | 2025-12-15 | Current | Modular architecture, 152 tests (90%+ coverage) |
+| 0.1.0-alpha | 2025-12-14 | Superseded | Initial release, 40 tests, referential transparency |
 
 ---
 
