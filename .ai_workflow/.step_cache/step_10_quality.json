@@ -24,12 +24,12 @@
     "src/config/version.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-12T10:54:57.869Z"
+      "lastAnalyzed": "2026-03-12T11:27:29.421Z"
     },
     "src/core/IbiraAPIFetchManager.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-12T04:20:25.059Z"
+      "lastAnalyzed": "2026-03-12T11:27:29.421Z"
     },
     "src/core/IbiraAPIFetcher.ts": {
       "score": 100,
@@ -44,7 +44,7 @@
     ".ai_workflow/commit_history.json": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-12T10:54:57.869Z"
+      "lastAnalyzed": "2026-03-12T11:27:29.421Z"
     },
     "package-lock.json": {
       "score": 100,
@@ -55,6 +55,16 @@
       "score": 100,
       "issueCount": 0,
       "lastAnalyzed": "2026-03-12T10:54:57.869Z"
+    },
+    "src/utils/DefaultCache.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T11:27:29.421Z"
+    },
+    "src/utils/DefaultEventNotifier.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T11:27:29.421Z"
     }
   }
 }
