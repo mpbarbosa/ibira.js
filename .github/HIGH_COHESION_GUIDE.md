@@ -626,7 +626,7 @@ describe('IbiraAPIFetchManager', () => {
 - [JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md) - JavaScript coding standards
 
 ### Architecture Examples
-- [src/ibira.js](../src/ibira.js) - Main library showing cohesive class design
+- [src/core/IbiraAPIFetcher.js](../src/core/IbiraAPIFetcher.js) - Main library showing cohesive class design
   - `IbiraAPIFetcher` - Focused on individual API fetching operations
   - `IbiraAPIFetchManager` - Focused on coordinating multiple fetchers
 
@@ -657,7 +657,7 @@ describe('IbiraAPIFetchManager', () => {
 
 ## Questions?
 
-If you have questions about applying high cohesion principles or need help refactoring for better cohesion, please open an issue using the [GitHub Configuration template](./ISSUE_TEMPLATE/github_config.md).
+If you have questions about applying high cohesion principles or need help refactoring for better cohesion, please open a GitHub issue.
 
 ## Summary Checklist
 

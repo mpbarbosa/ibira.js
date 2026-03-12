@@ -202,8 +202,7 @@ The documentation is **ready for production use** and exceeds typical open-sourc
 
 ## 📚 Additional Resources
 
-- [Type Definitions Reference](./type_definitions_reference.md)
-- [Documentation Enhancement Summary](./documentation_summary.md)
+- [Documentation Enhancement Summary](../../DOCUMENTATION_SUMMARY.md)
 - [JSDoc Official Documentation](https://jsdoc.app/)
 - [TypeScript JSDoc Reference](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
 

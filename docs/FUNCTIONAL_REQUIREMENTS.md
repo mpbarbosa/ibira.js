@@ -52,10 +52,10 @@ ibira.js was created to address common challenges in API data management:
 
 ### 1.4 References
 
-- [Node.js API Pattern Documentation](./docs/NODE_API_PATTERN.md)
-- [Architecture Documentation](./docs/ARCHITECTURE.md)
-- [API Reference](./docs/IBIRA_API_FETCHER.md)
-- [Test Results](./docs/TEST_RESULTS.md)
+- [Node.js API Pattern Documentation](./NODE_API_PATTERN.md)
+- [Architecture Documentation](./ARCHITECTURE.md)
+- [API Reference](./IBIRA_API_FETCHER.md)
+- [Test Results](./TEST_RESULTS.md)
 
 ---
 
@@ -1701,11 +1701,11 @@ For version 1.0.0 release, the following must be met:
 
 ## Appendix C: References
 
-- [Node.js API Pattern Guide](./docs/NODE_API_PATTERN.md)
-- [Quick Reference](./docs/QUICK_REFERENCE.md)
-- [API Documentation](./docs/IBIRA_API_FETCHER.md)
-- [Architecture](./docs/ARCHITECTURE.md)
-- [Test Results](./docs/TEST_RESULTS.md)
+- [Node.js API Pattern Guide](./NODE_API_PATTERN.md)
+- [Quick Reference](./QUICK_REFERENCE.md)
+- [API Documentation](./IBIRA_API_FETCHER.md)
+- [Architecture](./ARCHITECTURE.md)
+- [Test Results](./TEST_RESULTS.md)
 
 ---
 

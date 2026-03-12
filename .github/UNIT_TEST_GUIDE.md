@@ -1428,7 +1428,7 @@ npm test -- --coverage --collectCoverageFrom="src/utils.js"
 - **[REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md)** - Pure functions and testing
 - **[CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)** - Review checklist for tests
 - **[JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md)** - JavaScript best practices
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines
 
 ### Architecture Examples with Tests
 - **IbiraAPIFetcher** - Well-tested class for API data fetching with caching

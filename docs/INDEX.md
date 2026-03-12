@@ -140,8 +140,8 @@ ibira.js/
 
 | File | Description | Status |
 |------|-------------|--------|
-| [`src/ibira.js`](../src/ibira.js) | **Referentially transparent** library with dual-layer architecture | 🏆 **Perfect (10/10)** |
-| [`__tests__/IbiraAPIFetcher.test.js`](../__tests__/IbiraAPIFetcher.test.js) | Comprehensive test suite | ✅ **40/40 Passing** |
+| [`src/core/IbiraAPIFetcher.js`](../src/core/IbiraAPIFetcher.js) | **Referentially transparent** library with dual-layer architecture | 🏆 **Perfect (10/10)** |
+| [`__tests__/IbiraAPIFetcher.test.js`](../__tests__/IbiraAPIFetcher.test.js) | Comprehensive test suite | ✅ **172/172 Passing** |
 
 ### Main Classes
 

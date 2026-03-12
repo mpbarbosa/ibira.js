@@ -841,7 +841,7 @@ When opening a PR:
 - **[REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md)** - Pure functions guide
 - **[CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)** - Code review checklist
 - **[JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md)** - JavaScript best practices
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines
 
 ### Architecture Examples
 - **IbiraAPIFetcher** - Well-tested class for API data fetching

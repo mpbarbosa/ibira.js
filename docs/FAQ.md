@@ -520,7 +520,7 @@ v0.2.x is **100% backward compatible**. Main changes:
 - Enhanced test coverage (40 → 152 tests)
 - No breaking changes to public API
 
-See [MIGRATION.md](../MIGRATION.md) for details.
+See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for details.
 
 ### Can I use v0.1.0 and v0.2.0 code together?
 

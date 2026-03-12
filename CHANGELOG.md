@@ -143,7 +143,7 @@ npm install ibira.js@0.2.0-alpha
 ```
 
 ### 🔗 Migration
-For contributors wanting to understand the new structure, see [MIGRATION.md](./MIGRATION.md).
+For contributors wanting to understand the new structure, see [MIGRATION_GUIDE.md](./docs/MIGRATION_GUIDE.md).
 
 ---
 

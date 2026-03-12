@@ -1278,7 +1278,7 @@ test('calculateDistance works', () => {
 - **[CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)** - Code review checklist
 - **[UNIT_TEST_GUIDE.md](./UNIT_TEST_GUIDE.md)** - Unit testing best practices
 - **[TDD_GUIDE.md](./TDD_GUIDE.md)** - Test-driven development
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines
 
 ### External Resources
 

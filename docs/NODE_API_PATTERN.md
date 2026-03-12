@@ -1470,7 +1470,7 @@ The Node.js API pattern provides ibira.js with a scalable, maintainable, and pro
 ### Resources
 
 - [Source Code README](../src/README.md)
-- [Migration Guide](../MIGRATION.md)
+- [Migration Guide](./MIGRATION_GUIDE.md)
 - [Architecture Documentation](./ARCHITECTURE.md)
 - [Test Results](./TEST_RESULTS.md)
 
