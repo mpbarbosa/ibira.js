@@ -1,6 +1,6 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.3.3-alpha — Alpha Hardening
+> **Current version:** 0.3.4-alpha — Alpha Hardening
 > **Status:** Beta preparation in progress
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
@@ -16,7 +16,7 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.1-alpha** | jsDelivr CDN delivery, SRI support, CDN URL generator script |
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
 | **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
-| **0.3.3-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
+| **0.3.4-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
 
 ---
 
@@ -56,6 +56,14 @@ Low-priority housekeeping items that improve contributor experience without chan
   add integration tests covering cross-module flows (`IbiraAPIFetchManager` ↔ `DefaultCache` ↔
   `DefaultEventNotifier`) and at least one e2e scenario exercising the full fetch-cache-notify
   pipeline; maintain the test pyramid (unit → integration → e2e) as the codebase grows
+- [ ] **Version test consolidation** _(step_06)_ — `test/config/version.test.js` deleted (duplicate
+  of `version.test.ts`; anti-pattern custom `toString` overrides removed); remaining work: move
+  `test/config/version.test.ts` to `__tests__/` for consistent test location, and refactor
+  prerelease-variation tests to `it.each` parameterised table with a `makeVersion(overrides)` helper
+- [ ] **Automated dependency management** _(step_09)_ — enable Dependabot or Renovate for automated
+  PR-based dependency updates; add `npm audit` as a CI step; document in `CONTRIBUTING.md` that
+  `package-lock.json` must be committed; pin critical tooling versions (`typescript`, `jest`,
+  `ts-jest`) for reproducible builds across contributors
 - [ ] **Prettier integration** — add `.prettierrc` config file and ensure ESLint and Prettier configs
   do not conflict (install `eslint-config-prettier`); document formatting step in `CONTRIBUTING.md`
   (`npm run format` script and `prettier` devDependency already added in v0.4.x)
@@ -143,6 +151,9 @@ Goal: let consumers customise the request/response pipeline.
 - [ ] **Pluggable retry strategies** — expose a `retryStrategy(attempt, error)` function option alongside the existing fixed exponential backoff
 - [ ] **Stricter generics for cache & event interfaces** — introduce `DefaultCache<T>` and `Observer<T>` generics so cache values and observer payloads are fully typed end-to-end; eliminates `any` / `unknown` casts in consumers
 - [ ] **Async error propagation audit** — review all `fetch` call sites to confirm every async path has an explicit `try/catch` and surfaces errors to the caller rather than swallowing them silently
+- [ ] **Result/Either pattern for fetch operations** — replace throw-based error handling with `Result<T, E> = { ok: true; value: T } | { ok: false; error: E }` for explicit, type-safe error paths; consumers no longer need try/catch at call sites
+- [ ] **Runtime API response validation** — integrate a validation library (Zod or io-ts) to narrow `unknown` API responses to typed shapes at runtime; prevents type assertion bugs from unpredictable external payloads
+- [ ] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — evaluate and integrate the `ObserverSubject` implementation from the `bessa_patterns.ts` project repo as a replacement or complement to `DefaultEventNotifier`; aligns the observer pattern with a shared canonical implementation across projects
 
 ---
 

@@ -9,9 +9,9 @@
  * A single entry stored in the cache.
  */
 export interface CacheEntry {
-	data: unknown;
-	timestamp: number;
-	expiresAt: number;
+	readonly data: unknown;
+	readonly timestamp: number;
+	readonly expiresAt: number;
 }
 
 /**

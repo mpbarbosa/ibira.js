@@ -11,6 +11,15 @@
 
 ---
 
+## 📐 Architectural Principles
+
+- **Referential Transparency:** Core logic is implemented as pure functions; side effects are isolated in wrapper classes. See [Referential Transparency Guide](.github/REFERENTIAL_TRANSPARENCY.md).
+- **Immutability:** Data structures are not mutated in place; functions return new values. See [High Cohesion Guide](.github/HIGH_COHESION_GUIDE.md).
+- **High Cohesion & Low Coupling:** Modules and classes have single, well-defined responsibilities.
+- **Functional Programming:** Explicit dependencies, no hidden globals, deterministic outputs.
+
+---
+
 ## 📦 Installation
 
 ```bash
@@ -40,10 +49,11 @@ For comprehensive documentation, guides, and resources, see **[Documentation Ind
 **ibira.js** is a JavaScript library for fetching and caching API data with observer pattern support. It provides:
 
 - 🔄 **Observer pattern** for reactive data updates
-- 💾 **Built-in caching** mechanism
+- 💾 **Built-in LRU caching** mechanism
 - 🎯 **Promise-based** async/await API
 - 🛡️ **Comprehensive error handling**
 - 🧩 **Low coupling and high cohesion** design
+- 🧪 **Referentially transparent core logic** for testability and maintainability
 
 ## 🚀 Quick Start
 
@@ -58,6 +68,11 @@ console.log(data);
 // Advanced usage with IbiraAPIFetchManager
 const manager = new IbiraAPIFetchManager();
 const result = await manager.fetch('https://api.example.com/data');
+
+// Observer pattern example
+fetcher.subscribe((newData) => {
+  console.log('Data updated:', newData);
+});
 ```
 
 ## 🌐 CDN Delivery (jsDelivr)
@@ -121,7 +136,7 @@ npm run test:verbose
 # Run tests in Node.js environment (verifies server-side compatibility)
 npm run test:node
 
-# Validate JavaScript syntax
+# Validate JavaScript syntax and referential transparency
 npm run validate
 
 # Validate and run tests

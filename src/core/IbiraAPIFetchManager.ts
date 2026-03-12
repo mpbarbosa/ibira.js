@@ -476,8 +476,8 @@ export class IbiraAPIFetchManager {
 		
 		const now = Date.now();
 		if (cacheEntry && this._isCacheEntryValid(cacheEntry, now)) {
-			// Update timestamp for LRU tracking
-			cacheEntry.timestamp = now;
+			// Update timestamp for LRU tracking (immutable — create new entry)
+			this.globalCache.set(cacheKey, { ...cacheEntry, timestamp: now });
 			return cacheEntry.data;
 		}
 		

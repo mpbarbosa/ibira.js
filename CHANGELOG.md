@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ADDED**: `src/config/version.ts` — centralizes version management for build and runtime consistency
 
 ### 🛠️ Improvements
-- **IMPROVED**: Documentation consistency — `README.md`, CDN examples, and API usage updated to match new build outputs and versioning
+- **IMPROVED**: Documentation consistency — `README.md`, CDN examples, API usage, and architectural principles updated to match new build outputs, referential transparency, and versioning
 - **IMPROVED**: Project structure — all source files migrated to TypeScript; build and test scripts updated for new structure
 - **IMPROVED**: Linting and formatting — ESLint and Prettier configs updated for strict TypeScript and Node.js 18+ compatibility
 
@@ -29,7 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FIXED**: Caching logic edge cases in `DefaultCache`
 
 ### 📚 Documentation
-- **UPDATED**: `README.md` — CDN usage, versioning, and API examples reflect new build outputs and TypeScript migration
+- **UPDATED**: `README.md` — CDN usage, versioning, API examples, and architectural principles (referential transparency, high cohesion) reflect new build outputs and TypeScript migration
+- **UPDATED**: `.github/REFERENTIAL_TRANSPARENCY.md` — expanded referential transparency guidance for reviewers and contributors
+- **UPDATED**: `.github/HIGH_COHESION_GUIDE.md` — new high cohesion principles and examples for configuration and workflows
 - **UPDATED**: `CONTRIBUTING.md` — developer setup, code standards, testing, PR flow
 - **UPDATED**: `__tests__/README.md` — test naming, mocking patterns, coverage targets
 - **UPDATED**: `docs/ARCHITECTURE.md` — new modules and build process
@@ -37,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.3.3-alpha] - 2026-03-12
+## [0.3.4-alpha] - 2026-03-12
 
 ### 🔒 Alpha Hardening
 
@@ -208,7 +210,7 @@ For contributors wanting to understand the new structure, see [MIGRATION_GUIDE.m
 
 | Version | Release Date | Status | Key Features |
 |---------|--------------|--------|--------------|
-| 0.3.3-alpha | 2026-03-12 | Latest | AbortController, validateStatus, ESLint, 90%+ branch coverage |
+| 0.3.4-alpha | 2026-03-12 | Latest | AbortController, validateStatus, ESLint, 90%+ branch coverage |
 | 0.2.2-alpha | 2026-01-10 | Current | Workflow config fixes, copilot instructions |
 | 0.2.1-alpha | 2025-12-15 | Superseded | CDN delivery, production URLs |
 | 0.2.0-alpha | 2025-12-15 | Superseded | Modular architecture, 152 tests (90%+ coverage) |

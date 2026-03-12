@@ -41,7 +41,7 @@ export interface Observer {
  * notifier.notify('success', { result: 'data' });
  */
 export class DefaultEventNotifier {
-	observers: Observer[];
+	observers: ReadonlyArray<Observer>;
 
 	/**
 	 * Creates a new DefaultEventNotifier instance
@@ -105,7 +105,7 @@ export class DefaultEventNotifier {
 			if (observer && typeof observer.update === 'function') {
 				try {
 					observer.update(...args);
-				} catch (error) {
+				} catch (error: unknown) {
 					console.error('[ibira.js] Observer threw during notification:', error);
 				}
 			}

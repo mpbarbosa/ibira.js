@@ -25,7 +25,7 @@
  * 
  * @example
  * import { VERSION } from 'ibira.js';
- * console.log(VERSION.toString()); // "0.3.3-alpha"
+ * console.log(VERSION.toString()); // "0.3.4-alpha"
  * console.log(`v${VERSION.major}.${VERSION.minor}.${VERSION.patch}`);
  */
 export const VERSION: {
@@ -37,7 +37,7 @@ export const VERSION: {
 } = {
 	major: 0,
 	minor: 3,
-	patch: 2,
+	patch: 3,
 	prerelease: "alpha", // Indicates unstable development
 	toString(): string {
 		return `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;
