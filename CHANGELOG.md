@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 New Features
 - **ADDED**: HTTP methods beyond GET — `method`, `body`, and `headers` options on `FetcherOptions`; plain-object bodies auto-serialized to JSON with `Content-Type: application/json`; cache key is now `METHOD:url` so GET and POST requests cache independently
 - **ADDED**: Node.js ≥18 dual support — `jest.node.config.mjs` confirms all 200 tests pass in both browser (jsdom) and Node.js environments; `npm run test:node` script added
+- **ADDED**: TypeScript source migration — all `src/**/*.js` converted to strict-mode `.ts`; `tsconfig.json` (ES2022, strict, declaration); ts-jest replaces Babel for source transformation; native TypeScript interfaces (`FetcherOptions`, `FetchResult`, `CacheEntry`, `Observer`, `CacheOperation`, `FetchEvent`, `FetchMeta`) exported from `dist/index.d.ts`
+- **ADDED**: CJS + ESM dual build via tsup — `dist/index.js` (CJS), `dist/index.mjs` (ESM), `dist/index.d.ts` (types); `exports` field in `package.json` for proper Node.js/bundler resolution; `npm run build` script; `prepublishOnly` runs validate + test + build
 
 ---
 

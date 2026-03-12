@@ -2,7 +2,19 @@
   "name": "ibira.js",
   "version": "0.3.1-alpha",
   "description": "A JavaScript library for fetching and caching API data with observer pattern support",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=18.0.0"
   },
@@ -12,9 +24,10 @@
     "test:coverage": "jest --coverage",
     "test:verbose": "jest --verbose",
     "test:node": "jest --config jest.node.config.mjs",
-    "build": "tsc",
+    "build": "tsup",
     "validate": "npx tsc --noEmit",
     "test:all": "npm run validate && npm test",
+    "prepublishOnly": "npm run validate && npm test && npm run build",
     "lint": "eslint src/ __tests__/"
   },
   "jest": {
@@ -23,7 +36,12 @@
       "^.+\\.ts$": "ts-jest",
       "^.+\\.js$": "babel-jest"
     },
-    "moduleFileExtensions": ["ts", "js", "json", "node"],
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json",
+      "node"
+    ],
     "moduleNameMapper": {
       "^(.*)\\.js$": "$1"
     },
@@ -76,6 +94,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "ts-jest": "^29.4.6",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
 }

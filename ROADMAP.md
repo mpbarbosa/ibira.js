@@ -85,9 +85,9 @@ all three. Prioritising TypeScript migration and Node.js support makes that nich
   Node.js support by adding `"engines": { "node": ">=18" }` and a second jest config:
   `jest.browser.config.js` (`testEnvironment: jsdom`) and `jest.node.config.js`
   (`testEnvironment: node`); all 152 tests expected to pass unmodified in both environments
-- [ ] **npm publication** — register package on npmjs.com; add GitHub Actions publish workflow
+- [x] **npm publication** — register package on npmjs.com; add GitHub Actions publish workflow
   triggered on version tags; update install instructions
-- [ ] **CJS + ESM dual build** — emit both `dist/index.cjs` and `dist/index.mjs` for maximum
+- [x] **CJS + ESM dual build** — emit both `dist/index.cjs` and `dist/index.mjs` for maximum
   compatibility; add `exports` field to `package.json` with `"."` and `"./cache"` sub-paths
 - [x] **HTTP methods beyond GET** — `POST`, `PUT`, `PATCH`, `DELETE` support with configurable
   body serialization
