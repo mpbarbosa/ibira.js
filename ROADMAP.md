@@ -36,14 +36,14 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 
 Low-priority housekeeping items that improve contributor experience without changing library behaviour.
 
-- [ ] **Share `.vscode/settings.json`** — unignore via `.gitignore` exception (`!.vscode/settings.json`)
+- [x] **Share `.vscode/settings.json`** — unignore via `.gitignore` exception (`!.vscode/settings.json`)
   so contributors automatically get the project's cSpell word list and any future editor settings;
   add `.vscode/extensions.json` recommending ESLint and cSpell extensions
-- [ ] **`.ai_workflow/` README** — add `.ai_workflow/README.md` documenting the purpose of the
+- [x] **`.ai_workflow/` README** — add `.ai_workflow/README.md` documenting the purpose of the
   AI workflow automation directory and explaining that its contents are tooling artifacts (not
   library code) so contributors know to leave it alone
 - [ ] **Version consistency automation** — add a pre-commit hook or `npm run version:check` script
-  that asserts `package.json`, `src/config/version.js`, and `.workflow-config.yaml` all agree on
+  that asserts `package.json`, `src/config/version.ts`, and `.workflow-config.yaml` all agree on
   the current version, preventing silent drift like the `0.2.2-alpha` / `0.3.0-alpha` mismatch
 - [ ] **Test suite refactoring** — extract repeated setup (cache factories, URL constants, mock
   observers) to shared helpers; convert parallel edge-case tests to `it.each` parameterised tables;
@@ -110,12 +110,12 @@ Goal: let consumers customise the request/response pipeline.
 Goal: production-ready, semantically stable public API.
 
 - [ ] All `v0.x` features finalised and documented
-- [ ] Full TypeScript strict-mode compatibility
+- [x] Full TypeScript strict-mode compatibility
 - [ ] 95%+ test coverage across all metrics
 - [ ] Performance benchmarks published in `docs/`
 - [ ] `MIGRATION.md` updated for any breaking changes from alpha
 - [ ] `SECURITY.md` and responsible-disclosure process
-- [ ] Automated npm publish via GitHub Actions on tagged releases
+- [x] Automated npm publish via GitHub Actions on tagged releases
 
 ---
 
