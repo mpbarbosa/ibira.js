@@ -931,4 +931,165 @@ describe('IbiraAPIFetcher', () => {
             expect(result2).toEqual(mockData);
         });
     });
+
+    describe('v0.3.x — validateStatus option', () => {
+        test('should accept 2xx by default', async () => {
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                status: 201,
+                json: jest.fn().mockResolvedValue(mockData)
+            });
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl);
+            const data = await f.fetchData();
+            expect(data).toEqual(mockData);
+        });
+
+        test('should reject non-2xx by default', async () => {
+            fetch.mockResolvedValueOnce({
+                ok: false,
+                status: 404,
+                json: jest.fn().mockResolvedValue({})
+            });
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl);
+            await expect(f.fetchData()).rejects.toThrow('HTTP error! status: 404');
+        });
+
+        test('should accept custom validateStatus returning true', async () => {
+            fetch.mockResolvedValueOnce({
+                ok: false,
+                status: 404,
+                json: jest.fn().mockResolvedValue({ notFound: true })
+            });
+            const f = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                validateStatus: (status) => status === 404
+            });
+            const data = await f.fetchData();
+            expect(data).toEqual({ notFound: true });
+        });
+
+        test('should reject when custom validateStatus returns false', async () => {
+            fetch.mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                json: jest.fn().mockResolvedValue(mockData)
+            });
+            const f = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                validateStatus: () => false
+            });
+            await expect(f.fetchData()).rejects.toThrow('HTTP error! status: 200');
+        });
+
+        test('validateStatus is stored on the instance', () => {
+            const customValidate = (status) => status < 500;
+            const f = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                validateStatus: customValidate
+            });
+            expect(f.validateStatus).toBe(customValidate);
+        });
+
+        test('default validateStatus returns true for 200-299', () => {
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier });
+            expect(f.validateStatus(200)).toBe(true);
+            expect(f.validateStatus(204)).toBe(true);
+            expect(f.validateStatus(299)).toBe(true);
+            expect(f.validateStatus(300)).toBe(false);
+            expect(f.validateStatus(400)).toBe(false);
+            expect(f.validateStatus(500)).toBe(false);
+        });
+    });
+
+    describe('v0.3.x — AbortController / signal support', () => {
+        test('fetchData should accept a signal and abort the request', async () => {
+            const controller = new AbortController();
+            controller.abort(); // abort immediately
+
+            fetch.mockImplementation((_url, opts) => {
+                if (opts.signal && opts.signal.aborted) {
+                    const err = new DOMException('Aborted', 'AbortError');
+                    return Promise.reject(err);
+                }
+                return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    json: jest.fn().mockResolvedValue(mockData)
+                });
+            });
+
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl);
+            await expect(f.fetchData(null, controller.signal)).rejects.toThrow();
+        });
+
+        test('fetchDataPure should forward signal to network request', async () => {
+            const controller = new AbortController();
+            controller.abort();
+
+            fetch.mockImplementation((_url, opts) => {
+                if (opts.signal && opts.signal.aborted) {
+                    return Promise.reject(new DOMException('Aborted', 'AbortError'));
+                }
+                return Promise.resolve({ ok: true, status: 200, json: async () => mockData });
+            });
+
+            const f = IbiraAPIFetcher.withoutCache(testUrl);
+            const result = await f.fetchDataPure(new Map(), Date.now(), null, controller.signal);
+            expect(result.success).toBe(false);
+        });
+
+        test('should complete normally when signal is not aborted', async () => {
+            const controller = new AbortController();
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl);
+            const data = await f.fetchData(null, controller.signal);
+            expect(data).toEqual(mockData);
+        });
+    });
+
+    describe('v0.3.x — Coverage: withoutCache and pure noCache function bodies', () => {
+        test('withoutCache noCache methods are callable and return correct stubs', async () => {
+            const f = IbiraAPIFetcher.withoutCache(testUrl);
+            // Directly exercise each stub on the internal noCache object
+            expect(f.cache.has('x')).toBe(false);
+            expect(f.cache.get('x')).toBeNull();
+            expect(f.cache.set('x', 1)).toBeUndefined();
+            expect(f.cache.delete('x')).toBe(false);
+            expect(f.cache.clear()).toBeUndefined();
+            expect(f.cache.entries()).toEqual([]);
+        });
+
+        test('pure factory noCache methods are callable and return correct stubs', () => {
+            const f = IbiraAPIFetcher.pure(testUrl);
+            expect(f.cache.has('x')).toBe(false);
+            expect(f.cache.get('x')).toBeNull();
+            expect(f.cache.set('x', 1)).toBeUndefined();
+            expect(f.cache.delete('x')).toBe(false);
+            expect(f.cache.clear()).toBeUndefined();
+            expect(f.cache.entries()).toEqual([]);
+        });
+
+        test('withoutEvents noCache methods are callable', () => {
+            const f = IbiraAPIFetcher.withoutEvents(testUrl);
+            // eventNotifier stubs
+            expect(f.eventNotifier.subscriberCount).toBe(0);
+            f.eventNotifier.subscribe({});
+            f.eventNotifier.unsubscribe({});
+            f.eventNotifier.notify('test', {});
+            f.eventNotifier.clear();
+        });
+    });
+
+    describe('v0.3.x — Coverage: _isRetryableError non-matching error', () => {
+        test('should return false for generic non-retryable errors', () => {
+            const genericError = new Error('Something completely unrelated');
+            expect(fetcher._isRetryableError(genericError)).toBe(false);
+        });
+
+        test('should return false for HTTP error without status match', () => {
+            const malformedError = new Error('HTTP error! status: xyz');
+            // 'xyz' won't parseInt to a valid number, statusMatch will be null-ish
+            // Actually the regex /status: (\d+)/ won't match 'xyz', so statusMatch is null
+            expect(fetcher._isRetryableError(malformedError)).toBe(false);
+        });
+    });
 });

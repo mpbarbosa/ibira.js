@@ -440,4 +440,112 @@ describe('IbiraAPIFetchManager', () => {
 			expect(expiredKeys).not.toContain('valid');
 		});
 	});
+
+	describe('v0.3.x — Coverage: _enforceCacheSizeLimit eviction', () => {
+		it('should evict oldest entries when globalCache exceeds maxSize', () => {
+			const smallManager = new IbiraAPIFetchManager({ maxCacheSize: 3 });
+			const now = Date.now();
+
+			// Fill beyond maxSize
+			smallManager.globalCache.set('k1', { data: 1, timestamp: now - 400, expiresAt: now + 60000 });
+			smallManager.globalCache.set('k2', { data: 2, timestamp: now - 300, expiresAt: now + 60000 });
+			smallManager.globalCache.set('k3', { data: 3, timestamp: now - 200, expiresAt: now + 60000 });
+			smallManager.globalCache.set('k4', { data: 4, timestamp: now - 100, expiresAt: now + 60000 });
+
+			expect(smallManager.globalCache.size).toBe(4);
+			smallManager._enforceCacheSizeLimit();
+
+			expect(smallManager.globalCache.size).toBe(3);
+			// k1 was oldest — should have been evicted
+			expect(smallManager.globalCache.has('k1')).toBe(false);
+			expect(smallManager.globalCache.has('k4')).toBe(true);
+
+			smallManager.destroy();
+		});
+
+		it('should not evict when cache is within maxSize', () => {
+			const now = Date.now();
+			manager.globalCache.set('k1', { data: 1, timestamp: now, expiresAt: now + 60000 });
+			const before = manager.globalCache.size;
+			manager._enforceCacheSizeLimit();
+			expect(manager.globalCache.size).toBe(before);
+		});
+	});
+
+	describe('v0.3.x — Coverage: _performPeriodicCleanup with expired entries', () => {
+		it('should remove expired entries during cleanup', () => {
+			const now = Date.now();
+			manager.globalCache.set('fresh', { data: 1, timestamp: now, expiresAt: now + 60000 });
+			manager.globalCache.set('stale', { data: 2, timestamp: now - 9000, expiresAt: now - 1000 });
+
+			manager.triggerCleanup();
+
+			expect(manager.globalCache.has('stale')).toBe(false);
+			expect(manager.globalCache.has('fresh')).toBe(true);
+		});
+	});
+
+	describe('v0.3.x — Coverage: getCachedData expired entry removal', () => {
+		it('should remove an expired entry and return null', () => {
+			const url = 'https://api.example.com/expired';
+			const now = Date.now();
+
+			// Pre-populate globalCache with an expired entry via getFetcher + manual insert
+			const f = manager.getFetcher(url);
+			const cacheKey = f.getCacheKey();
+			manager.globalCache.set(cacheKey, {
+				data: { stale: true },
+				timestamp: now - 9999,
+				expiresAt: now - 1  // already expired
+			});
+
+			expect(manager.globalCache.has(cacheKey)).toBe(true);
+			const result = manager.getCachedData(url);
+			expect(result).toBeNull();
+			expect(manager.globalCache.has(cacheKey)).toBe(false);
+		});
+	});
+
+	describe('v0.3.x — Coverage: setRetryConfigForUrl both branches', () => {
+		it('should update retry config for an existing fetcher', () => {
+			const url = 'https://api.example.com/data';
+			manager.getFetcher(url); // ensure fetcher exists
+
+			manager.setRetryConfigForUrl(url, {
+				maxRetries: 7,
+				retryDelay: 500,
+				retryMultiplier: 3,
+				retryableStatusCodes: [500, 503]
+			});
+
+			const updated = manager.getFetcher(url);
+			expect(updated.maxRetries).toBe(7);
+			expect(updated.retryDelay).toBe(500);
+			expect(updated.retryMultiplier).toBe(3);
+			expect(updated.retryableStatusCodes).toEqual([500, 503]);
+		});
+
+		it('should create a new fetcher with retry config when URL not yet registered', () => {
+			const url = 'https://api.example.com/new-url';
+			expect(manager.fetchers.has(url)).toBe(false);
+
+			manager.setRetryConfigForUrl(url, { maxRetries: 10 });
+
+			expect(manager.fetchers.has(url)).toBe(true);
+			const f = manager.getFetcher(url);
+			expect(f.maxRetries).toBe(10);
+		});
+
+		it('should preserve existing config fields not explicitly overridden', () => {
+			const url = 'https://api.example.com/partial';
+			manager.getFetcher(url);
+
+			manager.setRetryConfigForUrl(url, { maxRetries: 9 });
+
+			const f = manager.getFetcher(url);
+			expect(f.maxRetries).toBe(9);
+			// retryDelay should still be the default
+			expect(f.retryDelay).toBe(manager.defaultRetryDelay);
+		});
+	});
 });

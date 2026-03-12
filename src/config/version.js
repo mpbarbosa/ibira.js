@@ -2,7 +2,7 @@
  * @fileoverview Semantic versioning configuration for ibira.js
  * @module config/version
  * @license MIT
- * @copyright 2025 Marcelo Pereira Barbosa
+ * @copyright 2026 Marcelo Pereira Barbosa
  * @see {@link https://semver.org/|Semantic Versioning 2.0.0}
  */
 
@@ -25,13 +25,13 @@
  * 
  * @example
  * import { VERSION } from 'ibira.js';
- * console.log(VERSION.toString()); // "0.2.1-alpha"
+ * console.log(VERSION.toString()); // "0.3.0-alpha"
  * console.log(`v${VERSION.major}.${VERSION.minor}.${VERSION.patch}`);
  */
 export const VERSION = {
 	major: 0,
-	minor: 2,
-	patch: 1,
+	minor: 3,
+	patch: 0,
 	prerelease: "alpha", // Indicates unstable development
 	toString: function () {
 		return `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;

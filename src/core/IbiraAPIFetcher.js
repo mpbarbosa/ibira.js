@@ -5,7 +5,6 @@
  * @copyright 2025 Marcelo Pereira Barbosa
  */
 
-import { DefaultCache } from '../utils/DefaultCache.js';
 import { DefaultEventNotifier } from '../utils/DefaultEventNotifier.js';
 
 /**
@@ -31,6 +30,7 @@ import { DefaultEventNotifier } from '../utils/DefaultEventNotifier.js';
  * @property {number} [maxCacheSize=100] - Maximum number of cache entries
  * @property {number} [cacheExpiration=300000] - Cache expiration time in milliseconds (default: 5 minutes)
  * @property {Object} [cache] - Cache instance (must implement Map-like interface)
+ * @property {Function} [validateStatus] - Function `(status: number) => boolean` that determines whether an HTTP status is successful. Defaults to `status >= 200 && status < 300`.
  */
 
 /**
@@ -323,6 +323,8 @@ export class IbiraAPIFetcher {
 		this.retryMultiplier = options.retryMultiplier || 2; // Exponential backoff multiplier
 		// ✅ IMMUTABLE: Create frozen copy of retryable status codes array for deep immutability
 		this.retryableStatusCodes = Object.freeze([...(options.retryableStatusCodes || [408, 429, 500, 502, 503, 504])]); // HTTP status codes that should trigger retries
+		// Custom HTTP success predicate — defaults to the standard 2xx range
+		this.validateStatus = options.validateStatus || ((status) => status >= 200 && status < 300);
 		
 		// ✅ IMMUTABLE: Deep freeze the entire instance for maximum referential transparency
 		// This prevents any external code from modifying the fetcher's properties
@@ -500,12 +502,23 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @private
 	 * @param {AbortController} abortController - Controller for request cancellation
+	 * @param {AbortSignal} [externalSignal] - Optional external signal for consumer-level cancellation
 	 * @returns {Promise<any>} Promise that resolves to the fetched data
 	 */
-	async _performSingleRequest(abortController) {
-		// Create fetch options with timeout
+	async _performSingleRequest(abortController, externalSignal = null) {
+		// Combine the internal timeout signal with an optional external cancellation signal
+		const signal = abortController.signal;
+		if (externalSignal) {
+			// If the external signal is already aborted, abort immediately
+			if (externalSignal.aborted) {
+				abortController.abort();
+			} else {
+				externalSignal.addEventListener('abort', () => abortController.abort(), { once: true });
+			}
+		}
+
 		const fetchOptions = {
-			signal: abortController.signal
+			signal
 		};
 
 		// Set up timeout
@@ -520,8 +533,8 @@ export class IbiraAPIFetcher {
 			// Clear timeout on successful response
 			clearTimeout(timeoutId);
 
-			// Check if HTTP request was successful (status 200-299)
-			if (!response.ok) {
+			// Check if HTTP request was successful using the configured validateStatus predicate
+			if (!this.validateStatus(response.status)) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 
@@ -582,6 +595,7 @@ export class IbiraAPIFetcher {
 	 * @param {Map} currentCacheState - Current cache state (not mutated)
 	 * @param {number} [currentTime] - Current timestamp for deterministic behavior
 	 * @param {Function} [networkProvider] - Pure network function for testing
+	 * @param {AbortSignal} [signal] - Optional external AbortSignal for consumer-level cancellation
 	 * @returns {Promise<FetchResult>} Pure result object describing what should happen
 	 * 
 	 * @example
@@ -598,8 +612,14 @@ export class IbiraAPIFetcher {
 	 * //   events: [{ type: 'loading-start', payload: {...} }],
 	 * //   newCacheState: Map {...}
 	 * // }
+	 * 
+	 * @example
+	 * // With external AbortSignal
+	 * const controller = new AbortController();
+	 * setTimeout(() => controller.abort(), 2000);
+	 * const result = await fetcher.fetchDataPure(new Map(), Date.now(), null, controller.signal);
 	 */
-	async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider = null) {
+	async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider = null, signal = null) {
 		const cacheKey = this.getCacheKey();
 		
 		// Pure function to get expired keys without mutations
@@ -647,7 +667,7 @@ export class IbiraAPIFetcher {
 		
 		try {
 			// Use injected network provider for purity, or real fetch for practical use
-			const networkFn = networkProvider || (() => this._performSingleRequest(new AbortController()));
+			const networkFn = networkProvider || (() => this._performSingleRequest(new AbortController(), signal));
 			const data = await networkFn();
 			
 			// Create new cache entry (pure)
@@ -754,6 +774,7 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @async
 	 * @param {Object} [cacheOverride] - Optional cache instance to use instead of the default
+	 * @param {AbortSignal} [signal] - Optional AbortSignal for consumer-level request cancellation
 	 * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
 	 * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are thrown directly
 	 * 
@@ -764,16 +785,22 @@ export class IbiraAPIFetcher {
 	 * console.log(data); // Retrieved data
 	 * 
 	 * @example
+	 * // Cancel an in-flight request
+	 * const controller = new AbortController();
+	 * setTimeout(() => controller.abort(), 1000);
+	 * const data = await fetcher.fetchData(null, controller.signal);
+	 * 
+	 * @example
 	 * // Pure functional testing
 	 * const mockNetwork = () => Promise.resolve({ test: 'data' });
 	 * const result = await fetcher.fetchDataPure(new Map(), Date.now(), mockNetwork);
 	 * // Test result without side effects
 	 */
-	async fetchData(cacheOverride = null) {
+	async fetchData(cacheOverride = null, signal = null) {
 		const activeCache = cacheOverride || this.cache;
 		
-		// Use the pure core function
-		const result = await this.fetchDataPure(activeCache);
+		// Use the pure core function, forwarding the optional cancellation signal
+		const result = await this.fetchDataPure(activeCache, Date.now(), null, signal);
 		
 		// Apply side effects based on pure computation
 		this._applySideEffects(result, activeCache);

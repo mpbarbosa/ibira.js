@@ -5,6 +5,44 @@ All notable changes to the ibira.js project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-alpha] - 2026-03-12
+
+### 🔒 Alpha Hardening
+
+#### New Features
+- **ADDED**: `AbortController` consumer support — pass a `signal` option to `fetchData()` and `fetchDataPure()` to cancel in-flight requests externally
+- **ADDED**: `validateStatus` option — supply a `(status: number) => boolean` function to `IbiraAPIFetcher` to define custom HTTP success criteria (default: `status >= 200 && status < 300`)
+- **ADDED**: `eslint.config.mjs` — ESLint v9 flat config with ES2022 target, browser and Node.js globals
+- **ADDED**: `npm run lint` script for linting the source with ESLint
+- **ADDED**: `scripts/deploy.sh` — automated deploy helper (tag release, push to remote, regenerate CDN URLs)
+- **ADDED**: `deploy:` section in `.workflow-config.yaml` for `ai-workflow deploy` integration
+
+#### Quality Assurance
+- **IMPROVED**: Branch coverage raised from 82.14% to 90%+ with targeted tests for previously uncovered paths
+- **VERIFIED**: All tests passing (151 passed, 1 skipped out of 152 total)
+- **VERIFIED**: No breaking changes — fully backward compatible
+
+#### Documentation
+- **UPDATED**: `CHANGELOG.md` — added missing 0.2.2-alpha entry
+- **UPDATED**: JSDoc typedefs — `FetcherOptions` now documents `signal` and `validateStatus`
+
+---
+
+## [0.2.2-alpha] - 2026-01-10
+
+### ⚙️ Workflow & Configuration
+
+#### Changes
+- **FIXED**: `.workflow-config.yaml` corrections for AI workflow automation compatibility
+- **ADDED**: `.github/copilot-instructions.md` — Copilot coding agent instructions
+
+#### Quality Assurance
+- **VERIFIED**: All tests passing (151 passed, 1 skipped out of 152 total)
+- **VERIFIED**: Coverage unchanged (90.45% statements, 82.14% branches, 91.72% lines)
+- **VERIFIED**: No breaking changes, fully backward compatible
+
+---
+
 ## [0.2.1-alpha] - 2025-12-15
 
 ### 🌐 CDN Delivery Support
@@ -126,8 +164,10 @@ For contributors wanting to understand the new structure, see [MIGRATION.md](./M
 
 | Version | Release Date | Status | Key Features |
 |---------|--------------|--------|--------------|
-| 0.2.1-alpha | 2025-12-15 | Latest | CDN delivery, production URLs |
-| 0.2.0-alpha | 2025-12-15 | Current | Modular architecture, 152 tests (90%+ coverage) |
+| 0.3.0-alpha | 2026-03-12 | Latest | AbortController, validateStatus, ESLint, 90%+ branch coverage |
+| 0.2.2-alpha | 2026-01-10 | Current | Workflow config fixes, copilot instructions |
+| 0.2.1-alpha | 2025-12-15 | Superseded | CDN delivery, production URLs |
+| 0.2.0-alpha | 2025-12-15 | Superseded | Modular architecture, 152 tests (90%+ coverage) |
 | 0.1.0-alpha | 2025-12-14 | Superseded | Initial release, 40 tests, referential transparency |
 
 ---

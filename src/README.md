@@ -30,7 +30,9 @@ Helper classes and utility functions:
 - **DefaultEventNotifier**: Observer pattern implementation for event handling
 
 ### Config (`/config`)
+
 Configuration and constants:
+
 - **version**: Semantic versioning information
 
 ## Import Examples

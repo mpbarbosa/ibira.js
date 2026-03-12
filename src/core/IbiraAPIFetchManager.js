@@ -566,10 +566,10 @@ export class IbiraAPIFetchManager {
 	 * });
 	 */
 	setRetryConfig(retryConfig = {}) {
-		if (retryConfig.maxRetries !== undefined) this.defaultMaxRetries = retryConfig.maxRetries;
-		if (retryConfig.retryDelay !== undefined) this.defaultRetryDelay = retryConfig.retryDelay;
-		if (retryConfig.retryMultiplier !== undefined) this.defaultRetryMultiplier = retryConfig.retryMultiplier;
-		if (retryConfig.retryableStatusCodes) this.defaultRetryableStatusCodes = retryConfig.retryableStatusCodes;
+		if (retryConfig.maxRetries !== undefined) { this.defaultMaxRetries = retryConfig.maxRetries; }
+		if (retryConfig.retryDelay !== undefined) { this.defaultRetryDelay = retryConfig.retryDelay; }
+		if (retryConfig.retryMultiplier !== undefined) { this.defaultRetryMultiplier = retryConfig.retryMultiplier; }
+		if (retryConfig.retryableStatusCodes) { this.defaultRetryableStatusCodes = retryConfig.retryableStatusCodes; }
 	}
 
 	/**
