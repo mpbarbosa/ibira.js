@@ -41,7 +41,7 @@ Error: Cannot find module 'ibira.js'
    ```javascript
    // ✅ Correct
    import { IbiraAPIFetcher } from 'ibira.js';
-   
+
    // ❌ Incorrect
    import { IbiraAPIFetcher } from './ibira.js';
    ```
@@ -92,11 +92,11 @@ ReferenceError: fetch is not defined
    ```bash
    npm install node-fetch
    ```
-   
+
    ```javascript
    import fetch from 'node-fetch';
    global.fetch = fetch;
-   
+
    import { IbiraAPIFetcher } from 'ibira.js';
    ```
 
@@ -104,7 +104,7 @@ ReferenceError: fetch is not defined
    ```bash
    npm install undici
    ```
-   
+
    ```javascript
    import { fetch } from 'undici';
    global.fetch = fetch;
@@ -156,7 +156,7 @@ async function loadFetcher() {
 
 **Symptoms:**
 ```
-Access to fetch at 'https://api.example.com' from origin 'http://localhost:3000' 
+Access to fetch at 'https://api.example.com' from origin 'http://localhost:3000'
 has been blocked by CORS policy
 ```
 
@@ -267,7 +267,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 2. **Check cache hasn't expired:**
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache({ 
+     cache: new DefaultCache({
        expiration: 600000  // 10 minutes
      }),
      eventNotifier: new DefaultEventNotifier()
@@ -279,7 +279,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
    // ❌ These are different URLs (different cache keys)
    fetcher1 = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');
    fetcher2 = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users?v=1');
-   
+
    // ✅ Same URL = same cache key
    const url = 'https://api.example.com/users';
    fetcher1 = IbiraAPIFetcher.withDefaultCache(url);
@@ -289,7 +289,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 4. **Check cache size limit:**
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache({ 
+     cache: new DefaultCache({
        maxSize: 100  // Increase if needed
      }),
      eventNotifier: new DefaultEventNotifier()
@@ -310,7 +310,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 2. **Reduce cache TTL:**
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache({ 
+     cache: new DefaultCache({
        expiration: 60000  // 1 minute
      }),
      eventNotifier: new DefaultEventNotifier()
@@ -380,12 +380,12 @@ try {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
         console.error('Network error - check connection');
     }
-    
+
     // HTTP errors
     else if (error.message.includes('HTTP error! status:')) {
         const match = error.message.match(/status: (\d+)/);
         const status = match ? parseInt(match[1]) : 0;
-        
+
         if (status === 401) {
             console.error('Unauthorized - refresh token');
         } else if (status === 404) {
@@ -394,12 +394,12 @@ try {
             console.error('Server error - retry later');
         }
     }
-    
+
     // Timeout errors
     else if (error.name === 'AbortError') {
         console.error('Request timeout - try increasing timeout');
     }
-    
+
     // Unknown errors
     else {
         console.error('Unknown error:', error);
@@ -436,7 +436,7 @@ try {
 
 1. **Reduce cache size:**
    ```javascript
-   const cache = new DefaultCache({ 
+   const cache = new DefaultCache({
      maxSize: 20,  // Lower limit
      expiration: 180000  // 3 minutes
    });
@@ -485,7 +485,7 @@ const results = await manager.fetchAll();
        console.log(event, data);
      }
    };
-   
+
    eventNotifier.subscribe(observer);  // ✅ Don't forget this
    ```
 
@@ -497,7 +497,7 @@ const results = await manager.fetchAll();
        console.log(event, data);
      }
    };
-   
+
    // ❌ Incorrect - typo in method name
    const observer = {
      updated(event, data) {
@@ -510,7 +510,7 @@ const results = await manager.fetchAll();
    ```javascript
    const eventNotifier = new DefaultEventNotifier();
    eventNotifier.subscribe(observer);
-   
+
    // ✅ Pass eventNotifier to fetcher
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache(),
@@ -607,7 +607,7 @@ const fetcher = new IbiraAPIFetcher(url, {
 
 ```javascript
 const cache = new DefaultCache();
-const fetcher = new IbiraAPIFetcher(url, { 
+const fetcher = new IbiraAPIFetcher(url, {
   cache,
   eventNotifier: new DefaultEventNotifier()
 });

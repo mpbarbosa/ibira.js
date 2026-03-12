@@ -1,8 +1,8 @@
 # Node.js API Pattern Documentation for ibira.js
 
-**Document Version:** 1.0.0  
-**Date:** December 15, 2025  
-**Project:** ibira.js v0.2.1-alpha  
+**Document Version:** 1.0.0
+**Date:** December 15, 2025
+**Project:** ibira.js v0.2.1-alpha
 
 ---
 
@@ -364,8 +364,8 @@ export class DefaultCache {
 ```javascript
 import { DefaultCache } from 'ibira.js';
 
-const cache = new DefaultCache({ 
-  maxSize: 100, 
+const cache = new DefaultCache({
+  maxSize: 100,
   expiration: 600000  // 10 minutes
 });
 
@@ -526,7 +526,7 @@ class DefaultEventNotifier {
   subscribe(observer) {
     this.observers = [...this.observers, observer];
   }
-  
+
   notify(...args) {
     this.observers.forEach(observer => {
       observer.update(...args);
@@ -597,7 +597,7 @@ async fetchDataPure(cacheState, currentTime, networkProvider) {
 async fetchData() {
   const result = await this.fetchDataPure(this.cache);
   this._applySideEffects(result, this.cache);
-  
+
   if (result.success) return result.data;
   else throw result.error;
 }
@@ -1003,9 +1003,9 @@ try {
 import { IbiraAPIFetcher, DefaultCache } from 'ibira.js';
 
 // Single shared cache
-const sharedCache = new DefaultCache({ 
+const sharedCache = new DefaultCache({
   maxSize: 500,
-  expiration: 600000 
+  expiration: 600000
 });
 
 // Multiple fetchers sharing the cache
@@ -1231,7 +1231,7 @@ New configuration?       → src/config/
 
 /**
  * NewFeature - Description
- * 
+ *
  * @class NewFeature
  * @since 0.3.0
  */
@@ -1239,7 +1239,7 @@ export class NewFeature {
   constructor(options = {}) {
     // Implementation
   }
-  
+
   // Methods...
 }
 ```
@@ -1342,19 +1342,19 @@ describe('IbiraAPIFetcher', () => {
       expect(fetcher.cache).toBeDefined();
     });
   });
-  
+
   describe('fetchData', () => {
     test('returns data from API', async () => {
-      global.fetch = jest.fn(() => 
+      global.fetch = jest.fn(() =>
         Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ data: 'test' })
         })
       );
-      
+
       const fetcher = IbiraAPIFetcher.withDefaultCache(url);
       const data = await fetcher.fetchData();
-      
+
       expect(data).toEqual({ data: 'test' });
     });
   });
@@ -1367,12 +1367,12 @@ describe('IbiraAPIFetcher', () => {
 describe('Integration Tests', () => {
   test('manager coordinates multiple fetchers', async () => {
     const manager = new IbiraAPIFetchManager();
-    
+
     const results = await manager.fetchMultiple([
       'https://api.example.com/users',
       'https://api.example.com/posts'
     ]);
-    
+
     expect(results).toHaveLength(2);
     expect(manager.getStats().activeFetchers).toBe(2);
   });
@@ -1388,11 +1388,11 @@ describe('Pure Functions', () => {
     const cache = new Map();
     const timestamp = 1000000;
     const mockNetwork = () => Promise.resolve({ data: 'test' });
-    
+
     // Call twice with same inputs
     const result1 = await fetcher.fetchDataPure(cache, timestamp, mockNetwork);
     const result2 = await fetcher.fetchDataPure(cache, timestamp, mockNetwork);
-    
+
     // Should produce same structure
     expect(result1.meta.timestamp).toBe(result2.meta.timestamp);
   });
@@ -1419,7 +1419,7 @@ Target coverage:
 #### Mock Network
 
 ```javascript
-global.fetch = jest.fn(() => 
+global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
     json: () => Promise.resolve({ data: 'test' })
@@ -1476,6 +1476,6 @@ The Node.js API pattern provides ibira.js with a scalable, maintainable, and pro
 
 ---
 
-**Document Maintained By**: ibira.js Core Team  
-**Last Updated**: December 15, 2025  
+**Document Maintained By**: ibira.js Core Team
+**Last Updated**: December 15, 2025
 **Version**: 1.0.0

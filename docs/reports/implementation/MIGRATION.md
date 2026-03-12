@@ -56,11 +56,11 @@ import { DefaultCache, DefaultEventNotifier, VERSION } from 'ibira.js';
 
 ## Benefits
 
-✅ **Better Organization**: Related code grouped logically  
-✅ **Easier Testing**: Isolated modules are easier to test  
-✅ **Improved Maintainability**: Smaller files are easier to understand  
-✅ **Better IDE Support**: Clearer module boundaries improve autocomplete  
-✅ **Scalability**: Easy to add new features without bloating files  
+✅ **Better Organization**: Related code grouped logically
+✅ **Easier Testing**: Isolated modules are easier to test
+✅ **Improved Maintainability**: Smaller files are easier to understand
+✅ **Better IDE Support**: Clearer module boundaries improve autocomplete
+✅ **Scalability**: Easy to add new features without bloating files
 
 ## Testing
 

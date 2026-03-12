@@ -40,7 +40,7 @@ The IbiraAPIFetcher employs a **dual-layer architecture** that separates pure fu
 
 **Key Methods**:
 - `fetchDataPure()` - Main pure computation
-- `_getExpiredCacheKeys()` - Pure cache analysis  
+- `_getExpiredCacheKeys()` - Pure cache analysis
 - `_applyCacheSizeLimitsPure()` - Pure cache sizing
 - `_calculateCacheEvictions()` - Pure eviction calculation
 
@@ -71,7 +71,7 @@ const cache = new Map();
 cache.maxSize = 100;
 cache.expiration = 300000;
 
-// Event notifier dependency  
+// Event notifier dependency
 const eventNotifier = new DefaultEventNotifier();
 
 // Create instance with dependencies
@@ -252,5 +252,5 @@ Tags a release, pushes to remote, and regenerates CDN URLs. Runs tests automatic
 
 ---
 
-*Architecture designed for referential transparency, testability, and maintainability*  
+*Architecture designed for referential transparency, testability, and maintainability*
 *IbiraAPIFetcher v0.3.0-alpha*

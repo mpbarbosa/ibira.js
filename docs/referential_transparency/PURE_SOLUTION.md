@@ -12,7 +12,7 @@ The IbiraAPIFetcher now achieves **true referential transparency** through a dua
 ### ✅ **What Makes It Pure:**
 
 - **Zero side effects** - No external state mutations in pure core
-- **Deterministic** - Same inputs always produce same outputs  
+- **Deterministic** - Same inputs always produce same outputs
 - **Immutable results** - All returned objects are immutable
 - **Composable** - Results can be combined and transformed
 - **Testable** - All dependencies can be mocked
@@ -38,7 +38,7 @@ if (result.success) {
     // Update external state based on pure result
     cacheState = result.newCacheState;
     console.log('Data:', result.data);
-    
+
     // Handle events externally
     result.events.forEach(event => {
         console.log('Event:', event.type, event.payload);
@@ -209,7 +209,7 @@ const data = await fetcher.fetchData(); // Uses pure core internally
 ## 🎉 **Achieved Benefits**
 
 1. **🔬 Perfect Testability** - Mock all dependencies
-2. **🎯 100% Determinism** - Predictable behavior 
+2. **🎯 100% Determinism** - Predictable behavior
 3. **🚀 Zero Side Effects** - Pure functional core
 4. **🧩 Full Composability** - Combine and transform results
 5. **⏰ Time Travel** - Replay at any timestamp

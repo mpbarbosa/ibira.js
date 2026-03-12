@@ -1,7 +1,7 @@
 # Scripts Reference Guide
 
-**Version:** 0.2.1-alpha  
-**Last Updated:** December 31, 2025  
+**Version:** 0.2.1-alpha
+**Last Updated:** December 31, 2025
 **Purpose:** Centralized reference for all scripts in the ibira.js project
 
 ---
@@ -28,9 +28,9 @@ All NPM scripts are defined in `package.json` and can be run with `npm run <scri
 ### Testing Scripts
 
 #### `npm test`
-**Command:** `jest`  
-**Purpose:** Run all tests once  
-**Output:** Test results with pass/fail summary  
+**Command:** `jest`
+**Purpose:** Run all tests once
+**Output:** Test results with pass/fail summary
 **Exit Code:** 0 (success), 1 (failure)
 
 ```bash
@@ -53,9 +53,9 @@ npm test
 ---
 
 #### `npm run test:watch`
-**Command:** `jest --watch`  
-**Purpose:** Run tests in watch mode with file monitoring  
-**Output:** Interactive test runner  
+**Command:** `jest --watch`
+**Purpose:** Run tests in watch mode with file monitoring
+**Output:** Interactive test runner
 **Exit Code:** Manual exit only (Ctrl+C)
 
 ```bash
@@ -85,9 +85,9 @@ npm run test:watch
 ---
 
 #### `npm run test:coverage`
-**Command:** `jest --coverage`  
-**Purpose:** Run tests and generate coverage report  
-**Output:** Coverage percentages + HTML report  
+**Command:** `jest --coverage`
+**Purpose:** Run tests and generate coverage report
+**Output:** Coverage percentages + HTML report
 **Exit Code:** 0 (success), 1 (failure or coverage below threshold)
 
 ```bash
@@ -122,9 +122,9 @@ npm run test:coverage
 ---
 
 #### `npm run test:verbose`
-**Command:** `jest --verbose`  
-**Purpose:** Run tests with detailed output  
-**Output:** Individual test names and execution times  
+**Command:** `jest --verbose`
+**Purpose:** Run tests with detailed output
+**Output:** Individual test names and execution times
 **Exit Code:** 0 (success), 1 (failure)
 
 ```bash
@@ -148,9 +148,9 @@ npm run test:verbose
 ---
 
 #### `npm run validate`
-**Command:** `node -c src/index.js`  
-**Purpose:** Validate JavaScript syntax without running tests  
-**Output:** Silent on success, error on syntax issues  
+**Command:** `node -c src/index.js`
+**Purpose:** Validate JavaScript syntax without running tests
+**Output:** Silent on success, error on syntax issues
 **Exit Code:** 0 (valid syntax), 1 (syntax error)
 
 ```bash
@@ -179,9 +179,9 @@ npm run validate
 ---
 
 #### `npm run test:all`
-**Command:** `npm run validate && npm test`  
-**Purpose:** Validate syntax then run all tests  
-**Output:** Combined validation and test output  
+**Command:** `npm run validate && npm test`
+**Purpose:** Validate syntax then run all tests
+**Output:** Combined validation and test output
 **Exit Code:** 0 (all pass), 1 (any failure)
 
 ```bash
@@ -214,9 +214,9 @@ Scripts located in the repository root for development and testing assistance.
 
 ### test-runner.js
 
-**Type:** Node.js utility script  
-**Purpose:** Display test commands and test suite information  
-**Executable:** Yes (`#!/usr/bin/env node`)  
+**Type:** Node.js utility script
+**Purpose:** Display test commands and test suite information
+**Executable:** Yes (`#!/usr/bin/env node`)
 **Permissions:** `-rwxrwxr-x` (775)
 
 **Usage:**
@@ -251,9 +251,9 @@ node test-runner.js
 
 ### test_pure_fetcher.js
 
-**Type:** Node.js demonstration script  
-**Purpose:** Interactive demonstration of referential transparency  
-**Executable:** Yes (`#!/usr/bin/env node`)  
+**Type:** Node.js demonstration script
+**Purpose:** Interactive demonstration of referential transparency
+**Executable:** Yes (`#!/usr/bin/env node`)
 **Permissions:** `-rwxrwxr-x` (775)
 
 **Usage:**
@@ -296,9 +296,9 @@ Bash scripts for automation and tooling.
 
 ### cdn-delivery.sh
 
-**Type:** Bash shell script  
-**Purpose:** Generate CDN URLs for jsDelivr distribution  
-**Executable:** Yes (`#!/bin/bash`)  
+**Type:** Bash shell script
+**Purpose:** Generate CDN URLs for jsDelivr distribution
+**Executable:** Yes (`#!/bin/bash`)
 **Permissions:** `-rwxrwxr-x` (775)
 
 **Prerequisites:**
@@ -541,7 +541,7 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x, 18.x, 20.x]
-    
+
     steps:
     - uses: actions/checkout@v3
     - name: Setup Node.js
@@ -670,6 +670,6 @@ This document should be updated when:
 
 ---
 
-**Version:** 0.2.1-alpha  
-**Last Updated:** December 31, 2025  
+**Version:** 0.2.1-alpha
+**Last Updated:** December 31, 2025
 **Maintained By:** ibira.js Contributors

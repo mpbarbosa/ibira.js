@@ -26,7 +26,7 @@ try {
     const user = await fetcher.fetchData();
     console.log(`User: ${user.name} (${user.login})`);
     // Output: User: The Octocat (octocat)
-    
+
     console.log(`Followers: ${user.followers}`);
     // Output: Followers: 9543
 } catch (error) {
@@ -80,7 +80,7 @@ async function updateUser(userId, updates) {
             enableCache: false
         }
     );
-    
+
     try {
         const updatedUser = await fetcher.fetchData();
         console.log('User updated:', updatedUser);
@@ -108,7 +108,7 @@ async function deleteUser(userId) {
             enableCache: false
         }
     );
-    
+
     try {
         await fetcher.fetchData();
         console.log(`User ${userId} deleted successfully`);
@@ -205,12 +205,12 @@ class AuthenticatedAPI {
         this.accessToken = null;
         this.refreshToken = localStorage.getItem('refreshToken');
     }
-    
+
     async getAccessToken() {
         if (this.accessToken) {
             return this.accessToken;
         }
-        
+
         // Refresh token
         const refreshFetcher = IbiraAPIFetcher.withDefaultCache(
             `${this.baseUrl}/auth/refresh`,
@@ -221,12 +221,12 @@ class AuthenticatedAPI {
                 enableCache: false
             }
         );
-        
+
         const result = await refreshFetcher.fetchData();
         this.accessToken = result.accessToken;
         return this.accessToken;
     }
-    
+
     async fetch(endpoint) {
         try {
             const token = await this.getAccessToken();
@@ -239,7 +239,7 @@ class AuthenticatedAPI {
                     }
                 }
             );
-            
+
             return await fetcher.fetchData();
         } catch (error) {
             if (error.message.includes('status: 401')) {
@@ -266,7 +266,7 @@ import { IbiraAPIFetcher } from 'ibira.js';
 
 async function fetchWithErrorHandling(url) {
     const fetcher = IbiraAPIFetcher.withDefaultCache(url);
-    
+
     try {
         const data = await fetcher.fetchData();
         return { success: true, data };
@@ -280,7 +280,7 @@ async function fetchWithErrorHandling(url) {
                 retryable: true
             };
         }
-        
+
         // Timeout errors
         if (error.name === 'AbortError') {
             return {
@@ -290,12 +290,12 @@ async function fetchWithErrorHandling(url) {
                 retryable: true
             };
         }
-        
+
         // HTTP errors
         if (error.message.includes('HTTP error! status:')) {
             const statusMatch = error.message.match(/status: (\d+)/);
             const status = statusMatch ? parseInt(statusMatch[1]) : 0;
-            
+
             switch (status) {
                 case 400:
                     return {
@@ -351,7 +351,7 @@ async function fetchWithErrorHandling(url) {
                     };
             }
         }
-        
+
         // Unknown errors
         return {
             success: false,
@@ -369,7 +369,7 @@ if (result.success) {
     console.log('Data:', result.data);
 } else {
     console.error(`Error (${result.error}):`, result.message);
-    
+
     if (result.retryable) {
         console.log('This error is retryable. You may want to try again.');
     }
@@ -383,25 +383,25 @@ import { IbiraAPIFetcher } from 'ibira.js';
 
 async function fetchWithRetry(url, maxAttempts = 5) {
     let lastError;
-    
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
             const fetcher = IbiraAPIFetcher.withDefaultCache(url);
             const data = await fetcher.fetchData();
-            
+
             if (attempt > 1) {
                 console.log(`✅ Success on attempt ${attempt}`);
             }
-            
+
             return data;
         } catch (error) {
             lastError = error;
-            
+
             // Don't retry on client errors (4xx)
             if (error.message.includes('status: 4')) {
                 throw error;
             }
-            
+
             if (attempt < maxAttempts) {
                 // Exponential backoff: 1s, 2s, 4s, 8s, 16s
                 const delay = Math.pow(2, attempt - 1) * 1000;
@@ -410,7 +410,7 @@ async function fetchWithRetry(url, maxAttempts = 5) {
             }
         }
     }
-    
+
     throw new Error(`Failed after ${maxAttempts} attempts: ${lastError.message}`);
 }
 
@@ -434,7 +434,7 @@ import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 const fetcher = new IbiraAPIFetcher(
     'https://api.example.com/stock-prices',
     {
-        cache: new DefaultCache({ 
+        cache: new DefaultCache({
             expiration: 30000,  // 30 seconds
             maxSize: 100
         }),
@@ -454,7 +454,7 @@ import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 const fetcher = new IbiraAPIFetcher(
     'https://api.example.com/countries',
     {
-        cache: new DefaultCache({ 
+        cache: new DefaultCache({
             expiration: 3600000,  // 1 hour
             maxSize: 50
         }),
@@ -494,15 +494,15 @@ async function fetchWithConditionalCaching(url) {
         cache,
         eventNotifier: new DefaultEventNotifier()
     });
-    
+
     try {
         const data = await fetcher.fetchData();
-        
+
         // If data indicates it's temporary, clear cache immediately
         if (data.temporary === true) {
             cache.clear();
         }
-        
+
         return data;
     } catch (error) {
         throw error;
@@ -518,8 +518,8 @@ async function fetchWithConditionalCaching(url) {
 import { IbiraAPIFetchManager, DefaultCache } from 'ibira.js';
 
 // Create manager with shared cache
-const manager = new IbiraAPIFetchManager({ 
-    cache: new DefaultCache({ maxSize: 100 }) 
+const manager = new IbiraAPIFetchManager({
+    cache: new DefaultCache({ maxSize: 100 })
 });
 
 // Add multiple endpoints
@@ -546,13 +546,13 @@ async function fetchUserWithPosts(userId) {
         `https://api.example.com/users/${userId}`
     );
     const user = await userFetcher.fetchData();
-    
+
     // Step 2: Fetch user's posts (depends on user data)
     const postsFetcher = IbiraAPIFetcher.withDefaultCache(
         `https://api.example.com/users/${user.id}/posts`
     );
     const posts = await postsFetcher.fetchData();
-    
+
     return {
         user,
         posts
@@ -576,17 +576,17 @@ async function getDashboardData() {
         'https://api.example.com/activity',
         'https://api.example.com/settings'
     ];
-    
+
     // Create fetchers for all endpoints
-    const fetchers = endpoints.map(url => 
+    const fetchers = endpoints.map(url =>
         IbiraAPIFetcher.withDefaultCache(url)
     );
-    
+
     // Fetch all in parallel
     const results = await Promise.allSettled(
         fetchers.map(f => f.fetchData())
     );
-    
+
     // Process results
     return {
         profile: results[0].status === 'fulfilled' ? results[0].value : null,
@@ -613,10 +613,10 @@ function useAPI(url) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     useEffect(() => {
         const fetcher = IbiraAPIFetcher.withDefaultCache(url);
-        
+
         fetcher.fetchData()
             .then(result => {
                 setData(result);
@@ -627,17 +627,17 @@ function useAPI(url) {
                 setLoading(false);
             });
     }, [url]);
-    
+
     return { data, loading, error };
 }
 
 // Usage in component
 function UserList() {
     const { data: users, loading, error } = useAPI('https://api.example.com/users');
-    
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
-    
+
     return (
         <ul>
             {users.map(user => (
@@ -659,16 +659,16 @@ function useAPIWithRefresh(url) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [fetcher] = useState(() => IbiraAPIFetcher.withDefaultCache(url));
-    
+
     const fetchData = useCallback(async (forceFresh = false) => {
         setLoading(true);
         setError(null);
-        
+
         try {
             if (forceFresh) {
                 fetcher.clearCache();
             }
-            
+
             const result = await fetcher.fetchData();
             setData(result);
         } catch (err) {
@@ -677,11 +677,11 @@ function useAPIWithRefresh(url) {
             setLoading(false);
         }
     }, [fetcher]);
-    
+
     useEffect(() => {
         fetchData();
     }, [fetchData]);
-    
+
     return { data, loading, error, refresh: () => fetchData(true) };
 }
 
@@ -690,10 +690,10 @@ function UserList() {
     const { data: users, loading, error, refresh } = useAPIWithRefresh(
         'https://api.example.com/users'
     );
-    
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
-    
+
     return (
         <div>
             <button onClick={refresh}>Refresh</button>
@@ -717,16 +717,16 @@ const APIContext = createContext(null);
 
 export function APIProvider({ children }) {
     const [manager] = useState(() => {
-        const m = new IbiraAPIFetchManager({ 
-            cache: new DefaultCache({ maxSize: 100 }) 
+        const m = new IbiraAPIFetchManager({
+            cache: new DefaultCache({ maxSize: 100 })
         });
-        
+
         m.addFetcher('users', 'https://api.example.com/users');
         m.addFetcher('posts', 'https://api.example.com/posts');
-        
+
         return m;
     });
-    
+
     return (
         <APIContext.Provider value={manager}>
             {children}
@@ -754,13 +754,13 @@ function App() {
 function Dashboard() {
     const manager = useAPIManager();
     const [data, setData] = useState(null);
-    
+
     useEffect(() => {
         manager.fetchAll().then(setData);
     }, [manager]);
-    
+
     if (!data) return <div>Loading...</div>;
-    
+
     return (
         <div>
             <h2>Users: {data.users.length}</h2>
@@ -786,7 +786,7 @@ app.get('/api/users', async (req, res) => {
         const fetcher = IbiraAPIFetcher.withDefaultCache(
             'https://external-api.example.com/users'
         );
-        
+
         const users = await fetcher.fetchData();
         res.json(users);
     } catch (error) {
@@ -806,7 +806,7 @@ app.listen(3000, () => {
 import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 
 // Global cache shared across requests
-const globalCache = new DefaultCache({ 
+const globalCache = new DefaultCache({
     maxSize: 500,
     expiration: 600000  // 10 minutes
 });
@@ -819,7 +819,7 @@ async function fetchExternalAPI(endpoint) {
             eventNotifier: new DefaultEventNotifier()
         }
     );
-    
+
     return fetcher.fetchData();
 }
 
@@ -849,7 +849,7 @@ class CircuitBreaker {
         this.state = 'CLOSED';  // CLOSED, OPEN, HALF_OPEN
         this.nextAttempt = Date.now();
     }
-    
+
     async execute(fn) {
         if (this.state === 'OPEN') {
             if (Date.now() < this.nextAttempt) {
@@ -857,7 +857,7 @@ class CircuitBreaker {
             }
             this.state = 'HALF_OPEN';
         }
-        
+
         try {
             const result = await fn();
             this.onSuccess();
@@ -867,15 +867,15 @@ class CircuitBreaker {
             throw error;
         }
     }
-    
+
     onSuccess() {
         this.failureCount = 0;
         this.state = 'CLOSED';
     }
-    
+
     onFailure() {
         this.failureCount++;
-        
+
         if (this.failureCount >= this.threshold) {
             this.state = 'OPEN';
             this.nextAttempt = Date.now() + this.timeout;
@@ -907,23 +907,23 @@ class RateLimiter {
         this.windowMs = windowMs;
         this.requests = [];
     }
-    
+
     async execute(fn) {
         const now = Date.now();
-        
+
         // Remove old requests outside window
         this.requests = this.requests.filter(time => now - time < this.windowMs);
-        
+
         if (this.requests.length >= this.maxRequests) {
             const oldestRequest = this.requests[0];
             const waitTime = this.windowMs - (now - oldestRequest);
-            
+
             console.log(`Rate limit reached. Waiting ${waitTime}ms...`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
-            
+
             return this.execute(fn);
         }
-        
+
         this.requests.push(now);
         return fn();
     }
@@ -951,30 +951,30 @@ class Poller {
             enableCache: false  // Always get fresh data
         });
     }
-    
+
     start(callback) {
         if (this.polling) return;
-        
+
         this.polling = true;
-        
+
         const poll = async () => {
             if (!this.polling) return;
-            
+
             try {
                 const data = await this.fetcher.fetchData();
                 callback(null, data);
             } catch (error) {
                 callback(error, null);
             }
-            
+
             if (this.polling) {
                 this.timer = setTimeout(poll, this.interval);
             }
         };
-        
+
         poll();
     }
-    
+
     stop() {
         this.polling = false;
         if (this.timer) {
@@ -992,9 +992,9 @@ poller.start((error, data) => {
         console.error('Poll failed:', error.message);
         return;
     }
-    
+
     console.log('Status:', data.status);
-    
+
     // Stop polling when condition is met
     if (data.status === 'complete') {
         poller.stop();

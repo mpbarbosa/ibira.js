@@ -82,13 +82,13 @@ const result = await fetcher.fetchDataPure(cacheState, Date.now());
 if (result.success) {
     console.log('Data:', result.data);
     // Output: Data: [{ id: 1, name: 'John' }, ...]
-    
+
     console.log('Cache operations to apply:', result.cacheOperations);
     // Output: Cache operations to apply: [{ type: 'set', key: 'https://...', value: {...} }]
-    
+
     console.log('Events to fire:', result.events);
     // Output: Events to fire: [{ type: 'fetch:success', payload: {...} }]
-    
+
     // Apply side effects manually if needed
     result.cacheOperations.forEach(op => {
         switch (op.type) {
@@ -103,7 +103,7 @@ if (result.success) {
                 break;
         }
     });
-    
+
     // Handle events
     result.events.forEach(event => {
         console.log(`Event: ${event.type}`, event.payload);
@@ -304,7 +304,7 @@ try {
 **Result Object Properties:**
 - `success` (boolean): Whether the operation succeeded
 - `data` (any): Retrieved data (if successful)
-- `error` (Error): Error object (if failed) 
+- `error` (Error): Error object (if failed)
 - `fromCache` (boolean): Whether data came from cache
 - `cacheOperations` (Array): Operations to apply to cache
 - `events` (Array): Events to trigger
@@ -383,7 +383,7 @@ All properties are **immutable** and **frozen** for complete referential transpa
 - `eventNotifier` (Object): Event notification handler
 - `timeout` (number): Request timeout in milliseconds
 - `maxRetries` (number): Maximum retry attempts
-- `retryDelay` (number): Initial retry delay in milliseconds  
+- `retryDelay` (number): Initial retry delay in milliseconds
 - `retryMultiplier` (number): Exponential backoff multiplier
 - `retryableStatusCodes` (Array): HTTP status codes that trigger retries (frozen)
 
@@ -490,7 +490,7 @@ Cache instances should implement the following interface:
     clear(): void,
     size: number,
     entries(): Iterator,
-    
+
     // Cache-specific properties
     maxSize: number,        // Maximum number of entries
     expiration: number      // Expiration time in milliseconds
@@ -557,7 +557,7 @@ Cache operations describe mutations to be applied:
     }
 }
 
-// Delete operation  
+// Delete operation
 {
     type: 'delete',
     key: string
@@ -636,7 +636,7 @@ Cache operations describe mutations to be applied:
     }
 }
 
-// Delete operation  
+// Delete operation
 {
     type: 'delete',
     key: string
@@ -702,11 +702,11 @@ class CustomEventNotifier {
     constructor() {
         this.listeners = new Map();
     }
-    
+
     subscribe(listener) {
         // Implementation
     }
-    
+
     unsubscribe(listener) {
 ---
 
@@ -721,10 +721,10 @@ class CustomCache {
         this.maxSize = options.maxSize || 50;
         this.expiration = options.expiration || 300000;
     }
-    
+
     has(key) { return this.storage.has(key); }
     get(key) { return this.storage.get(key); }
-    set(key, value) { 
+    set(key, value) {
         this.storage.set(key, value);
         this._enforceSizeLimit();
     }
@@ -732,7 +732,7 @@ class CustomCache {
     clear() { this.storage.clear(); }
     get size() { return this.storage.size; }
     entries() { return this.storage.entries(); }
-    
+
     _enforceSizeLimit() {
         // Implementation for LRU eviction
     }
@@ -751,13 +751,13 @@ class CustomEventNotifier {
     constructor() {
         this.listeners = new Map();
     }
-    
+
     subscribe(listener) {
         const id = Symbol();
         this.listeners.set(id, listener);
         return id;
     }
-    
+
     unsubscribe(listener) {
         for (const [id, l] of this.listeners) {
             if (l === listener) {
@@ -766,7 +766,7 @@ class CustomEventNotifier {
             }
         }
     }
-    
+
     notify(event, data) {
         this.listeners.forEach(listener => {
             if (listener && typeof listener.update === 'function') {
@@ -774,7 +774,7 @@ class CustomEventNotifier {
             }
         });
     }
-    
+
     clear() { this.listeners.clear(); }
     get subscriberCount() { return this.listeners.size; }
 }
@@ -795,30 +795,30 @@ describe('IbiraAPIFetcher Pure Functions', () => {
     it('should return deterministic results', async () => {
         const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
         const mockNetwork = () => Promise.resolve({ test: 'data' });
-        
+
         const cacheState = new Map();
         const timestamp = 1640995200000; // Fixed timestamp
-        
+
         const result = await fetcher.fetchDataPure(cacheState, timestamp, mockNetwork);
-        
+
         expect(result.success).toBe(true);
         expect(result.data).toEqual({ test: 'data' });
         expect(result.fromCache).toBe(false);
         expect(result.meta.timestamp).toBe(timestamp);
     });
-    
+
     it('should use cache when available', async () => {
         const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
-        
+
         const cacheState = new Map();
         cacheState.set('https://api.example.com/data', {
             data: { cached: 'data' },
             timestamp: 1640995200000,
             expiresAt: 1640995500000
         });
-        
+
         const result = await fetcher.fetchDataPure(cacheState, 1640995300000);
-        
+
         expect(result.success).toBe(true);
         expect(result.data).toEqual({ cached: 'data' });
         expect(result.fromCache).toBe(true);
@@ -857,7 +857,7 @@ const usersFetcher = IbiraAPIFetcher.withExternalCache(
 );
 
 const postsFetcher = IbiraAPIFetcher.withExternalCache(
-    'https://api.example.com/posts', 
+    'https://api.example.com/posts',
     sharedCache
 );
 
@@ -880,7 +880,7 @@ The fetcher can throw the following types of errors:
 - **`TypeError`**: Network connectivity issues
 - **`AbortError`**: Request timeout or cancellation
 
-#### HTTP Errors  
+#### HTTP Errors
 - **`Error`**: HTTP status errors (4xx, 5xx responses)
 - Message format: `"HTTP error! status: {statusCode}"`
 
@@ -891,7 +891,7 @@ The fetcher can throw the following types of errors:
 
 Retries are automatically attempted for:
 - Network errors (no response received)
-- Timeout errors  
+- Timeout errors
 - Specific HTTP status codes (configurable)
 
 **Default Retryable Status Codes:**
@@ -1082,13 +1082,13 @@ describe('API fetching', () => {
     test('should handle successful response', async () => {
         const mockData = { id: 1, name: 'Test' };
         const mockNetwork = async () => mockData;
-        
+
         const result = await fetcher.fetchDataPure(
             new Map(),
             Date.now(),
             mockNetwork
         );
-        
+
         expect(result.success).toBe(true);
         expect(result.data).toEqual(mockData);
         expect(result.fromCache).toBe(false);
@@ -1148,8 +1148,8 @@ Coordinate multiple API endpoints with a shared cache for optimal performance:
 import { IbiraAPIFetchManager, DefaultCache } from 'ibira.js';
 
 // Create a shared cache for multiple fetchers
-const sharedCache = new DefaultCache({ 
-    maxSize: 100, 
+const sharedCache = new DefaultCache({
+    maxSize: 100,
     expiration: 600000 // 10 minutes
 });
 
@@ -1203,7 +1203,7 @@ const productionFetcher = new IbiraAPIFetcher(
 // Exponential backoff retry pattern
 async function fetchWithExponentialBackoff(fetcher, maxAttempts = 5) {
     let lastError;
-    
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
             const data = await fetcher.fetchData();
@@ -1211,7 +1211,7 @@ async function fetchWithExponentialBackoff(fetcher, maxAttempts = 5) {
             return data;
         } catch (error) {
             lastError = error;
-            
+
             if (attempt < maxAttempts) {
                 // Exponential backoff: 1s, 2s, 4s, 8s, 16s
                 const delay = Math.pow(2, attempt - 1) * 1000;
@@ -1220,7 +1220,7 @@ async function fetchWithExponentialBackoff(fetcher, maxAttempts = 5) {
             }
         }
     }
-    
+
     throw new Error(`Failed after ${maxAttempts} attempts: ${lastError.message}`);
 }
 
@@ -1260,38 +1260,38 @@ async function fetchWithStatusHandling() {
             // Fallback to cached data or offline mode
             return handleOfflineMode();
         }
-        
+
         // HTTP errors - parse status code
         if (error.message.includes('HTTP error! status:')) {
             const statusMatch = error.message.match(/status: (\d+)/);
             const statusCode = statusMatch ? parseInt(statusMatch[1]) : 0;
-            
+
             switch (statusCode) {
                 case 400:
                     console.error('❌ Bad Request: Invalid parameters');
                     // Log for debugging, notify user of invalid input
                     return handleBadRequest(error);
-                    
+
                 case 401:
                     console.error('🔒 Unauthorized: Token expired or invalid');
                     // Redirect to login, refresh token
                     return handleAuthError();
-                    
+
                 case 403:
                     console.error('🚫 Forbidden: Insufficient permissions');
                     // Show access denied message
                     return handleForbidden();
-                    
+
                 case 404:
                     console.error('🔍 Not Found: Resource doesn\'t exist');
                     // Show "not found" UI
                     return handleNotFound();
-                    
+
                 case 429:
                     console.error('⏱️ Rate Limited: Too many requests');
                     // Implement exponential backoff
                     return handleRateLimit(error);
-                    
+
                 case 500:
                 case 502:
                 case 503:
@@ -1299,20 +1299,20 @@ async function fetchWithStatusHandling() {
                     console.error('🔧 Server Error: Backend issue');
                     // Retry with backoff, show maintenance message
                     return handleServerError(statusCode, error);
-                    
+
                 default:
                     console.error(`⚠️ Unexpected Status ${statusCode}:`, error.message);
                     return handleUnexpectedError(error);
             }
         }
-        
+
         // Timeout errors
         if (error.name === 'AbortError') {
             console.error('⏰ Request Timeout: Server took too long to respond');
             // Retry or notify user
             return handleTimeout(error);
         }
-        
+
         // Unknown errors
         console.error('❓ Unknown Error:', error);
         return handleUnknownError(error);
@@ -1398,13 +1398,13 @@ class APILogger {
     update(event, data) {
         const timestamp = new Date().toISOString();
         console.log(`[${timestamp}] ${event}:`, data);
-        
+
         // Send to analytics service
         if (event === 'fetch:error') {
             this.logErrorToService(data);
         }
     }
-    
+
     logErrorToService(error) {
         // Implementation for error tracking service
         console.log('📊 Logging error to analytics:', error.message);
@@ -1417,25 +1417,25 @@ class UIUpdater {
         this.loadingElement = loadingElement;
         this.errorElement = errorElement;
     }
-    
+
     update(event, data) {
         switch (event) {
             case 'fetch:start':
                 this.loadingElement.style.display = 'block';
                 this.errorElement.style.display = 'none';
                 break;
-                
+
             case 'fetch:success':
                 this.loadingElement.style.display = 'none';
                 // Update UI with data
                 break;
-                
+
             case 'fetch:error':
                 this.loadingElement.style.display = 'none';
                 this.errorElement.textContent = data.message;
                 this.errorElement.style.display = 'block';
                 break;
-                
+
             case 'cache:hit':
                 console.log('✨ Data loaded from cache');
                 break;
@@ -1490,10 +1490,10 @@ class AdaptiveFetcher {
         this.fetcher = null;
         this.updateFetcher();
     }
-    
+
     updateFetcher() {
         const config = this.getConfigForNetworkQuality();
-        
+
         this.fetcher = new IbiraAPIFetcher(
             this.baseUrl,
             {
@@ -1505,7 +1505,7 @@ class AdaptiveFetcher {
             }
         );
     }
-    
+
     getConfigForNetworkQuality() {
         switch (this.networkQuality) {
             case 'good':
@@ -1515,7 +1515,7 @@ class AdaptiveFetcher {
                     retryDelay: 1000,
                     timeout: 5000
                 };
-                
+
             case 'moderate':
                 return {
                     cache: { maxSize: 100, expiration: 600000 }, // 10 min
@@ -1523,7 +1523,7 @@ class AdaptiveFetcher {
                     retryDelay: 2000,
                     timeout: 10000
                 };
-                
+
             case 'poor':
                 return {
                     cache: { maxSize: 150, expiration: 1800000 }, // 30 min
@@ -1531,12 +1531,12 @@ class AdaptiveFetcher {
                     retryDelay: 3000,
                     timeout: 15000
                 };
-                
+
             default:
                 return this.getConfigForNetworkQuality(); // Default to good
         }
     }
-    
+
     setNetworkQuality(quality) {
         if (this.networkQuality !== quality) {
             console.log(`📶 Network quality changed: ${this.networkQuality} → ${quality}`);
@@ -1544,7 +1544,7 @@ class AdaptiveFetcher {
             this.updateFetcher();
         }
     }
-    
+
     async fetchData() {
         return this.fetcher.fetchData();
     }
@@ -1556,10 +1556,10 @@ const adaptiveFetcher = new AdaptiveFetcher('https://api.example.com/data');
 // Monitor network conditions (using Network Information API)
 if ('connection' in navigator) {
     const connection = navigator.connection;
-    
+
     function updateNetworkQuality() {
         const effectiveType = connection.effectiveType;
-        
+
         if (effectiveType === '4g') {
             adaptiveFetcher.setNetworkQuality('good');
         } else if (effectiveType === '3g') {
@@ -1568,7 +1568,7 @@ if ('connection' in navigator) {
             adaptiveFetcher.setNetworkQuality('poor');
         }
     }
-    
+
     connection.addEventListener('change', updateNetworkQuality);
     updateNetworkQuality(); // Initial check
 }
@@ -1594,5 +1594,5 @@ MIT License
 
 ---
 
-**IbiraAPIFetcher v0.2.1-alpha**  
+**IbiraAPIFetcher v0.2.1-alpha**
 *Achieving perfect referential transparency in JavaScript API fetching*

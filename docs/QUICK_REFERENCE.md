@@ -341,5 +341,5 @@ await fetcher.fetchData();     // Then fetch
 
 ---
 
-**Last Updated**: December 15, 2025  
+**Last Updated**: December 15, 2025
 **Version**: 0.2.1-alpha

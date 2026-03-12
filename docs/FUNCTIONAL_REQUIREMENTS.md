@@ -1,10 +1,10 @@
 # Functional Requirements Specification
 
-**Project**: ibira.js  
-**Version**: 0.2.1-alpha  
-**Date**: December 15, 2025  
-**Status**: Active Development  
-**Document Version**: 1.0.0  
+**Project**: ibira.js
+**Version**: 0.2.1-alpha
+**Date**: December 15, 2025
+**Status**: Active Development
+**Document Version**: 1.0.0
 
 ---
 
@@ -168,7 +168,7 @@ ibira.js is a client-side JavaScript library that operates in browser environmen
 
 #### FR-1.1: Basic HTTP GET Requests
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Implemented
 
 **Description**: The system shall fetch data from HTTP endpoints using the Fetch API.
@@ -199,7 +199,7 @@ expect(Array.isArray(users)).toBe(true);
 
 #### FR-1.2: Request Timeout Management
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall abort requests that exceed the configured timeout period.
@@ -228,7 +228,7 @@ await expect(fetcher.fetchData()).rejects.toThrow();
 
 #### FR-2.1: Response Caching
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Implemented
 
 **Description**: The system shall cache API responses to reduce redundant network requests.
@@ -259,7 +259,7 @@ await fetcher.fetchData(); // From cache
 
 #### FR-2.2: Cache Expiration
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Implemented
 
 **Description**: The system shall expire cached data after a configurable time period.
@@ -275,8 +275,8 @@ await fetcher.fetchData(); // From cache
 
 ```javascript
 // Given a fetcher with 1-second cache expiration
-const fetcher = IbiraAPIFetcher.withDefaultCache(url, { 
-  cacheExpiration: 1000 
+const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
+  cacheExpiration: 1000
 });
 
 // When data is fetched, then wait 2 seconds, then fetch again
@@ -291,7 +291,7 @@ await fetcher.fetchData(); // Network call (cache expired)
 
 #### FR-2.3: LRU Cache Eviction
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall remove least recently used entries when cache is full.
@@ -325,7 +325,7 @@ expect(cache.has('item3')).toBe(true);
 
 #### FR-2.4: Cache Strategies
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 **Description**: The system shall provide multiple cache configuration options.
@@ -359,7 +359,7 @@ const f3 = IbiraAPIFetcher.withoutCache(url);
 
 #### FR-3.1: Automatic Retry on Failure
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented (documented but verify in code)
 
 **Description**: The system shall automatically retry failed requests based on error type.
@@ -376,8 +376,8 @@ const f3 = IbiraAPIFetcher.withoutCache(url);
 
 ```javascript
 // Given a fetcher with retry enabled
-const fetcher = IbiraAPIFetcher.withDefaultCache(url, { 
-  maxRetries: 3 
+const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
+  maxRetries: 3
 });
 
 // When request fails with 503 (retryable)
@@ -391,7 +391,7 @@ const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
 
 #### FR-3.2: Exponential Backoff
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall increase delay between retry attempts exponentially.
@@ -417,7 +417,7 @@ const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
 
 #### FR-3.3: Retryable Status Codes
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 **Description**: The system shall identify which HTTP status codes warrant retry attempts.
@@ -436,7 +436,7 @@ const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
 
 #### FR-4.1: Event Subscription
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall allow observers to subscribe to fetch events.
@@ -470,7 +470,7 @@ await fetcher.fetchData();
 
 #### FR-4.2: Event Types
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall emit different event types for different stages.
@@ -495,7 +495,7 @@ await fetcher.fetchData();
 
 #### FR-4.3: Observer Management
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 **Description**: The system shall provide observer lifecycle management.
@@ -528,7 +528,7 @@ expect(fetcher.eventNotifier.subscriberCount).toBe(1);
 
 #### FR-5.1: Multi-Fetcher Management
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall coordinate multiple fetcher instances efficiently.
@@ -557,7 +557,7 @@ expect(f1).not.toBe(f2);
 
 #### FR-5.2: Request Deduplication
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Implemented
 
 **Description**: The system shall prevent duplicate concurrent requests to same endpoint.
@@ -588,7 +588,7 @@ expect(data1).toEqual(data2);
 
 #### FR-5.3: Batch Operations
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 **Description**: The system shall support fetching multiple URLs concurrently.
@@ -616,7 +616,7 @@ expect(results[0].status).toBe('fulfilled');
 
 #### FR-5.4: Lifecycle Management
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall provide proper resource cleanup.
@@ -652,7 +652,7 @@ expect(manager.globalCache.size).toBe(0);
 
 #### FR-6.1: Pure Fetch Operation
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 **Description**: The system shall provide a pure functional fetch method without side effects.
@@ -694,7 +694,7 @@ expect(cacheState.size).toBe(0);
 
 #### FR-6.2: Side Effect Application
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 **Description**: The system shall apply side effects separately from pure computation.
@@ -712,7 +712,7 @@ expect(cacheState.size).toBe(0);
 
 #### FR-7.1: Network Error Handling
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Implemented
 
 **Description**: The system shall gracefully handle network-related errors.
@@ -729,7 +729,7 @@ expect(cacheState.size).toBe(0);
 
 #### FR-7.2: HTTP Error Handling
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Implemented
 
 **Description**: The system shall handle HTTP error status codes appropriately.
@@ -745,7 +745,7 @@ expect(cacheState.size).toBe(0);
 
 #### FR-7.3: JSON Parsing Errors
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall handle invalid JSON responses.
@@ -763,7 +763,7 @@ expect(cacheState.size).toBe(0);
 
 #### FR-8.1: Fetcher Configuration
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall support comprehensive configuration options.
@@ -785,7 +785,7 @@ expect(cacheState.size).toBe(0);
 
 #### FR-8.2: Manager Configuration
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 **Description**: The system shall support manager-level configuration.
@@ -808,7 +808,7 @@ expect(cacheState.size).toBe(0);
 
 #### FR-9.1: Manager Statistics
 
-**Priority**: Low  
+**Priority**: Low
 **Status**: ✅ Implemented
 
 **Description**: The system shall provide runtime statistics.
@@ -845,7 +845,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-1.1: Response Time
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Met
 
 **Requirements**:
@@ -859,7 +859,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-1.2: Memory Usage
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Met
 
 **Requirements**:
@@ -873,7 +873,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-1.3: Scalability
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Met
 
 **Requirements**:
@@ -889,7 +889,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-2.1: Error Recovery
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Met
 
 **Requirements**:
@@ -903,7 +903,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-2.2: Data Integrity
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Met
 
 **Requirements**:
@@ -919,7 +919,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-3.1: Code Quality
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Met
 
 **Requirements**:
@@ -941,7 +941,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-3.2: Documentation
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Met
 
 **Requirements**:
@@ -965,7 +965,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-4.1: Developer Experience
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Met
 
 **Requirements**:
@@ -980,7 +980,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-4.2: Learning Curve
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Met
 
 **Requirements**:
@@ -1003,7 +1003,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-5.1: Browser Support
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Met
 
 **Requirements**:
@@ -1024,7 +1024,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-5.2: Environment Support
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Met
 
 **Requirements**:
@@ -1040,7 +1040,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-6.1: Data Security
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Met
 
 **Requirements**:
@@ -1054,7 +1054,7 @@ expect(cacheState.size).toBe(0);
 
 #### NFR-6.2: Code Security
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Met
 
 **Requirements**:
@@ -1070,8 +1070,8 @@ expect(cacheState.size).toBe(0);
 
 ### UC-1: Simple API Data Fetching
 
-**Actor**: Frontend Developer  
-**Goal**: Fetch data from a REST API  
+**Actor**: Frontend Developer
+**Goal**: Fetch data from a REST API
 **Priority**: Critical
 
 **Preconditions**:
@@ -1110,8 +1110,8 @@ renderUsers(users);
 
 ### UC-2: Cached Data Access
 
-**Actor**: Frontend Developer  
-**Goal**: Avoid redundant API calls using cache  
+**Actor**: Frontend Developer
+**Goal**: Avoid redundant API calls using cache
 **Priority**: High
 
 **Preconditions**:
@@ -1147,8 +1147,8 @@ await fetcher.fetchData(); // From cache (instant)
 
 ### UC-3: Reactive UI Updates
 
-**Actor**: Frontend Developer  
-**Goal**: Update UI automatically when data changes  
+**Actor**: Frontend Developer
+**Goal**: Update UI automatically when data changes
 **Priority**: High
 
 **Preconditions**:
@@ -1191,8 +1191,8 @@ await fetcher.fetchData();
 
 ### UC-4: Multiple Concurrent API Calls
 
-**Actor**: Frontend Developer  
-**Goal**: Fetch data from multiple endpoints efficiently  
+**Actor**: Frontend Developer
+**Goal**: Fetch data from multiple endpoints efficiently
 **Priority**: Medium
 
 **Preconditions**:
@@ -1232,8 +1232,8 @@ const [users, posts, comments] = results;
 
 ### UC-5: Handling Network Failures
 
-**Actor**: Frontend Developer  
-**Goal**: Recover from temporary network issues  
+**Actor**: Frontend Developer
+**Goal**: Recover from temporary network issues
 **Priority**: High
 
 **Preconditions**:
@@ -1284,8 +1284,8 @@ try {
 
 ### UC-6: Testing with Pure Functions
 
-**Actor**: Test Engineer  
-**Goal**: Test fetch logic without side effects  
+**Actor**: Test Engineer
+**Goal**: Test fetch logic without side effects
 **Priority**: Medium
 
 **Preconditions**:
@@ -1315,13 +1315,13 @@ try {
 test('fetchDataPure returns correct result', async () => {
   const fetcher = IbiraAPIFetcher.pure(url);
   const mockNetwork = () => Promise.resolve({ test: 'data' });
-  
+
   const result = await fetcher.fetchDataPure(
     new Map(),
     Date.now(),
     mockNetwork
   );
-  
+
   expect(result.success).toBe(true);
   expect(result.data).toEqual({ test: 'data' });
   expect(result.cacheOperations).toBeDefined();
@@ -1345,7 +1345,7 @@ test('fetchDataPure returns correct result', async () => {
 - Then I receive parsed JSON data
 - And errors are handled gracefully
 
-**Priority**: Critical  
+**Priority**: Critical
 **Status**: ✅ Implemented
 
 ---
@@ -1361,7 +1361,7 @@ test('fetchDataPure returns correct result', async () => {
 - Then data is returned from cache without network request
 - And I can configure cache expiration time
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 ---
@@ -1380,7 +1380,7 @@ test('fetchDataPure returns correct result', async () => {
 - And uses exponential backoff between retries
 - And gives up after max retries
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 ---
@@ -1397,7 +1397,7 @@ test('fetchDataPure returns correct result', async () => {
 - And includes the HTTP status code (if applicable)
 - And includes the URL that failed
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 ---
@@ -1416,7 +1416,7 @@ test('fetchDataPure returns correct result', async () => {
 - And receives success or error event
 - And I can update UI accordingly
 
-**Priority**: High  
+**Priority**: High
 **Status**: ✅ Implemented
 
 ---
@@ -1432,7 +1432,7 @@ test('fetchDataPure returns correct result', async () => {
 - Then it no longer receives events
 - And other observers still work
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 ---
@@ -1451,7 +1451,7 @@ test('fetchDataPure returns correct result', async () => {
 - And duplicate requests are prevented
 - And I can access shared cache
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 ---
@@ -1469,7 +1469,7 @@ test('fetchDataPure returns correct result', async () => {
 - Or no cache
 - Or shared cache
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 ---
@@ -1488,7 +1488,7 @@ test('fetchDataPure returns correct result', async () => {
 - And no external state is mutated
 - And I can inject mock dependencies
 
-**Priority**: Medium  
+**Priority**: Medium
 **Status**: ✅ Implemented
 
 ---
@@ -1547,7 +1547,7 @@ test('fetchDataPure returns correct result', async () => {
 
 ### 9.1 External Dependencies
 
-**Runtime Dependencies**: None  
+**Runtime Dependencies**: None
 **Dev Dependencies**:
 
 - Jest (testing)
@@ -1709,9 +1709,9 @@ For version 1.0.0 release, the following must be met:
 
 ---
 
-**Document Prepared By**: GitHub Copilot CLI  
-**Review Status**: Draft  
-**Approval Status**: Pending  
+**Document Prepared By**: GitHub Copilot CLI
+**Review Status**: Draft
+**Approval Status**: Pending
 **Last Updated**: December 15, 2025
 
 **Next Review Date**: January 15, 2026

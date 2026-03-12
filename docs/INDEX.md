@@ -2,9 +2,9 @@
 
 > **Comprehensive guide to all documentation, guides, and configuration files in the ibira.js repository**
 
-**Version:** 0.2.1-alpha  
-**Status:** ✅ **REFERENTIALLY TRANSPARENT** - Perfect 10/10 Score Achieved  
-**License:** MIT  
+**Version:** 0.2.1-alpha
+**Status:** ✅ **REFERENTIALLY TRANSPARENT** - Perfect 10/10 Score Achieved
+**License:** MIT
 **Achievement:** 🏆 **Perfect Functional Purity**
 
 ---
@@ -33,7 +33,7 @@
 **Score: 10/10** - The first JavaScript API fetching library to achieve perfect referential transparency through:
 
 - ✅ Complete immutability with Object.freeze
-- ✅ Pure functional core with zero side effects  
+- ✅ Pure functional core with zero side effects
 - ✅ Total dependency injection
 - ✅ Deterministic behavior
 - ✅ Isolated side effects in wrapper layer
@@ -65,7 +65,7 @@
 
 **ibira.js** is available via jsDelivr CDN for easy browser integration:
 
-- **Production URL:** `https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.1-alpha/src/index.js`
+- **Production URL:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.0-alpha/dist/index.mjs`
 - **Documentation:** See README.md CDN section or run `./cdn-delivery.sh`
 - **Generated URLs:** Check `cdn-urls.txt` for all available CDN options
 
@@ -103,16 +103,16 @@ ibira.js/
 │   │   └── VERIFICATION_REPORT.md  # Formal mathematical verification
 │   └── TEST_RESULTS.md             # Comprehensive test results and analysis
 ├── src/                            # 🔬 Source code (referentially transparent)
-│   ├── index.js                    # Main entry point exporting all public APIs
+│   ├── index.ts                    # Main entry point exporting all public APIs
 │   ├── core/                       # Core business logic
-│   │   ├── IbiraAPIFetcher.js      # Main fetcher class (10/10 purity)
-│   │   └── IbiraAPIFetchManager.js # Multi-fetcher coordinator
+│   │   ├── IbiraAPIFetcher.ts      # Main fetcher class (10/10 purity)
+│   │   └── IbiraAPIFetchManager.ts # Multi-fetcher coordinator
 │   ├── utils/                      # Utility classes
-│   │   ├── DefaultCache.js         # Default cache implementation
-│   │   └── DefaultEventNotifier.js # Default event system
+│   │   ├── DefaultCache.ts         # Default cache implementation
+│   │   └── DefaultEventNotifier.ts # Default event system
 │   └── config/                     # Configuration
-│       └── version.js              # Version information
-├── __tests__/                      # 🧪 Comprehensive test suite  
+│       └── version.ts              # Version information
+├── __tests__/                      # 🧪 Comprehensive test suite
 │   ├── IbiraAPIFetcher.test.js     # Core fetcher tests (60+ tests)
 │   ├── IbiraAPIFetchManager.test.js # Manager tests
 │   ├── DefaultCache.test.js        # Cache implementation tests
@@ -140,7 +140,7 @@ ibira.js/
 
 | File | Description | Status |
 |------|-------------|--------|
-| [`src/core/IbiraAPIFetcher.js`](../src/core/IbiraAPIFetcher.js) | **Referentially transparent** library with dual-layer architecture | 🏆 **Perfect (10/10)** |
+| [`src/core/IbiraAPIFetcher.ts`](../src/core/IbiraAPIFetcher.ts) | **Referentially transparent** library with dual-layer architecture | 🏆 **Perfect (10/10)** |
 | [`__tests__/IbiraAPIFetcher.test.js`](../__tests__/IbiraAPIFetcher.test.js) | Comprehensive test suite | ✅ **172/172 Passing** |
 
 ### Main Classes
@@ -473,7 +473,7 @@ Maintain high standards through code review and best practices. See [Code Review
 
 ## 📊 Project Status
 
-**Current Version:** 0.2.1-alpha  
+**Current Version:** 0.2.1-alpha
 **Status:** Early Development (Alpha)
 
 ### Development Roadmap
@@ -536,7 +536,7 @@ This index should be updated whenever:
 - Project structure changes
 - Configuration files are added
 
-**Last Updated:** 2025-12-15  
+**Last Updated:** 2025-12-15
 **Maintainer:** Project maintainers
 
 ---
@@ -561,7 +561,7 @@ This index should be updated whenever:
 ### 🌟 What This Means
 
 - **For Developers**: You can now use a mathematically pure API fetcher in production
-- **For JavaScript**: Proves that functional programming can be practical and performant  
+- **For JavaScript**: Proves that functional programming can be practical and performant
 - **For the Industry**: Sets a new standard for library design and referential transparency
 - **For Science**: Demonstrates formal verification of functional programming principles
 

@@ -41,7 +41,7 @@ Yes! You can use it via CDN:
 ```html
 <script type="module">
   import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.2.1-alpha/src/index.js';
-  
+
   const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
   const data = await fetcher.fetchData();
   console.log(data);
@@ -182,7 +182,7 @@ import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 const fetcher = new IbiraAPIFetcher(
     'https://api.example.com/data',
     {
-        cache: new DefaultCache({ 
+        cache: new DefaultCache({
             expiration: 600000  // 10 minutes
         }),
         eventNotifier: new DefaultEventNotifier()
@@ -204,7 +204,7 @@ import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 const fetcher = new IbiraAPIFetcher(
     'https://api.example.com/data',
     {
-        cache: new DefaultCache({ 
+        cache: new DefaultCache({
             maxSize: 100  // Store up to 100 entries
         }),
         eventNotifier: new DefaultEventNotifier()
@@ -221,7 +221,7 @@ class MyCustomCache {
     constructor() {
         this.storage = new Map();
     }
-    
+
     has(key) { return this.storage.has(key); }
     get(key) { return this.storage.get(key); }
     set(key, value) { this.storage.set(key, value); }
@@ -376,8 +376,8 @@ For managing multiple API endpoints:
 ```javascript
 import { IbiraAPIFetchManager, DefaultCache } from 'ibira.js';
 
-const manager = new IbiraAPIFetchManager({ 
-    cache: new DefaultCache() 
+const manager = new IbiraAPIFetchManager({
+    cache: new DefaultCache()
 });
 
 manager.addFetcher('users', 'https://api.example.com/users');
@@ -401,12 +401,12 @@ function UserList() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     useEffect(() => {
         const fetcher = IbiraAPIFetcher.withDefaultCache(
             'https://api.example.com/users'
         );
-        
+
         fetcher.fetchData()
             .then(data => {
                 setUsers(data);
@@ -417,10 +417,10 @@ function UserList() {
                 setLoading(false);
             });
     }, []);
-    
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
-    
+
     return (
         <ul>
             {users.map(user => <li key={user.id}>{user.name}</li>)}

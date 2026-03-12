@@ -407,6 +407,6 @@ For issues with these scripts:
 
 ---
 
-**Version:** 0.2.1-alpha  
-**Last Updated:** December 31, 2025  
+**Version:** 0.2.1-alpha
+**Last Updated:** December 31, 2025
 **Maintained By:** ibira.js Contributors

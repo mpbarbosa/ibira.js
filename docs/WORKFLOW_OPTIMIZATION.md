@@ -1,7 +1,7 @@
 # Adaptive Workflow Optimization
 
-**Version:** 0.2.1-alpha  
-**Last Updated:** December 31, 2025  
+**Version:** 0.2.1-alpha
+**Last Updated:** December 31, 2025
 **Purpose:** Workflow optimization strategies and automation improvements for ibira.js
 
 ---
@@ -108,28 +108,28 @@ cleanup_artifacts() {
         # Find and process old directories
         while IFS= read -r -d '' item; do
             local size=$(du -sh "$item" 2>/dev/null | cut -f1)
-            
+
             if [ "$DRY_RUN" = true ]; then
                 echo "  Would remove: $item ($size)"
             else
                 log "  Removing: $item ($size)"
                 rm -rf "$item"
             fi
-            
+
             total_removed=$((total_removed + 1))
         done < <(find "$dir" -mtime +${RETENTION_DAYS} -type d -print0 2>/dev/null)
 
         # Find and process old files
         while IFS= read -r -d '' item; do
             local size=$(du -sh "$item" 2>/dev/null | cut -f1)
-            
+
             if [ "$DRY_RUN" = true ]; then
                 echo "  Would remove: $item ($size)"
             else
                 log "  Removing: $item ($size)"
                 rm -f "$item"
             fi
-            
+
             total_removed=$((total_removed + 1))
         done < <(find "$dir" -mtime +${RETENTION_DAYS} -type f -name "*.log" -o -name "*.tmp" -print0 2>/dev/null)
     done
@@ -429,7 +429,7 @@ echo "📖 Validating documentation..."
 find docs -name "*.md" -exec grep -Hn "\]\(.*\.md\)" {} \; | while read -r line; do
     file=$(echo "$line" | cut -d: -f1)
     link=$(echo "$line" | grep -oP '\]\(\K[^)]+' | grep "\.md")
-    
+
     if [ ! -f "$link" ] && [ ! -f "docs/$link" ]; then
         echo "❌ Broken link in $file: $link"
         exit 1
@@ -450,13 +450,13 @@ echo "✅ Documentation validation passed"
 # For each markdown file in docs
 find docs -name "*.md" -type f | while read -r file; do
     echo "Generating TOC for $file..."
-    
+
     # Extract headings and generate TOC
     grep -E '^#{1,3} ' "$file" | while read -r heading; do
         level=$(echo "$heading" | grep -oE '^#{1,3}' | wc -c)
         title=$(echo "$heading" | sed 's/^#* //')
         anchor=$(echo "$title" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd '[:alnum:]-')
-        
+
         indent=$(printf ' %.0s' $(seq 1 $((level * 2 - 2))))
         echo "${indent}- [$title](#$anchor)"
     done
@@ -479,27 +479,27 @@ import { IbiraAPIFetcher } from './src/index.js';
 async function measurePerformance() {
     const iterations = 1000;
     const url = 'https://jsonplaceholder.typicode.com/posts/1';
-    
+
     // Warm up
     const fetcher = IbiraAPIFetcher.withDefaultCache(url);
     await fetcher.fetchData();
-    
+
     // Measure cache hits
     const start = performance.now();
     for (let i = 0; i < iterations; i++) {
         await fetcher.fetchData();
     }
     const end = performance.now();
-    
+
     const avgTime = (end - start) / iterations;
     console.log(`Average cache hit time: ${avgTime.toFixed(3)}ms`);
-    
+
     // Set benchmark threshold
     if (avgTime > 1) {
         console.error('❌ Performance regression detected');
         process.exit(1);
     }
-    
+
     console.log('✅ Performance within acceptable range');
 }
 
@@ -641,6 +641,6 @@ Add these to `package.json`:
 
 ---
 
-**Version:** 0.2.1-alpha  
-**Last Updated:** December 31, 2025  
+**Version:** 0.2.1-alpha
+**Last Updated:** December 31, 2025
 **Maintained By:** ibira.js Contributors

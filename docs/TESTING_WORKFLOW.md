@@ -1,6 +1,6 @@
 # Testing Workflow Guide
 
-**Version:** 0.2.1-alpha  
+**Version:** 0.2.1-alpha
 **Last Updated:** December 31, 2025
 
 ---
@@ -74,8 +74,8 @@ npm run test:watch
 ### NPM Test Commands
 
 #### `npm test` - Standard Test Execution
-**Purpose:** Run all tests once  
-**Use Case:** Pre-commit checks, manual verification  
+**Purpose:** Run all tests once
+**Use Case:** Pre-commit checks, manual verification
 **Output:** Pass/fail summary with any failures
 
 ```bash
@@ -90,8 +90,8 @@ npm test
 ```
 
 #### `npm run test:watch` - Watch Mode
-**Purpose:** Automatically re-run tests on file changes  
-**Use Case:** Active development, TDD workflow  
+**Purpose:** Automatically re-run tests on file changes
+**Use Case:** Active development, TDD workflow
 **Features:**
 - Watches for file changes
 - Only re-runs affected tests
@@ -123,8 +123,8 @@ npm run test:watch
 ```
 
 #### `npm run test:coverage` - Coverage Report
-**Purpose:** Generate detailed coverage report  
-**Use Case:** Pre-commit, code review, quality checks  
+**Purpose:** Generate detailed coverage report
+**Use Case:** Pre-commit, code review, quality checks
 **Output:** Coverage percentages + HTML report
 
 ```bash
@@ -157,8 +157,8 @@ xdg-open coverage/lcov-report/index.html  # Linux
 ```
 
 #### `npm run test:verbose` - Detailed Output
-**Purpose:** Show detailed test execution information  
-**Use Case:** Debugging test failures, understanding test flow  
+**Purpose:** Show detailed test execution information
+**Use Case:** Debugging test failures, understanding test flow
 **Output:** Individual test names and execution times
 
 ```bash
@@ -176,22 +176,22 @@ npm run test:verbose
 ```
 
 #### `npm run validate` - Syntax Validation
-**Purpose:** Check JavaScript syntax without running tests  
-**Use Case:** Quick syntax check, pre-commit validation  
+**Purpose:** Check JavaScript syntax without running tests
+**Use Case:** Quick syntax check, pre-commit validation
 **Speed:** Fast (< 1 second)
 
 ```bash
 npm run validate
 
 # Success output: (no output = success)
-# 
+#
 # Error output:
 # SyntaxError: Unexpected token
 ```
 
 #### `npm run test:all` - Complete Validation
-**Purpose:** Validate syntax + run all tests  
-**Use Case:** Pre-commit workflow, CI/CD pipeline  
+**Purpose:** Validate syntax + run all tests
+**Use Case:** Pre-commit workflow, CI/CD pipeline
 **Combines:** `validate` + `test`
 
 ```bash
@@ -209,7 +209,7 @@ npm run test:all
 ### Manual Test Scripts
 
 #### 1. test-runner.js - Test Information Display
-**Purpose:** Display test commands and structure  
+**Purpose:** Display test commands and structure
 **Type:** Informational (doesn't run tests)
 
 ```bash
@@ -224,7 +224,7 @@ npm run test:all
 ```
 
 #### 2. test_pure_fetcher.js - RT Demonstration
-**Purpose:** Manual verification of referential transparency  
+**Purpose:** Manual verification of referential transparency
 **Type:** Interactive demonstration with live results
 
 ```bash
@@ -256,11 +256,11 @@ import { IbiraAPIFetcher } from './src/index.js';
 
 async function testRealAPI() {
   console.log('Testing real API...');
-  
+
   const fetcher = IbiraAPIFetcher.withDefaultCache(
     'https://jsonplaceholder.typicode.com/posts/1'
   );
-  
+
   try {
     const data = await fetcher.fetchData();
     console.log('✅ Success:', data);
@@ -460,37 +460,37 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [16.x, 18.x, 20.x]
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Validate syntax
       run: npm run validate
-    
+
     - name: Run tests
       run: npm test
-    
+
     - name: Generate coverage
       run: npm run test:coverage
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage/lcov.info
         fail_ci_if_error: true
-    
+
     - name: Coverage threshold check
       run: |
         node -e "
@@ -785,7 +785,7 @@ test('should retry on 503 status (temporary server error)', async () => {
   // 503 indicates temporary failure, should retry
   mockFetch.mockRejectedValueOnce(new Error('HTTP error! status: 503'));
   mockFetch.mockResolvedValueOnce({ data: 'success' });
-  
+
   const result = await fetcher.fetchData();
   expect(result).toEqual({ data: 'success' });
   expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -837,6 +837,6 @@ open coverage/lcov-report/index.html         # View HTML report
 
 ---
 
-**Version:** 0.2.1-alpha  
-**Maintained By:** ibira.js Contributors  
+**Version:** 0.2.1-alpha
+**Maintained By:** ibira.js Contributors
 **Last Updated:** December 31, 2025

@@ -262,7 +262,7 @@ Total Source: ~1,382 lines (vs 1,261 lines in monolithic version)
 
 ```javascript
 // Application Code
-import { 
+import {
   IbiraAPIFetcher,        // from core/IbiraAPIFetcher.js
   IbiraAPIFetchManager,   // from core/IbiraAPIFetchManager.js
   DefaultCache,           // from utils/DefaultCache.js
@@ -373,6 +373,6 @@ import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: December 15, 2025  
+**Version**: 1.0.0
+**Last Updated**: December 15, 2025
 **See Also**: [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) for detailed documentation
