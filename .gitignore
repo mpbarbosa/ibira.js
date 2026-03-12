@@ -33,7 +33,10 @@ Thumbs.db
 *.swo
 *.sublime-project
 *.sublime-workspace
+
+# AI workflow automation (tooling artifacts — not library code)
 .ai_workflow/
+src/workflow/
 
 # Logs
 logs/
