@@ -16,15 +16,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ADDED**: `npm run lint` script for linting the source with ESLint
 - **ADDED**: `scripts/deploy.sh` — automated deploy helper (tag release, push to remote, regenerate CDN URLs)
 - **ADDED**: `deploy:` section in `.workflow-config.yaml` for `ai-workflow deploy` integration
+- **ADDED**: `engines` field in `package.json` — formalises Node.js ≥18 minimum requirement
+- **FIXED**: Observer error isolation — `DefaultEventNotifier.notify()` now wraps each subscriber call in try/catch; a throwing observer no longer silently drops notifications to subsequent subscribers
 
 #### Quality Assurance
-- **IMPROVED**: Branch coverage raised from 82.14% to 90%+ with targeted tests for previously uncovered paths
-- **VERIFIED**: All tests passing (151 passed, 1 skipped out of 152 total)
+- **IMPROVED**: Branch coverage raised from 82.14% to 91.75% (IbiraAPIFetcher), 86.95% (IbiraAPIFetchManager) with targeted tests
+- **VERIFIED**: All tests passing (184 passed, 1 skipped, 185 total after post-tag hardening)
 - **VERIFIED**: No breaking changes — fully backward compatible
+
+#### Bug Fixes
+- **FIXED**: `test/config/version.test.js` import path (`'../src/config/version'` → `'../../src/config/version'`) and stale version assertions
+- **FIXED**: `console.error/warn` mocks in `IbiraAPIFetcher.test.js` and `IbiraAPIFetchManager.test.js` converted from direct assignment to `jest.spyOn` for proper teardown
+- **FIXED**: `src/workflow/metrics/` AI tooling artifacts removed from source tree; `src/workflow/` added to `.gitignore`
 
 #### Documentation
 - **UPDATED**: `CHANGELOG.md` — added missing 0.2.2-alpha entry
 - **UPDATED**: JSDoc typedefs — `FetcherOptions` now documents `signal` and `validateStatus`
+- **CREATED**: `CONTRIBUTING.md` — developer setup, code standards, testing, PR flow
+- **CREATED**: `__tests__/README.md` — test naming, mocking patterns, coverage targets
+- **FIXED**: 27 broken cross-references across 12 documentation files
+- **UPDATED**: `README.md` — added `scripts/deploy.sh` documentation; fixed version header
+- **UPDATED**: `docs/ARCHITECTURE.md` — added Automation Scripts section
 
 ---
 

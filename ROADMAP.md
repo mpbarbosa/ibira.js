@@ -1,7 +1,7 @@
 # ibira.js Roadmap
 
 > **Current version:** 0.3.1-alpha — Alpha Hardening  
-> **Status:** Alpha stabilization in progress
+> **Status:** Beta preparation in progress
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
 
@@ -15,26 +15,20 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.0-alpha** | Modular architecture (`core/`, `utils/`, `config/`), 152 tests, 90%+ coverage |
 | **0.2.1-alpha** | jsDelivr CDN delivery, SRI support, CDN URL generator script |
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
+| **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
+| **0.3.1-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
 
 ---
 
-## 🔜 v0.3.x — Alpha Hardening
+## ✅ v0.3.x — Alpha Hardening (complete)
 
-Goal: reach a stable, well-guarded API before beta.
-
-- [ ] **`ai-workflow deploy` integration** — create `scripts/deploy.sh` (tag release, push to remote, regenerate `cdn-urls.txt` via `cdn-delivery.sh`) and add the corresponding `deploy:` section to `.workflow-config.yaml` so `ai-workflow deploy` can invoke it:
-  ```yaml
-  deploy:
-    enabled: true
-    script: scripts/deploy.sh
-    description: "Tag, push, and refresh CDN URLs for ibira.js"
-  ```
-- [ ] **ESLint configuration** — add linting (`eslint.config.mjs`) and `npm run lint` script; no lint tooling currently exists
-- [ ] **Branch coverage to 90%+** — currently at 82%; target matches statement/line coverage levels
-- [ ] **`AbortController` support** — allow consumers to cancel in-flight requests
-- [ ] **`validateStatus` option** — let callers define which HTTP status codes are considered success
-- [ ] **API surface review** — audit and lock public API shape before beta; document any breaking changes
-- [ ] **CHANGELOG for 0.2.2-alpha** — current version is undocumented in CHANGELOG.md
+- [x] **`ai-workflow deploy` integration** — `scripts/deploy.sh` created; `.workflow-config.yaml` updated
+- [x] **ESLint configuration** — `eslint.config.mjs` flat config; `npm run lint` script
+- [x] **Branch coverage to 90%+** — raised from 82% to 91.75% (IbiraAPIFetcher), 86.95% (Manager)
+- [x] **`AbortController` support** — `signal` option on `fetchData()` and `fetchDataPure()`
+- [x] **`validateStatus` option** — `(status: number) => boolean` on `FetcherOptions`
+- [x] **API surface review** — public exports audited; backward-compatible; documented
+- [x] **CHANGELOG for 0.2.2-alpha** — entry added
 
 ---
 
