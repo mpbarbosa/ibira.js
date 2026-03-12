@@ -1,9 +1,33 @@
 # ibira.js
 
-> Biblioteca JavaScript pública com código para operações básicas como fetch em APIs
+> Zero-dependency JavaScript/TypeScript library for API data fetching with LRU caching and observer pattern
 
-**Version:** 0.3.0-alpha  
-**Status:** 🚧 Early Development
+[![npm version](https://badge.fury.io/js/ibira.js.svg)](https://www.npmjs.com/package/ibira.js)
+[![Node.js >=18](https://img.shields.io/node/v/ibira.js.svg)](https://nodejs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**Version:** 0.4.0-alpha  
+**Status:** 🚧 Beta Preparation
+
+---
+
+## 📦 Installation
+
+```bash
+npm install ibira.js
+```
+
+```bash
+yarn add ibira.js
+```
+
+### CDN (browser)
+
+```html
+<script type="module">
+  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js/dist/index.mjs';
+</script>
+```
 
 ---
 
