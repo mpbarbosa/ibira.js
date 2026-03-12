@@ -2,7 +2,7 @@
 
 > Biblioteca JavaScript pública com código para operações básicas como fetch em APIs
 
-**Version:** 0.2.1-alpha  
+**Version:** 0.3.0-alpha  
 **Status:** 🚧 Early Development
 
 ---
@@ -157,6 +157,71 @@ npm run test:all
 - If git not found: `sudo apt-get install git` (Linux) or `brew install git` (macOS)
 - If permission denied: `chmod +x cdn-delivery.sh`
 - If version mismatch: Commit and push latest changes first
+
+#### Deploy Script
+
+**Purpose:** Tag a release, push to remote, and regenerate CDN URLs  
+**Prerequisites:**
+
+- Clean git working tree (no uncommitted changes)
+- Git remote `origin` configured and writable
+- Tests must pass (script runs them automatically before tagging)
+- Node.js and npm available
+
+**Usage:** `./scripts/deploy.sh [version]`
+
+- If `[version]` is omitted the version from `package.json` is used.
+
+**Exit codes:** `0` success · `1` dirty tree · `2` tests failed · `3` tag exists · `4` push failed
+
+```bash
+# Deploy current package.json version
+./scripts/deploy.sh
+
+# Deploy a specific version
+./scripts/deploy.sh 0.3.0-alpha
+# Output: annotated git tag pushed to origin; cdn-urls.txt regenerated
+```
+
+**Troubleshooting:**
+
+- If permission denied: `chmod +x scripts/deploy.sh`
+- If tests fail: fix failing tests before deploying
+- If tag already exists: bump the version in `package.json` first
+
+#### Deploy Script
+
+**Purpose:** Tag a release, push to remote, and regenerate CDN URLs  
+**Prerequisites:**
+
+- Clean git working tree (no uncommitted changes)
+- Git remote `origin` configured and writable
+- Tests must pass (runs automatically before tagging)
+- Node.js and npm available
+
+**Usage:** `./scripts/deploy.sh [version]`
+
+- If `[version]` is omitted the version from `package.json` is used.
+
+**Output:** Annotated git tag pushed to origin; `cdn-urls.txt` regenerated
+
+**Exit codes:**
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success |
+| `1` | Working tree is dirty |
+| `2` | Tests failed |
+| `3` | Tag already exists |
+| `4` | Push to remote failed |
+
+```bash
+# Deploy current package.json version
+./scripts/deploy.sh
+
+# Deploy a specific version
+./scripts/deploy.sh 0.3.0-alpha
+```
 
 ## 📖 Key Resources
 

@@ -221,5 +221,36 @@ const fetcher = IbiraAPIFetcher.withEventCallback(url, customEventHandler);
 
 ---
 
+## Automation Scripts
+
+Two shell scripts handle CDN URL generation and release deployment.
+
+### `cdn-delivery.sh`
+
+Generates jsDelivr CDN URLs for the current version and writes them to `cdn-urls.txt`.
+
+```bash
+./cdn-delivery.sh
+# Output: CDN URLs printed to terminal + cdn-urls.txt updated
+```
+
+### `scripts/deploy.sh`
+
+Tags a release, pushes to remote, and regenerates CDN URLs. Runs tests automatically before tagging — deploy is aborted on failure.
+
+**Prerequisites:** clean working tree, writable `origin` remote, Node.js/npm available.
+
+```bash
+# Deploy current package.json version
+./scripts/deploy.sh
+
+# Deploy a specific version
+./scripts/deploy.sh 0.3.0-alpha
+```
+
+**Exit codes:** `0` success · `1` dirty tree · `2` tests failed · `3` tag exists · `4` push failed
+
+---
+
 *Architecture designed for referential transparency, testability, and maintainability*  
-*IbiraAPIFetcher v0.1.0-alpha*
+*IbiraAPIFetcher v0.3.0-alpha*
