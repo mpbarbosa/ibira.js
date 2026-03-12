@@ -95,12 +95,26 @@ npm run test:coverage
 # Run tests with verbose output
 npm run test:verbose
 
+# Run tests in Node.js environment (verifies server-side compatibility)
+npm run test:node
+
 # Validate JavaScript syntax
 npm run validate
 
 # Validate and run tests
 npm run test:all
 ```
+
+### Environments
+
+ibira.js is isomorphic — it runs in both browser and Node.js ≥18 environments without modification. All tests pass in both runtimes:
+
+| Environment | Command | Status |
+|-------------|---------|--------|
+| Browser (jsdom) | `npm test` | ✅ |
+| Node.js ≥18 | `npm run test:node` | ✅ |
+
+The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `AbortController`) available in both environments.
 
 ### Utility Scripts
 
