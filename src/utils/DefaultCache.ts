@@ -6,10 +6,23 @@
  */
 
 /**
+ * A single entry stored in the cache.
+ */
+export interface CacheEntry {
+	data: unknown;
+	timestamp: number;
+	expiresAt: number;
+}
+
+/**
  * @typedef {Object} CacheOptions
  * @property {number} [maxSize=50] - Maximum number of cache entries
  * @property {number} [expiration=300000] - Cache expiration time in milliseconds (default: 5 minutes)
  */
+export interface CacheOptions {
+	maxSize?: number;
+	expiration?: number;
+}
 
 /**
  * DefaultCache - Map-based cache implementation with expiration and LRU eviction
@@ -34,6 +47,10 @@
  * const value = cache.get('key1');
  */
 export class DefaultCache {
+	storage: Map<string, CacheEntry>;
+	maxSize: number;
+	expiration: number;
+
 	/**
 	 * Creates a new DefaultCache instance
 	 * 
@@ -42,7 +59,7 @@ export class DefaultCache {
 	 * @example
 	 * const cache = new DefaultCache({ maxSize: 200, expiration: 600000 });
 	 */
-	constructor(options = {}) {
+	constructor(options: CacheOptions = {}) {
 		this.storage = new Map();
 		this.maxSize = options.maxSize || 50;
 		this.expiration = options.expiration || 300000; // 5 minutes
@@ -59,7 +76,7 @@ export class DefaultCache {
 	 *   console.log('Key exists');
 	 * }
 	 */
-	has(key) {
+	has(key: string): boolean {
 		return this.storage.has(key);
 	}
 
@@ -67,13 +84,13 @@ export class DefaultCache {
 	 * Retrieves a value from the cache
 	 * 
 	 * @param {string} key - The cache key to retrieve
-	 * @returns {*} The cached value or undefined if not found
+	 * @returns {CacheEntry | undefined} The cached value or undefined if not found
 	 * 
 	 * @example
 	 * const data = cache.get('myKey');
 	 * if (data) console.log('Found:', data);
 	 */
-	get(key) {
+	get(key: string): CacheEntry | undefined {
 		return this.storage.get(key);
 	}
 
@@ -82,12 +99,12 @@ export class DefaultCache {
 	 * Automatically enforces size limits using LRU eviction
 	 * 
 	 * @param {string} key - The cache key
-	 * @param {*} value - The value to cache
+	 * @param {CacheEntry} value - The value to cache
 	 * 
 	 * @example
-	 * cache.set('user:123', { name: 'John', age: 30 });
+	 * cache.set('user:123', { data: { name: 'John' }, timestamp: Date.now(), expiresAt: Date.now() + 300000 });
 	 */
-	set(key, value) {
+	set(key: string, value: CacheEntry): void {
 		this.storage.set(key, value);
 		this._enforceSizeLimit();
 	}
@@ -102,7 +119,7 @@ export class DefaultCache {
 	 * const deleted = cache.delete('myKey');
 	 * console.log(deleted ? 'Deleted' : 'Not found');
 	 */
-	delete(key) {
+	delete(key: string): boolean {
 		return this.storage.delete(key);
 	}
 
@@ -113,7 +130,7 @@ export class DefaultCache {
 	 * cache.clear();
 	 * console.log('Cache cleared, size:', cache.size);
 	 */
-	clear() {
+	clear(): void {
 		this.storage.clear();
 	}
 
@@ -125,21 +142,21 @@ export class DefaultCache {
 	 * @example
 	 * console.log(`Cache has ${cache.size} entries`);
 	 */
-	get size() {
+	get size(): number {
 		return this.storage.size;
 	}
 
 	/**
 	 * Returns an iterator over all cache entries
 	 * 
-	 * @returns {Iterator<Array>} Iterator over [key, value] pairs
+	 * @returns {IterableIterator<[string, CacheEntry]>} Iterator over [key, value] pairs
 	 * 
 	 * @example
 	 * for (const [key, value] of cache.entries()) {
 	 *   console.log(key, value);
 	 * }
 	 */
-	entries() {
+	entries(): IterableIterator<[string, CacheEntry]> {
 		return this.storage.entries();
 	}
 
@@ -149,7 +166,7 @@ export class DefaultCache {
 	 * 
 	 * @private
 	 */
-	_enforceSizeLimit() {
+	private _enforceSizeLimit(): void {
 		if (this.storage.size <= this.maxSize) {
 			return;
 		}

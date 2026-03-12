@@ -9,6 +9,9 @@
  * @typedef {Object} Observer
  * @property {Function} update - Method called with (eventType, payload) when events occur
  */
+export interface Observer {
+	update: (...args: unknown[]) => void;
+}
 
 /**
  * DefaultEventNotifier - Observer pattern implementation for event notifications
@@ -38,6 +41,8 @@
  * notifier.notify('success', { result: 'data' });
  */
 export class DefaultEventNotifier {
+	observers: Observer[];
+
 	/**
 	 * Creates a new DefaultEventNotifier instance
 	 * 
@@ -61,7 +66,7 @@ export class DefaultEventNotifier {
 	 *   }
 	 * });
 	 */
-	subscribe(observer) {
+	subscribe(observer: Observer): void {
 		if (observer) {
 			this.observers = [...this.observers, observer];
 		}
@@ -78,7 +83,7 @@ export class DefaultEventNotifier {
 	 * // Later...
 	 * notifier.unsubscribe(observer);
 	 */
-	unsubscribe(observer) {
+	unsubscribe(observer: Observer): void {
 		this.observers = this.observers.filter((o) => o !== observer);
 	}
 
@@ -95,7 +100,7 @@ export class DefaultEventNotifier {
 	 * // Notify with error
 	 * notifier.notify('error', { error: new Error('Failed') });
 	 */
-	notify(...args) {
+	notify(...args: unknown[]): void {
 		this.observers.forEach((observer) => {
 			if (observer && typeof observer.update === 'function') {
 				try {
@@ -114,7 +119,7 @@ export class DefaultEventNotifier {
 	 * notifier.clear();
 	 * console.log('Subscribers:', notifier.subscriberCount); // 0
 	 */
-	clear() {
+	clear(): void {
 		this.observers = [];
 	}
 
@@ -126,7 +131,7 @@ export class DefaultEventNotifier {
 	 * @example
 	 * console.log(`Active observers: ${notifier.subscriberCount}`);
 	 */
-	get subscriberCount() {
+	get subscriberCount(): number {
 		return this.observers.length;
 	}
 }

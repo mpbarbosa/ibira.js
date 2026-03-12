@@ -6,6 +6,8 @@
  */
 
 import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
+import type { CacheEntry, CacheInterface, FetcherOptions } from './IbiraAPIFetcher.js';
+import type { Observer } from '../utils/DefaultEventNotifier.js';
 
 /**
  * @typedef {Object} ManagerOptions
@@ -17,6 +19,15 @@ import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
  * @property {number} [retryMultiplier=2] - Default exponential backoff multiplier for retries
  * @property {number[]} [retryableStatusCodes=[408, 429, 500, 502, 503, 504]] - Default HTTP status codes that trigger retries
  */
+export interface ManagerOptions {
+	maxCacheSize?: number;
+	cacheExpiration?: number;
+	cleanupInterval?: number;
+	maxRetries?: number;
+	retryDelay?: number;
+	retryMultiplier?: number;
+	retryableStatusCodes?: number[];
+}
 
 /**
  * @typedef {Object} ManagerStats
@@ -29,6 +40,16 @@ import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
  * @property {string} lastCleanup - ISO timestamp of last cleanup
  * @property {number} cacheExpiration - Cache expiration time in milliseconds
  */
+export interface ManagerStats {
+	activeFetchers: number;
+	pendingRequests: number;
+	cacheSize: number;
+	maxCacheSize: number;
+	expiredEntries: number;
+	cacheUtilization: number;
+	lastCleanup: string;
+	cacheExpiration: number;
+}
 
 /**
  * @typedef {Object} RetryConfig
@@ -37,6 +58,13 @@ import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
  * @property {number} [retryMultiplier] - Exponential backoff multiplier
  * @property {number[]} [retryableStatusCodes] - HTTP status codes that should trigger retries
  */
+export interface RetryConfig {
+	maxRetries?: number;
+	retryDelay?: number;
+	retryMultiplier?: number;
+	retryableStatusCodes?: number[];
+	method?: string;
+}
 
 /**
  * IbiraAPIFetchManager - Manages multiple concurrent API fetch operations
@@ -87,7 +115,19 @@ import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
  * manager.destroy();
  */
 export class IbiraAPIFetchManager {
-	
+	fetchers: Map<string, IbiraAPIFetcher>;
+	pendingRequests: Map<string, Promise<unknown>>;
+	globalCache: Map<string, CacheEntry> & { maxSize: number; expiration: number };
+	maxCacheSize: number;
+	cacheExpiration: number;
+	cleanupInterval: number;
+	lastCleanup: number;
+	defaultMaxRetries: number;
+	defaultRetryDelay: number;
+	defaultRetryMultiplier: number;
+	defaultRetryableStatusCodes: number[];
+	cleanupTimer: ReturnType<typeof setInterval> | null;
+
 	/**
 	 * Creates a new IbiraAPIFetchManager instance
 	 * 
@@ -101,10 +141,10 @@ export class IbiraAPIFetchManager {
 	 *   maxRetries: 5
 	 * });
 	 */
-	constructor(options = {}) {
-		this.fetchers = new Map(); // Store fetcher instances by URL
-		this.pendingRequests = new Map(); // Track ongoing requests to prevent duplicates
-		this.globalCache = new Map(); // Shared cache across all fetchers
+	constructor(options: ManagerOptions = {}) {
+		this.fetchers = new Map();
+		this.pendingRequests = new Map();
+		this.globalCache = new Map() as Map<string, CacheEntry> & { maxSize: number; expiration: number };
 		this.maxCacheSize = options.maxCacheSize || 100; // Prevent unbounded cache growth
 		this.cacheExpiration = options.cacheExpiration || 300000; // 5 minutes default cache expiration
 		this.cleanupInterval = options.cleanupInterval || 60000; // 1 minute cleanup interval
@@ -115,6 +155,7 @@ export class IbiraAPIFetchManager {
 		this.defaultRetryDelay = options.retryDelay || 1000;
 		this.defaultRetryMultiplier = options.retryMultiplier || 2;
 		this.defaultRetryableStatusCodes = options.retryableStatusCodes || [408, 429, 500, 502, 503, 504];
+		this.cleanupTimer = null;
 		
 		// Start periodic cleanup
 		this._startPeriodicCleanup();
@@ -141,7 +182,7 @@ export class IbiraAPIFetchManager {
 	 *   maxRetries: 5
 	 * });
 	 */
-	getFetcher(url, options = {}) {
+	getFetcher(url: string, options: FetcherOptions = {}): IbiraAPIFetcher {
 		const method = (options.method || 'GET').toUpperCase();
 		const fetcherKey = `${method}:${url}`;
 		if (!this.fetchers.has(fetcherKey)) {
@@ -165,7 +206,7 @@ export class IbiraAPIFetchManager {
 			this.fetchers.set(fetcherKey, fetcher);
 		}
 		
-		return this.fetchers.get(fetcherKey);
+		return this.fetchers.get(fetcherKey)!;
 	}
 
 	/**
@@ -173,7 +214,7 @@ export class IbiraAPIFetchManager {
 	 * 
 	 * @private
 	 */
-	_startPeriodicCleanup() {
+	private _startPeriodicCleanup(): void {
 		this.cleanupTimer = setInterval(() => {
 			this._performPeriodicCleanup();
 		}, this.cleanupInterval);
@@ -188,7 +229,7 @@ export class IbiraAPIFetchManager {
 	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {string[]} Array of cache keys that have expired
 	 */
-	_getExpiredCacheKeys(cache, currentTime) {
+	private _getExpiredCacheKeys(cache: Map<string, CacheEntry>, currentTime: number): string[] {
 		const expiredKeys = [];
 
 		// Find all expired entries
@@ -206,7 +247,7 @@ export class IbiraAPIFetchManager {
 	 * 
 	 * @private
 	 */
-	_performPeriodicCleanup() {
+	private _performPeriodicCleanup(): void {
 		const now = Date.now();
 		const expiredKeys = this._getExpiredCacheKeys(this.globalCache, now);
 
@@ -225,7 +266,7 @@ export class IbiraAPIFetchManager {
 	 * 
 	 * @private
 	 */
-	_enforceCacheSizeLimit() {
+	private _enforceCacheSizeLimit(): void {
 		if (this.globalCache.size <= this.maxCacheSize) {
 			return;
 		}
@@ -253,7 +294,7 @@ export class IbiraAPIFetchManager {
 	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {Object} Cache entry with data and timestamp
 	 */
-	_createCacheEntry(data, currentTime) {
+	private _createCacheEntry(data: unknown, currentTime: number): CacheEntry {
 		return {
 			data: data,
 			timestamp: currentTime,
@@ -269,8 +310,8 @@ export class IbiraAPIFetchManager {
 	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {boolean} True if the entry is still valid
 	 */
-	_isCacheEntryValid(cacheEntry, currentTime) {
-		return cacheEntry && currentTime < cacheEntry.expiresAt;
+	private _isCacheEntryValid(cacheEntry: CacheEntry | undefined, currentTime: number): boolean {
+		return cacheEntry != null && currentTime < cacheEntry.expiresAt;
 	}
 
 	/**
@@ -302,7 +343,7 @@ export class IbiraAPIFetchManager {
 	 *   console.error('Fetch failed:', error);
 	 * }
 	 */
-	async fetch(url, options = {}) {
+	async fetch(url: string, options: FetcherOptions = {}): Promise<unknown> {
 		const fetcher = this.getFetcher(url, options);
 		const cacheKey = fetcher.getCacheKey();
 
@@ -333,7 +374,7 @@ export class IbiraAPIFetchManager {
 	 * @param {IbiraAPIFetcher} fetcher - The fetcher instance to use
 	 * @returns {Promise<*>} Promise that resolves to the fetched data
 	 */
-	async _executeFetch(fetcher) {
+	private async _executeFetch(fetcher: IbiraAPIFetcher): Promise<unknown> {
 		// ✅ fetchData() now returns data directly, no need to check fetcher.data
 		return await fetcher.fetchData();
 	}
@@ -360,7 +401,7 @@ export class IbiraAPIFetchManager {
 	 *   }
 	 * });
 	 */
-	async fetchMultiple(urls, options = {}) {
+	async fetchMultiple(urls: string[], options: FetcherOptions = {}): Promise<PromiseSettledResult<unknown>[]> {
 		const promises = urls.map(url => this.fetch(url, options));
 		return await Promise.allSettled(promises);
 	}
@@ -379,7 +420,7 @@ export class IbiraAPIFetchManager {
 	 *   }
 	 * });
 	 */
-	subscribe(url, observer) {
+	subscribe(url: string, observer: Observer): void {
 		const fetcher = this.getFetcher(url);
 		fetcher.subscribe(observer);
 	}
@@ -390,10 +431,10 @@ export class IbiraAPIFetchManager {
 	 * @param {string} url - The URL of the fetcher to unsubscribe from
 	 * @param {Object} observer - Observer object to remove
 	 */
-	unsubscribe(url, observer) {
+	unsubscribe(url: string, observer: Observer): void {
 		const fetcherKey = `GET:${url}`;
 		if (this.fetchers.has(fetcherKey)) {
-			this.fetchers.get(fetcherKey).unsubscribe(observer);
+			this.fetchers.get(fetcherKey)!.unsubscribe(observer);
 		}
 	}
 
@@ -408,7 +449,7 @@ export class IbiraAPIFetchManager {
 	 *   console.log('Request in progress...');
 	 * }
 	 */
-	isLoading(url) {
+	isLoading(url: string): boolean {
 		const fetcher = this.getFetcher(url);
 		const cacheKey = fetcher.getCacheKey();
 		return this.pendingRequests.has(cacheKey);
@@ -428,7 +469,7 @@ export class IbiraAPIFetchManager {
 	 *   const fresh = await manager.fetch('https://api.example.com/data');
 	 * }
 	 */
-	getCachedData(url) {
+	getCachedData(url: string): unknown | null {
 		const fetcher = this.getFetcher(url);
 		const cacheKey = fetcher.getCacheKey();
 		const cacheEntry = this.globalCache.get(cacheKey);
@@ -461,7 +502,7 @@ export class IbiraAPIFetchManager {
 	 * // Clear all cache
 	 * manager.clearCache();
 	 */
-	clearCache(url = null) {
+	clearCache(url: string | null = null): void {
 		if (url) {
 			const fetcher = this.getFetcher(url);
 			const cacheKey = fetcher.getCacheKey();
@@ -483,7 +524,7 @@ export class IbiraAPIFetchManager {
 	 *   };
 	 * }, []);
 	 */
-	destroy() {
+	destroy(): void {
 		// Stop periodic cleanup timer
 		if (this.cleanupTimer) {
 			clearInterval(this.cleanupTimer);
@@ -509,7 +550,7 @@ export class IbiraAPIFetchManager {
 	 * const stats = manager.getStats();
 	 * console.log(`Cache: ${stats.cacheSize}/${stats.maxCacheSize} (${stats.cacheUtilization}%)`);
 	 */
-	getStats() {
+	getStats(): ManagerStats {
 		const now = Date.now();
 		const expiredKeys = this._getExpiredCacheKeys(this.globalCache, now);
 		
@@ -533,7 +574,7 @@ export class IbiraAPIFetchManager {
 	 * // Force cleanup before important operation
 	 * manager.triggerCleanup();
 	 */
-	triggerCleanup() {
+	triggerCleanup(): void {
 		this._performPeriodicCleanup();
 	}
 
@@ -546,7 +587,7 @@ export class IbiraAPIFetchManager {
 	 * // Set cache expiration to 10 minutes
 	 * manager.setCacheExpiration(10 * 60 * 1000);
 	 */
-	setCacheExpiration(milliseconds) {
+	setCacheExpiration(milliseconds: number): void {
 		this.cacheExpiration = milliseconds;
 	}
 
@@ -559,7 +600,7 @@ export class IbiraAPIFetchManager {
 	 * // Increase cache size for better performance
 	 * manager.setMaxCacheSize(500);
 	 */
-	setMaxCacheSize(size) {
+	setMaxCacheSize(size: number): void {
 		this.maxCacheSize = size;
 		// Immediately enforce the new limit
 		this._enforceCacheSizeLimit();
@@ -577,7 +618,7 @@ export class IbiraAPIFetchManager {
 	 *   retryMultiplier: 1.5
 	 * });
 	 */
-	setRetryConfig(retryConfig = {}) {
+	setRetryConfig(retryConfig: RetryConfig = {}): void {
 		if (retryConfig.maxRetries !== undefined) { this.defaultMaxRetries = retryConfig.maxRetries; }
 		if (retryConfig.retryDelay !== undefined) { this.defaultRetryDelay = retryConfig.retryDelay; }
 		if (retryConfig.retryMultiplier !== undefined) { this.defaultRetryMultiplier = retryConfig.retryMultiplier; }
@@ -593,7 +634,7 @@ export class IbiraAPIFetchManager {
 	 * const config = manager.getRetryConfig();
 	 * console.log(`Max retries: ${config.maxRetries}`);
 	 */
-	getRetryConfig() {
+	getRetryConfig(): RetryConfig {
 		return {
 			maxRetries: this.defaultMaxRetries,
 			retryDelay: this.defaultRetryDelay,
@@ -617,13 +658,13 @@ export class IbiraAPIFetchManager {
 	 *   retryDelay: 500
 	 * });
 	 */
-	setRetryConfigForUrl(url, retryConfig = {}) {
+	setRetryConfigForUrl(url: string, retryConfig: RetryConfig = {}): void {
 		// ✅ IMMUTABLE: Create new fetcher instance instead of modifying existing one
 		// This respects the frozen nature of IbiraAPIFetcher instances
 		const method = (retryConfig.method || 'GET').toUpperCase();
 		const fetcherKey = `${method}:${url}`;
 		if (this.fetchers.has(fetcherKey)) {
-			const oldFetcher = this.fetchers.get(fetcherKey);
+			const oldFetcher = this.fetchers.get(fetcherKey)!;
 			
 			// Create new options object with updated retry configuration
 			const newOptions = {
@@ -631,7 +672,7 @@ export class IbiraAPIFetchManager {
 				maxRetries: retryConfig.maxRetries !== undefined ? retryConfig.maxRetries : oldFetcher.maxRetries,
 				retryDelay: retryConfig.retryDelay !== undefined ? retryConfig.retryDelay : oldFetcher.retryDelay,
 				retryMultiplier: retryConfig.retryMultiplier !== undefined ? retryConfig.retryMultiplier : oldFetcher.retryMultiplier,
-				retryableStatusCodes: retryConfig.retryableStatusCodes || oldFetcher.retryableStatusCodes,
+				retryableStatusCodes: retryConfig.retryableStatusCodes || [...oldFetcher.retryableStatusCodes],
 				eventNotifier: oldFetcher.eventNotifier,
 				method: oldFetcher.method,
 				body: oldFetcher.body,

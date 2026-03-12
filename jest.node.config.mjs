@@ -11,10 +11,17 @@
  */
 export default {
 	testEnvironment: 'node',
+	transform: {
+		'^.+\\.ts$': 'ts-jest',
+		'^.+\\.js$': 'babel-jest',
+	},
+	moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+	moduleNameMapper: {
+		'^(.*)\\.js$': '$1',
+	},
 	collectCoverageFrom: [
-		'src/**/*.js',
-		'!src/index.js',
-		'!src/**/*.test.js',
+		'src/**/*.ts',
+		'!src/index.ts',
 		'!**/node_modules/**',
 	],
 	coverageReporters: ['text', 'lcov', 'html'],

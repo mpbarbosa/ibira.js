@@ -6,18 +6,32 @@
  */
 
 import { DefaultEventNotifier } from '../utils/DefaultEventNotifier.js';
+import type { CacheEntry } from '../utils/DefaultCache.js';
+import type { Observer } from '../utils/DefaultEventNotifier.js';
 
-/**
- * @typedef {Object} CacheEntry
- * @property {*} data - The cached data
- * @property {number} timestamp - Timestamp when entry was created/last accessed
- * @property {number} expiresAt - Timestamp when entry expires
- */
+export type { CacheEntry };
 
-/**
- * @typedef {Object} Observer
- * @property {Function} update - Method called with (eventType, payload) on events
- */
+/** Duck-typed interface for any object that can act as a cache store. */
+export interface CacheInterface {
+	has(key: string): boolean;
+	get(key: string): CacheEntry | undefined | null;
+	set(key: string, value: CacheEntry): void;
+	delete(key: string): boolean;
+	clear(): void;
+	readonly size: number;
+	entries(): Iterable<[string, CacheEntry]>;
+	maxSize: number;
+	expiration: number;
+}
+
+/** Duck-typed interface for any event notifier implementation. */
+export interface EventNotifierInterface {
+	subscribe(observer: Observer): void;
+	unsubscribe(observer: Observer): void;
+	notify(...args: unknown[]): void;
+	clear(): void;
+	readonly subscriberCount: number;
+}
 
 /**
  * @typedef {Object} FetcherOptions
@@ -35,6 +49,51 @@ import { DefaultEventNotifier } from '../utils/DefaultEventNotifier.js';
  * @property {Object|string|FormData|Blob|null} [body=null] - Request body. Plain objects are JSON-serialized automatically; strings/FormData/Blob are passed as-is.
  * @property {Object} [headers={}] - Additional HTTP request headers. When body is a plain object, `Content-Type: application/json` is added automatically.
  */
+export interface FetcherOptions {
+	timeout?: number;
+	eventNotifier?: EventNotifierInterface;
+	maxRetries?: number;
+	retryDelay?: number;
+	retryMultiplier?: number;
+	retryableStatusCodes?: number[];
+	maxCacheSize?: number;
+	cacheExpiration?: number;
+	cache?: CacheInterface;
+	validateStatus?: (status: number) => boolean;
+	method?: string;
+	body?: object | string | FormData | Blob | ArrayBuffer | null;
+	headers?: Record<string, string>;
+}
+
+/**
+ * @typedef {Object} CacheOperation
+ * @property {'set'|'update'|'delete'} type - Type of cache operation
+ * @property {string} key - Cache key affected
+ * @property {CacheEntry} [value] - New value (for set/update operations)
+ */
+export interface CacheOperation {
+	type: 'set' | 'update' | 'delete';
+	key: string;
+	value?: CacheEntry;
+}
+
+/**
+ * @typedef {Object} FetchEvent
+ * @property {'loading-start'|'success'|'error'} type - Event type
+ * @property {*} payload - Event payload data
+ */
+export interface FetchEvent {
+	type: 'loading-start' | 'success' | 'error';
+	payload: unknown;
+}
+
+export interface FetchMeta {
+	cacheKey: string;
+	timestamp: number;
+	expiredKeysRemoved: number;
+	attempt?: number;
+	networkRequest?: boolean;
+}
 
 /**
  * @typedef {Object} FetchResult
@@ -43,23 +102,20 @@ import { DefaultEventNotifier } from '../utils/DefaultEventNotifier.js';
  * @property {Error} [error] - The error that occurred (present when success is false)
  * @property {boolean} fromCache - Whether data came from cache
  * @property {CacheOperation[]} cacheOperations - List of cache operations performed
- * @property {Event[]} events - List of events that occurred
+ * @property {FetchEvent[]} events - List of events that occurred
  * @property {Map} newCacheState - The new cache state after operations
- * @property {Object} meta - Metadata about the operation
+ * @property {FetchMeta} meta - Metadata about the operation
  */
-
-/**
- * @typedef {Object} CacheOperation
- * @property {'set'|'update'|'delete'} type - Type of cache operation
- * @property {string} key - Cache key affected
- * @property {CacheEntry} [value] - New value (for set/update operations)
- */
-
-/**
- * @typedef {Object} Event
- * @property {'loading-start'|'success'|'error'} type - Event type
- * @property {*} payload - Event payload data
- */
+export interface FetchResult {
+	success: boolean;
+	data?: unknown;
+	error?: Error;
+	fromCache: boolean;
+	cacheOperations: readonly CacheOperation[];
+	events: readonly FetchEvent[];
+	newCacheState: Map<string, CacheEntry>;
+	meta: FetchMeta;
+}
 
 /**
  * IbiraAPIFetcher - Core class for fetching and caching API data
@@ -100,6 +156,18 @@ import { DefaultEventNotifier } from '../utils/DefaultEventNotifier.js';
  * await fetcher.fetchData();
  */
 export class IbiraAPIFetcher {
+	readonly url: string;
+	readonly timeout: number;
+	readonly cache: CacheInterface;
+	readonly eventNotifier: EventNotifierInterface;
+	readonly maxRetries: number;
+	readonly retryDelay: number;
+	readonly retryMultiplier: number;
+	readonly retryableStatusCodes: ReadonlyArray<number>;
+	readonly validateStatus: (status: number) => boolean;
+	readonly method: string;
+	readonly body: object | string | FormData | Blob | ArrayBuffer | null;
+	readonly headers: Readonly<Record<string, string>>;
 
 	/**
 	 * Creates an IbiraAPIFetcher with a purely functional cache approach
@@ -107,7 +175,7 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @static
 	 * @param {string} url - The API endpoint URL
-	 * @param {Object} cache - External cache instance (must implement Map-like interface)
+	 * @param {CacheInterface} cache - External cache instance (must implement Map-like interface)
 	 * @param {FetcherOptions} [options={}] - Additional configuration options
 	 * @returns {IbiraAPIFetcher} Configured fetcher instance with external cache
 	 * 
@@ -120,7 +188,7 @@ export class IbiraAPIFetcher {
 	 *   { timeout: 5000 }
 	 * );
 	 */
-	static withExternalCache(url, cache, options = {}) {
+	static withExternalCache(url: string, cache: CacheInterface, options: FetcherOptions = {}): IbiraAPIFetcher {
 		return new IbiraAPIFetcher(url, cache, options);
 	}
 
@@ -129,11 +197,11 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @private
 	 * @static
-	 * @param {Object} [options={}] - Cache configuration options
-	 * @returns {Map} Configured cache instance
+	 * @param {FetcherOptions} [options={}] - Cache configuration options
+	 * @returns {CacheInterface} Configured cache instance
 	 */
-	static _createDefaultCache(options = {}) {
-		const cache = new Map();
+	private static _createDefaultCache(options: FetcherOptions = {}): CacheInterface {
+		const cache = new Map<string, CacheEntry>() as unknown as CacheInterface;
 		cache.maxSize = options.maxCacheSize || 100;
 		cache.expiration = options.cacheExpiration || 5 * 60 * 1000; // 5 minutes default
 		return cache;
@@ -159,7 +227,7 @@ export class IbiraAPIFetcher {
 	 *   cacheExpiration: 10 * 60 * 1000 // 10 minutes
 	 * });
 	 */
-	static withDefaultCache(url, options = {}) {
+	static withDefaultCache(url: string, options: FetcherOptions = {}): IbiraAPIFetcher {
 		const cache = this._createDefaultCache(options);
 		return new IbiraAPIFetcher(url, cache, options);
 	}
@@ -170,22 +238,22 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @static
 	 * @param {string} url - The API endpoint URL  
-	 * @param {Object} [options={}] - Additional configuration options
+	 * @param {FetcherOptions} [options={}] - Additional configuration options
 	 * @returns {IbiraAPIFetcher} Configured fetcher instance with no cache
 	 * 
 	 * @example
 	 * // No cache - purely functional, always fresh data
 	 * const fetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
 	 */
-	static withoutCache(url, options = {}) {
-		const noCache = {
+	static withoutCache(url: string, options: FetcherOptions = {}): IbiraAPIFetcher {
+		const noCache: CacheInterface = {
 			has: () => false,
 			get: () => null,
 			set: () => {},
 			delete: () => false,
 			clear: () => {},
 			size: 0,
-			entries: () => [],
+			entries: () => [] as unknown as IterableIterator<[string, CacheEntry]>,
 			maxSize: 0,
 			expiration: 0
 		};
@@ -199,7 +267,7 @@ export class IbiraAPIFetcher {
 	 * @static
 	 * @param {string} url - The API endpoint URL
 	 * @param {Function} eventCallback - Function to handle events (event, data) => void
-	 * @param {Object} [options={}] - Additional configuration options
+	 * @param {FetcherOptions} [options={}] - Additional configuration options
 	 * @returns {IbiraAPIFetcher} Configured fetcher instance with callback-based events
 	 * 
 	 * @example
@@ -213,8 +281,8 @@ export class IbiraAPIFetcher {
 	 *   }
 	 * );
 	 */
-	static withEventCallback(url, eventCallback, options = {}) {
-		const callbackNotifier = {
+	static withEventCallback(url: string, eventCallback: (...args: unknown[]) => void, options: FetcherOptions = {}): IbiraAPIFetcher {
+		const callbackNotifier: EventNotifierInterface = {
 			subscribe: () => {}, // No-op for external callback
 			unsubscribe: () => {}, // No-op for external callback
 			notify: eventCallback,
@@ -232,7 +300,7 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @static
 	 * @param {string} url - The API endpoint URL
-	 * @param {Object} [options={}] - Additional configuration options
+	 * @param {FetcherOptions} [options={}] - Additional configuration options
 	 * @returns {IbiraAPIFetcher} Configured fetcher instance with no event notifications
 	 * 
 	 * @example
@@ -240,8 +308,8 @@ export class IbiraAPIFetcher {
 	 * const fetcher = IbiraAPIFetcher.withoutEvents('https://api.example.com/data');
 	 * const data = await fetcher.fetchData(); // No event notifications
 	 */
-	static withoutEvents(url, options = {}) {
-		const noEvents = {
+	static withoutEvents(url: string, options: FetcherOptions = {}): IbiraAPIFetcher {
+		const noEvents: EventNotifierInterface = {
 			subscribe: () => {},
 			unsubscribe: () => {},
 			notify: () => {}, // Silent - no event notifications
@@ -259,7 +327,7 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @static
 	 * @param {string} url - The API endpoint URL
-	 * @param {Object} [options={}] - Additional configuration options
+	 * @param {FetcherOptions} [options={}] - Additional configuration options
 	 * @returns {IbiraAPIFetcher} Configured fetcher instance for pure functional usage
 	 * 
 	 * @example
@@ -273,20 +341,20 @@ export class IbiraAPIFetcher {
 	 *   console.log('Data:', result.data);
 	 * }
 	 */
-	static pure(url, options = {}) {
-		const noCache = {
+	static pure(url: string, options: FetcherOptions = {}): IbiraAPIFetcher {
+		const noCache: CacheInterface = {
 			has: () => false,
 			get: () => null,
 			set: () => {},
 			delete: () => false,
 			clear: () => {},
 			size: 0,
-			entries: () => [],
+			entries: () => [] as unknown as IterableIterator<[string, CacheEntry]>,
 			maxSize: options.maxCacheSize || 100,
 			expiration: options.cacheExpiration || 5 * 60 * 1000
 		};
 		
-		const noEvents = {
+		const noEvents: EventNotifierInterface = {
 			subscribe: () => {},
 			unsubscribe: () => {},
 			notify: () => {},
@@ -301,10 +369,10 @@ export class IbiraAPIFetcher {
 	 * Creates an IbiraAPIFetcher instance
 	 * 
 	 * @param {string} url - The API endpoint URL
-	 * @param {Object} cache - Cache instance (must implement Map-like interface with has/get/set/delete/clear/entries methods)
-	 * @param {Object} [options={}] - Configuration options
+	 * @param {CacheInterface} cache - Cache instance (must implement Map-like interface with has/get/set/delete/clear/entries methods)
+	 * @param {FetcherOptions} [options={}] - Configuration options
 	 * @param {number} [options.timeout=10000] - Request timeout in milliseconds
-	 * @param {Object} [options.eventNotifier] - Event notifier instance for observer pattern
+	 * @param {EventNotifierInterface} [options.eventNotifier] - Event notifier instance for observer pattern
 	 * @param {number} [options.maxRetries=3] - Maximum number of retry attempts
 	 * @param {number} [options.retryDelay=1000] - Initial retry delay in milliseconds
 	 * @param {number} [options.retryMultiplier=2] - Exponential backoff multiplier
@@ -313,7 +381,7 @@ export class IbiraAPIFetcher {
 	 * @param {Object|string|FormData|Blob|null} [options.body=null] - Request body (plain objects are JSON-serialized automatically)
 	 * @param {Object} [options.headers={}] - Additional request headers
 	 */
-    constructor(url, cache, options = {}) {
+    constructor(url: string, cache: CacheInterface, options: FetcherOptions = {}) {
 		this.url = url;
 		this.timeout = options.timeout || 10000;
 		
@@ -339,7 +407,7 @@ export class IbiraAPIFetcher {
 		// ✅ IMMUTABLE: Deep freeze the entire instance for maximum referential transparency
 		// This prevents any external code from modifying the fetcher's properties
 		// and guarantees true immutability at the language level
-		return Object.freeze(this);
+		Object.freeze(this);
 	}
 
 	/**
@@ -348,7 +416,7 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @returns {string} The cache key (`METHOD:url`)
 	 */
-	getCacheKey() {
+	getCacheKey(): string {
 		return `${this.method}:${this.url}`;
 	}
 
@@ -362,7 +430,7 @@ export class IbiraAPIFetcher {
 	 * @param {Object} cache - Cache instance with expiration configuration
 	 * @returns {Object} Cache entry with data and timestamp
 	 */
-	_createCacheEntry(data, currentTime, cache) {
+	private _createCacheEntry(data: unknown, currentTime: number, cache: CacheInterface): CacheEntry {
 		const expiration = cache.expiration || 300000; // Default 5 minutes if cache doesn't specify
 		return {
 			data: data,
@@ -379,8 +447,8 @@ export class IbiraAPIFetcher {
 	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {boolean} True if the entry is still valid
 	 */
-	_isCacheEntryValid(cacheEntry, currentTime) {
-		return cacheEntry && currentTime < cacheEntry.expiresAt;
+	private _isCacheEntryValid(cacheEntry: CacheEntry | undefined | null, currentTime: number): boolean {
+		return cacheEntry != null && currentTime < cacheEntry.expiresAt;
 	}
 
 	/**
@@ -390,7 +458,7 @@ export class IbiraAPIFetcher {
 	 * @private
 	 * @param {Object} [cache] - Optional cache instance, defaults to this.cache
 	 */
-	_enforceCacheSizeLimit(cache = null) {
+	private _enforceCacheSizeLimit(cache: CacheInterface | null = null): void {
 		const activeCache = cache || this.cache;
 		const maxSize = activeCache.maxSize || 50; // Use cache's own maxSize or default
 		
@@ -422,7 +490,7 @@ export class IbiraAPIFetcher {
 	 * @param {number} currentTime - Current timestamp in milliseconds
 	 * @returns {string[]} Array of cache keys that have expired
 	 */
-	_getExpiredCacheKeys(cache, currentTime) {
+	private _getExpiredCacheKeys(cache: { entries(): Iterable<[string, CacheEntry]> }, currentTime: number): string[] {
 		const expiredKeys = [];
 
 		// Find all expired entries
@@ -442,7 +510,7 @@ export class IbiraAPIFetcher {
 	 * @private
 	 * @param {Object} [cache] - Optional cache instance, defaults to this.cache
 	 */
-	_cleanupExpiredCache(cache = null) {
+	private _cleanupExpiredCache(cache: CacheInterface | null = null): void {
 		const activeCache = cache || this.cache;
 		const now = Date.now();
 		const expiredKeys = this._getExpiredCacheKeys(activeCache, now);
@@ -458,7 +526,7 @@ export class IbiraAPIFetcher {
 	 * @param {Error} error - The error to check
 	 * @returns {boolean} True if the error is retryable
 	 */
-	_isRetryableError(error) {
+	private _isRetryableError(error: Error): boolean {
 		// Network errors (no response received)
 		if (error.name === 'TypeError' && error.message.includes('fetch')) {
 			return true;
@@ -488,7 +556,7 @@ export class IbiraAPIFetcher {
 	 * @param {number} attempt - The current attempt number (0-based)
 	 * @returns {number} Delay in milliseconds
 	 */
-	_calculateRetryDelay(attempt) {
+	private _calculateRetryDelay(attempt: number): number {
 		const delay = this.retryDelay * Math.pow(this.retryMultiplier, attempt);
 		// Add jitter to prevent thundering herd (±25% random variation)
 		const jitter = delay * 0.25 * (Math.random() - 0.5);
@@ -502,7 +570,7 @@ export class IbiraAPIFetcher {
 	 * @param {number} ms - Milliseconds to sleep
 	 * @returns {Promise<void>} Promise that resolves after the delay
 	 */
-	_sleep(ms) {
+	private _sleep(ms: number): Promise<void> {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
@@ -514,7 +582,7 @@ export class IbiraAPIFetcher {
 	 * @param {AbortSignal} [externalSignal] - Optional external signal for consumer-level cancellation
 	 * @returns {Promise<any>} Promise that resolves to the fetched data
 	 */
-	async _performSingleRequest(abortController, externalSignal = null) {
+	private async _performSingleRequest(abortController: AbortController, externalSignal: AbortSignal | null = null): Promise<unknown> {
 		// Combine the internal timeout signal with an optional external cancellation signal
 		const signal = abortController.signal;
 		if (externalSignal) {
@@ -526,22 +594,23 @@ export class IbiraAPIFetcher {
 			}
 		}
 
-		const fetchOptions = {
+		const fetchOptions: RequestInit = {
 			method: this.method,
 			signal,
 		};
 
 		// Merge caller-supplied headers first, then auto-add Content-Type for object bodies
-		const mergedHeaders = { ...this.headers };
+		const mergedHeaders: Record<string, string> = { ...this.headers };
 
-		if (this.body !== null) {
-			if (this.body !== null && typeof this.body === 'object' && !(this.body instanceof FormData) && !(this.body instanceof Blob) && !(this.body instanceof ArrayBuffer)) {
-				fetchOptions.body = JSON.stringify(this.body);
+		const body = this.body;
+		if (body !== null) {
+			if (typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob) && !(body instanceof ArrayBuffer)) {
+				fetchOptions.body = JSON.stringify(body);
 				if (!mergedHeaders['Content-Type'] && !mergedHeaders['content-type']) {
 					mergedHeaders['Content-Type'] = 'application/json';
 				}
 			} else {
-				fetchOptions.body = this.body;
+				fetchOptions.body = body as BodyInit;
 			}
 		}
 
@@ -581,7 +650,7 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @param {Observer} observer - Observer object with an update method
 	 */
-	subscribe(observer) {
+	subscribe(observer: Observer): void {
 		// ✅ IMPROVED: Delegate to external event notifier for better referential transparency
 		this.eventNotifier.subscribe(observer);
 	}
@@ -591,7 +660,7 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @param {Observer} observer - Observer object to remove
 	 */
-	unsubscribe(observer) {
+	unsubscribe(observer: Observer): void {
 		// ✅ IMPROVED: Delegate to external event notifier for better referential transparency
 		this.eventNotifier.unsubscribe(observer);
 	}
@@ -601,7 +670,7 @@ export class IbiraAPIFetcher {
 	 * 
 	 * @param {...*} args - Arguments to pass to observers (typically eventType and payload)
 	 */
-	notifyObservers(...args) {
+	notifyObservers(...args: unknown[]): void {
 		// ✅ IMPROVED: Delegate to external event notifier for better referential transparency
 		this.eventNotifier.notify(...args);
 	}
@@ -647,15 +716,15 @@ export class IbiraAPIFetcher {
 	 * setTimeout(() => controller.abort(), 2000);
 	 * const result = await fetcher.fetchDataPure(new Map(), Date.now(), null, controller.signal);
 	 */
-	async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider = null, signal = null) {
+	async fetchDataPure(currentCacheState: Map<string, CacheEntry> | CacheInterface, currentTime: number = Date.now(), networkProvider: (() => Promise<unknown>) | null = null, signal: AbortSignal | null = null): Promise<FetchResult> {
 		const cacheKey = this.getCacheKey();
 		
 		// Pure function to get expired keys without mutations
 		const expiredKeys = this._getExpiredCacheKeys(currentCacheState, currentTime);
 		
 		// Create new cache state without expired entries (pure)
-		const cleanedCache = new Map();
-		for (const [key, value] of currentCacheState) {
+		const cleanedCache = new Map<string, CacheEntry>();
+		for (const [key, value] of currentCacheState.entries()) {
 			if (!expiredKeys.includes(key)) {
 				cleanedCache.set(key, value);
 			}
@@ -663,10 +732,10 @@ export class IbiraAPIFetcher {
 		
 		// Check cache (pure read operation)
 		if (cleanedCache.has(cacheKey)) {
-			const cacheEntry = cleanedCache.get(cacheKey);
+			const cacheEntry = cleanedCache.get(cacheKey)!;
 			if (this._isCacheEntryValid(cacheEntry, currentTime)) {
 				// Update timestamp for LRU (create new entry, don't mutate)
-				const updatedEntry = { ...cacheEntry, timestamp: currentTime };
+				const updatedEntry: CacheEntry = { ...cacheEntry, timestamp: currentTime };
 				const newCacheState = new Map(cleanedCache);
 				newCacheState.set(cacheKey, updatedEntry);
 				
@@ -675,22 +744,22 @@ export class IbiraAPIFetcher {
 					data: cacheEntry.data,
 					fromCache: true,
 					cacheOperations: Object.freeze([
-						Object.freeze({ type: 'update', key: cacheKey, value: updatedEntry })
+						Object.freeze({ type: 'update' as const, key: cacheKey, value: updatedEntry })
 					]),
-					events: Object.freeze([]), // No events for cache hits
+					events: Object.freeze([]) as readonly FetchEvent[],
 					newCacheState,
 					meta: Object.freeze({
 						cacheKey,
 						timestamp: currentTime,
 						expiredKeysRemoved: expiredKeys.length
 					})
-				});
+				}) as FetchResult;
 			}
 		}
 		
 		// Network operation (pure when networkProvider is provided)
-		const events = [
-			Object.freeze({ type: 'loading-start', payload: Object.freeze({ url: this.url, cacheKey }) })
+		const events: FetchEvent[] = [
+			{ type: 'loading-start', payload: Object.freeze({ url: this.url, cacheKey }) }
 		];
 		
 		try {
@@ -713,12 +782,12 @@ export class IbiraAPIFetcher {
 				data: data,
 				fromCache: false,
 				cacheOperations: Object.freeze([
-					Object.freeze({ type: 'set', key: cacheKey, value: cacheEntry }),
+					Object.freeze({ type: 'set' as const, key: cacheKey, value: cacheEntry }),
 					...this._calculateCacheEvictions(newCacheState, finalCacheState).map(op => Object.freeze(op))
 				]),
 				events: Object.freeze([
-					...events.map(e => Object.freeze(e)),
-					Object.freeze({ type: 'success', payload: data })
+					...events,
+					{ type: 'success' as const, payload: data }
 				]),
 				newCacheState: finalCacheState,
 				meta: Object.freeze({
@@ -728,17 +797,17 @@ export class IbiraAPIFetcher {
 					attempt: 1,
 					networkRequest: true
 				})
-			});
+			}) as FetchResult;
 			
 		} catch (error) {
 			return Object.freeze({
 				success: false,
-				error,
+				error: error as Error,
 				fromCache: false,
-				cacheOperations: Object.freeze([]),
+				cacheOperations: Object.freeze([]) as readonly CacheOperation[],
 				events: Object.freeze([
-					...events.map(e => Object.freeze(e)),
-					Object.freeze({ type: 'error', payload: Object.freeze({ error }) })
+					...events,
+					{ type: 'error' as const, payload: Object.freeze({ error }) }
 				]),
 				newCacheState: cleanedCache,
 				meta: Object.freeze({
@@ -748,7 +817,7 @@ export class IbiraAPIFetcher {
 					attempt: 1,
 					networkRequest: true
 				})
-			});
+			}) as FetchResult;
 		}
 	}
 
@@ -759,7 +828,7 @@ export class IbiraAPIFetcher {
 	 * @param {Map} cacheState - Current cache state
 	 * @returns {Map} New cache state with size limits applied
 	 */
-	_applyCacheSizeLimitsPure(cacheState) {
+	private _applyCacheSizeLimitsPure(cacheState: Map<string, CacheEntry>): Map<string, CacheEntry> {
 		const maxSize = this.cache.maxSize || 50;
 		
 		if (cacheState.size <= maxSize) {
@@ -783,8 +852,8 @@ export class IbiraAPIFetcher {
 	 * @param {Map} afterState - Cache state after size limits
 	 * @returns {Array} Array of eviction operations
 	 */
-	_calculateCacheEvictions(beforeState, afterState) {
-		const evictions = [];
+	private _calculateCacheEvictions(beforeState: Map<string, CacheEntry>, afterState: Map<string, CacheEntry>): CacheOperation[] {
+		const evictions: CacheOperation[] = [];
 		for (const [key] of beforeState) {
 			if (!afterState.has(key)) {
 				evictions.push({ type: 'delete', key });
@@ -824,7 +893,7 @@ export class IbiraAPIFetcher {
 	 * const result = await fetcher.fetchDataPure(new Map(), Date.now(), mockNetwork);
 	 * // Test result without side effects
 	 */
-	async fetchData(cacheOverride = null, signal = null) {
+	async fetchData(cacheOverride: CacheInterface | null = null, signal: AbortSignal | null = null): Promise<unknown> {
 		const activeCache = cacheOverride || this.cache;
 		
 		// Use the pure core function, forwarding the optional cancellation signal
@@ -848,13 +917,13 @@ export class IbiraAPIFetcher {
 	 * @param {FetchResult} result - Result from fetchDataPure
 	 * @param {Object} activeCache - Cache to apply operations to
 	 */
-	_applySideEffects(result, activeCache) {
+	private _applySideEffects(result: FetchResult, activeCache: CacheInterface): void {
 		// Apply cache operations
 		result.cacheOperations.forEach(operation => {
 			switch (operation.type) {
 				case 'set':
 				case 'update':
-					activeCache.set(operation.key, operation.value);
+					activeCache.set(operation.key, operation.value!);
 					break;
 				case 'delete':
 					activeCache.delete(operation.key);

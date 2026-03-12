@@ -75,12 +75,12 @@ all three. Prioritising TypeScript migration and Node.js support makes that nich
 
 ### Items
 
-- [ ] **TypeScript source migration** — convert `IbiraAPIFetcher.js`, `DefaultCache.js`,
+- [x] **TypeScript source migration** — convert `IbiraAPIFetcher.js`, `DefaultCache.js`,
   `DefaultEventNotifier.js` to `.ts`; add `tsconfig.json` targeting `ES2022` with
   `"lib": ["ES2022", "DOM"]`, `strict: true`, `declaration: true`; replace Babel with `ts-jest`;
   ship generated `.d.ts` files in `dist/`. Native interfaces replace JSDoc `@typedef`:
   `FetcherOptions`, `FetchResult<T>`, `CacheEntry`, `Observer`
-- [ ] **Node.js ≥ 18 dual support** — ibira.js source already uses zero browser APIs
+- [x] **Node.js ≥ 18 dual support** — ibira.js source already uses zero browser APIs
   (`window`, `document`, CORS `mode:` absent; pure `fetch` + `Map` + observer); formalise
   Node.js support by adding `"engines": { "node": ">=18" }` and a second jest config:
   `jest.browser.config.js` (`testEnvironment: jsdom`) and `jest.node.config.js`
@@ -89,7 +89,7 @@ all three. Prioritising TypeScript migration and Node.js support makes that nich
   triggered on version tags; update install instructions
 - [ ] **CJS + ESM dual build** — emit both `dist/index.cjs` and `dist/index.mjs` for maximum
   compatibility; add `exports` field to `package.json` with `"."` and `"./cache"` sub-paths
-- [ ] **HTTP methods beyond GET** — `POST`, `PUT`, `PATCH`, `DELETE` support with configurable
+- [x] **HTTP methods beyond GET** — `POST`, `PUT`, `PATCH`, `DELETE` support with configurable
   body serialization
 
 ---

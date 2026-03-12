@@ -28,12 +28,18 @@
  * console.log(VERSION.toString()); // "0.3.1-alpha"
  * console.log(`v${VERSION.major}.${VERSION.minor}.${VERSION.patch}`);
  */
-export const VERSION = {
+export const VERSION: {
+	major: number;
+	minor: number;
+	patch: number;
+	prerelease: string;
+	toString(): string;
+} = {
 	major: 0,
 	minor: 3,
 	patch: 1,
 	prerelease: "alpha", // Indicates unstable development
-	toString: function () {
+	toString(): string {
 		return `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;
 	},
 };
