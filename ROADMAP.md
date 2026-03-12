@@ -38,6 +38,22 @@ Goal: reach a stable, well-guarded API before beta.
 
 ---
 
+## 🔧 Developer Experience
+
+Low-priority housekeeping items that improve contributor experience without changing library behaviour.
+
+- [ ] **Share `.vscode/settings.json`** — unignore via `.gitignore` exception (`!.vscode/settings.json`)
+  so contributors automatically get the project's cSpell word list and any future editor settings;
+  add `.vscode/extensions.json` recommending ESLint and cSpell extensions
+- [ ] **`.ai_workflow/` README** — add `.ai_workflow/README.md` documenting the purpose of the
+  AI workflow automation directory and explaining that its contents are tooling artifacts (not
+  library code) so contributors know to leave it alone
+- [ ] **Version consistency automation** — add a pre-commit hook or `npm run version:check` script
+  that asserts `package.json`, `src/config/version.js`, and `.workflow-config.yaml` all agree on
+  the current version, preventing silent drift like the `0.2.2-alpha` / `0.3.0-alpha` mismatch
+
+---
+
 ## 🔜 v0.4.x — Beta Preparation
 
 Goal: make ibira.js usable beyond CDN delivery, including as an npm dependency for TypeScript projects.

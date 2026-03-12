@@ -1,12 +1,12 @@
 // __tests__/version.test.js
 
-import { VERSION } from '../src/config/version';
+import { VERSION } from '../../src/config/version';
 
 describe('VERSION semantic version object', () => {
   it('should have correct initial values', () => {
     expect(VERSION.major).toBe(0);
     expect(VERSION.minor).toBe(3);
-    expect(VERSION.patch).toBe(0);
+    expect(VERSION.patch).toBe(1);
     expect(VERSION.prerelease).toBe('alpha');
   });
 
@@ -16,22 +16,22 @@ describe('VERSION semantic version object', () => {
 
   it('should return correct version string for beta prerelease', () => {
     const betaVersion = { ...VERSION, prerelease: 'beta' };
-    expect(betaVersion.toString()).toBe('0.3.0-beta');
+    expect(betaVersion.toString()).toBe('0.3.1-beta');
   });
 
   it('should return correct version string for rc prerelease', () => {
     const rcVersion = { ...VERSION, prerelease: 'rc' };
-    expect(rcVersion.toString()).toBe('0.3.0-rc');
+    expect(rcVersion.toString()).toBe('0.3.1-rc');
   });
 
   it('should handle numeric prerelease values', () => {
     const numericVersion = { ...VERSION, prerelease: '1' };
-    expect(numericVersion.toString()).toBe('0.3.0-1');
+    expect(numericVersion.toString()).toBe('0.3.1-1');
   });
 
   it('should handle empty prerelease string', () => {
     const emptyVersion = { ...VERSION, prerelease: '' };
-    expect(emptyVersion.toString()).toBe('0.3.0-');
+    expect(emptyVersion.toString()).toBe('0.3.1-');
   });
 
   it('should handle negative version numbers', () => {
@@ -48,14 +48,14 @@ describe('VERSION semantic version object', () => {
     const missingPrerelease = { ...VERSION, prerelease: undefined, toString: function () {
       return `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;
     }};
-    expect(missingPrerelease.toString()).toBe('0.3.0-undefined');
+    expect(missingPrerelease.toString()).toBe('0.3.1-undefined');
   });
 
   it('should handle non-string prerelease values', () => {
     const objPrerelease = { ...VERSION, prerelease: { stage: 'alpha' }, toString: function () {
       return `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;
     }};
-    expect(objPrerelease.toString()).toBe('0.3.0-[object Object]');
+    expect(objPrerelease.toString()).toBe('0.3.1-[object Object]');
   });
 
   it('should not throw when calling toString with incomplete object', () => {

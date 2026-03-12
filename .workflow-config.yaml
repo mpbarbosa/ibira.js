@@ -6,7 +6,7 @@ project:
   type: "nodejs-library"
   description: "A JavaScript library for fetching and caching API data with observer pattern support"
   kind: "nodejs_library"
-  version: "0.2.2-alpha"
+  version: "0.3.1-alpha"
 
 tech_stack:
   primary_language: "javascript"
