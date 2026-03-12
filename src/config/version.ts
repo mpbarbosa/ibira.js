@@ -25,7 +25,7 @@
  * 
  * @example
  * import { VERSION } from 'ibira.js';
- * console.log(VERSION.toString()); // "0.3.4-alpha"
+ * console.log(VERSION.toString()); // "0.3.5-alpha"
  * console.log(`v${VERSION.major}.${VERSION.minor}.${VERSION.patch}`);
  */
 export const VERSION: {

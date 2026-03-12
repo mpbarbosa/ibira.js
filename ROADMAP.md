@@ -1,6 +1,6 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.3.4-alpha — Alpha Hardening
+> **Current version:** 0.3.5-alpha — Alpha Hardening
 > **Status:** Beta preparation in progress
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
@@ -16,7 +16,7 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.1-alpha** | jsDelivr CDN delivery, SRI support, CDN URL generator script |
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
 | **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
-| **0.3.4-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
+| **0.3.5-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
 
 ---
 
