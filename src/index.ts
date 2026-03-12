@@ -1,7 +1,7 @@
 /**
  * @fileoverview ibira.js - A JavaScript library for fetching and caching API data with observer pattern support
  * @module ibira.js
- * @version 0.3.1-alpha
+ * @version 0.3.2-alpha
  * @license MIT
  * @author Marcelo Pereira Barbosa
  * @copyright 2026 Marcelo Pereira Barbosa
