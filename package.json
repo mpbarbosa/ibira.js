@@ -3,6 +3,9 @@
   "version": "0.3.1-alpha",
   "description": "A JavaScript library for fetching and caching API data with observer pattern support",
   "main": "src/index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",

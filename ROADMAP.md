@@ -55,6 +55,9 @@ Low-priority housekeeping items that improve contributor experience without chan
   observers) to shared helpers; convert parallel edge-case tests to `it.each` parameterised tables;
   rename any remaining implementation-focused test names to behaviour-focused names (e.g.
   "should store and retrieve null values" rather than "should handle null values")
+- [ ] **Prettier integration** — add `prettier` dev dependency with a `.prettierrc` config file and
+  a `"format": "prettier --write ."` script; ensure ESLint and Prettier configs do not conflict
+  (install `eslint-config-prettier`); document formatting step in `CONTRIBUTING.md`
 
 ---
 
