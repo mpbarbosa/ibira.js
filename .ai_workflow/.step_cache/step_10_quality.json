@@ -20,6 +20,26 @@
       "score": 100,
       "issueCount": 0,
       "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    },
+    "src/config/version.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T04:20:25.059Z"
+    },
+    "src/core/IbiraAPIFetchManager.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T04:20:25.059Z"
+    },
+    "src/core/IbiraAPIFetcher.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T04:20:25.059Z"
+    },
+    "src/index.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T04:20:25.059Z"
     }
   }
 }

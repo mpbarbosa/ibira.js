@@ -1,13 +1,14 @@
 {
   "version": 1,
   "partitionIndex": 1,
-  "totalPartitions": 4,
-  "filesHash": "7c3da2a2",
+  "totalPartitions": 5,
+  "filesHash": "c644d294",
   "partitionLabels": [
     "src/config, src/core, src",
-    "src/utils, test-runner.js, test_pure_fetcher.js, babel.config.mjs",
-    "eslint.config.mjs, package-lock.json, package.json, src/workflow, cdn-delivery.sh",
-    "scripts, .ai_workflow/.step_cache, .ai_workflow/metrics, .vscode"
+    "src/utils, tsup.config.ts, jest.node.config.mjs, .vscode",
+    "package-lock.json, package.json, tsconfig.json, test-runner.js, test_pure_fetcher.js",
+    "babel.config.mjs, eslint.config.mjs, .ai_workflow/.step_cache",
+    ".ai_workflow, .ai_workflow/metrics, cdn-delivery.sh, scripts"
   ],
-  "updatedAt": "2026-03-12T03:06:18.964Z"
+  "updatedAt": "2026-03-12T04:20:25.059Z"
 }
