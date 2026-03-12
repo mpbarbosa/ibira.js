@@ -1,6 +1,6 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.2.2-alpha — Early Development  
+> **Current version:** 0.3.1-alpha — Alpha Hardening  
 > **Status:** Alpha stabilization in progress
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
@@ -58,6 +58,13 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [ ] **Prettier integration** — add `prettier` dev dependency with a `.prettierrc` config file and
   a `"format": "prettier --write ."` script; ensure ESLint and Prettier configs do not conflict
   (install `eslint-config-prettier`); document formatting step in `CONTRIBUTING.md`
+- [ ] **Cache cleanup scalability review** — profile the periodic cleanup interval
+  (`_startPeriodicCleanup`) under high-load scenarios (many concurrent URLs, large TTL spreads);
+  consider a lazy / on-demand eviction strategy for environments where `setInterval` is costly
+- [ ] **Edge-case documentation** — expand JSDoc and `docs/` to explicitly cover: cache overflow
+  behaviour (what happens when `maxSize` is reached mid-burst), retry exhaustion (what the caller
+  receives after all retries fail), and observer error isolation (does one subscriber's throw
+  prevent others from being notified)
 
 ---
 
