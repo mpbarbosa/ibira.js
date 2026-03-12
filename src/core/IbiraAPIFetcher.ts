@@ -33,6 +33,9 @@ export interface EventNotifierInterface {
 	readonly subscriberCount: number;
 }
 
+/** Union of valid HTTP method strings accepted by FetcherOptions and RetryConfig. */
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
+
 /**
  * @typedef {Object} FetcherOptions
  * @property {number} [timeout=10000] - Request timeout in milliseconds
@@ -60,8 +63,8 @@ export interface FetcherOptions {
 	cacheExpiration?: number;
 	cache?: CacheInterface;
 	validateStatus?: (status: number) => boolean;
-	method?: string;
-	body?: object | string | FormData | Blob | ArrayBuffer | null;
+	method?: HttpMethod;
+	body?: Record<string, unknown> | string | FormData | Blob | ArrayBuffer | null;
 	headers?: Record<string, string>;
 }
 
@@ -165,8 +168,8 @@ export class IbiraAPIFetcher {
 	readonly retryMultiplier: number;
 	readonly retryableStatusCodes: ReadonlyArray<number>;
 	readonly validateStatus: (status: number) => boolean;
-	readonly method: string;
-	readonly body: object | string | FormData | Blob | ArrayBuffer | null;
+	readonly method: HttpMethod;
+	readonly body: Record<string, unknown> | string | FormData | Blob | ArrayBuffer | null;
 	readonly headers: Readonly<Record<string, string>>;
 
 	/**
@@ -400,7 +403,7 @@ export class IbiraAPIFetcher {
 		// Custom HTTP success predicate — defaults to the standard 2xx range
 		this.validateStatus = options.validateStatus || ((status) => status >= 200 && status < 300);
 		// HTTP method, body, and headers for non-GET requests
-		this.method = (options.method || 'GET').toUpperCase();
+		this.method = (options.method || 'GET').toUpperCase() as HttpMethod;
 		this.body = options.body !== undefined ? options.body : null;
 		this.headers = Object.freeze({ ...(options.headers || {}) });
 		

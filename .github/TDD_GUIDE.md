@@ -95,9 +95,9 @@ describe('ApiResponseParser', () => {
             },
             timestamp: '2025-01-08T10:00:00Z'
         };
-        
+
         const parsed = parseApiResponse(response);
-        
+
         expect(parsed).toEqual({
             id: '123',
             name: 'Test Item',
@@ -154,7 +154,7 @@ module.exports = { parseApiResponse };
 function parseApiResponse(response) {
     // Refactored: handle missing fields safely
     if (!response || !response.data) return null;
-    
+
     return {
         id: response.data.id || '',
         name: response.data.name || '',
@@ -308,11 +308,11 @@ function calculateDistance(coord1, coord2) {
     const R = 6371; // Earth's radius in km
     const dLat = toRadians(coord2.lat - coord1.lat);
     const dLon = toRadians(coord2.lon - coord1.lon);
-    
+
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
               Math.cos(toRadians(coord1.lat)) * Math.cos(toRadians(coord2.lat)) *
               Math.sin(dLon/2) * Math.sin(dLon/2);
-    
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
 }
@@ -322,17 +322,17 @@ describe('calculateDistance', () => {
     test('should calculate distance between two coordinates', () => {
         const coord1 = { lat: -23.550520, lon: -46.633308 }; // São Paulo
         const coord2 = { lat: -22.906847, lon: -43.172896 }; // Rio de Janeiro
-        
+
         const distance = calculateDistance(coord1, coord2);
-        
+
         expect(distance).toBeCloseTo(357.4, 1);
     });
-    
+
     test('should return 0 for same coordinates', () => {
         const coord = { lat: -23.550520, lon: -46.633308 };
-        
+
         const distance = calculateDistance(coord, coord);
-        
+
         expect(distance).toBe(0);
     });
 });
@@ -373,7 +373,7 @@ async function fetchGeocodingData(address) {
 describe('buildGeocodingUrl', () => {
     test('should build correct URL for Brazilian address', () => {
         const url = buildGeocodingUrl('Avenida Paulista, São Paulo');
-        
+
         expect(url).toContain('nominatim.openstreetmap.org');
         expect(url).toContain('q=Avenida+Paulista');
         expect(url).toContain('format=json');
@@ -388,9 +388,9 @@ describe('fetchGeocodingData', () => {
                 json: () => Promise.resolve([{ lat: '-23.5', lon: '-46.6' }])
             })
         );
-        
+
         const data = await fetchGeocodingData('São Paulo');
-        
+
         expect(data).toHaveLength(1);
         expect(data[0].lat).toBe('-23.5');
     });
@@ -468,7 +468,7 @@ test('should format address in all cases', () => {
 test('should return sorted cities by name', () => {
     const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
     const sorted = sortCities(cities);
-    
+
     expect(sorted[0]).toBe('Brasília');
     expect(sorted[2]).toBe('São Paulo');
 });
@@ -479,7 +479,7 @@ test('should return sorted cities by name', () => {
 test('should call Array.sort', () => {
     const sortSpy = jest.spyOn(Array.prototype, 'sort');
     sortCities(['São Paulo', 'Rio']);
-    
+
     expect(sortSpy).toHaveBeenCalled(); // Implementation detail
 });
 ```
@@ -497,7 +497,7 @@ test('calculateDistance is fast', () => {
     const start = Date.now();
     calculateDistance({lat: 0, lon: 0}, {lat: 1, lon: 1});
     const duration = Date.now() - start;
-    
+
     expect(duration).toBeLessThan(10); // milliseconds
 });
 ```
@@ -516,11 +516,11 @@ describe('formatAddress edge cases', () => {
     test('should handle null address', () => {
         expect(formatAddress(null)).toBe('');
     });
-    
+
     test('should handle empty object', () => {
         expect(formatAddress({})).toBe('');
     });
-    
+
     test('should handle missing required fields', () => {
         expect(formatAddress({ city: 'São Paulo' })).toContain('São Paulo');
     });
@@ -552,10 +552,10 @@ test('should calculate distance between cities', () => {
     // Arrange - Set up test data
     const saoPaulo = { lat: -23.550520, lon: -46.633308 };
     const rio = { lat: -22.906847, lon: -43.172896 };
-    
+
     // Act - Execute the function
     const distance = calculateDistance(saoPaulo, rio);
-    
+
     // Assert - Verify the result
     expect(distance).toBeCloseTo(357.4, 1);
 });
@@ -569,16 +569,16 @@ Each test should be able to run in isolation:
 ```javascript
 describe('AddressCache', () => {
     let cache;
-    
+
     beforeEach(() => {
         cache = new AddressCache(); // Fresh instance each test
     });
-    
+
     test('should add address to cache', () => {
         cache.add('key1', { city: 'São Paulo' });
         expect(cache.get('key1')).toBeDefined();
     });
-    
+
     test('should return null for missing key', () => {
         expect(cache.get('nonexistent')).toBeNull();
     });
@@ -602,11 +602,11 @@ describe('formatCEP', () => {
     test('should format valid CEP', () => {
         expect(formatCEP('01310200')).toBe('01310-200');
     });
-    
+
     test('should handle CEP with formatting', () => {
         expect(formatCEP('01310-200')).toBe('01310-200');
     });
-    
+
     test('should return null for invalid CEP', () => {
         expect(formatCEP('123')).toBeNull();
     });
@@ -621,16 +621,16 @@ describe('geocoding with mocks', () => {
     beforeEach(() => {
         global.fetch = jest.fn();
     });
-    
+
     afterEach(() => {
         jest.restoreAllMocks();
     });
-    
+
     test('should handle API errors gracefully', async () => {
         global.fetch.mockRejectedValue(new Error('Network error'));
-        
+
         const result = await safeGeocode('São Paulo');
-        
+
         expect(result).toBeNull();
     });
 });
@@ -643,11 +643,11 @@ describe('geocoding with mocks', () => {
 describe('async operations', () => {
     test('should resolve with address data', async () => {
         const data = await fetchAddress('01310-200');
-        
+
         expect(data).toBeDefined();
         expect(data.city).toBe('São Paulo');
     });
-    
+
     test('should reject with error for invalid CEP', async () => {
         await expect(fetchAddress('invalid'))
             .rejects
@@ -664,9 +664,9 @@ describe('immutability', () => {
     test('should not mutate original array when sorting', () => {
         const original = ['c', 'a', 'b'];
         const originalCopy = [...original];
-        
+
         const sorted = sortArray(original);
-        
+
         expect(original).toEqual(originalCopy); // Original unchanged
         expect(sorted).toEqual(['a', 'b', 'c']);
     });
@@ -688,7 +688,7 @@ describe('Brazilian Phone Validator', () => {
     test('should validate mobile phone with area code', () => {
         expect(isValidBrazilianPhone('(11) 98765-4321')).toBe(true);
     });
-    
+
     test('should reject invalid phone', () => {
         expect(isValidBrazilianPhone('123')).toBe(false);
     });
@@ -719,7 +719,7 @@ function isValidBrazilianPhone(phone) {
     const digits = phone.replace(/\D/g, '');
     const hasCorrectLength = digits.length === 10 || digits.length === 11;
     const hasValidAreaCode = /^[1-9]{2}/.test(digits);
-    
+
     return hasCorrectLength && hasValidAreaCode;
 }
 
@@ -759,7 +759,7 @@ describe('generateGreeting (pure)', () => {
     test('should generate morning greeting', () => {
         expect(generateGreeting('João', 8)).toBe('Bom dia, João!');
     });
-    
+
     test('should generate afternoon greeting', () => {
         expect(generateGreeting('Maria', 14)).toBe('Boa tarde, Maria!');
     });
@@ -781,7 +781,7 @@ function greetUser(name) {
 module.exports = { generateGreeting, greetUser };
 ```
 
-**Result**: 
+**Result**:
 - `generateGreeting` is pure and easy to test
 - `greetUser` is impure but thin (delegates to pure function)
 - Side effect isolated at boundary
@@ -869,9 +869,9 @@ When opening a PR:
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2025-01-08  
-**Status**: ✅ Ready for use  
+**Version**: 1.0.0
+**Last Updated**: 2025-01-08
+**Status**: ✅ Ready for use
 **Maintained by**: ibira.js Team
 
 ---

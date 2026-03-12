@@ -1,4 +1,4 @@
-# Code Review Guide for Guia.js
+# Code Review Guide for ibira.js
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@
 
 ## Overview
 
-This guide helps reviewers ensure code contributions meet the Guia.js project standards, with particular emphasis on **referential transparency**, **immutability**, and **functional programming principles**.
+This guide helps reviewers ensure code contributions meet the ibira.js project standards, with particular emphasis on **referential transparency**, **immutability**, and **functional programming principles**.
 
 ### Goals of Code Review
 
@@ -154,7 +154,7 @@ function formatAddress(address) {  // Pure
 async function saveAddress(address) {  // Impure (clear from name)
   const isValid = validateAddress(address);  // Pure
   if (!isValid) throw new Error('Invalid address');
-  
+
   const formatted = formatAddress(address);  // Pure
   await database.save(formatted);  // Side effect
 }
@@ -435,7 +435,7 @@ class DataLoader {
   load(id) {
     this.data = fetchData(id);
   }
-  
+
   getData() {
     return this.data;
   }
@@ -448,7 +448,7 @@ class DataLoader {
   async load(id) {
     return await fetchData(id);
   }
-  
+
   transform(data) {
     return processData(data);
   }

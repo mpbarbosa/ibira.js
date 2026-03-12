@@ -6,7 +6,7 @@
 [![Node.js >=18](https://img.shields.io/node/v/ibira.js.svg)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Version:** 0.4.0-alpha  
+**Version:** 0.4.0-alpha
 **Status:** 🚧 Beta Preparation
 
 ---
@@ -56,7 +56,6 @@ const data = await fetcher.fetchData();
 console.log(data);
 
 // Advanced usage with IbiraAPIFetchManager
-// Create a manager instance
 const manager = new IbiraAPIFetchManager();
 const result = await manager.fetch('https://api.example.com/data');
 ```
@@ -69,10 +68,10 @@ Load **ibira.js** directly from jsDelivr CDN without installation:
 
 ```html
 <!-- Load specific version (recommended for production) -->
-<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.1-alpha/src/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.0-alpha/dist/index.mjs"></script>
 
 <!-- Load with SRI (Subresource Integrity) for security -->
-<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.1-alpha/src/index.js"
+<script src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.0-alpha/dist/index.mjs"
         integrity="sha384-HASH_HERE"
         crossorigin="anonymous"></script>
 ```
@@ -81,14 +80,14 @@ Load **ibira.js** directly from jsDelivr CDN without installation:
 
 ```html
 <script type="module">
-  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.1-alpha/src/index.js';
+  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.0-alpha/dist/index.mjs';
 </script>
 ```
 
 ### Version Options
 
-- **Specific version:** `@0.2.1-alpha` (recommended for production)
-- **Latest patch:** `@0.2` (auto-updates to latest 0.2.x)
+- **Specific version:** `@0.4.0-alpha` (recommended for production)
+- **Latest patch:** `@0.4` (auto-updates to latest 0.4.x)
 - **Latest minor:** `@0` (auto-updates to latest 0.x.x)
 - **Latest from branch:** `@main` (development, auto-updates)
 
@@ -144,8 +143,8 @@ The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `Abor
 
 #### Test Runner Helper
 
-**Purpose:** Display available test commands and test structure  
-**Usage:** `./test-runner.js` or `node test-runner.js`  
+**Purpose:** Display available test commands and test structure
+**Usage:** `./test-runner.js` or `node test-runner.js`
 **Note:** Informational only - use `npm test` to run actual tests
 
 ```bash
@@ -155,8 +154,8 @@ The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `Abor
 
 #### Pure Referential Transparency Demonstration
 
-**Purpose:** Interactive demonstration of referential transparency principles  
-**Usage:** `./test_pure_fetcher.js` or `node test_pure_fetcher.js`  
+**Purpose:** Interactive demonstration of referential transparency principles
+**Usage:** `./test_pure_fetcher.js` or `node test_pure_fetcher.js`
 **Features:**
 
 - 5 comprehensive deterministic tests
@@ -171,14 +170,14 @@ The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `Abor
 
 #### CDN Delivery Script
 
-**Purpose:** Generate CDN URLs for ibira.js distribution  
+**Purpose:** Generate CDN URLs for ibira.js distribution
 **Prerequisites:**
 
 - Git installed and repository initialized
 - Node.js and npm available
 - Run from repository root
 
-**Usage:** `./cdn-delivery.sh`  
+**Usage:** `./cdn-delivery.sh`
 **Output:**
 
 - CDN URLs displayed in terminal
@@ -198,7 +197,7 @@ The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `Abor
 
 #### Deploy Script
 
-**Purpose:** Tag a release, push to remote, and regenerate CDN URLs  
+**Purpose:** Tag a release, push to remote, and regenerate CDN URLs
 **Prerequisites:**
 
 - Clean git working tree (no uncommitted changes)
@@ -229,7 +228,7 @@ The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `Abor
 
 #### Deploy Script
 
-**Purpose:** Tag a release, push to remote, and regenerate CDN URLs  
+**Purpose:** Tag a release, push to remote, and regenerate CDN URLs
 **Prerequisites:**
 
 - Clean git working tree (no uncommitted changes)

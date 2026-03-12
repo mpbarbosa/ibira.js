@@ -67,7 +67,7 @@ test('should parse API response with all fields', () => {
         data: { id: '123', value: 42 },
         timestamp: '2025-01-08T10:00:00Z'
     };
-    
+
     expect(parseApiResponse(response)).toEqual({ id: '123', value: 42 });
 });
 ```
@@ -142,10 +142,10 @@ Structure tests in three clear phases:
 test('should format CEP correctly', () => {
     // Arrange: Set up test data
     const cep = '01310200';
-    
+
     // Act: Execute the function
     const formatted = formatCEP(cep);
-    
+
     // Assert: Verify the result
     expect(formatted).toBe('01310-200');
 });
@@ -160,7 +160,7 @@ Focus on what the function does, not how it does it:
 test('should return sorted cities', () => {
     const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
     const result = sortCities(cities);
-    
+
     expect(result[0]).toBe('Brasília');
     expect(result).toHaveLength(3);
 });
@@ -171,7 +171,7 @@ test('should return sorted cities', () => {
 test('should call Array.sort with correct comparator', () => {
     const sortSpy = jest.spyOn(Array.prototype, 'sort');
     sortCities(['São Paulo', 'Rio']);
-    
+
     expect(sortSpy).toHaveBeenCalledWith(expect.any(Function));
 });
 ```
@@ -184,16 +184,16 @@ Each test should set up its own data and not rely on other tests:
 ```javascript
 describe('AddressCache', () => {
     let cache;
-    
+
     beforeEach(() => {
         cache = new AddressCache(); // Fresh instance for each test
     });
-    
+
     test('should store address', () => {
         cache.set('key1', { city: 'São Paulo' });
         expect(cache.get('key1')).toBeDefined();
     });
-    
+
     test('should return null for missing key', () => {
         expect(cache.get('nonexistent')).toBeNull();
     });
@@ -215,7 +215,7 @@ test('calculates distance quickly', () => {
     const start = Date.now();
     calculateDistance(coord1, coord2);
     const duration = Date.now() - start;
-    
+
     expect(duration).toBeLessThan(10); // Less than 10ms
 });
 ```
@@ -308,12 +308,12 @@ describe('calculateDistance', () => {
         test('should calculate distance between two coordinates', () => {});
         test('should return 0 for same coordinates', () => {});
     });
-    
+
     describe('edge cases', () => {
         test('should handle null coordinates', () => {});
         test('should handle undefined coordinates', () => {});
     });
-    
+
     describe('error cases', () => {
         test('should throw error for invalid latitude', () => {});
         test('should throw error for invalid longitude', () => {});
@@ -374,25 +374,25 @@ describe('getCacheKey', () => {
     test('should generate cache key with sorted params', () => {
         const url = 'https://api.example.com/data';
         const params = { id: '123', type: 'json' };
-        
+
         const key = getCacheKey(url, params);
-        
+
         expect(key).toBe('https://api.example.com/data?id=123&type=json');
     });
-    
+
     test('should return URL only when params is empty', () => {
         const url = 'https://api.example.com/data';
-        
+
         expect(getCacheKey(url, {})).toBe(url);
     });
-    
+
     test('should be deterministic (same params produce same key)', () => {
         const url = 'https://api.example.com';
         const params = { a: '1', b: '2' };
-        
+
         const key1 = getCacheKey(url, params);
         const key2 = getCacheKey(url, params);
-        
+
         expect(key1).toBe(key2);
     });
 });
@@ -427,7 +427,7 @@ function buildGeocodingUrl(address, options = {}) {
 // Pure function - easy to unit test
 function parseGeocodingResponse(response) {
     if (!response || response.length === 0) return null;
-    
+
     const result = response[0];
     return {
         lat: parseFloat(result.lat),
@@ -449,23 +449,23 @@ describe('Geocoding Functions', () => {
     describe('buildGeocodingUrl (pure)', () => {
         test('should build URL with required parameters', () => {
             const url = buildGeocodingUrl('Avenida Paulista, São Paulo');
-            
+
             expect(url).toContain('nominatim.openstreetmap.org');
             expect(url).toContain('q=Avenida+Paulista');
             expect(url).toContain('format=json');
         });
-        
+
         test('should include optional parameters', () => {
-            const url = buildGeocodingUrl('São Paulo', { 
-                details: true, 
-                limit: 5 
+            const url = buildGeocodingUrl('São Paulo', {
+                details: true,
+                limit: 5
             });
-            
+
             expect(url).toContain('addressdetails=1');
             expect(url).toContain('limit=5');
         });
     });
-    
+
     describe('parseGeocodingResponse (pure)', () => {
         test('should parse valid response', () => {
             const response = [{
@@ -473,41 +473,41 @@ describe('Geocoding Functions', () => {
                 lon: '-46.633308',
                 display_name: 'São Paulo, Brasil'
             }];
-            
+
             const result = parseGeocodingResponse(response);
-            
+
             expect(result).toEqual({
                 lat: -23.550520,
                 lon: -46.633308,
                 displayName: 'São Paulo, Brasil'
             });
         });
-        
+
         test('should return null for empty response', () => {
             expect(parseGeocodingResponse([])).toBeNull();
             expect(parseGeocodingResponse(null)).toBeNull();
         });
     });
-    
+
     describe('fetchGeocodingData (impure)', () => {
         beforeEach(() => {
             // Mock the side effect
             global.fetch = jest.fn();
         });
-        
+
         test('should fetch and parse geocoding data', async () => {
             const mockResponse = [{
                 lat: '-23.5',
                 lon: '-46.6',
                 display_name: 'Test'
             }];
-            
+
             global.fetch.mockResolvedValue({
                 json: () => Promise.resolve(mockResponse)
             });
-            
+
             const result = await fetchGeocodingData('São Paulo');
-            
+
             expect(result.lat).toBe(-23.5);
             expect(result.lon).toBe(-46.6);
         });
@@ -556,23 +556,23 @@ describe('formatCEP edge cases', () => {
     test('should handle null input', () => {
         expect(formatCEP(null)).toBe('');
     });
-    
+
     test('should handle undefined input', () => {
         expect(formatCEP(undefined)).toBe('');
     });
-    
+
     test('should handle empty string', () => {
         expect(formatCEP('')).toBe('');
     });
-    
+
     test('should handle invalid length', () => {
         expect(formatCEP('123')).toBe('');
     });
-    
+
     test('should handle non-numeric characters', () => {
         expect(formatCEP('abcdefgh')).toBe('');
     });
-    
+
     test('should handle already formatted CEP', () => {
         expect(formatCEP('01310-200')).toBe('01310-200');
     });
@@ -605,20 +605,20 @@ Use `beforeEach` and `afterEach` to avoid repetition:
 ```javascript
 describe('AddressCache', () => {
     let cache;
-    
+
     beforeEach(() => {
         cache = new AddressCache();
     });
-    
+
     afterEach(() => {
         cache.clear();
     });
-    
+
     test('should add item', () => {
         cache.set('key', 'value');
         expect(cache.get('key')).toBe('value');
     });
-    
+
     test('should remove item', () => {
         cache.set('key', 'value');
         cache.delete('key');
@@ -636,19 +636,19 @@ describe('calculateDistance error handling', () => {
     test('should throw error for invalid latitude', () => {
         const invalid = { lat: 91, lon: 0 };
         const valid = { lat: 0, lon: 0 };
-        
+
         expect(() => calculateDistance(invalid, valid))
             .toThrow('Invalid latitude');
     });
-    
+
     test('should throw error for invalid longitude', () => {
         const invalid = { lat: 0, lon: 181 };
         const valid = { lat: 0, lon: 0 };
-        
+
         expect(() => calculateDistance(valid, invalid))
             .toThrow('Invalid longitude');
     });
-    
+
     test('should throw error for null coordinates', () => {
         expect(() => calculateDistance(null, { lat: 0, lon: 0 }))
             .toThrow('Coordinates cannot be null');
@@ -707,16 +707,16 @@ describe('isValidCEP', () => {
     test('should accept valid 8-digit CEP', () => {
         expect(isValidCEP('01310200')).toBe(true);
     });
-    
+
     test('should accept formatted CEP', () => {
         expect(isValidCEP('01310-200')).toBe(true);
     });
-    
+
     test('should reject CEP with wrong length', () => {
         expect(isValidCEP('123')).toBe(false);
         expect(isValidCEP('123456789')).toBe(false);
     });
-    
+
     test('should reject null and undefined', () => {
         expect(isValidCEP(null)).toBe(false);
         expect(isValidCEP(undefined)).toBe(false);
@@ -746,7 +746,7 @@ describe('formatAddress', () => {
         const address = buildAddress();
         expect(formatAddress(address)).toContain('Avenida Paulista');
     });
-    
+
     test('should handle missing neighborhood', () => {
         const address = buildAddress({ neighborhood: null });
         const result = formatAddress(address);
@@ -765,13 +765,13 @@ describe('isValidBrazilianState', () => {
         'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC',
         'SP', 'SE', 'TO'
     ];
-    
+
     test.each(validStates)('should accept valid state: %s', (state) => {
         expect(isValidBrazilianState(state)).toBe(true);
     });
-    
+
     const invalidStates = ['XX', 'ZZ', '', null, undefined, 'S', 'SPP'];
-    
+
     test.each(invalidStates)('should reject invalid state: %s', (state) => {
         expect(isValidBrazilianState(state)).toBe(false);
     });
@@ -791,9 +791,9 @@ describe('formatBrazilianAddress', () => {
             state: 'SP',
             zipCode: '01310-200'
         };
-        
+
         const result = formatBrazilianAddress(address);
-        
+
         // Snapshot test captures the exact output
         expect(result).toMatchSnapshot();
     });
@@ -808,7 +808,7 @@ describe('formatBrazilianAddress', () => {
 // src/utils.js
 function normalizeStreet(street) {
     if (!street) return '';
-    
+
     return street
         .trim()
         .replace(/\s+/g, ' ')
@@ -828,19 +828,19 @@ describe('normalizeStreet', () => {
     test('should normalize "rua" to "Rua"', () => {
         expect(normalizeStreet('rua paulista')).toBe('Rua paulista');
     });
-    
+
     test('should normalize "av" to "Avenida"', () => {
         expect(normalizeStreet('av paulista')).toBe('Avenida paulista');
     });
-    
+
     test('should handle extra whitespace', () => {
         expect(normalizeStreet('  rua   paulista  ')).toBe('Rua paulista');
     });
-    
+
     test('should handle empty string', () => {
         expect(normalizeStreet('')).toBe('');
     });
-    
+
     test('should handle null', () => {
         expect(normalizeStreet(null)).toBe('');
     });
@@ -856,7 +856,7 @@ class AddressFormatter {
         this.separator = options.separator || ', ';
         this.includeCountry = options.includeCountry || false;
     }
-    
+
     format(address) {
         const parts = [
             address.street,
@@ -866,13 +866,13 @@ class AddressFormatter {
             address.state,
             address.zipCode
         ].filter(Boolean);
-        
+
         let result = parts.join(this.separator);
-        
+
         if (this.includeCountry) {
             result += `${this.separator}Brasil`;
         }
-        
+
         return result;
     }
 }
@@ -883,25 +883,25 @@ describe('AddressFormatter', () => {
         test('should use default separator', () => {
             const formatter = new AddressFormatter();
             const address = { street: 'Rua A', number: '123' };
-            
+
             expect(formatter.format(address)).toBe('Rua A, 123');
         });
-        
+
         test('should use custom separator', () => {
             const formatter = new AddressFormatter({ separator: ' - ' });
             const address = { street: 'Rua A', number: '123' };
-            
+
             expect(formatter.format(address)).toBe('Rua A - 123');
         });
     });
-    
+
     describe('format', () => {
         let formatter;
-        
+
         beforeEach(() => {
             formatter = new AddressFormatter();
         });
-        
+
         test('should format complete address', () => {
             const address = {
                 street: 'Avenida Paulista',
@@ -911,31 +911,31 @@ describe('AddressFormatter', () => {
                 state: 'SP',
                 zipCode: '01310-200'
             };
-            
+
             const result = formatter.format(address);
-            
+
             expect(result).toBe(
                 'Avenida Paulista, 1578, Bela Vista, São Paulo, SP, 01310-200'
             );
         });
-        
+
         test('should handle missing fields', () => {
             const address = {
                 street: 'Avenida Paulista',
                 city: 'São Paulo'
             };
-            
+
             const result = formatter.format(address);
-            
+
             expect(result).toBe('Avenida Paulista, São Paulo');
         });
-        
+
         test('should include country when option is set', () => {
             const formatter = new AddressFormatter({ includeCountry: true });
             const address = { city: 'São Paulo' };
-            
+
             const result = formatter.format(address);
-            
+
             expect(result).toBe('São Paulo, Brasil');
         });
     });
@@ -955,27 +955,27 @@ function sortCitiesByName(cities) {
 describe('sortCitiesByName', () => {
     test('should return sorted cities', () => {
         const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
-        
+
         const result = sortCitiesByName(cities);
-        
+
         expect(result).toEqual(['Brasília', 'Rio de Janeiro', 'São Paulo']);
     });
-    
+
     test('should not mutate original array', () => {
         const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
         const original = [...cities];
-        
+
         sortCitiesByName(cities);
-        
+
         // Original array unchanged
         expect(cities).toEqual(original);
     });
-    
+
     test('should handle Portuguese characters correctly', () => {
         const cities = ['Belém', 'Brasília', 'São Paulo'];
-        
+
         const result = sortCitiesByName(cities);
-        
+
         expect(result[0]).toBe('Belém');
         expect(result[1]).toBe('Brasília');
     });
@@ -1001,14 +1001,14 @@ Use mocks when testing code that has external dependencies:
 // __tests__/geolocation.test.js
 describe('getCurrentLocation', () => {
     let mockGeolocation;
-    
+
     beforeEach(() => {
         mockGeolocation = {
             getCurrentPosition: jest.fn()
         };
         global.navigator = { geolocation: mockGeolocation };
     });
-    
+
     test('should get current location', async () => {
         const mockPosition = {
             coords: {
@@ -1017,27 +1017,27 @@ describe('getCurrentLocation', () => {
                 accuracy: 10
             }
         };
-        
+
         mockGeolocation.getCurrentPosition.mockImplementation((success) => {
             success(mockPosition);
         });
-        
+
         const location = await getCurrentLocation();
-        
+
         expect(location.lat).toBe(-23.5);
         expect(location.lon).toBe(-46.6);
     });
-    
+
     test('should handle geolocation error', async () => {
         const mockError = {
             code: 1,
             message: 'User denied geolocation'
         };
-        
+
         mockGeolocation.getCurrentPosition.mockImplementation((_, error) => {
             error(mockError);
         });
-        
+
         await expect(getCurrentLocation()).rejects.toThrow('User denied');
     });
 });
@@ -1051,11 +1051,11 @@ describe('fetchAddressFromCEP', () => {
     beforeEach(() => {
         global.fetch = jest.fn();
     });
-    
+
     afterEach(() => {
         jest.restoreAllMocks();
     });
-    
+
     test('should fetch address data', async () => {
         const mockResponse = {
             cep: '01310-200',
@@ -1064,21 +1064,21 @@ describe('fetchAddressFromCEP', () => {
             localidade: 'São Paulo',
             uf: 'SP'
         };
-        
+
         global.fetch.mockResolvedValue({
             ok: true,
             json: () => Promise.resolve(mockResponse)
         });
-        
+
         const result = await fetchAddressFromCEP('01310-200');
-        
+
         expect(result.street).toBe('Avenida Paulista');
         expect(result.city).toBe('São Paulo');
     });
-    
+
     test('should handle API error', async () => {
         global.fetch.mockRejectedValue(new Error('Network error'));
-        
+
         await expect(fetchAddressFromCEP('01310-200'))
             .rejects
             .toThrow('Network error');
@@ -1095,24 +1095,24 @@ describe('isBusinessHour', () => {
         // Mock Date.now()
         jest.useFakeTimers();
     });
-    
+
     afterEach(() => {
         jest.useRealTimers();
     });
-    
+
     test('should return true during business hours', () => {
         // Set time to 10:00 AM
         const mockDate = new Date('2025-01-08T10:00:00');
         jest.setSystemTime(mockDate);
-        
+
         expect(isBusinessHour()).toBe(true);
     });
-    
+
     test('should return false outside business hours', () => {
         // Set time to 11:00 PM
         const mockDate = new Date('2025-01-08T23:00:00');
         jest.setSystemTime(mockDate);
-        
+
         expect(isBusinessHour()).toBe(false);
     });
 });
@@ -1136,9 +1136,9 @@ describe('processAddress', () => {
             lat: -23.5,
             lon: -46.6
         });
-        
+
         const result = await processAddress('São Paulo');
-        
+
         expect(geocode).toHaveBeenCalledWith('São Paulo');
         expect(result.lat).toBe(-23.5);
     });
@@ -1153,11 +1153,11 @@ describe('processAddress', () => {
 describe('fetchAddress', () => {
     test('should resolve with address data', async () => {
         const address = await fetchAddress('01310-200');
-        
+
         expect(address).toBeDefined();
         expect(address.city).toBe('São Paulo');
     });
-    
+
     test('should reject with error for invalid CEP', async () => {
         await expect(fetchAddress('invalid'))
             .rejects
@@ -1172,15 +1172,15 @@ describe('fetchAddress', () => {
 describe('geocodeAddress', () => {
     test('should geocode Brazilian address', async () => {
         const result = await geocodeAddress('Avenida Paulista, São Paulo');
-        
+
         expect(result).toHaveProperty('lat');
         expect(result).toHaveProperty('lon');
         expect(result.lat).toBeCloseTo(-23.5, 0);
     });
-    
+
     test('should handle network errors', async () => {
         global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
-        
+
         try {
             await geocodeAddress('São Paulo');
             fail('Should have thrown an error');
@@ -1202,7 +1202,7 @@ describe('loadAddress with callback', () => {
             done();
         });
     });
-    
+
     test('should call callback with error', (done) => {
         loadAddress('invalid', (error, address) => {
             expect(error).toBeDefined();
@@ -1220,22 +1220,22 @@ describe('debounced geocoding', () => {
     beforeEach(() => {
         jest.useFakeTimers();
     });
-    
+
     afterEach(() => {
         jest.useRealTimers();
     });
-    
+
     test('should debounce multiple calls', () => {
         const mockCallback = jest.fn();
         const debouncedGeocode = debounce(mockCallback, 500);
-        
+
         debouncedGeocode('São Paulo');
         debouncedGeocode('Rio de Janeiro');
         debouncedGeocode('Brasília');
-        
+
         // Advance time by 500ms
         jest.advanceTimersByTime(500);
-        
+
         // Only last call should execute
         expect(mockCallback).toHaveBeenCalledTimes(1);
         expect(mockCallback).toHaveBeenCalledWith('Brasília');
@@ -1252,12 +1252,12 @@ describe('addCity', () => {
     test('should not mutate original array', () => {
         const cities = ['São Paulo', 'Rio de Janeiro'];
         const original = [...cities];
-        
+
         const result = addCity(cities, 'Brasília');
-        
+
         // Original array unchanged
         expect(cities).toEqual(original);
-        
+
         // New array has added city
         expect(result).toContain('Brasília');
         expect(result).toHaveLength(3);
@@ -1268,9 +1268,9 @@ describe('sortArray', () => {
     test('should return new sorted array without mutating original', () => {
         const numbers = [3, 1, 4, 1, 5];
         const original = [...numbers];
-        
+
         const sorted = sortArray(numbers);
-        
+
         expect(numbers).toEqual(original);
         expect(sorted).toEqual([1, 1, 3, 4, 5]);
     });
@@ -1288,12 +1288,12 @@ describe('updateAddress', () => {
             city: 'São Paulo'
         };
         const original = { ...address };
-        
+
         const updated = updateAddress(address, { number: '2000' });
-        
+
         // Original unchanged
         expect(address).toEqual(original);
-        
+
         // New object has updated value
         expect(updated.number).toBe('2000');
         expect(updated.street).toBe('Avenida Paulista');
@@ -1309,11 +1309,11 @@ describe('immutable operations', () => {
         const address = Object.freeze({
             city: 'São Paulo'
         });
-        
+
         expect(() => {
             address.city = 'Rio de Janeiro'; // Fails in strict mode
         }).toThrow(); // Or doesn't throw in non-strict mode
-        
+
         expect(Object.isFrozen(address)).toBe(true);
     });
 });
@@ -1375,7 +1375,7 @@ await expect(promise).rejects.toThrow();
   "jest": {
     // Use node environment for unit tests
     "testEnvironment": "node",
-    
+
     // Coverage thresholds
     "coverageThreshold": {
       "global": {
@@ -1385,13 +1385,13 @@ await expect(promise).rejects.toThrow();
         "statements": 80
       }
     },
-    
+
     // Ignore patterns
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/dist/"
     ],
-    
+
     // Setup files
     "setupFilesAfterEnv": ["<rootDir>/__tests__/setup.js"]
   }
@@ -1458,9 +1458,9 @@ npm test -- --coverage --collectCoverageFrom="src/utils.js"
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2025-01-09  
-**Status**: ✅ Ready for use  
+**Version**: 1.0.0
+**Last Updated**: 2025-01-09
+**Status**: ✅ Ready for use
 **Maintained by**: ibira.js Team
 
 ---
@@ -1484,18 +1484,18 @@ describe('Feature/Module', () => {
     beforeEach(() => {
         // Setup before each test
     });
-    
+
     afterEach(() => {
         // Cleanup after each test
     });
-    
+
     test('should do something specific', () => {
         // Arrange
         const input = createInput();
-        
+
         // Act
         const result = functionUnderTest(input);
-        
+
         // Assert
         expect(result).toBe(expected);
     });

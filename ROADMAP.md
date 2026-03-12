@@ -1,6 +1,6 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.3.2-alpha — Alpha Hardening  
+> **Current version:** 0.3.3-alpha — Alpha Hardening
 > **Status:** Beta preparation in progress
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
@@ -16,7 +16,7 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.1-alpha** | jsDelivr CDN delivery, SRI support, CDN URL generator script |
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
 | **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
-| **0.3.2-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
+| **0.3.3-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
 
 ---
 
@@ -48,10 +48,22 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [ ] **Test suite refactoring** — extract repeated setup (cache factories, URL constants, mock
   observers) to shared helpers; convert parallel edge-case tests to `it.each` parameterised tables;
   rename any remaining implementation-focused test names to behaviour-focused names (e.g.
-  "should store and retrieve null values" rather than "should handle null values")
-- [ ] **Prettier integration** — add `prettier` dev dependency with a `.prettierrc` config file and
-  a `"format": "prettier --write ."` script; ensure ESLint and Prettier configs do not conflict
-  (install `eslint-config-prettier`); document formatting step in `CONTRIBUTING.md`
+  "should store and retrieve null values" rather than "should handle null values"); prefer specific
+  Jest matchers (`toBeUndefined`, `toBeNull`, `toHaveLength`, `toBeInstanceOf`, `toHaveBeenCalledTimes`,
+  `toHaveBeenCalledWith`) over generic `toEqual`; use `.resolves`/`.rejects` for async assertions;
+  ensure all mocks and timers are reset in `afterEach` for test isolation
+- [ ] **Integration & e2e test layer** — the current suite is unit-heavy (6 files, 1 directory);
+  add integration tests covering cross-module flows (`IbiraAPIFetchManager` ↔ `DefaultCache` ↔
+  `DefaultEventNotifier`) and at least one e2e scenario exercising the full fetch-cache-notify
+  pipeline; maintain the test pyramid (unit → integration → e2e) as the codebase grows
+- [ ] **Prettier integration** — add `.prettierrc` config file and ensure ESLint and Prettier configs
+  do not conflict (install `eslint-config-prettier`); document formatting step in `CONTRIBUTING.md`
+  (`npm run format` script and `prettier` devDependency already added in v0.4.x)
+- [ ] **Markdown quality hardening** — 2786 linting violations remain across 43 docs after bulk-fixing
+  trailing spaces (MD009) and final newlines (MD047); manually review and fix nested list indentation
+  (MD007) and headers ending with punctuation (MD026); integrate `markdownlint-cli` as a pre-commit
+  hook (Husky) and CI step to prevent regressions; add `docs/MARKDOWN_LINTING_GUIDE.md` for
+  contributors
 - [ ] **Cache cleanup scalability review** — profile the periodic cleanup interval
   (`_startPeriodicCleanup`) under high-load scenarios (many concurrent URLs, large TTL spreads);
   consider a lazy / on-demand eviction strategy for environments where `setInterval` is costly
@@ -59,6 +71,26 @@ Low-priority housekeeping items that improve contributor experience without chan
   behaviour (what happens when `maxSize` is reached mid-burst), retry exhaustion (what the caller
   receives after all retries fail), and observer error isolation (does one subscriber's throw
   prevent others from being notified)
+- [ ] **`docs/INDEX.md` CDN & versioning refresh** — update CDN URLs and version references in
+  `docs/INDEX.md` to point to npm-based delivery (`cdn.jsdelivr.net/npm/ibira.js@…/dist/index.mjs`)
+  now that the package is published; verify all cross-links remain valid
+- [ ] **`docs/FUNCTIONAL_REQUIREMENTS.md` API alignment** — review and update to reflect current
+  API surface (HTTP methods beyond GET, `validateStatus`, `AbortController` signal) and CDN usage
+  patterns introduced in v0.4.x
+- [ ] **`docs/ARCHITECTURE.md` TypeScript update** — update to reflect TypeScript source migration,
+  new `tsconfig.json` / tsup build pipeline, and the `dist/` output structure (CJS + ESM + `.d.ts`)
+- [ ] **`__tests__/README.md` dual-environment expansion** — expand to document dual-environment
+  testing requirements (Node.js ≥18 + jsdom), new test modules (`DefaultCache`, `DefaultEventNotifier`),
+  and the `npm run test:node` script
+- [ ] **Referential transparency docs cross-linking** — add explicit cross-links between the five
+  related referential transparency documents (`docs/REFERENTIAL_TRANSPARENCY.md`,
+  `.github/REFERENTIAL_TRANSPARENCY.md`, `docs/referential_transparency/REFERENTIAL_TRANSPARENCY.md`,
+  `docs/referential_transparency/PURE_SOLUTION.md`,
+  `docs/referential_transparency/VERIFICATION_REPORT.md`) so readers can navigate between them
+- [ ] **Script best-practice documentation** — add a brief "Script Best Practices" note to
+  `docs/ARCHITECTURE.md` (or README.md) covering: executable permissions (`chmod +x`), shebang
+  presence, required environment variables, and expected exit codes for `cdn-delivery.sh` and
+  `scripts/deploy.sh`; also note each script's expected stdout output and return values
 
 ---
 
@@ -92,9 +124,16 @@ all three. Prioritising TypeScript migration and Node.js support makes that nich
 - [x] **HTTP methods beyond GET** — `POST`, `PUT`, `PATCH`, `DELETE` support with configurable
   body serialization
 
----
+- [ ] **Wire retry loop into `fetchData()`** _(high-priority bug, step_18)_ — Private methods
+  `_isRetryableError()`, `_calculateRetryDelay()`, and `_sleep()` in `IbiraAPIFetcher.ts` are fully
+  implemented and unit-tested but **never called** — the retry loop body is missing from `fetchData()`.
+  Wiring them in requires advancing fake timers in tests that use `fetch.mockRejectedValue` with
+  retryable status codes (408/429/500-504); recommended approach is `jest.runAllTimersAsync()` in
+  the retry-specific describe block, or setting `maxRetries: 0` in non-retry test fixtures.
+- [ ] **Stricter generics** — Parameterise `DefaultCache<T>` and `Observer<T>` with a type argument
+  instead of `unknown` so consumers get end-to-end type inference for cached values and event payloads.
 
-## 🔜 v0.5.x — Middleware & Extension Points
+
 
 Goal: let consumers customise the request/response pipeline.
 
@@ -102,6 +141,8 @@ Goal: let consumers customise the request/response pipeline.
 - [ ] **Response interceptors** — transform or validate responses before caching
 - [ ] **Pluggable cache backends** — formalise the cache interface so consumers can swap in localStorage, IndexedDB, Redis adapters, etc.
 - [ ] **Pluggable retry strategies** — expose a `retryStrategy(attempt, error)` function option alongside the existing fixed exponential backoff
+- [ ] **Stricter generics for cache & event interfaces** — introduce `DefaultCache<T>` and `Observer<T>` generics so cache values and observer payloads are fully typed end-to-end; eliminates `any` / `unknown` casts in consumers
+- [ ] **Async error propagation audit** — review all `fetch` call sites to confirm every async path has an explicit `try/catch` and surfaces errors to the caller rather than swallowing them silently
 
 ---
 
@@ -113,6 +154,7 @@ Goal: production-ready, semantically stable public API.
 - [x] Full TypeScript strict-mode compatibility
 - [ ] 95%+ test coverage across all metrics
 - [ ] Performance benchmarks published in `docs/`
+- [ ] **Performance monitoring hooks** — add optional hooks for observability metrics (fetch timing, cache hit/miss rate, retry counts) to support profiling and future scalability analysis
 - [ ] `MIGRATION.md` updated for any breaking changes from alpha
 - [ ] `SECURITY.md` and responsible-disclosure process
 - [x] Automated npm publish via GitHub Actions on tagged releases

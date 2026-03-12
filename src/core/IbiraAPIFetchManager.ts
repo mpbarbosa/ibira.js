@@ -6,7 +6,7 @@
  */
 
 import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
-import type { CacheEntry, CacheInterface, FetcherOptions } from './IbiraAPIFetcher.js';
+import type { CacheEntry, CacheInterface, FetcherOptions, HttpMethod } from './IbiraAPIFetcher.js';
 import type { Observer } from '../utils/DefaultEventNotifier.js';
 
 /**
@@ -63,7 +63,7 @@ export interface RetryConfig {
 	retryDelay?: number;
 	retryMultiplier?: number;
 	retryableStatusCodes?: number[];
-	method?: string;
+	method?: HttpMethod;
 }
 
 /**
@@ -183,7 +183,7 @@ export class IbiraAPIFetchManager {
 	 * });
 	 */
 	getFetcher(url: string, options: FetcherOptions = {}): IbiraAPIFetcher {
-		const method = (options.method || 'GET').toUpperCase();
+		const method = (options.method || 'GET').toUpperCase() as HttpMethod;
 		const fetcherKey = `${method}:${url}`;
 		if (!this.fetchers.has(fetcherKey)) {
 			// Configure global cache with manager settings
@@ -661,7 +661,7 @@ export class IbiraAPIFetchManager {
 	setRetryConfigForUrl(url: string, retryConfig: RetryConfig = {}): void {
 		// ✅ IMMUTABLE: Create new fetcher instance instead of modifying existing one
 		// This respects the frozen nature of IbiraAPIFetcher instances
-		const method = (retryConfig.method || 'GET').toUpperCase();
+		const method = (retryConfig.method || 'GET').toUpperCase() as HttpMethod;
 		const fetcherKey = `${method}:${url}`;
 		if (this.fetchers.has(fetcherKey)) {
 			const oldFetcher = this.fetchers.get(fetcherKey)!;

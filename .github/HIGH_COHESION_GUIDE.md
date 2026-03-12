@@ -452,18 +452,18 @@ test-suite:
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Run tests
       run: npm test
-    
+
     - name: Generate coverage
       run: npm run test:coverage
 ```
@@ -477,16 +477,16 @@ everything:
   steps:
     - name: Run tests
       run: npm test
-    
+
     - name: Build Docker image
       run: docker build .
-    
+
     - name: Send Slack notification
       run: curl -X POST slack-webhook
-    
+
     - name: Update documentation
       run: npm run docs
-    
+
     - name: Clean old releases
       run: gh release delete old
 ```
@@ -596,7 +596,7 @@ describe('IbiraAPIFetcher', () => {
     await fetcher.fetchData();
     expect(fetcher.data).toBeDefined();
   });
-  
+
   // All tests focus on fetching - one responsibility
 });
 
@@ -609,7 +609,7 @@ describe('IbiraAPIFetchManager', () => {
     // Verify both resolve to same promise
     expect(promise1).toBe(promise2);
   });
-  
+
   // All tests focus on coordination - different responsibility
 });
 ```
@@ -626,7 +626,7 @@ describe('IbiraAPIFetchManager', () => {
 - [JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md) - JavaScript coding standards
 
 ### Architecture Examples
-- [src/core/IbiraAPIFetcher.js](../src/core/IbiraAPIFetcher.js) - Main library showing cohesive class design
+- [src/core/IbiraAPIFetcher.ts](../src/core/IbiraAPIFetcher.ts) - Main library showing cohesive class design
   - `IbiraAPIFetcher` - Focused on individual API fetching operations
   - `IbiraAPIFetchManager` - Focused on coordinating multiple fetchers
 

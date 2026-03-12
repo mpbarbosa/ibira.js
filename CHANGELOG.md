@@ -12,10 +12,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ADDED**: Node.js ≥18 dual support — `jest.node.config.mjs` confirms all 200 tests pass in both browser (jsdom) and Node.js environments; `npm run test:node` script added
 - **ADDED**: TypeScript source migration — all `src/**/*.js` converted to strict-mode `.ts`; `tsconfig.json` (ES2022, strict, declaration); ts-jest replaces Babel for source transformation; native TypeScript interfaces (`FetcherOptions`, `FetchResult`, `CacheEntry`, `Observer`, `CacheOperation`, `FetchEvent`, `FetchMeta`) exported from `dist/index.d.ts`
 - **ADDED**: CJS + ESM dual build via tsup — `dist/index.js` (CJS), `dist/index.mjs` (ESM), `dist/index.d.ts` (types); `exports` field in `package.json` for proper Node.js/bundler resolution; `npm run build` script; `prepublishOnly` runs validate + test + build
+- **ADDED**: Updated CDN delivery — jsDelivr URLs now reference `dist/index.mjs` and version `0.4.0-alpha` for both script and module usage; documentation and examples updated accordingly
+- **ADDED**: Expanded test suite — `__tests__/DefaultCache.test.js`, `__tests__/DefaultEventNotifier.test.js`, `__tests__/IbiraAPIFetchManager.test.js`, `__tests__/IbiraAPIFetcher.test.js` cover new caching and event notifier logic
+- **ADDED**: `DefaultCache` and `DefaultEventNotifier` utilities — `src/utils/` modules migrated to strict TypeScript, fully documented and tested
+- **ADDED**: `IbiraAPIFetchManager` and `IbiraAPIFetcher` refactored to TypeScript — improved type safety, API surface, and JSDoc coverage
+- **ADDED**: `src/config/version.ts` — centralizes version management for build and runtime consistency
+
+### 🛠️ Improvements
+- **IMPROVED**: Documentation consistency — `README.md`, CDN examples, and API usage updated to match new build outputs and versioning
+- **IMPROVED**: Project structure — all source files migrated to TypeScript; build and test scripts updated for new structure
+- **IMPROVED**: Linting and formatting — ESLint and Prettier configs updated for strict TypeScript and Node.js 18+ compatibility
+
+### 🐛 Bug Fixes
+- **FIXED**: Test import paths and version assertions in `test/config/version.test.js`
+- **FIXED**: Observer error isolation in `DefaultEventNotifier`
+- **FIXED**: Caching logic edge cases in `DefaultCache`
+
+### 📚 Documentation
+- **UPDATED**: `README.md` — CDN usage, versioning, and API examples reflect new build outputs and TypeScript migration
+- **UPDATED**: `CONTRIBUTING.md` — developer setup, code standards, testing, PR flow
+- **UPDATED**: `__tests__/README.md` — test naming, mocking patterns, coverage targets
+- **UPDATED**: `docs/ARCHITECTURE.md` — new modules and build process
+- **UPDATED**: `docs/INDEX.md`, `docs/FUNCTIONAL_REQUIREMENTS.md` — reflect new utilities and API changes
 
 ---
 
-## [0.3.2-alpha] - 2026-03-12
+## [0.3.3-alpha] - 2026-03-12
 
 ### 🔒 Alpha Hardening
 
@@ -186,7 +208,7 @@ For contributors wanting to understand the new structure, see [MIGRATION_GUIDE.m
 
 | Version | Release Date | Status | Key Features |
 |---------|--------------|--------|--------------|
-| 0.3.2-alpha | 2026-03-12 | Latest | AbortController, validateStatus, ESLint, 90%+ branch coverage |
+| 0.3.3-alpha | 2026-03-12 | Latest | AbortController, validateStatus, ESLint, 90%+ branch coverage |
 | 0.2.2-alpha | 2026-01-10 | Current | Workflow config fixes, copilot instructions |
 | 0.2.1-alpha | 2025-12-15 | Superseded | CDN delivery, production URLs |
 | 0.2.0-alpha | 2025-12-15 | Superseded | Modular architecture, 152 tests (90%+ coverage) |
