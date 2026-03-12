@@ -48,6 +48,7 @@ describe('IbiraAPIFetcher', () => {
     let cache;
     let eventNotifier;
     const testUrl = 'https://api.example.com/data';
+    const testCacheKey = `GET:${testUrl}`;
     const mockData = { id: 123, name: 'Test Data' };
 
     beforeEach(() => {
@@ -145,7 +146,7 @@ describe('IbiraAPIFetcher', () => {
             expect(Array.isArray(result.cacheOperations)).toBe(true);
             
             // Verify no side effects on original cache
-            expect(testCache.has(testUrl)).toBe(false);
+            expect(testCache.has(testCacheKey)).toBe(false);
             expect(eventNotifier.notifications).toHaveLength(0);
         });
 
@@ -209,7 +210,7 @@ describe('IbiraAPIFetcher', () => {
                 timestamp: Date.now(),
                 expiresAt: Date.now() + 60000
             };
-            testCache.set(testUrl, cacheEntry);
+            testCache.set(testCacheKey, cacheEntry);
             
             const result = await fetcher.fetchDataPure(testCache);
             
@@ -242,8 +243,8 @@ describe('IbiraAPIFetcher', () => {
         test('should cache data after successful fetch', async () => {
             await fetcher.fetchData();
             
-            expect(cache.has(testUrl)).toBe(true);
-            const cacheEntry = cache.get(testUrl);
+            expect(cache.has(testCacheKey)).toBe(true);
+            const cacheEntry = cache.get(testCacheKey);
             expect(cacheEntry.data).toEqual(mockData);
             expect(cacheEntry.timestamp).toBeDefined();
             expect(cacheEntry.timestamp).toBeLessThanOrEqual(Date.now());
@@ -259,7 +260,7 @@ describe('IbiraAPIFetcher', () => {
                 timestamp: Date.now(),
                 expiresAt: Date.now() + 1000
             };
-            cache.set(testUrl, cacheEntry);
+            cache.set(testCacheKey, cacheEntry);
             
             const result = await fetcher.fetchData();
             
@@ -274,7 +275,7 @@ describe('IbiraAPIFetcher', () => {
                 timestamp: Date.now() - 2000,
                 expiresAt: Date.now() - 1000
             };
-            cache.set(testUrl, expiredEntry);
+            cache.set(testCacheKey, expiredEntry);
             
             const result = await fetcher.fetchData();
             
@@ -486,7 +487,7 @@ describe('IbiraAPIFetcher', () => {
         test('should properly format cache entries', async () => {
             await fetcher.fetchData();
             
-            const cacheEntry = cache.get(testUrl);
+            const cacheEntry = cache.get(testCacheKey);
             expect(cacheEntry).toHaveProperty('data');
             expect(cacheEntry).toHaveProperty('timestamp');
             expect(cacheEntry).toHaveProperty('expiresAt');
@@ -500,11 +501,11 @@ describe('IbiraAPIFetcher', () => {
                 timestamp: originalTimestamp,
                 expiresAt: Date.now() + 1000
             };
-            cache.set(testUrl, cacheEntry);
+            cache.set(testCacheKey, cacheEntry);
             
             await fetcher.fetchData();
             
-            const updatedEntry = cache.get(testUrl);
+            const updatedEntry = cache.get(testCacheKey);
             expect(updatedEntry.timestamp).toBeGreaterThan(originalTimestamp);
         });
 
@@ -531,7 +532,7 @@ describe('IbiraAPIFetcher', () => {
             expect(cache.size).toBe(2);
             expect(cache.has('url1')).toBe(false); // Oldest should be evicted
             expect(cache.has('url2')).toBe(true);
-            expect(cache.has(testUrl)).toBe(true);
+            expect(cache.has(testCacheKey)).toBe(true);
         });
     });
 
@@ -681,8 +682,8 @@ describe('IbiraAPIFetcher', () => {
     });
 
     describe('Helper Methods and Utilities', () => {
-        test('getCacheKey should return URL', () => {
-            expect(fetcher.getCacheKey()).toBe(testUrl);
+        test('getCacheKey should return method:URL', () => {
+            expect(fetcher.getCacheKey()).toBe(testCacheKey);
         });
 
         test('subscribe should add observer via eventNotifier', () => {
@@ -853,7 +854,7 @@ describe('IbiraAPIFetcher', () => {
                 success: true,
                 data: mockData,
                 cacheOperations: [
-                    { type: 'set', key: testUrl, value: cacheEntry }
+                    { type: 'set', key: testCacheKey, value: cacheEntry }
                 ],
                 events: []
             };
@@ -861,7 +862,7 @@ describe('IbiraAPIFetcher', () => {
             fetcher._applySideEffects(result, testCache);
             
             expect(testCache.size).toBe(1);
-            expect(testCache.get(testUrl)).toEqual(cacheEntry);
+            expect(testCache.get(testCacheKey)).toEqual(cacheEntry);
         });
 
         test('_applySideEffects should fire events', () => {
@@ -1090,6 +1091,94 @@ describe('IbiraAPIFetcher', () => {
             // 'xyz' won't parseInt to a valid number, statusMatch will be null-ish
             // Actually the regex /status: (\d+)/ won't match 'xyz', so statusMatch is null
             expect(fetcher._isRetryableError(malformedError)).toBe(false);
+        });
+    });
+
+    describe('v0.4.x — HTTP methods beyond GET', () => {
+        test('should default method to GET', () => {
+            expect(fetcher.method).toBe('GET');
+        });
+
+        test('should normalise method to uppercase', () => {
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'post' });
+            expect(f.method).toBe('POST');
+        });
+
+        test('should set body and headers from options', () => {
+            const body = { name: 'Alice' };
+            const headers = { Authorization: 'Bearer token' };
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST', body, headers });
+            expect(f.method).toBe('POST');
+            expect(f.body).toEqual(body);
+            expect(f.headers).toEqual(headers);
+            expect(Object.isFrozen(f.headers)).toBe(true);
+        });
+
+        test('getCacheKey includes method prefix', () => {
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST' });
+            expect(f.getCacheKey()).toBe(`POST:${testUrl}`);
+        });
+
+        test('POST and GET for same URL have different cache keys', () => {
+            const get = IbiraAPIFetcher.withDefaultCache(testUrl);
+            const post = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST' });
+            expect(get.getCacheKey()).not.toBe(post.getCacheKey());
+        });
+
+        test('should pass method to fetch() call', async () => {
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST', body: { x: 1 } });
+            await f.fetchData();
+            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({
+                method: 'POST',
+            }));
+        });
+
+        test('should auto-serialize plain object body to JSON and set Content-Type', async () => {
+            const body = { key: 'value' };
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST', body });
+            await f.fetchData();
+            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({
+                body: JSON.stringify(body),
+                headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+            }));
+        });
+
+        test('should pass string body without JSON-serializing it', async () => {
+            const body = 'raw string body';
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST', body });
+            await f.fetchData();
+            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({
+                body: 'raw string body',
+            }));
+        });
+
+        test('should not override caller-supplied Content-Type', async () => {
+            const body = { x: 1 };
+            const headers = { 'Content-Type': 'application/vnd.api+json' };
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST', body, headers });
+            await f.fetchData();
+            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({
+                headers: expect.objectContaining({ 'Content-Type': 'application/vnd.api+json' }),
+            }));
+        });
+
+        test('should include custom headers in fetch call', async () => {
+            const headers = { Authorization: 'Bearer abc', 'X-Custom': '1' };
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { headers });
+            await f.fetchData();
+            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({
+                headers: expect.objectContaining(headers),
+            }));
+        });
+
+        test('should not include headers key in fetchOptions when no headers and no body', async () => {
+            await fetcher.fetchData();
+            const [, opts] = fetch.mock.calls[0];
+            expect(opts.headers).toBeUndefined();
+        });
+
+        test('default body is null', () => {
+            expect(fetcher.body).toBeNull();
         });
     });
 });

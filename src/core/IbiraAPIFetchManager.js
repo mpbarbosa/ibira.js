@@ -121,7 +121,7 @@ export class IbiraAPIFetchManager {
 	}
 
 	/**
-	 * Creates or retrieves a fetcher instance for the given URL
+	 * Creates or retrieves a fetcher instance for the given URL and method.
 	 * 
 	 * @param {string} url - The API endpoint URL
 	 * @param {Object} [options={}] - Configuration options for the fetcher
@@ -130,7 +130,10 @@ export class IbiraAPIFetchManager {
 	 * @param {number} [options.retryDelay] - Initial retry delay in milliseconds
 	 * @param {number} [options.retryMultiplier] - Exponential backoff multiplier
 	 * @param {number[]} [options.retryableStatusCodes] - HTTP status codes that should trigger retries
-	 * @returns {IbiraAPIFetcher} The fetcher instance for this URL
+	 * @param {'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'HEAD'} [options.method='GET'] - HTTP method
+	 * @param {Object|string|FormData|Blob|null} [options.body=null] - Request body
+	 * @param {Object} [options.headers={}] - Additional request headers
+	 * @returns {IbiraAPIFetcher} The fetcher instance for this URL + method combination
 	 * 
 	 * @example
 	 * const fetcher = manager.getFetcher('https://api.example.com/data', {
@@ -139,7 +142,9 @@ export class IbiraAPIFetchManager {
 	 * });
 	 */
 	getFetcher(url, options = {}) {
-		if (!this.fetchers.has(url)) {
+		const method = (options.method || 'GET').toUpperCase();
+		const fetcherKey = `${method}:${url}`;
+		if (!this.fetchers.has(fetcherKey)) {
 			// Configure global cache with manager settings
 			this.globalCache.maxSize = this.maxCacheSize;
 			this.globalCache.expiration = this.cacheExpiration;
@@ -150,14 +155,17 @@ export class IbiraAPIFetchManager {
 				maxRetries: options.maxRetries !== undefined ? options.maxRetries : this.defaultMaxRetries,
 				retryDelay: options.retryDelay !== undefined ? options.retryDelay : this.defaultRetryDelay,
 				retryMultiplier: options.retryMultiplier !== undefined ? options.retryMultiplier : this.defaultRetryMultiplier,
-				retryableStatusCodes: options.retryableStatusCodes || this.defaultRetryableStatusCodes
+				retryableStatusCodes: options.retryableStatusCodes || this.defaultRetryableStatusCodes,
+				method,
+				body: options.body !== undefined ? options.body : null,
+				headers: options.headers || {},
 			};
 			
 			const fetcher = new IbiraAPIFetcher(url, this.globalCache, fetcherOptions);
-			this.fetchers.set(url, fetcher);
+			this.fetchers.set(fetcherKey, fetcher);
 		}
 		
-		return this.fetchers.get(url);
+		return this.fetchers.get(fetcherKey);
 	}
 
 	/**
@@ -280,6 +288,9 @@ export class IbiraAPIFetchManager {
 	 * @param {number} [options.retryDelay] - Initial retry delay in milliseconds
 	 * @param {number} [options.retryMultiplier] - Exponential backoff multiplier
 	 * @param {number[]} [options.retryableStatusCodes] - Array of HTTP status codes that should trigger retries
+	 * @param {'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'HEAD'} [options.method='GET'] - HTTP method
+	 * @param {Object|string|FormData|Blob|null} [options.body=null] - Request body (plain objects auto-serialized to JSON)
+	 * @param {Object} [options.headers={}] - Additional request headers
 	 * @returns {Promise<*>} Promise that resolves to the fetched data
 	 * @throws {Error} Network errors, HTTP errors, or JSON parsing errors
 	 * 
@@ -380,8 +391,9 @@ export class IbiraAPIFetchManager {
 	 * @param {Object} observer - Observer object to remove
 	 */
 	unsubscribe(url, observer) {
-		if (this.fetchers.has(url)) {
-			this.fetchers.get(url).unsubscribe(observer);
+		const fetcherKey = `GET:${url}`;
+		if (this.fetchers.has(fetcherKey)) {
+			this.fetchers.get(fetcherKey).unsubscribe(observer);
 		}
 	}
 
@@ -608,8 +620,10 @@ export class IbiraAPIFetchManager {
 	setRetryConfigForUrl(url, retryConfig = {}) {
 		// ✅ IMMUTABLE: Create new fetcher instance instead of modifying existing one
 		// This respects the frozen nature of IbiraAPIFetcher instances
-		if (this.fetchers.has(url)) {
-			const oldFetcher = this.fetchers.get(url);
+		const method = (retryConfig.method || 'GET').toUpperCase();
+		const fetcherKey = `${method}:${url}`;
+		if (this.fetchers.has(fetcherKey)) {
+			const oldFetcher = this.fetchers.get(fetcherKey);
 			
 			// Create new options object with updated retry configuration
 			const newOptions = {
@@ -618,12 +632,15 @@ export class IbiraAPIFetchManager {
 				retryDelay: retryConfig.retryDelay !== undefined ? retryConfig.retryDelay : oldFetcher.retryDelay,
 				retryMultiplier: retryConfig.retryMultiplier !== undefined ? retryConfig.retryMultiplier : oldFetcher.retryMultiplier,
 				retryableStatusCodes: retryConfig.retryableStatusCodes || oldFetcher.retryableStatusCodes,
-				eventNotifier: oldFetcher.eventNotifier
+				eventNotifier: oldFetcher.eventNotifier,
+				method: oldFetcher.method,
+				body: oldFetcher.body,
+				headers: { ...oldFetcher.headers },
 			};
 			
 			// Create new immutable fetcher instance and replace the old one
 			const newFetcher = new IbiraAPIFetcher(url, oldFetcher.cache, newOptions);
-			this.fetchers.set(url, newFetcher);
+			this.fetchers.set(fetcherKey, newFetcher);
 		} else {
 			// If fetcher doesn't exist yet, create it with the specified retry config
 			this.getFetcher(url, retryConfig);

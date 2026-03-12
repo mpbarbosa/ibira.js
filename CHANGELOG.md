@@ -5,6 +5,14 @@ All notable changes to the ibira.js project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — v0.4.x Beta Preparation
+
+### 🚀 New Features
+- **ADDED**: HTTP methods beyond GET — `method`, `body`, and `headers` options on `FetcherOptions`; plain-object bodies auto-serialized to JSON with `Content-Type: application/json`; cache key is now `METHOD:url` so GET and POST requests cache independently
+- **ADDED**: Node.js ≥18 dual support — `jest.node.config.mjs` confirms all 200 tests pass in both browser (jsdom) and Node.js environments; `npm run test:node` script added
+
+---
+
 ## [0.3.1-alpha] - 2026-03-12
 
 ### 🔒 Alpha Hardening

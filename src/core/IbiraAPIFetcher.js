@@ -31,6 +31,9 @@ import { DefaultEventNotifier } from '../utils/DefaultEventNotifier.js';
  * @property {number} [cacheExpiration=300000] - Cache expiration time in milliseconds (default: 5 minutes)
  * @property {Object} [cache] - Cache instance (must implement Map-like interface)
  * @property {Function} [validateStatus] - Function `(status: number) => boolean` that determines whether an HTTP status is successful. Defaults to `status >= 200 && status < 300`.
+ * @property {'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'HEAD'} [method='GET'] - HTTP method for the request
+ * @property {Object|string|FormData|Blob|null} [body=null] - Request body. Plain objects are JSON-serialized automatically; strings/FormData/Blob are passed as-is.
+ * @property {Object} [headers={}] - Additional HTTP request headers. When body is a plain object, `Content-Type: application/json` is added automatically.
  */
 
 /**
@@ -306,6 +309,9 @@ export class IbiraAPIFetcher {
 	 * @param {number} [options.retryDelay=1000] - Initial retry delay in milliseconds
 	 * @param {number} [options.retryMultiplier=2] - Exponential backoff multiplier
 	 * @param {number[]} [options.retryableStatusCodes=[408, 429, 500, 502, 503, 504]] - HTTP status codes that trigger retries
+	 * @param {'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'HEAD'} [options.method='GET'] - HTTP method
+	 * @param {Object|string|FormData|Blob|null} [options.body=null] - Request body (plain objects are JSON-serialized automatically)
+	 * @param {Object} [options.headers={}] - Additional request headers
 	 */
     constructor(url, cache, options = {}) {
 		this.url = url;
@@ -325,6 +331,10 @@ export class IbiraAPIFetcher {
 		this.retryableStatusCodes = Object.freeze([...(options.retryableStatusCodes || [408, 429, 500, 502, 503, 504])]); // HTTP status codes that should trigger retries
 		// Custom HTTP success predicate — defaults to the standard 2xx range
 		this.validateStatus = options.validateStatus || ((status) => status >= 200 && status < 300);
+		// HTTP method, body, and headers for non-GET requests
+		this.method = (options.method || 'GET').toUpperCase();
+		this.body = options.body !== undefined ? options.body : null;
+		this.headers = Object.freeze({ ...(options.headers || {}) });
 		
 		// ✅ IMMUTABLE: Deep freeze the entire instance for maximum referential transparency
 		// This prevents any external code from modifying the fetcher's properties
@@ -333,14 +343,13 @@ export class IbiraAPIFetcher {
 	}
 
 	/**
-	 * Generates a unique cache key for this fetcher
-	 * Override this method in subclasses to provide custom cache key logic
+	 * Generates a unique cache key for this fetcher.
+	 * Includes the HTTP method so POST /url and GET /url cache independently.
 	 * 
-	 * @returns {string} The cache key (defaults to the URL)
+	 * @returns {string} The cache key (`METHOD:url`)
 	 */
 	getCacheKey() {
-		// Override this method in subclasses to provide a unique cache key
-		return this.url;
+		return `${this.method}:${this.url}`;
 	}
 
 	/**
@@ -518,8 +527,27 @@ export class IbiraAPIFetcher {
 		}
 
 		const fetchOptions = {
-			signal
+			method: this.method,
+			signal,
 		};
+
+		// Merge caller-supplied headers first, then auto-add Content-Type for object bodies
+		const mergedHeaders = { ...this.headers };
+
+		if (this.body !== null) {
+			if (this.body !== null && typeof this.body === 'object' && !(this.body instanceof FormData) && !(this.body instanceof Blob) && !(this.body instanceof ArrayBuffer)) {
+				fetchOptions.body = JSON.stringify(this.body);
+				if (!mergedHeaders['Content-Type'] && !mergedHeaders['content-type']) {
+					mergedHeaders['Content-Type'] = 'application/json';
+				}
+			} else {
+				fetchOptions.body = this.body;
+			}
+		}
+
+		if (Object.keys(mergedHeaders).length > 0) {
+			fetchOptions.headers = mergedHeaders;
+		}
 
 		// Set up timeout
 		const timeoutId = setTimeout(() => {

@@ -74,7 +74,7 @@ describe('IbiraAPIFetchManager', () => {
 			
 			expect(fetcher).toBeInstanceOf(IbiraAPIFetcher);
 			expect(manager.fetchers.size).toBe(1);
-			expect(manager.fetchers.has(url)).toBe(true);
+			expect(manager.fetchers.has(`GET:${url}`)).toBe(true);
 		});
 
 		it('should reuse existing fetcher for same URL', () => {
@@ -527,11 +527,11 @@ describe('IbiraAPIFetchManager', () => {
 
 		it('should create a new fetcher with retry config when URL not yet registered', () => {
 			const url = 'https://api.example.com/new-url';
-			expect(manager.fetchers.has(url)).toBe(false);
+			expect(manager.fetchers.has(`GET:${url}`)).toBe(false);
 
 			manager.setRetryConfigForUrl(url, { maxRetries: 10 });
 
-			expect(manager.fetchers.has(url)).toBe(true);
+			expect(manager.fetchers.has(`GET:${url}`)).toBe(true);
 			const f = manager.getFetcher(url);
 			expect(f.maxRetries).toBe(10);
 		});
@@ -546,6 +546,35 @@ describe('IbiraAPIFetchManager', () => {
 			expect(f.maxRetries).toBe(9);
 			// retryDelay should still be the default
 			expect(f.retryDelay).toBe(manager.defaultRetryDelay);
+		});
+	});
+
+	describe('v0.4.x — HTTP methods beyond GET', () => {
+		it('should create separate fetcher instances for GET and POST on the same URL', () => {
+			const url = 'https://api.example.com/resource';
+			manager.getFetcher(url);
+			manager.getFetcher(url, { method: 'POST', body: { x: 1 } });
+			expect(manager.fetchers.size).toBe(2);
+			expect(manager.fetchers.has(`GET:${url}`)).toBe(true);
+			expect(manager.fetchers.has(`POST:${url}`)).toBe(true);
+		});
+
+		it('should pass method and body through fetch()', async () => {
+			const url = 'https://api.example.com/resource';
+			await manager.fetch(url, { method: 'POST', body: { name: 'Alice' } });
+			expect(fetch).toHaveBeenCalledWith(url, expect.objectContaining({
+				method: 'POST',
+				body: JSON.stringify({ name: 'Alice' }),
+				headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+			}));
+		});
+
+		it('should pass custom headers through fetch()', async () => {
+			const url = 'https://api.example.com/resource';
+			await manager.fetch(url, { headers: { Authorization: 'Bearer tok' } });
+			expect(fetch).toHaveBeenCalledWith(url, expect.objectContaining({
+				headers: expect.objectContaining({ Authorization: 'Bearer tok' }),
+			}));
 		});
 	});
 });
