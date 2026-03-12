@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "partitionIndex": 1,
+  "totalPartitions": 4,
+  "filesHash": "7c3da2a2",
+  "partitionLabels": [
+    "src/config, src/core, src",
+    "src/utils, test-runner.js, test_pure_fetcher.js, babel.config.mjs",
+    "eslint.config.mjs, package-lock.json, package.json, src/workflow, cdn-delivery.sh",
+    "scripts, .ai_workflow/.step_cache, .ai_workflow/metrics, .vscode"
+  ],
+  "updatedAt": "2026-03-12T03:06:18.964Z"
+}

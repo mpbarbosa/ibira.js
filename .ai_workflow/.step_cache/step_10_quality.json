@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "fileScores": {
+    "src/config/version.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    },
+    "src/core/IbiraAPIFetchManager.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    },
+    "src/core/IbiraAPIFetcher.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    },
+    "src/index.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    }
+  }
+}

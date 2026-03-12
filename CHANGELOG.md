@@ -5,7 +5,7 @@ All notable changes to the ibira.js project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0-alpha] - 2026-03-12
+## [0.3.1-alpha] - 2026-03-12
 
 ### 🔒 Alpha Hardening
 
@@ -164,7 +164,7 @@ For contributors wanting to understand the new structure, see [MIGRATION.md](./M
 
 | Version | Release Date | Status | Key Features |
 |---------|--------------|--------|--------------|
-| 0.3.0-alpha | 2026-03-12 | Latest | AbortController, validateStatus, ESLint, 90%+ branch coverage |
+| 0.3.1-alpha | 2026-03-12 | Latest | AbortController, validateStatus, ESLint, 90%+ branch coverage |
 | 0.2.2-alpha | 2026-01-10 | Current | Workflow config fixes, copilot instructions |
 | 0.2.1-alpha | 2025-12-15 | Superseded | CDN delivery, production URLs |
 | 0.2.0-alpha | 2025-12-15 | Superseded | Modular architecture, 152 tests (90%+ coverage) |

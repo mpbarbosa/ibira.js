@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "partitionIndex": 1,
+  "totalPartitions": 2,
+  "filesHash": "b499c13a",
+  "partitionLabels": [
+    "__tests__",
+    "test-runner.js, test_pure_fetcher.js"
+  ],
+  "updatedAt": "2026-03-12T03:05:05.634Z"
+}
