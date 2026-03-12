@@ -98,7 +98,11 @@ export class DefaultEventNotifier {
 	notify(...args) {
 		this.observers.forEach((observer) => {
 			if (observer && typeof observer.update === 'function') {
-				observer.update(...args);
+				try {
+					observer.update(...args);
+				} catch (error) {
+					console.error('[ibira.js] Observer threw during notification:', error);
+				}
 			}
 		});
 	}

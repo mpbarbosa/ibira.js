@@ -143,19 +143,41 @@ describe('DefaultEventNotifier', () => {
 			expect(observer.update).toHaveBeenCalledWith('test');
 		});
 
-		it('should handle observer throwing error', () => {
+		it('should isolate observer errors and continue notifying remaining observers', () => {
+			const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 			const goodObserver = { update: jest.fn() };
-			const badObserver = { 
-				update: jest.fn(() => { 
-					throw new Error('Observer error'); 
-				}) 
+			const badObserver = {
+				update: jest.fn(() => {
+					throw new Error('Observer error');
+				})
 			};
-			
-			notifier.subscribe(goodObserver);
+
+			// bad before good — without isolation, goodObserver would never be called
 			notifier.subscribe(badObserver);
-			
-			expect(() => notifier.notify('test')).toThrow('Observer error');
+			notifier.subscribe(goodObserver);
+
+			expect(() => notifier.notify('test')).not.toThrow();
+			expect(badObserver.update).toHaveBeenCalled();
 			expect(goodObserver.update).toHaveBeenCalled();
+			consoleSpy.mockRestore();
+		});
+
+		it('should log an error when an observer throws', () => {
+			const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+			const badObserver = {
+				update: jest.fn(() => {
+					throw new Error('Observer error');
+				})
+			};
+
+			notifier.subscribe(badObserver);
+			notifier.notify('test');
+
+			expect(consoleSpy).toHaveBeenCalledWith(
+				expect.stringContaining('[ibira.js]'),
+				expect.any(Error)
+			);
+			consoleSpy.mockRestore();
 		});
 
 		it('should handle notify with no arguments', () => {
