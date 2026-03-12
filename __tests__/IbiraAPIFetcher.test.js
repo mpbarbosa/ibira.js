@@ -43,10 +43,6 @@ class MockEventNotifier {
 // Mock fetch globally
 global.fetch = jest.fn();
 
-// Mock console methods to avoid noise in tests
-console.error = jest.fn();
-console.warn = jest.fn();
-
 describe('IbiraAPIFetcher', () => {
     let fetcher;
     let cache;
@@ -55,6 +51,10 @@ describe('IbiraAPIFetcher', () => {
     const mockData = { id: 123, name: 'Test Data' };
 
     beforeEach(() => {
+        // Suppress console noise; restored by jest.restoreAllMocks() in afterEach
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.spyOn(console, 'warn').mockImplementation(() => {});
+
         // Reset all mocks before each test
         jest.clearAllMocks();
         jest.clearAllTimers();

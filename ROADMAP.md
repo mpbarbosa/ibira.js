@@ -51,6 +51,10 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [ ] **Version consistency automation** — add a pre-commit hook or `npm run version:check` script
   that asserts `package.json`, `src/config/version.js`, and `.workflow-config.yaml` all agree on
   the current version, preventing silent drift like the `0.2.2-alpha` / `0.3.0-alpha` mismatch
+- [ ] **Test suite refactoring** — extract repeated setup (cache factories, URL constants, mock
+  observers) to shared helpers; convert parallel edge-case tests to `it.each` parameterised tables;
+  rename any remaining implementation-focused test names to behaviour-focused names (e.g.
+  "should store and retrieve null values" rather than "should handle null values")
 
 ---
 

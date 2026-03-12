@@ -75,7 +75,7 @@ describe('DefaultCache', () => {
 			cache.set('key1', { data: 'test1', timestamp: Date.now() });
 			cache.set('key2', { data: 'test2', timestamp: Date.now() });
 			const entries = Array.from(cache.entries());
-			expect(entries.length).toBe(2);
+			expect(entries).toHaveLength(2);
 			expect(entries[0][0]).toBe('key1');
 			expect(entries[1][0]).toBe('key2');
 		});

@@ -7,14 +7,13 @@ import { IbiraAPIFetcher } from '../src/core/IbiraAPIFetcher.js';
 // Mock fetch globally
 global.fetch = jest.fn();
 
-// Mock console methods
-console.error = jest.fn();
-console.warn = jest.fn();
-
 describe('IbiraAPIFetchManager', () => {
 	let manager;
 
 	beforeEach(() => {
+		// Suppress console noise; restored by jest.restoreAllMocks() in afterEach
+		jest.spyOn(console, 'error').mockImplementation(() => {});
+		jest.spyOn(console, 'warn').mockImplementation(() => {});
 		manager = new IbiraAPIFetchManager();
 		global.fetch.mockClear();
 		jest.clearAllTimers();
@@ -24,6 +23,7 @@ describe('IbiraAPIFetchManager', () => {
 		if (manager) {
 			manager.destroy();
 		}
+		jest.restoreAllMocks();
 	});
 
 	describe('Constructor and Initialization', () => {
