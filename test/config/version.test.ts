@@ -9,7 +9,7 @@ describe('VERSION semantic version object', () => {
   it('should have correct major, minor, patch, and prerelease values', () => {
     expect(VERSION.major).toBe(0);
     expect(VERSION.minor).toBe(3);
-    expect(VERSION.patch).toBe(3);
+    expect(VERSION.patch).toBe(5);
     expect(VERSION.prerelease).toBe('alpha');
   });
 
@@ -19,20 +19,20 @@ describe('VERSION semantic version object', () => {
 
   it('should format version string correctly for different prerelease values', () => {
     const betaVersion = { ...VERSION, prerelease: 'beta' };
-    expect(betaVersion.toString()).toBe('0.3.3-beta');
+    expect(betaVersion.toString()).toBe('0.3.5-beta');
     const rcVersion = { ...VERSION, prerelease: 'rc' };
-    expect(rcVersion.toString()).toBe('0.3.3-rc');
+    expect(rcVersion.toString()).toBe('0.3.5-rc');
   });
 
   it('should handle empty prerelease identifier', () => {
     const emptyVersion = { ...VERSION, prerelease: '' };
-    expect(emptyVersion.toString()).toBe('0.3.3-');
+    expect(emptyVersion.toString()).toBe('0.3.5-');
   });
 
   it('should handle numeric prerelease identifier', () => {
     // @ts-ignore
     const numericVersion = { ...VERSION, prerelease: 123 };
-    expect(numericVersion.toString()).toBe('0.3.3-123');
+    expect(numericVersion.toString()).toBe('0.3.5-123');
   });
 
   it('should handle negative and large version numbers', () => {

@@ -1,28 +1,28 @@
-jsDelivr CDN URLs for mpbarbosa/ibira.js v0.2.2-alpha
-Generated: Thu Jan  1 11:11:30 -03 2026
+jsDelivr CDN URLs for mpbarbosa/ibira.js v0.3.5-alpha
+Generated: Thu Mar 13 00:00:00 -03 2026
 =============================================================================
 
 PRODUCTION (Recommended - Specific Version):
-https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.2-alpha/src/index.js
+https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.3.5-alpha/dist/index.mjs
 
 DEVELOPMENT (Latest from branch):
-https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@main/src/index.js
+https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@main/dist/index.mjs
 
 VERSION RANGE (Auto-update patches):
-https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2/src/index.js
+https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.3/dist/index.mjs
 
 NPM CDN (if published to npm):
-https://cdn.jsdelivr.net/npm/ibira.js@0.2.2-alpha/src/index.js
+https://cdn.jsdelivr.net/npm/ibira.js@0.3.5-alpha/dist/index.mjs
 
 HTML USAGE:
-<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.2-alpha/src/index.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.3.5-alpha/dist/index.mjs"></script>
 
 ES MODULE:
 <script type="module">
-  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.2.2-alpha/src/index.js';
+  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.3.5-alpha/dist/index.mjs';
 </script>
 
 PACKAGE INFO API:
-https://data.jsdelivr.com/v1/package/gh/mpbarbosa/ibira.js@0.2.2-alpha
+https://data.jsdelivr.com/v1/package/gh/mpbarbosa/ibira.js@0.3.5-alpha
 
 =============================================================================
