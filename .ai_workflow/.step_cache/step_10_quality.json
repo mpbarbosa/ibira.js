@@ -65,6 +65,31 @@
       "score": 100,
       "issueCount": 0,
       "lastAnalyzed": "2026-03-12T11:40:27.615Z"
+    },
+    "src/utils/debounce.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+    },
+    "src/utils/throttle.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+    },
+    "tsup.config.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+    },
+    "test-runner.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+    },
+    "test_pure_fetcher.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
     }
   }
 }
