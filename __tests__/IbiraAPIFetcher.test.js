@@ -320,8 +320,11 @@ describe('IbiraAPIFetcher', () => {
                 status: 500,
                 statusText: 'Internal Server Error'
             });
-            
-            await expect(fetcher.fetchData()).rejects.toThrow('HTTP error! status: 500');
+
+            // maxRetries: 0 to test single-attempt failure without exercising retry logic
+            const noRetryFetcher = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, maxRetries: 0 });
+            await expect(noRetryFetcher.fetchData()).rejects.toThrow('HTTP error! status: 500');
+            expect(fetch).toHaveBeenCalledTimes(1);
         });
 
         test('should handle successful responses', async () => {
@@ -1180,5 +1183,124 @@ describe('IbiraAPIFetcher', () => {
         test('default body is null', () => {
             expect(fetcher.body).toBeNull();
         });
+    });
+
+    describe('v0.4.x — Retry loop wired into fetchData()', () => {
+        // All tests here advance fake timers to bypass _sleep() delays.
+
+        test('should retry on retryable status code and eventually throw after maxRetries', async () => {
+            fetch.mockResolvedValue({
+                ok: false,
+                status: 500,
+                statusText: 'Internal Server Error'
+            });
+
+            const retryFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                maxRetries: 2,
+                retryDelay: 100,
+            });
+
+            const promise = retryFetcher.fetchData();
+            promise.catch(() => {}); // prevent unhandled rejection during timer advancement
+            await jest.runAllTimersAsync();
+
+            await expect(promise).rejects.toThrow('HTTP error! status: 500');
+            // Initial attempt + 2 retries = 3 total calls
+            expect(fetch).toHaveBeenCalledTimes(3);
+        });
+
+        test('should succeed on a retry after an initial retryable failure', async () => {
+            fetch
+                .mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Service Unavailable' })
+                .mockResolvedValueOnce({ ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) });
+
+            const retryFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                maxRetries: 2,
+                retryDelay: 100,
+            });
+
+            const promise = retryFetcher.fetchData();
+            await jest.runAllTimersAsync();
+
+            await expect(promise).resolves.toEqual(mockData);
+            expect(fetch).toHaveBeenCalledTimes(2);
+        });
+
+        test('should not retry non-retryable status codes', async () => {
+            fetch.mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' });
+
+            const retryFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                maxRetries: 3,
+                retryDelay: 100,
+            });
+
+            const promise = retryFetcher.fetchData();
+            promise.catch(() => {});
+            await jest.runAllTimersAsync();
+
+            await expect(promise).rejects.toThrow('HTTP error! status: 404');
+            expect(fetch).toHaveBeenCalledTimes(1);
+        });
+
+        test('should make only one attempt when maxRetries is 0', async () => {
+            fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Server Error' });
+
+            const noRetryFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                maxRetries: 0,
+            });
+
+            const promise = noRetryFetcher.fetchData();
+            promise.catch(() => {});
+            await jest.runAllTimersAsync();
+
+            await expect(promise).rejects.toThrow('HTTP error! status: 500');
+            expect(fetch).toHaveBeenCalledTimes(1);
+        });
+
+        test('should notify observers on each retry attempt', async () => {
+            fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Server Error' });
+
+            const observer = { update: jest.fn() };
+            const retryFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                maxRetries: 1,
+                retryDelay: 100,
+            });
+            retryFetcher.subscribe(observer);
+
+            const promise = retryFetcher.fetchData();
+            promise.catch(() => {});
+            await jest.runAllTimersAsync();
+
+            await expect(promise).rejects.toThrow();
+            // Each of the 2 attempts emits 'loading-start' and 'error' — 4 notifications total
+            expect(observer.update).toHaveBeenCalledTimes(4);
+        });
+
+        test.each([408, 429, 500, 502, 503, 504])(
+            'should retry on status code %i',
+            async (status) => {
+                fetch.mockResolvedValue({ ok: false, status, statusText: 'Error' });
+
+                const retryFetcher = new IbiraAPIFetcher(testUrl, new Map(), {
+                    maxRetries: 1,
+                    retryDelay: 100,
+                });
+
+                const promise = retryFetcher.fetchData();
+                promise.catch(() => {});
+                await jest.runAllTimersAsync();
+
+                await expect(promise).rejects.toThrow(`HTTP error! status: ${status}`);
+                expect(fetch).toHaveBeenCalledTimes(2);
+
+                fetch.mockReset();
+                fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) });
+            }
+        );
     });
 });

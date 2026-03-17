@@ -395,9 +395,9 @@ export class IbiraAPIFetcher {
 		this.eventNotifier = options.eventNotifier || new DefaultEventNotifier();
 		
 		// ✅ SIMPLIFIED: Cache configuration managed by cache instance itself
-		this.maxRetries = options.maxRetries || 3; // Maximum number of retry attempts
-		this.retryDelay = options.retryDelay || 1000; // Initial retry delay in milliseconds
-		this.retryMultiplier = options.retryMultiplier || 2; // Exponential backoff multiplier
+		this.maxRetries = options.maxRetries ?? 3; // Maximum number of retry attempts
+		this.retryDelay = options.retryDelay ?? 1000; // Initial retry delay in milliseconds
+		this.retryMultiplier = options.retryMultiplier ?? 2; // Exponential backoff multiplier
 		// ✅ IMMUTABLE: Create frozen copy of retryable status codes array for deep immutability
 		this.retryableStatusCodes = Object.freeze([...(options.retryableStatusCodes || [408, 429, 500, 502, 503, 504])]); // HTTP status codes that should trigger retries
 		// Custom HTTP success predicate — defaults to the standard 2xx range
@@ -876,7 +876,7 @@ export class IbiraAPIFetcher {
 	 * @param {Object} [cacheOverride] - Optional cache instance to use instead of the default
 	 * @param {AbortSignal} [signal] - Optional AbortSignal for consumer-level request cancellation
 	 * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
-	 * @throws {Error} Network errors, HTTP errors, or JSON parsing errors are thrown directly
+	 * @throws {Error} Network errors, HTTP errors, or JSON parsing errors after all retries exhausted
 	 * 
 	 * @example
 	 * // Practical usage - handles side effects automatically
@@ -898,19 +898,28 @@ export class IbiraAPIFetcher {
 	 */
 	async fetchData(cacheOverride: CacheInterface | null = null, signal: AbortSignal | null = null): Promise<unknown> {
 		const activeCache = cacheOverride || this.cache;
-		
-		// Use the pure core function, forwarding the optional cancellation signal
-		const result = await this.fetchDataPure(activeCache, Date.now(), null, signal);
-		
-		// Apply side effects based on pure computation
-		this._applySideEffects(result, activeCache);
-		
-		// Return data or throw error based on pure result
-		if (result.success) {
-			return result.data;
-		} else {
-			throw result.error;
+
+		for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+			const result = await this.fetchDataPure(activeCache, Date.now(), null, signal);
+
+			this._applySideEffects(result, activeCache);
+
+			if (result.success) {
+				return result.data;
+			}
+
+			const isLastAttempt = attempt >= this.maxRetries;
+			// Do not retry if the caller's signal was aborted — that is a deliberate cancellation
+			const isExternallyAborted = signal?.aborted ?? false;
+			if (isLastAttempt || !this._isRetryableError(result.error!) || isExternallyAborted) {
+				throw result.error;
+			}
+
+			await this._sleep(this._calculateRetryDelay(attempt));
 		}
+
+		// Unreachable — TypeScript exhaustiveness guard
+		throw new Error('Unexpected retry loop exit');
 	}
 
 	/**

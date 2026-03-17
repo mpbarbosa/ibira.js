@@ -132,7 +132,7 @@ all three. Prioritising TypeScript migration and Node.js support makes that nich
 - [x] **HTTP methods beyond GET** — `POST`, `PUT`, `PATCH`, `DELETE` support with configurable
   body serialization
 
-- [ ] **Wire retry loop into `fetchData()`** _(high-priority bug, step_18)_ — Private methods
+- [x] **Wire retry loop into `fetchData()`** _(high-priority bug, step_18)_ — Private methods
   `_isRetryableError()`, `_calculateRetryDelay()`, and `_sleep()` in `IbiraAPIFetcher.ts` are fully
   implemented and unit-tested but **never called** — the retry loop body is missing from `fetchData()`.
   Wiring them in requires advancing fake timers in tests that use `fetch.mockRejectedValue` with
