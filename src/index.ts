@@ -35,4 +35,6 @@ export { IbiraAPIFetcher } from './core/IbiraAPIFetcher.js';
 export { IbiraAPIFetchManager } from './core/IbiraAPIFetchManager.js';
 export { DefaultCache } from './utils/DefaultCache.js';
 export { DefaultEventNotifier } from './utils/DefaultEventNotifier.js';
+export { throttle } from './utils/throttle.js';
+export { debounce } from './utils/debounce.js';
 export { VERSION } from './config/version.js';
