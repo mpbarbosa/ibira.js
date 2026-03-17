@@ -24,7 +24,7 @@
     "src/config/version.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-12T11:40:27.615Z"
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
     },
     "src/core/IbiraAPIFetchManager.ts": {
       "score": 100,
@@ -90,6 +90,26 @@
       "score": 100,
       "issueCount": 0,
       "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+    },
+    "cdn-delivery.sh": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
+    },
+    "babel.config.mjs": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
+    },
+    "eslint.config.mjs": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
+    },
+    "jest.node.config.mjs": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
     }
   }
 }
