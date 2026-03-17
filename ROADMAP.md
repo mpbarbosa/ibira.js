@@ -1,6 +1,6 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.3.5-alpha — v0.4.x Beta Preparation in progress
+> **Current version:** 0.3.6-alpha — v0.4.x Beta Preparation in progress
 > **Status:** Active development — retry loop wired, `throttle`/`debounce` utilities shipped; several v0.4.x items remain
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
@@ -16,7 +16,7 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.1-alpha** | jsDelivr CDN delivery, SRI support, CDN URL generator script |
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
 | **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
-| **0.3.5-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
+| **0.3.6-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
 | **0.4.x-alpha** _(in progress)_ | Retry loop wired into `fetchData()`, `throttle()` and `debounce()` utilities, 238 tests |
 
 ---

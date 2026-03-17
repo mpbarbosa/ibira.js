@@ -14,7 +14,7 @@ describe('VERSION semantic version object', () => {
   });
 
   it('should return correct version string with toString()', () => {
-    expect(VERSION.toString()).toBe('0.3.5-alpha');
+    expect(VERSION.toString()).toBe('0.3.6-alpha');
   });
 
   it('should format version string correctly for different prerelease values', () => {
