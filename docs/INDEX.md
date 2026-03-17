@@ -56,10 +56,12 @@
 
 ### New to the Project?
 
-1. **[referential_transparency/REFERENTIAL_TRANSPARENCY.md](./referential_transparency/REFERENTIAL_TRANSPARENCY.md)** - 🏆 **Start here** - Main achievement documentation
-2. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Understand the innovative dual-layer design
-3. **[IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md)** - Complete class documentation with examples
-4. **[referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md)** - See the formal proof and test results
+1. **[GETTING_STARTED.md](./GETTING_STARTED.md)** - Installation, quick start, and common patterns
+2. **[API.md](./API.md)** - Full API reference for all exported classes and utilities
+3. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Understand the innovative dual-layer design
+4. **[IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md)** - Complete class documentation with examples
+5. **[referential_transparency/REFERENTIAL_TRANSPARENCY.md](./referential_transparency/REFERENTIAL_TRANSPARENCY.md)** - 🏆 Referential transparency achievement documentation
+6. **[referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md)** - See the formal proof and test results
 
 ### 🌐 CDN Delivery
 

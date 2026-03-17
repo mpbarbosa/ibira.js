@@ -1,6 +1,12 @@
 # __tests__ — Test Suite
 
-This directory contains the full Jest test suite for ibira.js.
+This directory contains the Jest test suite for the JavaScript source modules of ibira.js.
+
+> **Two test directories exist intentionally:**
+> - `__tests__/` — JavaScript (`.js`) tests for the main library modules; runs with jsdom
+> - `test/` — TypeScript (`.ts`) tests for TypeScript-specific source files (e.g. `src/config/version.ts`); uses ts-jest
+>
+> Both directories are discovered by the default `npm test` command.
 
 ## Structure
 
@@ -10,7 +16,13 @@ __tests__/
 ├── IbiraAPIFetchManager.test.js  # Orchestrator — concurrency, deduplication, cache lifecycle, retry config
 ├── DefaultCache.test.js          # LRU cache — expiration, eviction, size limits
 ├── DefaultEventNotifier.test.js  # Observer pattern — subscribe/unsubscribe/notify lifecycle
+├── debounce.test.js              # Debounce utility
+├── throttle.test.js              # Throttle utility
 └── index.test.js                 # Public API barrel — export validation
+
+test/
+└── config/
+    └── version.test.ts           # TypeScript VERSION object — semver format and toString()
 ```
 
 ## Running Tests
