@@ -1,7 +1,7 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.3.5-alpha — Alpha Hardening
-> **Status:** Beta preparation in progress
+> **Current version:** 0.3.5-alpha — v0.4.x Beta Preparation in progress
+> **Status:** Active development — retry loop wired, `throttle`/`debounce` utilities shipped; several v0.4.x items remain
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
 
@@ -17,6 +17,7 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
 | **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
 | **0.3.5-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
+| **0.4.x-alpha** _(in progress)_ | Retry loop wired into `fetchData()`, `throttle()` and `debounce()` utilities, 238 tests |
 
 ---
 
@@ -133,15 +134,23 @@ all three. Prioritising TypeScript migration and Node.js support makes that nich
   body serialization
 
 - [x] **Wire retry loop into `fetchData()`** _(high-priority bug, step_18)_ — Private methods
-  `_isRetryableError()`, `_calculateRetryDelay()`, and `_sleep()` in `IbiraAPIFetcher.ts` are fully
-  implemented and unit-tested but **never called** — the retry loop body is missing from `fetchData()`.
-  Wiring them in requires advancing fake timers in tests that use `fetch.mockRejectedValue` with
-  retryable status codes (408/429/500-504); recommended approach is `jest.runAllTimersAsync()` in
-  the retry-specific describe block, or setting `maxRetries: 0` in non-retry test fixtures.
-- [ ] **Stricter generics** — Parameterise `DefaultCache<T>` and `Observer<T>` with a type argument
-  instead of `unknown` so consumers get end-to-end type inference for cached values and event payloads.
+  `_isRetryableError()`, `_calculateRetryDelay()`, and `_sleep()` were fully implemented and
+  unit-tested but never called. The retry loop now runs up to `maxRetries` attempts with
+  exponential backoff; externally-aborted requests are not retried; `options.maxRetries ?? 3`
+  replaces `||` so `0` correctly disables retries; 11 new tests cover all retryable status codes
+  (408/429/500–504), observer notification per attempt, `maxRetries: 0`, and successful mid-retry
+  recovery.
+- [x] **`throttle()` and `debounce()` utilities** — generic higher-order functions exported from
+  `src/utils/throttle.ts` and `src/utils/debounce.ts`; both re-exported from `src/index.ts`.
+  `throttle(fn, wait)` uses a leading-edge strategy and exposes `flush()` to reset the cooldown.
+  `debounce(fn, wait)` uses a trailing-edge strategy; all callers in the same window share a single
+  `Promise` so every `await debouncedFetch()` resolves together; exposes `cancel()` and `flush()`;
+  works with sync and async wrapped functions. 30 new tests across two files.
+- [ ] **Stricter generics** — parameterise `DefaultCache<T>` and `Observer<T>` with a type argument
+  instead of `unknown`; eliminates `any`/`unknown` casts in consumers and gives end-to-end type
+  inference for cached values and event payloads.
 
-
+### Pipeline customisation
 
 Goal: let consumers customise the request/response pipeline.
 
@@ -149,7 +158,6 @@ Goal: let consumers customise the request/response pipeline.
 - [ ] **Response interceptors** — transform or validate responses before caching
 - [ ] **Pluggable cache backends** — formalise the cache interface so consumers can swap in localStorage, IndexedDB, Redis adapters, etc.
 - [ ] **Pluggable retry strategies** — expose a `retryStrategy(attempt, error)` function option alongside the existing fixed exponential backoff
-- [ ] **Stricter generics for cache & event interfaces** — introduce `DefaultCache<T>` and `Observer<T>` generics so cache values and observer payloads are fully typed end-to-end; eliminates `any` / `unknown` casts in consumers
 - [ ] **Async error propagation audit** — review all `fetch` call sites to confirm every async path has an explicit `try/catch` and surfaces errors to the caller rather than swallowing them silently
 - [ ] **Result/Either pattern for fetch operations** — replace throw-based error handling with `Result<T, E> = { ok: true; value: T } | { ok: false; error: E }` for explicit, type-safe error paths; consumers no longer need try/catch at call sites
 - [ ] **Runtime API response validation** — integrate a validation library (Zod or io-ts) to narrow `unknown` API responses to typed shapes at runtime; prevents type assertion bugs from unpredictable external payloads
