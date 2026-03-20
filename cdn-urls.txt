@@ -26,3 +26,18 @@ PACKAGE INFO API:
 https://data.jsdelivr.com/v1/package/gh/mpbarbosa/ibira.js@0.3.6-alpha
 
 =============================================================================
+
+BUNDLED DEPENDENCY — bessa_patterns.ts v0.12.3-alpha
+(DualObserverSubject is bundled into the ibira.js dist — no separate load required)
+=============================================================================
+
+bessa_patterns.ts CDN (GitHub via jsDelivr):
+https://cdn.jsdelivr.net/gh/mpbarbosa/bessa_patterns.ts@v0.12.3-alpha/dist/index.mjs
+
+bessa_patterns.ts CDN (npm via jsDelivr, when published):
+https://cdn.jsdelivr.net/npm/bessa_patterns.ts@0.12.3-alpha/dist/index.mjs
+
+bessa_patterns.ts GitHub repository:
+https://github.com/mpbarbosa/bessa_patterns.ts
+
+=============================================================================

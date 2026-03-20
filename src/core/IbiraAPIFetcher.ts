@@ -11,15 +11,22 @@ import type { Observer } from '../utils/DefaultEventNotifier.js';
 
 export type { CacheEntry };
 
-/** Duck-typed interface for any object that can act as a cache store. */
-export interface CacheInterface {
+/** Duck-typed interface for any object that can act as a cache store.
+ *
+ * @template T - The type of the cached data. Defaults to `unknown` for backward compatibility.
+ *   Implement this interface with a specific type to build custom typed cache backends.
+ *
+ * @example
+ * class LocalStorageCache implements CacheInterface<User> { ... }
+ */
+export interface CacheInterface<T = unknown> {
 	has(key: string): boolean;
-	get(key: string): CacheEntry | undefined | null;
-	set(key: string, value: CacheEntry): void;
+	get(key: string): CacheEntry<T> | undefined | null;
+	set(key: string, value: CacheEntry<T>): void;
 	delete(key: string): boolean;
 	clear(): void;
 	readonly size: number;
-	entries(): Iterable<[string, CacheEntry]>;
+	entries(): Iterable<[string, CacheEntry<T>]>;
 	maxSize: number;
 	expiration: number;
 }
@@ -51,6 +58,9 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
  * @property {'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'HEAD'} [method='GET'] - HTTP method for the request
  * @property {Object|string|FormData|Blob|null} [body=null] - Request body. Plain objects are JSON-serialized automatically; strings/FormData/Blob are passed as-is.
  * @property {Object} [headers={}] - Additional HTTP request headers. When body is a plain object, `Content-Type: application/json` is added automatically.
+ * @property {Function} [onRequest] - Request interceptor: `(options: RequestInit) => RequestInit | Promise<RequestInit>`. Called before each fetch attempt; return modified options to add headers, change the body, etc.
+ * @property {Function} [onResponse] - Response interceptor: `(response: Response) => Response | Promise<Response>`. Called after each fetch attempt before status validation; return a modified or cloned response.
+ * @property {Function} [retryStrategy] - Custom retry predicate: `(attempt: number, error: Error) => boolean`. When provided, replaces the built-in retryable-status check; return `true` to retry, `false` to give up.
  */
 export interface FetcherOptions {
 	timeout?: number;
@@ -66,6 +76,9 @@ export interface FetcherOptions {
 	method?: HttpMethod;
 	body?: Record<string, unknown> | string | FormData | Blob | ArrayBuffer | null;
 	headers?: Record<string, string>;
+	onRequest?: (options: RequestInit) => RequestInit | Promise<RequestInit>;
+	onResponse?: (response: Response) => Response | Promise<Response>;
+	retryStrategy?: (attempt: number, error: Error) => boolean;
 }
 
 /**
@@ -171,6 +184,9 @@ export class IbiraAPIFetcher {
 	readonly method: HttpMethod;
 	readonly body: Record<string, unknown> | string | FormData | Blob | ArrayBuffer | null;
 	readonly headers: Readonly<Record<string, string>>;
+	readonly onRequest: ((options: RequestInit) => RequestInit | Promise<RequestInit>) | null;
+	readonly onResponse: ((response: Response) => Response | Promise<Response>) | null;
+	readonly retryStrategy: ((attempt: number, error: Error) => boolean) | null;
 
 	/**
 	 * Creates an IbiraAPIFetcher with a purely functional cache approach
@@ -383,6 +399,9 @@ export class IbiraAPIFetcher {
 	 * @param {'GET'|'POST'|'PUT'|'PATCH'|'DELETE'|'HEAD'} [options.method='GET'] - HTTP method
 	 * @param {Object|string|FormData|Blob|null} [options.body=null] - Request body (plain objects are JSON-serialized automatically)
 	 * @param {Object} [options.headers={}] - Additional request headers
+	 * @param {Function} [options.onRequest] - Request interceptor called before each fetch attempt; return modified RequestInit
+	 * @param {Function} [options.onResponse] - Response interceptor called after each fetch attempt; return modified Response
+	 * @param {Function} [options.retryStrategy] - Custom retry predicate; return true to retry, false to stop
 	 */
     constructor(url: string, cache: CacheInterface, options: FetcherOptions = {}) {
 		this.url = url;
@@ -406,6 +425,10 @@ export class IbiraAPIFetcher {
 		this.method = (options.method || 'GET').toUpperCase() as HttpMethod;
 		this.body = options.body !== undefined ? options.body : null;
 		this.headers = Object.freeze({ ...(options.headers || {}) });
+		// Pipeline hooks — null when not provided
+		this.onRequest = options.onRequest ?? null;
+		this.onResponse = options.onResponse ?? null;
+		this.retryStrategy = options.retryStrategy ?? null;
 		
 		// ✅ IMMUTABLE: Deep freeze the entire instance for maximum referential transparency
 		// This prevents any external code from modifying the fetcher's properties
@@ -451,7 +474,7 @@ export class IbiraAPIFetcher {
 	 * @returns {boolean} True if the entry is still valid
 	 */
 	private _isCacheEntryValid(cacheEntry: CacheEntry | undefined | null, currentTime: number): boolean {
-		return cacheEntry != null && currentTime < cacheEntry.expiresAt;
+		return cacheEntry !== null && cacheEntry !== undefined && currentTime < cacheEntry.expiresAt;
 	}
 
 	/**
@@ -627,19 +650,29 @@ export class IbiraAPIFetcher {
 		}, this.timeout);
 
 		try {
+			// Apply request interceptor before sending (e.g. add auth headers, sign requests)
+			const effectiveFetchOptions = this.onRequest
+				? await this.onRequest({ ...fetchOptions })
+				: fetchOptions;
+
 			// Perform network request using modern Fetch API
-			const response = await fetch(this.url, fetchOptions);
+			const response = await fetch(this.url, effectiveFetchOptions);
 
 			// Clear timeout on successful response
 			clearTimeout(timeoutId);
 
+			// Apply response interceptor before validation (e.g. inspect, transform, or clone)
+			const processedResponse = this.onResponse
+				? await this.onResponse(response)
+				: response;
+
 			// Check if HTTP request was successful using the configured validateStatus predicate
-			if (!this.validateStatus(response.status)) {
-				throw new Error(`HTTP error! status: ${response.status}`);
+			if (!this.validateStatus(processedResponse.status)) {
+				throw new Error(`HTTP error! status: ${processedResponse.status}`);
 			}
 
 			// Parse JSON response data
-			const data = await response.json();
+			const data = await processedResponse.json();
 			return data;
 
 		} catch (error) {
@@ -875,8 +908,13 @@ export class IbiraAPIFetcher {
 	 * @async
 	 * @param {Object} [cacheOverride] - Optional cache instance to use instead of the default
 	 * @param {AbortSignal} [signal] - Optional AbortSignal for consumer-level request cancellation
-	 * @returns {Promise<any>} Resolves with the fetched data, or retrieved from cache
-	 * @throws {Error} Network errors, HTTP errors, or JSON parsing errors after all retries exhausted
+	 * @returns {Promise<unknown>} Resolves with the fetched data, or retrieved from cache
+	 * @throws {Error} Thrown after all retry attempts are exhausted. Possible causes:
+	 *   - Network errors (e.g. `TypeError: Failed to fetch`)
+	 *   - HTTP error responses not matching `validateStatus` (e.g. `HTTP error! status: 500`)
+	 *   - JSON parsing errors from `response.json()`
+	 *   - Errors thrown by `onRequest` or `onResponse` interceptors
+	 *   - `AbortError` when `signal` is aborted externally (not retried)
 	 * 
 	 * @example
 	 * // Practical usage - handles side effects automatically
@@ -911,7 +949,10 @@ export class IbiraAPIFetcher {
 			const isLastAttempt = attempt >= this.maxRetries;
 			// Do not retry if the caller's signal was aborted — that is a deliberate cancellation
 			const isExternallyAborted = signal?.aborted ?? false;
-			if (isLastAttempt || !this._isRetryableError(result.error!) || isExternallyAborted) {
+			const shouldRetry = this.retryStrategy
+				? this.retryStrategy(attempt, result.error!)
+				: this._isRetryableError(result.error!);
+			if (isLastAttempt || !shouldRetry || isExternallyAborted) {
 				throw result.error;
 			}
 

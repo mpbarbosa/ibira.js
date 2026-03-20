@@ -1,6 +1,6 @@
 # ibira.js
 
-> Zero-dependency JavaScript/TypeScript library for API data fetching with LRU caching and observer pattern
+> JavaScript/TypeScript library for API data fetching with LRU caching and observer pattern — no peer dependencies required
 
 [![npm version](https://badge.fury.io/js/ibira.js.svg)](https://www.npmjs.com/package/ibira.js)
 [![Node.js >=18](https://img.shields.io/node/v/ibira.js.svg)](https://nodejs.org)

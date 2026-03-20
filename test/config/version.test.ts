@@ -5,7 +5,6 @@
 
 import { VERSION } from '../../src/config/version';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../package.json') as { version: string };
 const dashIdx = pkg.version.indexOf('-');
 const versionCore = dashIdx === -1 ? pkg.version : pkg.version.slice(0, dashIdx);

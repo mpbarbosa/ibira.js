@@ -1303,4 +1303,238 @@ describe('IbiraAPIFetcher', () => {
             }
         );
     });
+
+    describe('v0.4.x — onRequest interceptor', () => {
+        test('should call onRequest with fetch options before each request', async () => {
+            const onRequest = jest.fn((opts) => opts);
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onRequest,
+            });
+
+            await interceptorFetcher.fetchData();
+
+            expect(onRequest).toHaveBeenCalledTimes(1);
+            expect(onRequest).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET' }));
+        });
+
+        test('should use the options returned by onRequest', async () => {
+            const customHeader = { 'X-Custom': 'intercepted' };
+            const onRequest = jest.fn((opts) => ({ ...opts, headers: { ...opts.headers, ...customHeader } }));
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onRequest,
+            });
+
+            await interceptorFetcher.fetchData();
+
+            expect(fetch).toHaveBeenCalledWith(
+                testUrl,
+                expect.objectContaining({ headers: expect.objectContaining({ 'X-Custom': 'intercepted' }) })
+            );
+        });
+
+        test('should support async onRequest interceptor', async () => {
+            const onRequest = jest.fn(async (opts) => ({ ...opts, headers: { ...opts.headers, 'X-Async': 'yes' } }));
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onRequest,
+            });
+
+            await interceptorFetcher.fetchData();
+
+            expect(fetch).toHaveBeenCalledWith(
+                testUrl,
+                expect.objectContaining({ headers: expect.objectContaining({ 'X-Async': 'yes' }) })
+            );
+        });
+
+        test('should not mutate original fetchOptions when interceptor spreads', async () => {
+            const originalHeaders = {};
+            const onRequest = jest.fn((opts) => ({ ...opts, headers: { ...opts.headers, 'X-Added': 'yes' } }));
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onRequest,
+                headers: originalHeaders,
+            });
+
+            await interceptorFetcher.fetchData();
+
+            // Original headers object should not be mutated
+            expect(originalHeaders).not.toHaveProperty('X-Added');
+        });
+
+        test('should propagate error thrown by onRequest as a fetch rejection', async () => {
+            const onRequest = jest.fn(() => { throw new Error('interceptor failure'); });
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onRequest,
+                maxRetries: 0,
+            });
+
+            await expect(interceptorFetcher.fetchData()).rejects.toThrow('interceptor failure');
+        });
+    });
+
+    describe('v0.4.x — onResponse interceptor', () => {
+        test('should call onResponse with the raw Response after each successful fetch', async () => {
+            const mockResponse = { ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) };
+            fetch.mockResolvedValue(mockResponse);
+
+            const onResponse = jest.fn((res) => res);
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onResponse,
+            });
+
+            await interceptorFetcher.fetchData();
+
+            expect(onResponse).toHaveBeenCalledTimes(1);
+            expect(onResponse).toHaveBeenCalledWith(mockResponse);
+        });
+
+        test('should use the response returned by onResponse', async () => {
+            const originalJson = jest.fn().mockResolvedValue({ original: true });
+            const replacedJson = jest.fn().mockResolvedValue({ replaced: true });
+            fetch.mockResolvedValue({ ok: true, status: 200, json: originalJson });
+
+            const onResponse = jest.fn(() => ({ ok: true, status: 200, json: replacedJson }));
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onResponse,
+            });
+
+            const result = await interceptorFetcher.fetchData();
+
+            expect(replacedJson).toHaveBeenCalled();
+            expect(result).toEqual({ replaced: true });
+        });
+
+        test('should support async onResponse interceptor', async () => {
+            const asyncJson = jest.fn().mockResolvedValue({ async: true });
+            fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) });
+
+            const onResponse = jest.fn(async () => ({ ok: true, status: 200, json: asyncJson }));
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onResponse,
+            });
+
+            const result = await interceptorFetcher.fetchData();
+
+            expect(result).toEqual({ async: true });
+        });
+
+        test('should propagate error thrown by onResponse as a fetch rejection', async () => {
+            const onResponse = jest.fn(() => { throw new Error('response interceptor failure'); });
+            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                onResponse,
+                maxRetries: 0,
+            });
+
+            await expect(interceptorFetcher.fetchData()).rejects.toThrow('response interceptor failure');
+        });
+    });
+
+    describe('v0.4.x — retryStrategy', () => {
+        test('should call retryStrategy with attempt and error on each retry decision', async () => {
+            fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error' });
+
+            const retryStrategy = jest.fn(() => false);
+            const strategyFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                retryStrategy,
+                maxRetries: 2,
+                retryDelay: 100,
+            });
+
+            const promise = strategyFetcher.fetchData();
+            promise.catch(() => {});
+            await jest.runAllTimersAsync();
+            await expect(promise).rejects.toThrow();
+
+            expect(retryStrategy).toHaveBeenCalledWith(0, expect.any(Error));
+        });
+
+        test('should not retry when retryStrategy returns false for a retryable error', async () => {
+            fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error' });
+
+            const retryStrategy = jest.fn(() => false);
+            const strategyFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                retryStrategy,
+                maxRetries: 3,
+                retryDelay: 100,
+            });
+
+            const promise = strategyFetcher.fetchData();
+            promise.catch(() => {});
+            await jest.runAllTimersAsync();
+            await expect(promise).rejects.toThrow();
+
+            // Only 1 call — strategy blocked all retries
+            expect(fetch).toHaveBeenCalledTimes(1);
+        });
+
+        test('should retry when retryStrategy returns true for a normally non-retryable error', async () => {
+            // 404 is not in the default retryable list
+            fetch
+                .mockResolvedValueOnce({ ok: false, status: 404, statusText: 'Not Found' })
+                .mockResolvedValueOnce({ ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) });
+
+            const retryStrategy = jest.fn(() => true);
+            const strategyFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                retryStrategy,
+                maxRetries: 1,
+                retryDelay: 100,
+            });
+
+            const promise = strategyFetcher.fetchData();
+            await jest.runAllTimersAsync();
+
+            await expect(promise).resolves.toEqual(mockData);
+            expect(fetch).toHaveBeenCalledTimes(2);
+        });
+
+        test('should fall back to default _isRetryableError when retryStrategy is not provided', async () => {
+            // 404 is NOT retryable by default
+            fetch.mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' });
+
+            const defaultFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                maxRetries: 2,
+                retryDelay: 100,
+            });
+
+            await expect(defaultFetcher.fetchData()).rejects.toThrow('HTTP error! status: 404');
+            // Only 1 call — no retries for 404 without custom strategy
+            expect(fetch).toHaveBeenCalledTimes(1);
+        });
+
+        test('should receive incrementing attempt index across retries', async () => {
+            fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error' });
+
+            const attempts = [];
+            const retryStrategy = jest.fn((attempt) => {
+                attempts.push(attempt);
+                return attempt < 2;
+            });
+
+            const strategyFetcher = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier,
+                retryStrategy,
+                maxRetries: 3,
+                retryDelay: 100,
+            });
+
+            const promise = strategyFetcher.fetchData();
+            promise.catch(() => {});
+            await jest.runAllTimersAsync();
+            await expect(promise).rejects.toThrow();
+
+            expect(attempts).toEqual([0, 1, 2]);
+        });
+    });
 });

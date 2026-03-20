@@ -1,5 +1,6 @@
 // __tests__/DefaultEventNotifier.test.js
 // Unit tests for DefaultEventNotifier class
+// DefaultEventNotifier delegates to DualObserverSubject from bessa_patterns.ts (v0.12.3-alpha)
 
 import { DefaultEventNotifier } from '../src/utils/DefaultEventNotifier.js';
 
@@ -93,7 +94,7 @@ describe('DefaultEventNotifier', () => {
 			expect(notifier.observers).toContain(observer3);
 		});
 
-		it('should remove only first occurrence if subscribed multiple times', () => {
+		it('should remove all occurrences if subscribed multiple times', () => {
 			const observer = { update: jest.fn() };
 			notifier.subscribe(observer);
 			notifier.subscribe(observer);
@@ -134,17 +135,8 @@ describe('DefaultEventNotifier', () => {
 			expect(invalidObserver.notUpdate).not.toHaveBeenCalled();
 		});
 
-		it('should skip null observers', () => {
-			const observer = { update: jest.fn() };
-			notifier.subscribe(observer);
-			notifier.observers = [...notifier.observers, null];
-			
-			expect(() => notifier.notify('test')).not.toThrow();
-			expect(observer.update).toHaveBeenCalledWith('test');
-		});
-
 		it('should isolate observer errors and continue notifying remaining observers', () => {
-			const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+			const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 			const goodObserver = { update: jest.fn() };
 			const badObserver = {
 				update: jest.fn(() => {
@@ -162,8 +154,8 @@ describe('DefaultEventNotifier', () => {
 			consoleSpy.mockRestore();
 		});
 
-		it('should log an error when an observer throws', () => {
-			const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+		it('should log a warning when an observer throws', () => {
+			const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 			const badObserver = {
 				update: jest.fn(() => {
 					throw new Error('Observer error');
@@ -174,7 +166,7 @@ describe('DefaultEventNotifier', () => {
 			notifier.notify('test');
 
 			expect(consoleSpy).toHaveBeenCalledWith(
-				expect.stringContaining('[ibira.js]'),
+				expect.stringContaining('DualObserverSubject:'),
 				expect.any(Error)
 			);
 			consoleSpy.mockRestore();

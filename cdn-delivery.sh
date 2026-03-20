@@ -164,6 +164,10 @@ echo ""
 OUTPUT_FILE="cdn-urls.txt"
 echo -e "${GREEN}\U0001F4BE Saving URLs to ${OUTPUT_FILE}...${NC}"
 
+# bessa_patterns.ts bundled dependency info
+BESSA_REPO="bessa_patterns.ts"
+BESSA_VERSION=$(node -p "require('./node_modules/bessa_patterns.ts/package.json').version" 2>/dev/null || echo "0.12.3-alpha")
+
 cat > "${OUTPUT_FILE}" << EOF
 jsDelivr CDN URLs for ${GITHUB_USER}/${GITHUB_REPO} v${PACKAGE_VERSION}
 Generated: $(date)
@@ -191,6 +195,21 @@ ES MODULE:
 
 PACKAGE INFO API:
 https://data.jsdelivr.com/v1/package/gh/${GITHUB_USER}/${GITHUB_REPO}@${PACKAGE_VERSION}
+
+=============================================================================
+
+BUNDLED DEPENDENCY — ${BESSA_REPO} v${BESSA_VERSION}
+(DualObserverSubject is bundled into the ibira.js dist — no separate load required)
+=============================================================================
+
+${BESSA_REPO} CDN (GitHub via jsDelivr):
+https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${BESSA_REPO}@v${BESSA_VERSION}/dist/index.mjs
+
+${BESSA_REPO} CDN (npm via jsDelivr, when published):
+https://cdn.jsdelivr.net/npm/${BESSA_REPO}@${BESSA_VERSION}/dist/index.mjs
+
+${BESSA_REPO} GitHub repository:
+https://github.com/${GITHUB_USER}/${BESSA_REPO}
 
 =============================================================================
 EOF

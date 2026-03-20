@@ -1,6 +1,6 @@
 {
   "name": "ibira.js",
-  "version": "0.3.6-alpha",
+  "version": "0.4.0-alpha",
   "description": "A JavaScript library for fetching and caching API data with observer pattern support",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -31,7 +31,7 @@
     "version:check": "node scripts/sync-version.js --check",
     "test:all": "npm run version:check && npm run validate && npm test",
     "prepublishOnly": "npm run validate && npm test && npm run build",
-    "lint": "eslint src/ __tests__/",
+    "lint": "eslint src/ __tests__/ test/",
     "format": "prettier --write ."
   },
   "jest": {
@@ -92,6 +92,8 @@
     "@babel/core": "^7.23.0",
     "@babel/preset-env": "^7.23.0",
     "@types/jest": "^30.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
     "babel-jest": "^29.7.0",
     "eslint": "^9.39.4",
     "globals": "^17.4.0",

@@ -7,9 +7,11 @@
 
 /**
  * A single entry stored in the cache.
+ *
+ * @template T - The type of the cached data. Defaults to `unknown` for backward compatibility.
  */
-export interface CacheEntry {
-	readonly data: unknown;
+export interface CacheEntry<T = unknown> {
+	readonly data: T;
 	readonly timestamp: number;
 	readonly expiresAt: number;
 }
@@ -33,21 +35,25 @@ export interface CacheOptions {
  * - Map-compatible interface for easy integration
  * 
  * @class DefaultCache
+ * @template T - The type of the cached data. Defaults to `unknown` for backward compatibility.
+ *   Use a specific type (e.g. `DefaultCache<User>`) to get typed cache entries.
  * @implements {Map}
  * @since 0.1.0-alpha
  * @author Marcelo Pereira Barbosa
  * 
  * @example
- * const cache = new DefaultCache({
- *   maxSize: 100,
- *   expiration: 5 * 60 * 1000 // 5 minutes
- * });
+ * // Untyped (backward-compatible)
+ * const cache = new DefaultCache({ maxSize: 100, expiration: 5 * 60 * 1000 });
  * 
- * cache.set('key1', { data: 'value' });
- * const value = cache.get('key1');
+ * @example
+ * // Typed for end-to-end type inference
+ * interface User { id: number; name: string; }
+ * const cache = new DefaultCache<User>();
+ * cache.set('user:1', { data: { id: 1, name: 'Alice' }, timestamp: Date.now(), expiresAt: Date.now() + 300000 });
+ * const entry = cache.get('user:1'); // entry.data is typed as User
  */
-export class DefaultCache {
-	storage: Map<string, CacheEntry>;
+export class DefaultCache<T = unknown> {
+	storage: Map<string, CacheEntry<T>>;
 	maxSize: number;
 	expiration: number;
 
@@ -90,7 +96,7 @@ export class DefaultCache {
 	 * const data = cache.get('myKey');
 	 * if (data) console.log('Found:', data);
 	 */
-	get(key: string): CacheEntry | undefined {
+	get(key: string): CacheEntry<T> | undefined {
 		return this.storage.get(key);
 	}
 
@@ -104,7 +110,7 @@ export class DefaultCache {
 	 * @example
 	 * cache.set('user:123', { data: { name: 'John' }, timestamp: Date.now(), expiresAt: Date.now() + 300000 });
 	 */
-	set(key: string, value: CacheEntry): void {
+	set(key: string, value: CacheEntry<T>): void {
 		this.storage.set(key, value);
 		this._enforceSizeLimit();
 	}
@@ -156,7 +162,7 @@ export class DefaultCache {
 	 *   console.log(key, value);
 	 * }
 	 */
-	entries(): IterableIterator<[string, CacheEntry]> {
+	entries(): IterableIterator<[string, CacheEntry<T>]> {
 		return this.storage.entries();
 	}
 
@@ -171,7 +177,7 @@ export class DefaultCache {
 			return;
 		}
 
-		const entries = Array.from(this.storage.entries());
+		const entries: Array<[string, CacheEntry<T>]> = Array.from(this.storage.entries());
 		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
 		
 		const entriesToRemove = this.storage.size - this.maxSize;

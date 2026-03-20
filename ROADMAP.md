@@ -1,6 +1,6 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.3.6-alpha — v0.4.x Beta Preparation in progress
+> **Current version:** 0.4.0-alpha — v0.4.x Beta Preparation in progress
 > **Status:** Active development — retry loop wired, `throttle`/`debounce` utilities shipped; several v0.4.x items remain
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
@@ -17,7 +17,7 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
 | **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
 | **0.3.6-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
-| **0.4.x-alpha** _(in progress)_ | Retry loop wired into `fetchData()`, `throttle()` and `debounce()` utilities, 238 tests |
+| **0.4.0-alpha** | Request/response interceptors, pluggable retry strategy, `DefaultCache<T>` generics, TypeScript ESLint coverage, 251 tests |
 
 ---
 
@@ -43,9 +43,7 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [x] **`.ai_workflow/` README** — add `.ai_workflow/README.md` documenting the purpose of the
   AI workflow automation directory and explaining that its contents are tooling artifacts (not
   library code) so contributors know to leave it alone
-- [ ] **Version consistency automation** — add a pre-commit hook or `npm run version:check` script
-  that asserts `package.json`, `src/config/version.ts`, and `.workflow-config.yaml` all agree on
-  the current version, preventing silent drift like the `0.2.2-alpha` / `0.3.0-alpha` mismatch
+- [x] **Version consistency automation** — `scripts/sync-version.js` reads `package.json` and regenerates `src/config/version.ts` atomically; `npm run version:sync` and `npm run version:check` scripts added; `version:check` wired into `test:all` to catch drift in CI
 - [ ] **Test suite refactoring** — extract repeated setup (cache factories, URL constants, mock
   observers) to shared helpers; convert parallel edge-case tests to `it.each` parameterised tables;
   rename any remaining implementation-focused test names to behaviour-focused names (e.g.
@@ -107,13 +105,13 @@ Low-priority housekeeping items that improve contributor experience without chan
   `docs/referential_transparency`, `docs/reports`, `docs/reports/analysis`,
   `docs/reports/bugfixes`, `docs/testing`, `docs/workflow-automation`); add a minimal
   `README.md` to each so contributors understand what belongs where
-- [ ] **`@typescript-eslint` rule review** — confirm that `@typescript-eslint/no-explicit-any`,
-  `@typescript-eslint/explicit-function-return-type`, and `@typescript-eslint/no-floating-promises`
-  are active in `eslint.config.mjs`; enable any that are missing
+- [x] **`@typescript-eslint` rule review** — `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` added; `eslint.config.mjs` now covers `src/**/*.ts` and `test/**/*.ts`; `no-explicit-any: 'error'` and `no-unused-vars` TypeScript variant are active
 - [ ] **`cdn-delivery.sh` helper functions** — extract ANSI color codes and repeated `echo`/log
   patterns into small named helper functions for easier maintenance as the script grows
 
 ---
+
+## 🔜 v0.4.x — Beta Preparation
 
 Goal: make ibira.js usable beyond CDN delivery, including as an npm dependency for TypeScript projects.
 
@@ -156,19 +154,17 @@ all three. Prioritising TypeScript migration and Node.js support makes that nich
   `debounce(fn, wait)` uses a trailing-edge strategy; all callers in the same window share a single
   `Promise` so every `await debouncedFetch()` resolves together; exposes `cancel()` and `flush()`;
   works with sync and async wrapped functions. 30 new tests across two files.
-- [ ] **Stricter generics** — parameterise `DefaultCache<T>` and `Observer<T>` with a type argument
-  instead of `unknown`; eliminates `any`/`unknown` casts in consumers and gives end-to-end type
-  inference for cached values and event payloads.
+- [x] **Stricter generics** — `DefaultCache<T = unknown>` and `CacheEntry<T = unknown>` parameterised; `CacheInterface<T>` exported publicly from `src/index.ts`; end-to-end type inference for cached values; all existing call sites remain valid (default `= unknown`)
 
 ### Pipeline customisation
 
 Goal: let consumers customise the request/response pipeline.
 
-- [ ] **Request interceptors** — hook into the request before it is sent (custom headers, auth tokens, signing)
-- [ ] **Response interceptors** — transform or validate responses before caching
-- [ ] **Pluggable cache backends** — formalise the cache interface so consumers can swap in localStorage, IndexedDB, Redis adapters, etc.
-- [ ] **Pluggable retry strategies** — expose a `retryStrategy(attempt, error)` function option alongside the existing fixed exponential backoff
-- [ ] **Async error propagation audit** — review all `fetch` call sites to confirm every async path has an explicit `try/catch` and surfaces errors to the caller rather than swallowing them silently
+- [x] **Request interceptors** — `onRequest?: (options: RequestInit) => RequestInit | Promise<RequestInit>` on `FetcherOptions`; called before every `fetch()` call; async-safe; throwing interceptor propagates through the retry loop; 5 new tests
+- [x] **Response interceptors** — `onResponse?: (response: Response) => Response | Promise<Response>` on `FetcherOptions`; called after `fetch()`, before status validation; async-safe; throwing interceptor surfaces as fetch error; 4 new tests
+- [x] **Pluggable cache backends** — `CacheInterface<T>` exported publicly from `src/index.ts`; consumers can provide any duck-typed cache adapter (localStorage, IndexedDB, Redis) via `IbiraAPIFetcher.withCustomCache()`
+- [x] **Pluggable retry strategies** — `retryStrategy?: (attempt: number, error: Error) => boolean` on `FetcherOptions`; replaces `_isRetryableError` when provided; default exponential backoff unchanged; 5 new tests
+- [x] **Async error propagation audit** — all `fetch` call sites in `IbiraAPIFetcher` and `IbiraAPIFetchManager` confirmed to have explicit `try/catch`; error surfaces to caller via `throw`; documented in JSDoc `@throws`
 - [ ] **Result/Either pattern for fetch operations** — replace throw-based error handling with `Result<T, E> = { ok: true; value: T } | { ok: false; error: E }` for explicit, type-safe error paths; consumers no longer need try/catch at call sites
 - [ ] **Runtime API response validation** — integrate a validation library (Zod or io-ts) to narrow `unknown` API responses to typed shapes at runtime; prevents type assertion bugs from unpredictable external payloads
 - [x] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — `DefaultEventNotifier` now delegates to `DualObserverSubject` (v0.12.3-alpha) from the `bessa_patterns.ts` project via composition; bundled into the ibira.js dist (zero peer dependencies) via `noExternal` tsup config. CDN URL: `https://cdn.jsdelivr.net/gh/mpbarbosa/bessa_patterns.ts@v0.12.3-alpha/dist/index.mjs`

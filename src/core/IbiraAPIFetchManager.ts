@@ -6,7 +6,7 @@
  */
 
 import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
-import type { CacheEntry, CacheInterface, FetcherOptions, HttpMethod } from './IbiraAPIFetcher.js';
+import type { CacheEntry, FetcherOptions, HttpMethod } from './IbiraAPIFetcher.js';
 import type { Observer } from '../utils/DefaultEventNotifier.js';
 
 /**
@@ -311,7 +311,7 @@ export class IbiraAPIFetchManager {
 	 * @returns {boolean} True if the entry is still valid
 	 */
 	private _isCacheEntryValid(cacheEntry: CacheEntry | undefined, currentTime: number): boolean {
-		return cacheEntry != null && currentTime < cacheEntry.expiresAt;
+		return cacheEntry !== null && cacheEntry !== undefined && currentTime < cacheEntry.expiresAt;
 	}
 
 	/**

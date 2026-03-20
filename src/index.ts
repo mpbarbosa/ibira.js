@@ -1,7 +1,7 @@
 /**
  * @fileoverview ibira.js - A JavaScript library for fetching and caching API data with observer pattern support
  * @module ibira.js
- * @version 0.3.6-alpha
+ * @version 0.4.0-alpha
  * @license MIT
  * @author Marcelo Pereira Barbosa
  * @copyright 2026 Marcelo Pereira Barbosa
@@ -32,8 +32,10 @@
  */
 
 export { IbiraAPIFetcher } from './core/IbiraAPIFetcher.js';
+export type { CacheInterface, FetcherOptions, FetchResult, CacheOperation, FetchEvent, FetchMeta, HttpMethod } from './core/IbiraAPIFetcher.js';
 export { IbiraAPIFetchManager } from './core/IbiraAPIFetchManager.js';
 export { DefaultCache } from './utils/DefaultCache.js';
+export type { CacheEntry, CacheOptions } from './utils/DefaultCache.js';
 export { DefaultEventNotifier } from './utils/DefaultEventNotifier.js';
 export { throttle } from './utils/throttle.js';
 export { debounce } from './utils/debounce.js';

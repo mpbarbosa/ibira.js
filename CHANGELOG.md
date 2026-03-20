@@ -5,7 +5,31 @@ All notable changes to the ibira.js project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v0.4.x Beta Preparation
+## [Unreleased]
+
+---
+
+## [0.4.0-alpha] — 2026-03-17
+
+### 🚀 New Features (Pipeline Customisation)
+- **ADDED**: `onRequest` interceptor — `FetcherOptions.onRequest?: (options: RequestInit) => RequestInit | Promise<RequestInit>`; called before every `fetch()` call; supports async; throwing interceptor propagates through the retry loop
+- **ADDED**: `onResponse` interceptor — `FetcherOptions.onResponse?: (response: Response) => Response | Promise<Response>`; called after `fetch()`, before status validation; supports async; throwing interceptor surfaces as fetch error
+- **ADDED**: Pluggable retry strategy — `FetcherOptions.retryStrategy?: (attempt: number, error: Error) => boolean`; replaces the built-in `_isRetryableError` when provided; default exponential backoff unchanged
+- **ADDED**: `DefaultCache<T>` generics — `CacheEntry<T = unknown>` and `DefaultCache<T = unknown>` parameterised; `CacheInterface<T>` exported publicly from `src/index.ts` for custom cache adapters
+- **ADDED**: TypeScript ESLint coverage — `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` added; `eslint.config.mjs` now covers `src/**/*.ts` and `test/**/*.ts`; `no-explicit-any: 'error'` active
+- **ADDED**: `scripts/sync-version.js` — regenerates `src/config/version.ts` from `package.json`; `npm run version:sync` and `npm run version:check` scripts; `version:check` wired into `test:all` for CI drift detection
+- **ADDED**: 18 new tests for interceptors and retryStrategy (251 total; 1 pre-existing skip)
+
+### 🐛 Bug Fixes
+- **FIXED**: `IbiraAPIFetcher._isCacheEntryValid()` — changed `!= null` to strict `!== null && !== undefined` (eqeqeq)
+- **FIXED**: `IbiraAPIFetchManager._isCacheEntryValid()` — same eqeqeq fix
+- **FIXED**: Removed unused `CacheInterface` import from `IbiraAPIFetchManager.ts`
+
+### 📚 Documentation
+- **UPDATED**: `README.md` — "Zero-dependency" claim updated to "no peer dependencies required" (runtime dependency on `bessa_patterns.ts` is bundled)
+- **UPDATED**: ROADMAP.md — v0.4.0-alpha items marked complete; completed table updated
+
+### ⬆️ v0.4.x Beta Preparation (earlier entries)
 
 ### 🚀 New Features
 - **ADDED**: HTTP methods beyond GET — `method`, `body`, and `headers` options on `FetcherOptions`; plain-object bodies auto-serialized to JSON with `Content-Type: application/json`; cache key is now `METHOD:url` so GET and POST requests cache independently
