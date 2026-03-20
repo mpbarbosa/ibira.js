@@ -59,6 +59,15 @@ Low-priority housekeeping items that improve contributor experience without chan
   of `version.test.ts`; anti-pattern custom `toString` overrides removed); remaining work: move
   `test/config/version.test.ts` to `__tests__/` for consistent test location, and refactor
   prerelease-variation tests to `it.each` parameterised table with a `makeVersion(overrides)` helper
+- [ ] **`version.ts toString()` SemVer compliance** _(step_10)_ — when `prerelease` is empty,
+  `toString()` currently outputs a trailing hyphen (e.g. `"0.4.1-"`), which is not valid SemVer.
+  Change to omit the hyphen when `prerelease === ''` so output is `"0.4.1"`. Requires updating the
+  corresponding test assertion in `test/config/version.test.ts` (the "empty prerelease" case) and
+  updating `generateVersionTs()` in `scripts/sync-version.js` to match the new behaviour.
+- [ ] **`sync-version.js` NaN guard** _(step_10)_ — after `core.split('.').map(Number)`, add
+  `if (isNaN(major) || isNaN(minor) || isNaN(patch)) throw new Error(...)` so a malformed
+  `package.json` version (e.g. `"x.y.z"`) produces a clear error instead of silently writing
+  `NaN.NaN.NaN-alpha` to `version.ts`.
 - [ ] **Automated dependency management** _(step_09)_ — enable Dependabot or Renovate for automated
   PR-based dependency updates; add `npm audit` as a CI step; document in `CONTRIBUTING.md` that
   `package-lock.json` must be committed; pin critical tooling versions (`typescript`, `jest`,
