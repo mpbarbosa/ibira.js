@@ -27,7 +27,9 @@
     "test:node": "jest --config jest.node.config.mjs",
     "build": "tsup",
     "validate": "npx tsc --noEmit",
-    "test:all": "npm run validate && npm test",
+    "version:sync": "node scripts/sync-version.js",
+    "version:check": "node scripts/sync-version.js --check",
+    "test:all": "npm run version:check && npm run validate && npm test",
     "prepublishOnly": "npm run validate && npm test && npm run build",
     "lint": "eslint src/ __tests__/",
     "format": "prettier --write ."
@@ -99,5 +101,8 @@
     "ts-jest": "^29.4.6",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "bessa_patterns.ts": "github:mpbarbosa/bessa_patterns.ts#v0.12.3-alpha"
   }
 }

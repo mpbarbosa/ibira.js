@@ -907,12 +907,12 @@ git checkout HEAD -- .
 ## 📚 Reference Documents
 
 ### Related Documentation
-- [docs/INDEX.md](docs/INDEX.md) - Main documentation index
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - System architecture
-- [docs/NODE_API_PATTERN.md](docs/NODE_API_PATTERN.md) - API patterns
-- [.github/JAVASCRIPT_BEST_PRACTICES.md](.github/JAVASCRIPT_BEST_PRACTICES.md) - Coding standards
-- [.github/HIGH_COHESION_GUIDE.md](.github/HIGH_COHESION_GUIDE.md) - Design principles
-- [.github/LOW_COUPLING_GUIDE.md](.github/LOW_COUPLING_GUIDE.md) - Dependency management
+- [docs/INDEX.md](../../INDEX.md) - Main documentation index
+- [docs/ARCHITECTURE.md](../../ARCHITECTURE.md) - System architecture
+- [docs/NODE_API_PATTERN.md](../../NODE_API_PATTERN.md) - API patterns
+- [.github/JAVASCRIPT_BEST_PRACTICES.md](../../../.github/JAVASCRIPT_BEST_PRACTICES.md) - Coding standards
+- [.github/HIGH_COHESION_GUIDE.md](../../../.github/HIGH_COHESION_GUIDE.md) - Design principles
+- [.github/LOW_COUPLING_GUIDE.md](../../../.github/LOW_COUPLING_GUIDE.md) - Dependency management
 
 ### External Standards
 - [Node.js Package Guidelines](https://docs.npmjs.com/packages-and-modules)

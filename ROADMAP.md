@@ -101,9 +101,19 @@ Low-priority housekeeping items that improve contributor experience without chan
   presence, required environment variables, and expected exit codes for `cdn-delivery.sh` and
   `scripts/deploy.sh`; also note each script's expected stdout output and return values
 
----
+- [ ] **Undocumented docs subdirectories** — 12 subdirectories under `docs/` and `.github/` lack a
+  `README.md` or `index.md` explaining their purpose (`.github/ISSUE_TEMPLATE`,
+  `.github/workflows`, `docs/architecture`, `docs/misc`, `docs/prompts`, `docs/reference`,
+  `docs/referential_transparency`, `docs/reports`, `docs/reports/analysis`,
+  `docs/reports/bugfixes`, `docs/testing`, `docs/workflow-automation`); add a minimal
+  `README.md` to each so contributors understand what belongs where
+- [ ] **`@typescript-eslint` rule review** — confirm that `@typescript-eslint/no-explicit-any`,
+  `@typescript-eslint/explicit-function-return-type`, and `@typescript-eslint/no-floating-promises`
+  are active in `eslint.config.mjs`; enable any that are missing
+- [ ] **`cdn-delivery.sh` helper functions** — extract ANSI color codes and repeated `echo`/log
+  patterns into small named helper functions for easier maintenance as the script grows
 
-## 🔜 v0.4.x — Beta Preparation
+---
 
 Goal: make ibira.js usable beyond CDN delivery, including as an npm dependency for TypeScript projects.
 
@@ -161,7 +171,7 @@ Goal: let consumers customise the request/response pipeline.
 - [ ] **Async error propagation audit** — review all `fetch` call sites to confirm every async path has an explicit `try/catch` and surfaces errors to the caller rather than swallowing them silently
 - [ ] **Result/Either pattern for fetch operations** — replace throw-based error handling with `Result<T, E> = { ok: true; value: T } | { ok: false; error: E }` for explicit, type-safe error paths; consumers no longer need try/catch at call sites
 - [ ] **Runtime API response validation** — integrate a validation library (Zod or io-ts) to narrow `unknown` API responses to typed shapes at runtime; prevents type assertion bugs from unpredictable external payloads
-- [ ] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — evaluate and integrate the `ObserverSubject` implementation from the `bessa_patterns.ts` project repo as a replacement or complement to `DefaultEventNotifier`; aligns the observer pattern with a shared canonical implementation across projects
+- [x] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — `DefaultEventNotifier` now delegates to `DualObserverSubject` (v0.12.3-alpha) from the `bessa_patterns.ts` project via composition; bundled into the ibira.js dist (zero peer dependencies) via `noExternal` tsup config. CDN URL: `https://cdn.jsdelivr.net/gh/mpbarbosa/bessa_patterns.ts@v0.12.3-alpha/dist/index.mjs`
 
 ---
 
