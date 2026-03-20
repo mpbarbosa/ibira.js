@@ -67,7 +67,7 @@
 
 **ibira.js** is available via jsDelivr CDN for easy browser integration:
 
-- **Production URL:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.0-alpha/dist/index.mjs`
+- **Production URL:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.1-alpha/dist/index.mjs`
 - **Documentation:** See README.md CDN section or run `./cdn-delivery.sh`
 - **Generated URLs:** Check `cdn-urls.txt` for all available CDN options
 
