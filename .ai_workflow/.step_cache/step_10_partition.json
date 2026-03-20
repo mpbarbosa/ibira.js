@@ -1,14 +1,12 @@
 {
   "version": 1,
   "partitionIndex": 1,
-  "totalPartitions": 5,
-  "filesHash": "ccb9c251",
+  "totalPartitions": 3,
+  "filesHash": "99f59db3",
   "partitionLabels": [
-    "scripts, src/config, src/core",
-    "src, src/utils, tsup.config.ts, eslint.config.mjs",
-    "package-lock.json, package.json, cdn-delivery.sh",
-    ".ai_workflow/.step_cache, .ai_workflow/metrics, .vscode",
-    "tsconfig.json"
+    "src/config, src, src/utils",
+    ".ai_workflow/.step_cache, .ai_workflow, package.json",
+    ".vscode, tsconfig.json"
   ],
-  "updatedAt": "2026-03-20T01:26:28.927Z"
+  "updatedAt": "2026-03-20T02:06:55.648Z"
 }

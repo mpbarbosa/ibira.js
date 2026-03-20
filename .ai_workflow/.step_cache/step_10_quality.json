@@ -24,7 +24,7 @@
     "src/config/version.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-20T01:26:28.926Z"
+      "lastAnalyzed": "2026-03-20T02:06:55.647Z"
     },
     "src/core/IbiraAPIFetchManager.ts": {
       "score": 100,
@@ -39,12 +39,12 @@
     "src/index.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-12T11:40:27.615Z"
+      "lastAnalyzed": "2026-03-20T02:06:55.647Z"
     },
     ".ai_workflow/commit_history.json": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-12T11:27:29.421Z"
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
     },
     "package-lock.json": {
       "score": 100,
@@ -69,12 +69,12 @@
     "src/utils/debounce.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+      "lastAnalyzed": "2026-03-20T02:06:55.647Z"
     },
     "src/utils/throttle.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+      "lastAnalyzed": "2026-03-20T02:06:55.647Z"
     },
     "tsup.config.ts": {
       "score": 100,
@@ -120,6 +120,26 @@
       "score": 100,
       "issueCount": 0,
       "lastAnalyzed": "2026-03-20T01:26:28.926Z"
+    },
+    ".ai_workflow/.step_cache/step_06_partition.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+    },
+    ".ai_workflow/.step_cache/step_10_partition.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+    },
+    ".ai_workflow/.step_cache/step_10_quality.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+    },
+    ".ai_workflow/metrics/current_run.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
     }
   }
 }
