@@ -1,12 +1,10 @@
 {
   "version": 1,
-  "partitionIndex": 1,
-  "totalPartitions": 3,
-  "filesHash": "99f59db3",
+  "partitionIndex": 0,
+  "totalPartitions": 1,
+  "filesHash": "514fa525",
   "partitionLabels": [
-    "src/config, src, src/utils",
-    ".ai_workflow/.step_cache, .ai_workflow, package.json",
-    ".vscode, tsconfig.json"
+    ".ai_workflow, .vscode, tsconfig.json"
   ],
-  "updatedAt": "2026-03-20T02:06:55.648Z"
+  "updatedAt": "2026-03-20T02:20:48.919Z"
 }

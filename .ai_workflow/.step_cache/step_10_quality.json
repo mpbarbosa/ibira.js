@@ -44,7 +44,7 @@
     ".ai_workflow/commit_history.json": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+      "lastAnalyzed": "2026-03-20T02:20:48.918Z"
     },
     "package-lock.json": {
       "score": 100,
@@ -140,6 +140,16 @@
       "score": 100,
       "issueCount": 0,
       "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+    },
+    ".vscode/settings.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T02:20:48.918Z"
+    },
+    "tsconfig.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T02:20:48.918Z"
     }
   }
 }
