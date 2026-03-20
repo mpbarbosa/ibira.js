@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.4.1-alpha] — 2026-03-17
+## [0.4.3-alpha] — 2026-03-17
 
 ### 🚀 New Features (Pipeline Customisation)
 - **ADDED**: `onRequest` interceptor — `FetcherOptions.onRequest?: (options: RequestInit) => RequestInit | Promise<RequestInit>`; called before every `fetch()` call; supports async; throwing interceptor propagates through the retry loop
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📚 Documentation
 - **UPDATED**: `README.md` — "Zero-dependency" claim updated to "no peer dependencies required" (runtime dependency on `bessa_patterns.ts` is bundled)
-- **UPDATED**: ROADMAP.md — v0.4.1-alpha items marked complete; completed table updated
+- **UPDATED**: ROADMAP.md — v0.4.3-alpha items marked complete; completed table updated
 
 ### ⬆️ v0.4.x Beta Preparation (earlier entries)
 
@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ADDED**: Node.js ≥18 dual support — `jest.node.config.mjs` confirms all 200 tests pass in both browser (jsdom) and Node.js environments; `npm run test:node` script added
 - **ADDED**: TypeScript source migration — all `src/**/*.js` converted to strict-mode `.ts`; `tsconfig.json` (ES2022, strict, declaration); ts-jest replaces Babel for source transformation; native TypeScript interfaces (`FetcherOptions`, `FetchResult`, `CacheEntry`, `Observer`, `CacheOperation`, `FetchEvent`, `FetchMeta`) exported from `dist/index.d.ts`
 - **ADDED**: CJS + ESM dual build via tsup — `dist/index.js` (CJS), `dist/index.mjs` (ESM), `dist/index.d.ts` (types); `exports` field in `package.json` for proper Node.js/bundler resolution; `npm run build` script; `prepublishOnly` runs validate + test + build
-- **ADDED**: Updated CDN delivery — jsDelivr URLs now reference `dist/index.mjs` and version `0.4.1-alpha` for both script and module usage; documentation and examples updated accordingly
+- **ADDED**: Updated CDN delivery — jsDelivr URLs now reference `dist/index.mjs` and version `0.4.3-alpha` for both script and module usage; documentation and examples updated accordingly
 - **ADDED**: Expanded test suite — `__tests__/DefaultCache.test.js`, `__tests__/DefaultEventNotifier.test.js`, `__tests__/IbiraAPIFetchManager.test.js`, `__tests__/IbiraAPIFetcher.test.js` cover new caching and event notifier logic
 - **ADDED**: `DefaultCache` and `DefaultEventNotifier` utilities — `src/utils/` modules migrated to strict TypeScript, fully documented and tested
 - **ADDED**: `IbiraAPIFetchManager` and `IbiraAPIFetcher` refactored to TypeScript — improved type safety, API surface, and JSDoc coverage

@@ -6,7 +6,7 @@
 [![Node.js >=18](https://img.shields.io/node/v/ibira.js.svg)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Version:** 0.4.1-alpha
+**Version:** 0.4.3-alpha
 **Status:** 🚧 Beta Preparation
 
 ---
@@ -83,10 +83,10 @@ Load **ibira.js** directly from jsDelivr CDN without installation:
 
 ```html
 <!-- Load specific version (recommended for production) -->
-<script src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.1-alpha/dist/index.mjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.3-alpha/dist/index.mjs"></script>
 
 <!-- Load with SRI (Subresource Integrity) for security -->
-<script src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.1-alpha/dist/index.mjs"
+<script src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.3-alpha/dist/index.mjs"
         integrity="sha384-HASH_HERE"
         crossorigin="anonymous"></script>
 ```
@@ -95,13 +95,13 @@ Load **ibira.js** directly from jsDelivr CDN without installation:
 
 ```html
 <script type="module">
-  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.1-alpha/dist/index.mjs';
+  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.3-alpha/dist/index.mjs';
 </script>
 ```
 
 ### Version Options
 
-- **Specific version:** `@0.4.1-alpha` (recommended for production)
+- **Specific version:** `@0.4.3-alpha` (recommended for production)
 - **Latest patch:** `@0.3` (auto-updates to latest 0.3.x)
 - **Latest minor:** `@0` (auto-updates to latest 0.x.x)
 - **Latest from branch:** `@main` (development, auto-updates)
