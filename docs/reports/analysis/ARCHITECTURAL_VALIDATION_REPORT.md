@@ -5,7 +5,7 @@
 **Project:** ibira.js
 **Language:** JavaScript (Node.js Library)
 **Analysis Date:** 2026-01-01
-**Version:** 0.4.5-alpha
+**Version:** 0.4.6-alpha
 **Status:** 🚧 Early Development (Alpha)
 
 ---
