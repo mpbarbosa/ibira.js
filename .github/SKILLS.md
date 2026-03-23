@@ -23,6 +23,7 @@ repository state.
 | Skill | File | Trigger | Purpose |
 |-------|------|---------|---------|
 | [Update bessa_patterns.ts](#update-bessayml) | `update-bessa.yml` | Weekly (Tue) / manual | Bump bessa_patterns.ts GitHub reference |
+| [Sync version strings](#sync-versionyml) | `sync-version.yml` | Push to main (`package.json`) / manual | Propagate version from package.json to all files |
 | [CDN Update](#cdn-updateyml) | `cdn-update.yml` | Manual | Update CDN delivery URLs |
 | [Publish](#publishyml) | `publish.yml` | Release / manual | Publish package |
 | [Validate logs](#validate-logs) | _(Copilot skill)_ | Manual | Validate `.ai_workflow/logs` against codebase; write `plan.md` |
@@ -66,7 +67,55 @@ gh workflow run update-bessa.yml --field version=v0.13.0-alpha
 
 ---
 
-## CDN Update
+## sync-version.yml
+
+**File:** `.github/workflows/sync-version.yml`
+**Trigger:** Push to `main` (when `package.json` changes) or `workflow_dispatch`
+**Skill docs:** `.github/skills/sync-version/SKILL.md`
+
+Reads `package.json → version` as the single source of truth and propagates
+it to every file that carries a version string. Validates TypeScript and runs
+the full test suite before committing. Idempotent — if all strings already
+agree, no commit is made.
+
+### Files checked
+
+| File | What is checked |
+|------|----------------|
+| `src/config/version.ts` | `major`, `minor`, `patch`, `prerelease` fields + `@example` comment |
+| `src/index.ts` | `@version` JSDoc tag |
+| `src/utils/debounce.ts` | `@since` JSDoc tag |
+| `src/utils/throttle.ts` | `@since` JSDoc tag |
+| `README.md` | Version badge, CDN `<script>` and `import` URLs |
+| `docs/API.md` | Version badge, example output comment |
+| `docs/INDEX.md` | CDN production URL |
+| `.workflow-config.yaml` | `version:` field |
+| `ROADMAP.md` | `> **Current version:**` header line only |
+
+### Steps
+
+| # | Step | Notes |
+|---|------|-------|
+| 1 | Checkout | `fetch-depth: 2` to detect previous version via `git diff` |
+| 2 | Set up Node.js 20 | npm cache enabled |
+| 3 | Resolve canonical version | `package.json` or `workflow_dispatch` input |
+| 4 | Detect previous version | `git diff HEAD~1` or file scan fallback |
+| 5 | Install dependencies | `npm ci` |
+| 6 | Fix `src/config/version.ts` | Node script — field-level precision |
+| 7 | Fix all other files | `sed` — global replacement of old → new version |
+| 8 | Validate TypeScript | `npm run validate` |
+| 9 | Run tests | `npm test` — catches `version.test.ts` regressions |
+| 10 | Commit | Staged diff; skips commit if nothing changed |
+
+### Trigger manually
+
+```bash
+gh workflow run sync-version.yml
+```
+
+---
+
+
 
 **File:** `.github/workflows/cdn-update.yml`
 **Trigger:** Manual (`workflow_dispatch`)
@@ -88,6 +137,14 @@ Publishes the ibira.js package.
 
 The following skills are invoked via GitHub Copilot CLI and have no
 corresponding `.yml` workflow file.
+
+### Sync version
+
+**Skill docs:** `.github/skills/sync-version/SKILL.md`
+
+Reads `package.json → version` and checks it against all files that carry
+a version string. Fixes any mismatch, validates TypeScript, runs tests, and
+commits. Also available as `.github/workflows/sync-version.yml`.
 
 ### Validate logs
 
