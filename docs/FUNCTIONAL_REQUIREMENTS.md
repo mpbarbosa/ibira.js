@@ -1729,3 +1729,4 @@ For version 1.0.0 release, the following must be met:
 | RI-002 | step_13 | 2391 markdown lint violations (markdownlint-cli not available) | docs/ | Low | skipped |
 | RI-003 | step_19 | tsconfig missing noUnusedLocals/noUnusedParameters (exposed dead code) | tsconfig.json | Low | skipped |
 | RI-004 | step_09 | 4 low @tootallnate/once vulnerabilities (require --force breaking change) | package-lock.json | Low | skipped |
+| RI-005 | step_02 | 21 docs files referencing stale version 0.2.1-alpha (current: 0.4.5-alpha) | docs/ | Medium | done |
