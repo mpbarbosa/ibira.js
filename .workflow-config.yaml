@@ -47,3 +47,11 @@ deploy:
   enabled: true
   script: scripts/deploy.sh
   description: "Tag, push, and refresh CDN URLs for ibira.js"
+
+skills:
+  version_sync:
+    command: "npm run version:sync"
+    check_command: "npm run version:check"
+    skill_doc: ".github/skills/sync-version/SKILL.md"
+    description: "Regenerates src/config/version.ts and propagates the version to all project files"
+
