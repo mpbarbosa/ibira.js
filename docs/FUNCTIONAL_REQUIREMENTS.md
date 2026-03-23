@@ -1715,3 +1715,17 @@ For version 1.0.0 release, the following must be met:
 **Last Updated**: December 15, 2025
 
 **Next Review Date**: January 15, 2026
+
+---
+
+## Roadmap — Minor Issues
+
+> Populated by the `fix-log-issues` skill. Each item was verified against
+> the live codebase before being marked done.
+
+| ID | Source step | Description | File / Path | Priority | Status |
+|----|------------|-------------|-------------|----------|--------|
+| RI-001 | step_09 | js-yaml moderate vulnerability fixed via npm audit fix | package-lock.json | Medium | done |
+| RI-002 | step_13 | 2391 markdown lint violations (markdownlint-cli not available) | docs/ | Low | skipped |
+| RI-003 | step_19 | tsconfig missing noUnusedLocals/noUnusedParameters (exposed dead code) | tsconfig.json | Low | skipped |
+| RI-004 | step_09 | 4 low @tootallnate/once vulnerabilities (require --force breaking change) | package-lock.json | Low | skipped |
