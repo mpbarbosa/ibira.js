@@ -160,8 +160,8 @@ For each file in the canonical list, determine whether it contains
 ```
 File                         | Expected           | Found              | Status
 src/config/version.ts        | patch: 4           | patch: 1           | ✗ MISMATCH
-README.md                    | @0.4.7-alpha       | @0.4.3-alpha       | ✗ MISMATCH
-docs/API.md                  | 0.4.7-alpha        | 0.4.7-alpha        | ✓ OK
+README.md                    | @0.4.8-alpha       | @0.4.3-alpha       | ✗ MISMATCH
+docs/API.md                  | 0.4.8-alpha        | 0.4.8-alpha        | ✓ OK
 ```
 
 For `src/config/version.ts`, check each field individually:
@@ -284,7 +284,7 @@ Print a structured summary after execution:
 ```
 sync-version — ibira.js
 ════════════════════════════════════════════
-Canonical version: 0.4.7-alpha
+Canonical version: 0.4.8-alpha
 ─────────────────────────────────────────────
 File                         Status
 src/config/version.ts        ✓ OK  (or ✗ FIXED)
@@ -299,14 +299,14 @@ ROADMAP.md                   ✓ OK
 ─────────────────────────────────────────────
 Result: 1 fixed  |  8 already correct
 ✅  Validation passed (tsc + npm test)
-✅  Committed: chore(version): sync all version strings to 0.4.7-alpha
+✅  Committed: chore(version): sync all version strings to 0.4.8-alpha
 ════════════════════════════════════════════
 ```
 
 If no mismatches are found, print:
 
 ```
-✅  sync-version: all version strings already agree with package.json (0.4.7-alpha)
+✅  sync-version: all version strings already agree with package.json (0.4.8-alpha)
     No files were modified.
 ```
 

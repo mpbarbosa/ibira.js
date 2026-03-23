@@ -68,7 +68,7 @@ export interface DebouncedFunction<TArgs extends unknown[], TReturn> {
  * // Force immediate execution regardless of the wait timer
  * submitButton.addEventListener('click', () => debouncedFetch.flush());
  *
- * @since 0.4.7-alpha
+ * @since 0.4.8-alpha
  */
 export function debounce<TArgs extends unknown[], TReturn>(
 	fn: (...args: TArgs) => TReturn | Promise<TReturn>,
