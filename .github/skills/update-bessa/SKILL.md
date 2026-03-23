@@ -63,7 +63,7 @@ Leave `version` blank to use the latest published release.
 `bessa_patterns.ts` is referenced in `package.json` using the GitHub shorthand:
 
 ```json
-"bessa_patterns.ts": "github:mpbarbosa/bessa_patterns.ts#v0.12.3-alpha"
+"bessa_patterns.ts": "github:mpbarbosa/bessa_patterns.ts#v0.12.5-alpha"
 ```
 
 The workflow updates only the `#TAG` fragment — the prefix
