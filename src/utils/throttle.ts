@@ -57,7 +57,7 @@ export interface ThrottledFunction<TArgs extends unknown[], TReturn> {
  * throttledFetch.flush();
  * const fresh = await throttledFetch(); // executes immediately
  *
- * @since 0.4.4-alpha
+ * @since 0.4.5-alpha
  */
 export function throttle<TArgs extends unknown[], TReturn>(
 	fn: (...args: TArgs) => TReturn,

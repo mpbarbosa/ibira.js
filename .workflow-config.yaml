@@ -6,7 +6,7 @@ project:
   type: "nodejs-library"
   description: "Zero-dependency JavaScript/TypeScript library for API data fetching with LRU caching and observer pattern"
   kind: "nodejs_library"
-  version: "0.4.4-alpha"
+  version: "0.4.5-alpha"
 
 tech_stack:
   primary_language: "typescript"
