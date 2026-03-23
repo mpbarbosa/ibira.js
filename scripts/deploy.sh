@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/deploy.sh
-# Tag a release, push to remote, and regenerate CDN URLs for ibira.js.
+# Build, test, tag, push to GitHub, and regenerate CDN URLs for ibira.js.
 #
 # Usage:
 #   ./scripts/deploy.sh [version]
@@ -16,6 +16,16 @@
 
 set -euo pipefail
 
+# ── Colors ────────────────────────────────────────────────────────────────────
+# shellcheck source=scripts/colors.sh
+source "$(dirname "${BASH_SOURCE[0]}")/colors.sh"
+
+info()    { echo -e "${BLUE}ℹ  $*${NC}"; }
+success() { echo -e "${GREEN}✓  $*${NC}"; }
+warn()    { echo -e "${YELLOW}⚠  $*${NC}"; }
+error()   { echo -e "${RED}✗  $*${NC}" >&2; }
+
+# ── Resolve project root ───────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
@@ -29,56 +39,87 @@ fi
 
 TAG="v${VERSION}"
 
-echo "🚀  ibira.js deploy — ${TAG}"
+echo ""
+echo -e "${BLUE}╔════════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}║      ibira.js  ·  Deploy to CDN            ║${NC}"
+echo -e "${BLUE}╚════════════════════════════════════════════╝${NC}"
+echo ""
+info "Project root : ${REPO_ROOT}"
+info "Version      : ${VERSION}"
+info "Git tag      : ${TAG}"
 echo ""
 
 # ── Guard: clean working tree ──────────────────────────────────────────────────
 if ! git diff --quiet || ! git diff --cached --quiet; then
-	echo "❌  Working tree is dirty. Commit or stash your changes first." >&2
+	error "Working tree is dirty. Commit or stash your changes first."
 	exit 1
 fi
 
 # ── Guard: tag must not already exist ─────────────────────────────────────────
 if git rev-parse "${TAG}" >/dev/null 2>&1; then
-	echo "❌  Tag ${TAG} already exists. Bump the version before deploying." >&2
+	error "Tag ${TAG} already exists. Bump the version before deploying."
 	exit 3
 fi
 
-# ── Run tests ──────────────────────────────────────────────────────────────────
-echo "🧪  Running tests…"
+# ── Step 1/4: Build ───────────────────────────────────────────────────────────
+info "Step 1/4 — Building …"
+npm run build
+success "Build complete"
+echo ""
+
+# ── Step 2/4: Run tests ───────────────────────────────────────────────────────
+info "Step 2/4 — Running tests …"
 if ! npm test --silent; then
-	echo "❌  Tests failed. Fix failing tests before deploying." >&2
+	error "Tests failed. Fix failing tests before deploying."
 	exit 2
 fi
-echo "✅  All tests passed."
+success "All tests passed"
 echo ""
 
-# ── Create and push tag ────────────────────────────────────────────────────────
-echo "🏷   Tagging ${TAG}…"
-git tag -a "${TAG}" -m "Release ${TAG}"
+# ── Step 3/4: Commit build artifacts ─────────────────────────────────────────
+info "Step 3/4 — Committing build artifacts …"
+git add dist/ cdn-delivery.sh 2>/dev/null || true
 
-echo "📤  Pushing tag to origin…"
-if ! git push origin "${TAG}"; then
-	echo "❌  Push failed." >&2
+if git diff --cached --quiet; then
+	warn "Nothing to commit — build artifacts are up to date"
+else
+	git commit -m "chore: build artifacts for ${TAG}"
+	success "Committed build artifacts"
+fi
+echo ""
+
+# ── Step 4/4: Tag & push ──────────────────────────────────────────────────────
+info "Step 4/4 — Tagging and pushing …"
+
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+if [[ -z "${CURRENT_BRANCH}" ]]; then
+	error "Could not determine current git branch (detached HEAD?)."
+	exit 1
+fi
+
+# Pull latest remote changes before pushing to avoid non-fast-forward rejection
+git pull --rebase origin "${CURRENT_BRANCH}"
+
+git tag -a "${TAG}" -m "Release ${TAG}"
+success "Created tag ${TAG}"
+
+if ! git push origin "${CURRENT_BRANCH}" --tags; then
+	error "Push failed."
 	exit 4
 fi
-
-# Also push the current branch so the tag is reachable
-CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-git push origin "${CURRENT_BRANCH}" || true
-
-echo "✅  Tag pushed."
+success "Pushed to origin/${CURRENT_BRANCH}"
 echo ""
 
-# ── Regenerate CDN URLs ────────────────────────────────────────────────────────
+# ── Generate CDN URLs ─────────────────────────────────────────────────────────
 if [[ -f "${REPO_ROOT}/cdn-delivery.sh" ]]; then
-	echo "🌐  Regenerating CDN URLs…"
-	bash "${REPO_ROOT}/cdn-delivery.sh" "${VERSION}" > "${REPO_ROOT}/cdn-urls.txt"
-	echo "✅  cdn-urls.txt updated."
+	info "Regenerating CDN URLs …"
+	bash "${REPO_ROOT}/cdn-delivery.sh"
+	success "cdn-urls.txt updated"
 else
-	echo "⚠️   cdn-delivery.sh not found — skipping CDN URL regeneration."
+	warn "cdn-delivery.sh not found — skipping CDN URL regeneration"
 fi
 
 echo ""
-echo "🎉  Deploy complete: ${TAG}"
+success "Deployment of ${TAG} complete! 🚀"
 echo "    CDN will pick up the new tag automatically via jsDelivr within a few minutes."
+echo ""
