@@ -2,25 +2,25 @@
 
 > **Comprehensive guide to all documentation, guides, and configuration files in the ibira.js repository**
 
-**Version:** 0.1.0-alpha  
-**Status:** ✅ **REFERENTIALLY TRANSPARENT** - Perfect 10/10 Score Achieved  
-**License:** MIT  
+**Version:** 0.4.7-alpha
+**Status:** ✅ **REFERENTIALLY TRANSPARENT** - Perfect 10/10 Score Achieved
+**License:** MIT
 **Achievement:** 🏆 **Perfect Functional Purity**
 
 ---
 
 ## 📖 Table of Contents
 
-- [Overview](#overview)
-- [Getting Started](#getting-started)
-- [Core Library](#core-library)
-- [Architecture & Design Principles](#architecture--design-principles)
-- [Development Guides](#development-guides)
-- [Testing & Quality](#testing--quality)
-- [Configuration Files](#configuration-files)
-- [Contributing](#contributing)
-- [Project Principles](#project-principles)
-- [Resources](#resources)
+- [Overview](#-overview)
+- [Getting Started](#-getting-started)
+- [Core Library](#-core-library)
+- [Architecture & Design Principles](#️-architecture--design-principles)
+- [Development Guides](#-development-guides)
+- [Testing & Quality](#-testing--quality)
+- [Configuration Files](#️-configuration-files)
+- [Contributing](#-contributing)
+- [Project Principles](#-project-principles)
+- [Resources](#-resources)
 
 ---
 
@@ -31,8 +31,9 @@
 ### 🏆 Major Achievement: Perfect Referential Transparency
 
 **Score: 10/10** - The first JavaScript API fetching library to achieve perfect referential transparency through:
+
 - ✅ Complete immutability with Object.freeze
-- ✅ Pure functional core with zero side effects  
+- ✅ Pure functional core with zero side effects
 - ✅ Total dependency injection
 - ✅ Deterministic behavior
 - ✅ Isolated side effects in wrapper layer
@@ -55,10 +56,20 @@
 
 ### New to the Project?
 
-1. **[referential_transparency/REFERENTIAL_TRANSPARENCY.md](./referential_transparency/REFERENTIAL_TRANSPARENCY.md)** - 🏆 **Start here** - Main achievement documentation
-2. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Understand the innovative dual-layer design
-3. **[IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md)** - Complete class documentation with examples
-4. **[referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md)** - See the formal proof and test results
+1. **[GETTING_STARTED.md](./GETTING_STARTED.md)** - Installation, quick start, and common patterns
+2. **[API.md](./API.md)** - Full API reference for all exported classes and utilities
+3. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Understand the innovative dual-layer design
+4. **[IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md)** - Complete class documentation with examples
+5. **[referential_transparency/REFERENTIAL_TRANSPARENCY.md](./referential_transparency/REFERENTIAL_TRANSPARENCY.md)** - 🏆 Referential transparency achievement documentation
+6. **[referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md)** - See the formal proof and test results
+
+### 🌐 CDN Delivery
+
+**ibira.js** is available via jsDelivr CDN for easy browser integration:
+
+- **Production URL:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.7-alpha/dist/index.mjs`
+- **Documentation:** See README.md CDN section or run `./cdn-delivery.sh`
+- **Generated URLs:** Check `cdn-urls.txt` for all available CDN options
 
 ### Quick Navigation
 
@@ -72,7 +83,7 @@
 
 ### Repository Structure
 
-```
+```text
 ibira.js/
 ├── .github/                        # 📋 GitHub configuration and guides
 │   ├── CODE_REVIEW_GUIDE.md         # Code review checklist and standards
@@ -94,15 +105,29 @@ ibira.js/
 │   │   └── VERIFICATION_REPORT.md  # Formal mathematical verification
 │   └── TEST_RESULTS.md             # Comprehensive test results and analysis
 ├── src/                            # 🔬 Source code (referentially transparent)
-│   └── ibira.js                    # Main library with perfect purity (10/10)
-├── __tests__/                      # 🧪 Comprehensive test suite  
-│   └── IbiraAPIFetcher.test.js     # 40/40 passing tests validating purity
+│   ├── index.ts                    # Main entry point exporting all public APIs
+│   ├── core/                       # Core business logic
+│   │   ├── IbiraAPIFetcher.ts      # Main fetcher class (10/10 purity)
+│   │   └── IbiraAPIFetchManager.ts # Multi-fetcher coordinator
+│   ├── utils/                      # Utility classes
+│   │   ├── DefaultCache.ts         # Default cache implementation
+│   │   └── DefaultEventNotifier.ts # Default event system
+│   └── config/                     # Configuration
+│       └── version.ts              # Version information
+├── __tests__/                      # 🧪 Comprehensive test suite
+│   ├── IbiraAPIFetcher.test.js     # Core fetcher tests (60+ tests)
+│   ├── IbiraAPIFetchManager.test.js # Manager tests
+│   ├── DefaultCache.test.js        # Cache implementation tests
+│   ├── DefaultEventNotifier.test.js # Event system tests
+│   └── index.test.js               # Export validation tests
 ├── coverage/                       # 📊 Test coverage reports
 ├── node_modules/                   # 📦 NPM dependencies
 ├── .vscode/                        # 🔧 VS Code configuration
 ├── babel.config.mjs                # 🔄 Babel configuration for ES modules
 ├── package.json                    # 📋 NPM package configuration
 ├── package-lock.json               # 🔒 NPM dependency lock file
+├── cdn-delivery.sh                 # 🌐 jsDelivr CDN URL generator script
+├── cdn-urls.txt                    # 📝 Generated CDN URLs reference
 ├── test-runner.js                  # 🏃 Custom test runner
 ├── test_pure_fetcher.js            # 🧪 Pure function validation tests
 ├── README.md                       # 📖 Project overview and quick start
@@ -117,35 +142,41 @@ ibira.js/
 
 | File | Description | Status |
 |------|-------------|--------|
-| [`src/ibira.js`](../src/ibira.js) | **Referentially transparent** library with dual-layer architecture | 🏆 **Perfect (10/10)** |
-| [`__tests__/IbiraAPIFetcher.test.js`](../__tests__/IbiraAPIFetcher.test.js) | Comprehensive test suite | ✅ **40/40 Passing** |
+| [`src/core/IbiraAPIFetcher.ts`](../src/core/IbiraAPIFetcher.ts) | **Referentially transparent** library with dual-layer architecture | 🏆 **Perfect (10/10)** |
+| [`__tests__/IbiraAPIFetcher.test.js`](../__tests__/IbiraAPIFetcher.test.js) | Comprehensive test suite | ✅ **172/172 Passing** |
 
 ### Main Classes
 
 #### `IbiraAPIFetcher` 🏆
+
 **Referentially transparent** API fetcher with perfect functional purity.
 
 **Pure Functional Core:**
+
 - `fetchDataPure()` - Zero side effects, deterministic computation
 - `_getExpiredCacheKeys()` - Pure cache analysis
 - `_applyCacheSizeLimitsPure()` - Pure cache size management
 - Complete immutability with Object.freeze
 
 **Practical Features:**
+
 - `fetchData()` - Wrapper that applies side effects
 - Dependency injection (cache, event notifier)
 - Static factory methods for different use cases
 - Backward compatible API
 
 **Architecture:**
+
 - **Pure Core**: Mathematical computation without side effects
 - **Side Effects Layer**: Applies computed operations to real world
 - **Dual Benefits**: Mathematical purity + practical usability
 
 #### `IbiraAPIFetchManager`
+
 Manages multiple concurrent API fetch operations across different endpoints.
 
 **Features:**
+
 - Shared cache management across fetchers
 - Request deduplication protection
 - Race condition prevention
@@ -180,6 +211,7 @@ The ibira.js project has achieved **perfect referential transparency (10/10)** t
 ### 🏆 Achievement Summary
 
 **Perfect Referential Transparency (10/10):**
+
 1. ✅ **Immutable State (2/2)** - Complete Object.freeze implementation
 2. ✅ **Dependency Injection (2/2)** - External cache and event notifier
 3. ✅ **Pure Functions (2/2)** - Zero side effects in core computation
@@ -205,12 +237,13 @@ Comprehensive guides for writing high-quality JavaScript code aligned with proje
 
 | Guide | Description | When to Use |
 |-------|-------------|-------------|
-| [**JavaScript Best Practices**](./.github/JAVASCRIPT_BEST_PRACTICES.md) | Comprehensive JavaScript coding standards | All development work - reference for code style, patterns, and conventions |
-| [**Code Review Guide**](./.github/CODE_REVIEW_GUIDE.md) | Checklist for reviewing code contributions | When reviewing pull requests or performing code audits |
+| [**JavaScript Best Practices**](../.github/JAVASCRIPT_BEST_PRACTICES.md) | Comprehensive JavaScript coding standards | All development work - reference for code style, patterns, and conventions |
+| [**Code Review Guide**](../.github/CODE_REVIEW_GUIDE.md) | Checklist for reviewing code contributions | When reviewing pull requests or performing code audits |
 
 ### Key Topics Covered
 
 **JavaScript Best Practices:**
+
 - Functional programming in JavaScript
 - Pure functions and referential transparency
 - Immutability patterns
@@ -221,6 +254,7 @@ Comprehensive guides for writing high-quality JavaScript code aligned with proje
 - Performance considerations
 
 **Code Review Guide:**
+
 - Referential transparency checklist
 - Immutability verification
 - Code quality standards
@@ -231,21 +265,66 @@ Comprehensive guides for writing high-quality JavaScript code aligned with proje
 
 ## 🧪 Testing & Quality
 
-The project emphasizes test-driven development and comprehensive unit testing.
+The project emphasizes test-driven development and comprehensive unit testing with 90%+ coverage.
 
 ### Testing Documentation
 
 | Guide | Description | Coverage |
 |-------|-------------|----------|
-| [**TDD Guide**](./.github/TDD_GUIDE.md) | Test-driven development methodology | Red-Green-Refactor cycle, TDD workflow, integration with CI/CD |
-| [**Unit Test Guide**](./.github/UNIT_TEST_GUIDE.md) | Comprehensive unit testing practices | Writing effective tests, mocking, async testing, Jest integration |
+| [**TESTING_WORKFLOW.md**](./TESTING_WORKFLOW.md) | Complete testing workflow guide | Automated & manual testing, CI/CD, workflows |
+| [**SCRIPTS_REFERENCE.md**](./SCRIPTS_REFERENCE.md) | Centralized scripts reference | All NPM scripts, utility scripts, shell scripts |
+| [**TEST_RESULTS.md**](./TEST_RESULTS.md) | Current test results and statistics | 152 tests, 90%+ coverage across all metrics |
+| [**UTILITY_SCRIPTS.md**](./UTILITY_SCRIPTS.md) | Test utility scripts documentation | test-runner.js, test_pure_fetcher.js, troubleshooting |
+| [**TROUBLESHOOTING.md**](./TROUBLESHOOTING.md) | Common issues and solutions | Installation, network, caching, errors, performance |
+| [**FAQ.md**](./FAQ.md) | Frequently asked questions | 50+ Q&A covering all aspects of the library |
+| [**TDD Guide**](../.github/TDD_GUIDE.md) | Test-driven development methodology | Red-Green-Refactor cycle, TDD workflow, integration with CI/CD |
+| [**Unit Test Guide**](../.github/UNIT_TEST_GUIDE.md) | Comprehensive unit testing practices | Writing effective tests, mocking, async testing, Jest integration |
+| [**QUICK_REFERENCE.md**](./QUICK_REFERENCE.md) | NPM scripts quick reference | Test commands table and workflow examples |
+
+### Test Suite Overview
+
+**Current Statistics:**
+
+- 📊 **Total Tests:** 152 (151 passing, 1 skipped)
+- ✅ **Statements:** 90.45% (target: 75%)
+- ✅ **Branches:** 82.14% (target: 75%)
+- ✅ **Functions:** 75.7% (target: 75%)
+- ✅ **Lines:** 91.72% (target: 75%)
+
+**Test Files:**
+
+- `IbiraAPIFetcher.test.js` - 60+ tests (core functionality)
+- `IbiraAPIFetchManager.test.js` - 40+ tests (manager coordination)
+- `DefaultCache.test.js` - 30+ tests (cache implementation)
+- `DefaultEventNotifier.test.js` - 35+ tests (event system)
+- `index.test.js` - Export validation tests
+
+### NPM Test Commands
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `npm test` | Run all tests | Standard test execution, pre-commit |
+| `npm run test:watch` | Watch mode | During active development |
+| `npm run test:coverage` | Generate coverage | Pre-commit, code review |
+| `npm run test:verbose` | Detailed output | Debugging test failures |
+| `npm run validate` | Syntax check only | Quick validation without tests |
+| `npm run test:all` | Validate + test | Pre-commit workflow, CI/CD |
+
+### Utility Test Scripts
+
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `./test-runner.js` | Display test information | Show commands, structure, coverage info |
+| `./test_pure_fetcher.js` | RT demonstration | Prove 10/10 referential transparency |
+
+See [TESTING_WORKFLOW.md](./TESTING_WORKFLOW.md) for complete workflows and [UTILITY_SCRIPTS.md](./UTILITY_SCRIPTS.md) for detailed script documentation.
 
 ### Testing Principles
 
 1. **Test-First Development** - Write tests before implementation
 2. **Isolation** - Test units independently
 3. **Clarity** - Tests serve as living documentation
-4. **Coverage** - Aim for high test coverage of critical paths
+4. **Coverage** - Maintain 90%+ coverage across all metrics
 5. **Fast Feedback** - Tests should run quickly
 
 ### Test Structure
@@ -256,6 +335,24 @@ The project emphasizes test-driven development and comprehensive unit testing.
 
 ---
 
+## 🌐 CDN Delivery Tools
+
+### CDN Generation Scripts
+
+| File | Purpose | Usage |
+|------|---------|-------|
+| `cdn-delivery.sh` | Generates jsDelivr CDN URLs for various delivery options | Run `./cdn-delivery.sh` to see all available CDN URLs |
+| `cdn-urls.txt` | Pre-generated CDN URLs for quick reference | Contains production, development, and version-range URLs |
+
+**CDN Features:**
+
+- ✅ Multiple version strategies (specific, range, branch)
+- ✅ SRI (Subresource Integrity) support
+- ✅ ES Module and script tag examples
+- ✅ Worldwide CDN distribution (750+ locations)
+- ✅ Automatic minification and compression
+- ✅ HTTP/2 and HTTP/3 support
+
 ## ⚙️ Configuration Files
 
 ### Repository Configuration
@@ -263,6 +360,7 @@ The project emphasizes test-driven development and comprehensive unit testing.
 | File | Purpose | Notes |
 |------|---------|-------|
 | `.gitignore` | Specifies files to exclude from Git | Currently ignores `.vscode/` directory |
+| `babel.config.mjs` | Babel transpilation configuration | ES module support for Jest tests |
 
 ### Future Configuration
 
@@ -291,9 +389,9 @@ While there are no formal CONTRIBUTING.md or CODE_OF_CONDUCT.md files yet, contr
 
 ### Before Submitting a PR
 
-- [ ] Read [JavaScript Best Practices](./.github/JAVASCRIPT_BEST_PRACTICES.md)
-- [ ] Write tests following [TDD Guide](./.github/TDD_GUIDE.md)
-- [ ] Ensure code passes [Code Review Guide](./.github/CODE_REVIEW_GUIDE.md) checklist
+- [ ] Read [JavaScript Best Practices](../.github/JAVASCRIPT_BEST_PRACTICES.md)
+- [ ] Write tests following [TDD Guide](../.github/TDD_GUIDE.md)
+- [ ] Ensure code passes [Code Review Guide](../.github/CODE_REVIEW_GUIDE.md) checklist
 - [ ] Verify referential transparency where applicable
 - [ ] Document any new features or changes
 
@@ -304,25 +402,32 @@ While there are no formal CONTRIBUTING.md or CODE_OF_CONDUCT.md files yet, contr
 The ibira.js project is guided by these core principles:
 
 ### 1. **Referential Transparency**
+
 Functions should produce the same output for the same input without side effects. See [Referential Transparency Achievement](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) for the complete 10/10 achievement documentation.
 
 ### 2. **Immutability**
+
 Favor immutable data structures and avoid mutations. Use functional programming patterns.
 
 ### 3. **Pure Functions**
+
 Strive for pure functions that are deterministic and easy to test.
 
 ### 4. **High Cohesion**
-Each module should have a single, well-defined responsibility. See [High Cohesion Guide](./.github/HIGH_COHESION_GUIDE.md).
+
+Each module should have a single, well-defined responsibility. See [High Cohesion Guide](../.github/HIGH_COHESION_GUIDE.md).
 
 ### 5. **Low Coupling**
-Minimize dependencies between modules. See [Low Coupling Guide](./.github/LOW_COUPLING_GUIDE.md).
+
+Minimize dependencies between modules. See [Low Coupling Guide](../.github/LOW_COUPLING_GUIDE.md).
 
 ### 6. **Test-Driven Development**
-Write tests before implementation. See [TDD Guide](./.github/TDD_GUIDE.md).
+
+Write tests before implementation. See [TDD Guide](../.github/TDD_GUIDE.md).
 
 ### 7. **Code Quality**
-Maintain high standards through code review and best practices. See [Code Review Guide](./.github/CODE_REVIEW_GUIDE.md).
+
+Maintain high standards through code review and best practices. See [Code Review Guide](../.github/CODE_REVIEW_GUIDE.md).
 
 ---
 
@@ -331,6 +436,7 @@ Maintain high standards through code review and best practices. See [Code Review
 ### Internal Documentation
 
 **Achievement Documentation:**
+
 - [referential_transparency/REFERENTIAL_TRANSPARENCY.md](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) - Main achievement (10/10)
 - [referential_transparency/PURE_SOLUTION.md](./referential_transparency/PURE_SOLUTION.md) - Pure functional solution
 - [referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md) - Formal verification
@@ -338,6 +444,7 @@ Maintain high standards through code review and best practices. See [Code Review
 - [IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md) - Complete class documentation
 
 **Historical Guides (`.github/` directory):**
+
 - [HIGH_COHESION_GUIDE.md](../.github/HIGH_COHESION_GUIDE.md)
 - [LOW_COUPLING_GUIDE.md](../.github/LOW_COUPLING_GUIDE.md)
 - [JAVASCRIPT_BEST_PRACTICES.md](../.github/JAVASCRIPT_BEST_PRACTICES.md)
@@ -371,7 +478,7 @@ Maintain high standards through code review and best practices. See [Code Review
 
 ## 📊 Project Status
 
-**Current Version:** 0.1.0-alpha  
+**Current Version:** 0.4.7-alpha
 **Status:** Early Development (Alpha)
 
 ### Development Roadmap
@@ -389,7 +496,11 @@ The project is in active early development. Current focus areas:
 
 ### Version History
 
-- **0.1.0-alpha** - Initial implementation with core features
+| Version | Release Date | Status | Key Features |
+|---------|--------------|--------|--------------|
+| 0.2.1-alpha | 2025-12-15 | Latest | CDN delivery support, documentation updates |
+| 0.2.0-alpha | 2025-12-15 | Superseded | Modular architecture, 90%+ test coverage |
+| 0.1.0-alpha | 2025-12-14 | Superseded | Initial release, referential transparency |
 
 ---
 
@@ -430,7 +541,7 @@ This index should be updated whenever:
 - Project structure changes
 - Configuration files are added
 
-**Last Updated:** 2025-10-13  
+**Last Updated:** 2025-12-15
 **Maintainer:** Project maintainers
 
 ---
@@ -455,13 +566,14 @@ This index should be updated whenever:
 ### 🌟 What This Means
 
 - **For Developers**: You can now use a mathematically pure API fetcher in production
-- **For JavaScript**: Proves that functional programming can be practical and performant  
+- **For JavaScript**: Proves that functional programming can be practical and performant
 - **For the Industry**: Sets a new standard for library design and referential transparency
 - **For Science**: Demonstrates formal verification of functional programming principles
 
 ### 🎯 The Journey
 
 This achievement required:
+
 - 🔬 **Mathematical rigor** in design and implementation
 - 🏗️ **Architectural innovation** with the dual-layer approach
 - 🧪 **Comprehensive testing** with 40 test cases covering every aspect
@@ -473,3 +585,36 @@ This achievement required:
 ---
 
 **Note:** This index is a living document. If you find missing information or broken links, please submit an issue or pull request.
+
+## 🆕 Latest Documentation (December 2025)
+
+### [Node.js API Pattern Guide](./NODE_API_PATTERN.md) ⭐ NEW
+
+Complete 32KB comprehensive guide covering the entire Node.js API pattern implementation
+
+This is the most comprehensive documentation available, covering:
+
+- Complete architecture overview with diagrams
+- Module organization and structure details
+- All design patterns used (Factory, Observer, Strategy, etc.)
+- Full API documentation with extensive examples
+- Best practices and coding guidelines
+- Contributing guidelines for developers
+- Testing strategies and patterns
+- Usage examples for all scenarios
+
+👉 **Start here for a complete understanding of the project!**
+
+### [Structure Diagram](./STRUCTURE_DIAGRAM.md) ⭐ NEW
+
+Visual representation of the entire project structure
+
+Includes:
+
+- ASCII tree diagrams of file structure
+- Module dependency graphs
+- Data flow diagrams
+- Layer architecture visualizations
+- Design pattern maps
+- Test coverage distribution
+- Import patterns

@@ -9,12 +9,13 @@ This guide documents the transformation of IbiraAPIFetcher from a traditional ob
 ### State Management
 
 #### ❌ Before (Impure)
+
 ```javascript
 class IbiraAPIFetcher {
     constructor(url) {
         this.url = url;
         this.data = null;           // Mutable state
-        this.error = null;          // Mutable state  
+        this.error = null;          // Mutable state
         this.loading = false;       // Mutable state
         this.fetching = false;      // Mutable state
         this.cache = new Map();     // Internal mutable state
@@ -24,6 +25,7 @@ class IbiraAPIFetcher {
 ```
 
 #### ✅ After (Pure)
+
 ```javascript
 class IbiraAPIFetcher {
     constructor(url, cache, options = {}) {
@@ -35,7 +37,7 @@ class IbiraAPIFetcher {
         this.retryDelay = options.retryDelay || 1000;
         this.retryMultiplier = options.retryMultiplier || 2;
         this.retryableStatusCodes = Object.freeze([408, 429, 500, 502, 503, 504]);
-        
+
         return Object.freeze(this); // Immutable instance
     }
 }
@@ -44,20 +46,21 @@ class IbiraAPIFetcher {
 ### Method Implementation
 
 #### ❌ Before (Side Effects Mixed with Logic)
+
 ```javascript
 async fetchData() {
     this.loading = true;                    // Side effect
     this.error = null;                      // Side effect
-    
+
     try {
         const response = await fetch(this.url); // Side effect
         const data = await response.json();     // Side effect
-        
+
         this.data = data;                    // Side effect
         this.cache.set(this.url, data);     // Side effect
         this.notifyObservers('success', data); // Side effect
         this.loading = false;                // Side effect
-        
+
         return data;
     } catch (error) {
         this.error = error;                  // Side effect
@@ -69,11 +72,12 @@ async fetchData() {
 ```
 
 #### ✅ After (Pure Core + Side Effects Wrapper)
+
 ```javascript
 // Pure functional core - zero side effects
 async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider = null) {
     const cacheKey = this.getCacheKey();
-    
+
     // Pure cache analysis
     const expiredKeys = this._getExpiredCacheKeys(currentCacheState, currentTime);
     const cleanedCache = new Map();
@@ -82,7 +86,7 @@ async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider
             cleanedCache.set(key, value);
         }
     }
-    
+
     // Pure cache check
     if (cleanedCache.has(cacheKey)) {
         const cacheEntry = cleanedCache.get(cacheKey);
@@ -104,21 +108,21 @@ async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider
             });
         }
     }
-    
+
     // Pure network operation description
     const events = [
         Object.freeze({ type: 'loading-start', payload: Object.freeze({ url: this.url, cacheKey }) })
     ];
-    
+
     try {
         const networkFn = networkProvider || (() => this._performSingleRequest(new AbortController()));
         const data = await networkFn();
-        
+
         const cacheEntry = this._createCacheEntry(data, currentTime, this.cache);
         const newCacheState = new Map(cleanedCache);
         newCacheState.set(cacheKey, cacheEntry);
         const finalCacheState = this._applyCacheSizeLimitsPure(newCacheState);
-        
+
         return Object.freeze({
             success: true,
             data: data,
@@ -140,7 +144,7 @@ async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider
                 networkRequest: true
             })
         });
-        
+
     } catch (error) {
         return Object.freeze({
             success: false,
@@ -166,13 +170,13 @@ async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider
 // Practical wrapper that applies side effects
 async fetchData(cacheOverride = null) {
     const activeCache = cacheOverride || this.cache;
-    
+
     // Use the pure core function
     const result = await this.fetchDataPure(activeCache);
-    
+
     // Apply side effects based on pure computation
     this._applySideEffects(result, activeCache);
-    
+
     // Return data or throw error based on pure result
     if (result.success) {
         return result.data;
@@ -195,7 +199,7 @@ _applySideEffects(result, activeCache) {
                 break;
         }
     });
-    
+
     // Apply event notifications
     result.events.forEach(event => {
         this.notifyObservers(event.type, event.payload);
@@ -206,6 +210,7 @@ _applySideEffects(result, activeCache) {
 ## Step-by-Step Transformation Process
 
 ### Step 1: Remove Mutable Properties
+
 ```diff
 class IbiraAPIFetcher {
     constructor(url, cache, options = {}) {
@@ -225,6 +230,7 @@ class IbiraAPIFetcher {
 ```
 
 ### Step 2: Externalize Dependencies
+
 ```diff
 - const fetcher = new IbiraAPIFetcher(url);
 + const cache = new Map();
@@ -233,6 +239,7 @@ class IbiraAPIFetcher {
 ```
 
 ### Step 3: Create Pure Core Function
+
 ```javascript
 // Add pure functional core
 async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider = null) {
@@ -250,12 +257,13 @@ async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider
 ```
 
 ### Step 4: Implement Side Effects Layer
+
 ```javascript
 // Wrapper that uses pure core and applies side effects
 async fetchData(cacheOverride = null) {
     const result = await this.fetchDataPure(activeCache);
     this._applySideEffects(result, activeCache);
-    
+
     if (result.success) {
         return result.data;
     } else {
@@ -265,6 +273,7 @@ async fetchData(cacheOverride = null) {
 ```
 
 ### Step 5: Add Static Factory Methods
+
 ```javascript
 static withDefaultCache(url, options = {}) {
     const cache = this._createDefaultCache(options);
@@ -284,6 +293,7 @@ static withoutCache(url, options = {}) {
 ## Migration Benefits
 
 ### Before Migration Issues
+
 - ❌ **Unpredictable behavior** due to mutable state
 - ❌ **Difficult testing** requiring complex mocking
 - ❌ **Race conditions** with concurrent access
@@ -291,6 +301,7 @@ static withoutCache(url, options = {}) {
 - ❌ **Side effects everywhere** making debugging difficult
 
 ### After Migration Benefits
+
 - ✅ **Predictable behavior** with pure functions
 - ✅ **Easy testing** with deterministic inputs/outputs
 - ✅ **Thread-safe** operations without race conditions
@@ -302,17 +313,18 @@ static withoutCache(url, options = {}) {
 ## Testing Migration
 
 ### Before (Complex Mocking)
+
 ```javascript
 describe('IbiraAPIFetcher', () => {
     test('should set loading state', async () => {
         const fetcher = new IbiraAPIFetcher(testUrl);
-        
+
         let loadingDuringFetch;
         fetch.mockImplementation(() => {
             loadingDuringFetch = fetcher.loading; // Testing mutable state
             return Promise.resolve(mockResponse);
         });
-        
+
         await fetcher.fetchData();
         expect(loadingDuringFetch).toBe(true);
         expect(fetcher.loading).toBe(false);
@@ -321,25 +333,26 @@ describe('IbiraAPIFetcher', () => {
 ```
 
 ### After (Simple Assertions)
+
 ```javascript
 describe('IbiraAPIFetcher', () => {
     test('should return pure operation description', async () => {
         const result = await fetcher.fetchDataPure(testCache);
-        
+
         // Test pure computation
         expect(result.success).toBe(true);
         expect(result.data).toEqual(mockData);
         expect(Object.isFrozen(result)).toBe(true);
-        
+
         // Verify no side effects
         expect(eventNotifier.notifications).toHaveLength(0);
         expect(cache.has(testUrl)).toBe(false);
     });
-    
+
     test('should be deterministic', async () => {
         const result1 = await fetcher.fetchDataPure(testCache);
         const result2 = await fetcher.fetchDataPure(testCache);
-        
+
         expect(result1).toEqual(result2);
     });
 });
@@ -348,20 +361,24 @@ describe('IbiraAPIFetcher', () => {
 ## Performance Impact
 
 ### Memory Usage
+
 - **Before**: Mutable objects with hidden state
 - **After**: Immutable objects that can be safely cached and reused
 
 ### CPU Usage
+
 - **Before**: Complex state management overhead
 - **After**: Pure computation with efficient caching
 
 ### Concurrency
+
 - **Before**: Race conditions with shared mutable state
 - **After**: Safe parallel execution with immutable data
 
 ## Backward Compatibility
 
 ### Existing Code Continues to Work
+
 ```javascript
 // This still works exactly as before
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
@@ -370,6 +387,7 @@ console.log(data);
 ```
 
 ### New Functional Patterns Available
+
 ```javascript
 // New pure functional usage
 const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
@@ -397,6 +415,6 @@ This transformation demonstrates how legacy object-oriented code can be evolved 
 
 ---
 
-*Migration completed: October 13, 2025*  
-*Referential Transparency Score: 10/10*  
+*Migration completed: October 13, 2025*
+*Referential Transparency Score: 10/10*
 *Test Coverage: 40/40 passing tests*

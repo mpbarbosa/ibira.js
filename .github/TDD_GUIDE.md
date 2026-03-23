@@ -22,6 +22,7 @@
 3. **Refactor** (Refactor) - Improve the code while keeping tests green
 
 TDD ensures that:
+
 - Every feature has tests from the start
 - Code is designed to be testable
 - Tests serve as living documentation
@@ -32,6 +33,7 @@ TDD ensures that:
 > "Code without tests is broken by design." - Jacob Kaplan-Moss
 
 TDD inverts the traditional development process:
+
 - **Traditional**: Code → Test → Debug
 - **TDD**: Test → Code → Refactor
 
@@ -40,6 +42,7 @@ TDD inverts the traditional development process:
 ### 1. **Better Design**
 
 Writing tests first forces you to think about:
+
 - Function interfaces and APIs
 - Dependencies and coupling
 - Edge cases and error handling
@@ -48,6 +51,7 @@ Writing tests first forces you to think about:
 ### 2. **Higher Confidence**
 
 With TDD, you know:
+
 - ✅ Your code works as expected
 - ✅ Changes don't break existing functionality
 - ✅ Edge cases are handled
@@ -56,6 +60,7 @@ With TDD, you know:
 ### 3. **Living Documentation**
 
 Tests serve as:
+
 - Examples of how to use your code
 - Specifications of expected behavior
 - Documentation that never goes out of date
@@ -63,6 +68,7 @@ Tests serve as:
 ### 4. **Faster Development**
 
 TDD may seem slower initially, but:
+
 - Less time debugging
 - Fewer production bugs
 - Easier maintenance
@@ -71,6 +77,7 @@ TDD may seem slower initially, but:
 ### 5. **Aligns with Referential Transparency**
 
 TDD naturally encourages:
+
 - Pure functions (easier to test)
 - Isolated side effects (testable boundaries)
 - Deterministic behavior (predictable tests)
@@ -95,9 +102,9 @@ describe('ApiResponseParser', () => {
             },
             timestamp: '2025-01-08T10:00:00Z'
         };
-        
+
         const parsed = parseApiResponse(response);
-        
+
         expect(parsed).toEqual({
             id: '123',
             name: 'Test Item',
@@ -108,12 +115,14 @@ describe('ApiResponseParser', () => {
 ```
 
 **What to do:**
+
 1. Think about the function signature
 2. Consider inputs and expected outputs
 3. Write the test as if the function exists
 4. Run the test - it should fail (Red)
 
 **Why it fails:**
+
 - Function doesn't exist yet
 - This is expected and good!
 
@@ -135,12 +144,14 @@ module.exports = { parseApiResponse };
 ```
 
 **What to do:**
+
 1. Implement the minimum code to pass the test
 2. Don't worry about perfection yet
 3. Run the test - it should pass (Green)
 4. Commit if test passes
 
 **Principles:**
+
 - Keep it simple
 - Don't add features not covered by tests
 - Make the test pass first, optimize later
@@ -154,7 +165,7 @@ module.exports = { parseApiResponse };
 function parseApiResponse(response) {
     // Refactored: handle missing fields safely
     if (!response || !response.data) return null;
-    
+
     return {
         id: response.data.id || '',
         name: response.data.name || '',
@@ -166,6 +177,7 @@ module.exports = { parseApiResponse };
 ```
 
 **What to do:**
+
 1. Improve code quality, readability, performance
 2. Extract functions if needed
 3. Apply referential transparency principles
@@ -173,6 +185,7 @@ module.exports = { parseApiResponse };
 5. Commit when refactoring is complete
 
 **Safe refactorings:**
+
 - Rename variables
 - Extract functions
 - Remove duplication
@@ -183,7 +196,7 @@ module.exports = { parseApiResponse };
 
 ### Step-by-Step Process
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  1. Write a failing test (RED)          │
 │     - Define expected behavior          │
@@ -239,6 +252,7 @@ module.exports = { parseApiResponse };
 ### Daily TDD Workflow
 
 **Morning:**
+
 ```bash
 # 1. Pull latest changes
 git pull origin main
@@ -251,6 +265,7 @@ npm run test:coverage
 ```
 
 **During Development:**
+
 ```bash
 # 1. Create feature branch
 git checkout -b feature/address-validation
@@ -281,6 +296,7 @@ git commit -m "test: add Brazilian address validation"
 ```
 
 **Before Push:**
+
 ```bash
 # 1. Run full test suite
 npm run test:all
@@ -301,18 +317,19 @@ TDD and referential transparency work together perfectly. Pure functions are eas
 
 ### Pure Functions are Easy to Test
 
-**Good Example: Pure Function**
+#### Good Example: Pure Function
+
 ```javascript
 // src/utils.js - Pure function
 function calculateDistance(coord1, coord2) {
     const R = 6371; // Earth's radius in km
     const dLat = toRadians(coord2.lat - coord1.lat);
     const dLon = toRadians(coord2.lon - coord1.lon);
-    
+
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
               Math.cos(toRadians(coord1.lat)) * Math.cos(toRadians(coord2.lat)) *
               Math.sin(dLon/2) * Math.sin(dLon/2);
-    
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
 }
@@ -322,23 +339,24 @@ describe('calculateDistance', () => {
     test('should calculate distance between two coordinates', () => {
         const coord1 = { lat: -23.550520, lon: -46.633308 }; // São Paulo
         const coord2 = { lat: -22.906847, lon: -43.172896 }; // Rio de Janeiro
-        
+
         const distance = calculateDistance(coord1, coord2);
-        
+
         expect(distance).toBeCloseTo(357.4, 1);
     });
-    
+
     test('should return 0 for same coordinates', () => {
         const coord = { lat: -23.550520, lon: -46.633308 };
-        
+
         const distance = calculateDistance(coord, coord);
-        
+
         expect(distance).toBe(0);
     });
 });
 ```
 
 **Why this is easy to test:**
+
 - No dependencies to mock
 - Deterministic output
 - No side effects
@@ -346,7 +364,8 @@ describe('calculateDistance', () => {
 
 ### Isolate Side Effects for Testing
 
-**Good Example: Separate Pure and Impure**
+#### Good Example: Separate Pure and Impure
+
 ```javascript
 // src/geocoding.js
 
@@ -373,7 +392,7 @@ async function fetchGeocodingData(address) {
 describe('buildGeocodingUrl', () => {
     test('should build correct URL for Brazilian address', () => {
         const url = buildGeocodingUrl('Avenida Paulista, São Paulo');
-        
+
         expect(url).toContain('nominatim.openstreetmap.org');
         expect(url).toContain('q=Avenida+Paulista');
         expect(url).toContain('format=json');
@@ -388,9 +407,9 @@ describe('fetchGeocodingData', () => {
                 json: () => Promise.resolve([{ lat: '-23.5', lon: '-46.6' }])
             })
         );
-        
+
         const data = await fetchGeocodingData('São Paulo');
-        
+
         expect(data).toHaveLength(1);
         expect(data[0].lat).toBe('-23.5');
     });
@@ -398,6 +417,7 @@ describe('fetchGeocodingData', () => {
 ```
 
 **Benefits:**
+
 - Pure `buildGeocodingUrl` tested without mocks
 - Side effect (`fetch`) isolated to `fetchGeocodingData`
 - Easier to test, maintain, and understand
@@ -407,6 +427,7 @@ describe('fetchGeocodingData', () => {
 ### 1. Write the Test First (Always)
 
 ❌ **Don't:**
+
 ```javascript
 // Writing code first
 function processAddress(address) {
@@ -420,6 +441,7 @@ test('should process address', () => {
 ```
 
 ✅ **Do:**
+
 ```javascript
 // Write test first
 test('should process address', () => {
@@ -439,6 +461,7 @@ function processAddress(address) {
 Focus on one behavior per test:
 
 ✅ **Good:**
+
 ```javascript
 test('should format street address', () => {
     const address = { street: 'Av. Paulista', number: '1000' };
@@ -452,6 +475,7 @@ test('should handle missing street number', () => {
 ```
 
 ❌ **Avoid:**
+
 ```javascript
 test('should format address in all cases', () => {
     // Testing multiple behaviors in one test
@@ -464,22 +488,24 @@ test('should format address in all cases', () => {
 ### 3. Test Behavior, Not Implementation
 
 ✅ **Good: Testing behavior**
+
 ```javascript
 test('should return sorted cities by name', () => {
     const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
     const sorted = sortCities(cities);
-    
+
     expect(sorted[0]).toBe('Brasília');
     expect(sorted[2]).toBe('São Paulo');
 });
 ```
 
 ❌ **Avoid: Testing implementation**
+
 ```javascript
 test('should call Array.sort', () => {
     const sortSpy = jest.spyOn(Array.prototype, 'sort');
     sortCities(['São Paulo', 'Rio']);
-    
+
     expect(sortSpy).toHaveBeenCalled(); // Implementation detail
 });
 ```
@@ -497,7 +523,7 @@ test('calculateDistance is fast', () => {
     const start = Date.now();
     calculateDistance({lat: 0, lon: 0}, {lat: 1, lon: 1});
     const duration = Date.now() - start;
-    
+
     expect(duration).toBeLessThan(10); // milliseconds
 });
 ```
@@ -505,6 +531,7 @@ test('calculateDistance is fast', () => {
 ### 5. Test Edge Cases
 
 Always test:
+
 - Empty inputs
 - Null/undefined
 - Invalid data types
@@ -516,11 +543,11 @@ describe('formatAddress edge cases', () => {
     test('should handle null address', () => {
         expect(formatAddress(null)).toBe('');
     });
-    
+
     test('should handle empty object', () => {
         expect(formatAddress({})).toBe('');
     });
-    
+
     test('should handle missing required fields', () => {
         expect(formatAddress({ city: 'São Paulo' })).toContain('São Paulo');
     });
@@ -530,6 +557,7 @@ describe('formatAddress edge cases', () => {
 ### 6. Use Descriptive Test Names
 
 ✅ **Good:**
+
 ```javascript
 test('should return empty string when address is null', () => { });
 test('should format complete Brazilian address with all components', () => { });
@@ -537,6 +565,7 @@ test('should preserve Portuguese special characters in city names', () => { });
 ```
 
 ❌ **Avoid:**
+
 ```javascript
 test('test 1', () => { });
 test('address formatting', () => { });
@@ -552,10 +581,10 @@ test('should calculate distance between cities', () => {
     // Arrange - Set up test data
     const saoPaulo = { lat: -23.550520, lon: -46.633308 };
     const rio = { lat: -22.906847, lon: -43.172896 };
-    
+
     // Act - Execute the function
     const distance = calculateDistance(saoPaulo, rio);
-    
+
     // Assert - Verify the result
     expect(distance).toBeCloseTo(357.4, 1);
 });
@@ -566,19 +595,20 @@ test('should calculate distance between cities', () => {
 Each test should be able to run in isolation:
 
 ✅ **Good:**
+
 ```javascript
 describe('AddressCache', () => {
     let cache;
-    
+
     beforeEach(() => {
         cache = new AddressCache(); // Fresh instance each test
     });
-    
+
     test('should add address to cache', () => {
         cache.add('key1', { city: 'São Paulo' });
         expect(cache.get('key1')).toBeDefined();
     });
-    
+
     test('should return null for missing key', () => {
         expect(cache.get('nonexistent')).toBeNull();
     });
@@ -602,11 +632,11 @@ describe('formatCEP', () => {
     test('should format valid CEP', () => {
         expect(formatCEP('01310200')).toBe('01310-200');
     });
-    
+
     test('should handle CEP with formatting', () => {
         expect(formatCEP('01310-200')).toBe('01310-200');
     });
-    
+
     test('should return null for invalid CEP', () => {
         expect(formatCEP('123')).toBeNull();
     });
@@ -621,16 +651,16 @@ describe('geocoding with mocks', () => {
     beforeEach(() => {
         global.fetch = jest.fn();
     });
-    
+
     afterEach(() => {
         jest.restoreAllMocks();
     });
-    
+
     test('should handle API errors gracefully', async () => {
         global.fetch.mockRejectedValue(new Error('Network error'));
-        
+
         const result = await safeGeocode('São Paulo');
-        
+
         expect(result).toBeNull();
     });
 });
@@ -643,11 +673,11 @@ describe('geocoding with mocks', () => {
 describe('async operations', () => {
     test('should resolve with address data', async () => {
         const data = await fetchAddress('01310-200');
-        
+
         expect(data).toBeDefined();
         expect(data.city).toBe('São Paulo');
     });
-    
+
     test('should reject with error for invalid CEP', async () => {
         await expect(fetchAddress('invalid'))
             .rejects
@@ -664,9 +694,9 @@ describe('immutability', () => {
     test('should not mutate original array when sorting', () => {
         const original = ['c', 'a', 'b'];
         const originalCopy = [...original];
-        
+
         const sorted = sortArray(original);
-        
+
         expect(original).toEqual(originalCopy); // Original unchanged
         expect(sorted).toEqual(['a', 'b', 'c']);
     });
@@ -679,7 +709,8 @@ describe('immutability', () => {
 
 **Feature**: Validate Brazilian phone numbers
 
-**Step 1: Write failing test (RED)**
+#### Step 1: Write failing test (RED)
+
 ```javascript
 // __tests__/PhoneValidator.test.js
 const { isValidBrazilianPhone } = require('../src/PhoneValidator');
@@ -688,7 +719,7 @@ describe('Brazilian Phone Validator', () => {
     test('should validate mobile phone with area code', () => {
         expect(isValidBrazilianPhone('(11) 98765-4321')).toBe(true);
     });
-    
+
     test('should reject invalid phone', () => {
         expect(isValidBrazilianPhone('123')).toBe(false);
     });
@@ -698,7 +729,8 @@ describe('Brazilian Phone Validator', () => {
 // Result: FAIL - function doesn't exist
 ```
 
-**Step 2: Make test pass (GREEN)**
+#### Step 2: Make test pass (GREEN)
+
 ```javascript
 // src/PhoneValidator.js
 function isValidBrazilianPhone(phone) {
@@ -712,14 +744,15 @@ module.exports = { isValidBrazilianPhone };
 // Result: PASS
 ```
 
-**Step 3: Refactor (REFACTOR)**
+#### Step 3: Refactor (REFACTOR)
+
 ```javascript
 // src/PhoneValidator.js
 function isValidBrazilianPhone(phone) {
     const digits = phone.replace(/\D/g, '');
     const hasCorrectLength = digits.length === 10 || digits.length === 11;
     const hasValidAreaCode = /^[1-9]{2}/.test(digits);
-    
+
     return hasCorrectLength && hasValidAreaCode;
 }
 
@@ -727,7 +760,8 @@ function isValidBrazilianPhone(phone) {
 // Result: PASS - tests still green after refactor
 ```
 
-**Step 4: Add more tests**
+#### Step 4: Add more tests
+
 ```javascript
 test('should validate landline with 10 digits', () => {
     expect(isValidBrazilianPhone('(11) 3456-7890')).toBe(true);
@@ -742,7 +776,8 @@ test('should reject phone with invalid area code', () => {
 
 **Scenario**: Refactor impure function to be pure
 
-**Before: Impure function**
+#### Before: Impure function
+
 ```javascript
 // Hard to test - depends on Date
 function greetUser(name) {
@@ -752,21 +787,23 @@ function greetUser(name) {
 }
 ```
 
-**Step 1: Write tests for new pure function**
+#### Step 1: Write tests for new pure function
+
 ```javascript
 // __tests__/greeting.test.js
 describe('generateGreeting (pure)', () => {
     test('should generate morning greeting', () => {
         expect(generateGreeting('João', 8)).toBe('Bom dia, João!');
     });
-    
+
     test('should generate afternoon greeting', () => {
         expect(generateGreeting('Maria', 14)).toBe('Boa tarde, Maria!');
     });
 });
 ```
 
-**Step 2: Implement pure function**
+#### Step 2: Implement pure function
+
 ```javascript
 // src/greeting.js
 function generateGreeting(name, hour) {
@@ -781,7 +818,8 @@ function greetUser(name) {
 module.exports = { generateGreeting, greetUser };
 ```
 
-**Result**: 
+**Result**:
+
 - `generateGreeting` is pure and easy to test
 - `greetUser` is impure but thin (delegates to pure function)
 - Side effect isolated at boundary
@@ -793,10 +831,12 @@ module.exports = { generateGreeting, greetUser };
 The project includes automated workflows that run tests on every push:
 
 **`.github/workflows/modified-files.yml`** runs tests when:
+
 - Source files change (`src/*.js`)
 - Test files change (`__tests__/*.test.js`)
 
 **Local Testing Before Push:**
+
 ```bash
 # Run all tests
 npm test
@@ -820,6 +860,7 @@ npm run test:all
 ### Continuous Testing
 
 The workflow ensures:
+
 1. Tests run on every commit
 2. Failed tests block merges
 3. Coverage is reported
@@ -828,6 +869,7 @@ The workflow ensures:
 ### TDD in Pull Requests
 
 When opening a PR:
+
 1. ✅ All tests pass
 2. ✅ New tests cover new features
 3. ✅ Coverage hasn't decreased
@@ -841,9 +883,10 @@ When opening a PR:
 - **[REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md)** - Pure functions guide
 - **[CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)** - Code review checklist
 - **[JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md)** - JavaScript best practices
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines
 
 ### Architecture Examples
+
 - **IbiraAPIFetcher** - Well-tested class for API data fetching
 - **IbiraAPIFetchManager** - TDD implementation example for managing multiple fetch operations
 - **Observer Pattern** - Refactoring with tests for subscribe/unsubscribe operations
@@ -869,9 +912,9 @@ When opening a PR:
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2025-01-08  
-**Status**: ✅ Ready for use  
+**Version**: 1.0.0
+**Last Updated**: 2025-01-08
+**Status**: ✅ Ready for use
 **Maintained by**: ibira.js Team
 
 ---
@@ -879,6 +922,7 @@ When opening a PR:
 ## Quick Reference Card
 
 ### TDD Commands
+
 ```bash
 npm test                    # Run all tests
 npm run test:watch          # Watch mode
@@ -889,12 +933,14 @@ npm run test:all            # Validate + test
 ```
 
 ### TDD Cycle
+
 1. 🔴 **RED** - Write failing test
 2. 🟢 **GREEN** - Make it pass
 3. 🔵 **REFACTOR** - Improve code
 4. ✅ **COMMIT** - Save progress
 
 ### Testing Principles
+
 - ✅ Test behavior, not implementation
 - ✅ One assertion concept per test
 - ✅ Tests should be fast
@@ -904,6 +950,7 @@ npm run test:all            # Validate + test
 - ✅ Test edge cases
 
 ### Referential Transparency + TDD
+
 - ✅ Pure functions are easy to test
 - ✅ Isolate side effects at boundaries
 - ✅ Use dependency injection

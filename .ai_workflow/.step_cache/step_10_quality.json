@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "fileScores": {
+    "src/config/version.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    },
+    "src/core/IbiraAPIFetchManager.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    },
+    "src/core/IbiraAPIFetcher.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    },
+    "src/index.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T03:06:18.963Z"
+    },
+    "src/config/version.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T04:08:14.349Z"
+    },
+    "src/core/IbiraAPIFetchManager.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:26:28.926Z"
+    },
+    "src/core/IbiraAPIFetcher.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:26:28.926Z"
+    },
+    "src/index.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T04:08:14.349Z"
+    },
+    ".ai_workflow/commit_history.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T02:20:48.918Z"
+    },
+    "package-lock.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T13:36:29.844Z"
+    },
+    "package.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T13:36:29.844Z"
+    },
+    "src/utils/DefaultCache.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-12T11:40:27.615Z"
+    },
+    "src/utils/DefaultEventNotifier.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T04:08:14.349Z"
+    },
+    "src/utils/debounce.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T04:08:14.349Z"
+    },
+    "src/utils/throttle.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T04:08:14.349Z"
+    },
+    "tsup.config.ts": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+    },
+    "test-runner.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+    },
+    "test_pure_fetcher.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:27:04.072Z"
+    },
+    "cdn-delivery.sh": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
+    },
+    "babel.config.mjs": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
+    },
+    "eslint.config.mjs": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
+    },
+    "jest.node.config.mjs": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-17T23:45:15.190Z"
+    },
+    "scripts/sync-version.js": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:26:28.926Z"
+    },
+    "scripts/deploy.sh": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T13:49:56.900Z"
+    },
+    ".ai_workflow/.step_cache/step_06_partition.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+    },
+    ".ai_workflow/.step_cache/step_10_partition.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+    },
+    ".ai_workflow/.step_cache/step_10_quality.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+    },
+    ".ai_workflow/metrics/current_run.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T01:56:00.686Z"
+    },
+    ".vscode/settings.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T02:20:48.918Z"
+    },
+    "tsconfig.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-20T02:20:48.918Z"
+    },
+    "scripts/colors.sh": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-23T13:49:56.900Z"
+    }
+  }
+}

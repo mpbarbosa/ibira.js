@@ -46,6 +46,7 @@ Always use strict mode to catch common coding errors:
 ```
 
 **Why?** Strict mode:
+
 - Prevents accidental global variables
 - Throws errors for unsafe actions
 - Disables confusing features
@@ -165,6 +166,7 @@ const normalizeInput = compose(removeSpaces, lowercase, trim);
 ### 1. What Makes a Function Pure?
 
 A pure function must:
+
 1. Always return the same output for the same input
 2. Have no side effects
 
@@ -240,7 +242,7 @@ const extractResponseData = (rawData) => {
 const fetchAndExtractData = async (url) => {
     // Impure: I/O operation isolated to single function
     const rawData = await fetch(url).then(r => r.json());
-    
+
     // Call pure function for data transformation
     return extractResponseData(rawData);
 };
@@ -341,7 +343,7 @@ class IbiraAPIFetcher {
         this.loading = false;
         this.cache = new Map();
         // ... copy all properties individually
-        
+
         // ❌ Would be bad: this.config = config; (shares reference if config is an object)
     }
 }
@@ -649,19 +651,19 @@ const parseCoordinates = (input) => {
     if (typeof input !== 'string') {
         return { error: 'Input must be a string' };
     }
-    
+
     const parts = input.split(',');
     if (parts.length !== 2) {
         return { error: 'Invalid format' };
     }
-    
+
     const lat = parseFloat(parts[0]);
     const lon = parseFloat(parts[1]);
-    
+
     if (isNaN(lat) || isNaN(lon)) {
         return { error: 'Invalid numbers' };
     }
-    
+
     return { latitude: lat, longitude: lon };
 };
 
@@ -683,15 +685,15 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
         typeof lat2 !== 'number' || typeof lon2 !== 'number') {
         throw new TypeError('All coordinates must be numbers');
     }
-    
+
     if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90) {
         throw new RangeError('Latitude must be between -90 and 90');
     }
-    
+
     if (lon1 < -180 || lon1 > 180 || lon2 < -180 || lon2 > 180) {
         throw new RangeError('Longitude must be between -180 and 180');
     }
-    
+
     // Main logic here
     // ...
 };
@@ -851,7 +853,7 @@ const processAddress = (data) => {
     if (!data) return null;
     if (!data.address) return null;
     if (!data.address.city) return null;
-    
+
     return formatAddress(data.address);
 };
 
@@ -955,17 +957,17 @@ const totalDistance = previousDistance + newDistance;
 ```javascript
 /**
  * Calculates the great-circle distance between two geographic points.
- * 
+ *
  * @param {number} lat1 - Latitude of first point in decimal degrees (-90 to 90)
  * @param {number} lon1 - Longitude of first point in decimal degrees (-180 to 180)
  * @param {number} lat2 - Latitude of second point in decimal degrees (-90 to 90)
  * @param {number} lon2 - Longitude of second point in decimal degrees (-180 to 180)
  * @returns {number} Distance in meters between the two points
- * 
+ *
  * @example
  * const distance = calculateDistance(-23.5505, -46.6333, -22.9068, -43.1729);
  * console.log(distance); // ~357,710 meters
- * 
+ *
  * @see {@link https://en.wikipedia.org/wiki/Haversine_formula}
  * @since 0.7.1-alpha
  */
@@ -1278,27 +1280,31 @@ test('calculateDistance works', () => {
 - **[CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)** - Code review checklist
 - **[UNIT_TEST_GUIDE.md](./UNIT_TEST_GUIDE.md)** - Unit testing best practices
 - **[TDD_GUIDE.md](./TDD_GUIDE.md)** - Test-driven development
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines
 
 ### External Resources
 
 #### JavaScript Best Practices
+
 - [MDN JavaScript Guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide)
 - [Clean Code JavaScript](https://github.com/ryanmcdermott/clean-code-javascript)
 - [JavaScript: The Good Parts](http://shop.oreilly.com/product/9780596517748.do)
 - [You Don't Know JS](https://github.com/getify/You-Dont-Know-JS)
 
 #### Functional Programming
+
 - [Professor Frisby's Mostly Adequate Guide](https://mostly-adequate.gitbook.io/)
 - [Functional-Light JavaScript](https://github.com/getify/Functional-Light-JS)
 - [Ramda.js - Functional Library](https://ramdajs.com/)
 
 #### ES6+ Features
+
 - [ES6 Features](http://es6-features.org/)
 - [Exploring ES6](https://exploringjs.com/es6/)
 - [2ality - JavaScript Blog](https://2ality.com/)
 
 #### Style Guides
+
 - [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript)
 - [Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html)
 - [StandardJS](https://standardjs.com/)
@@ -1306,6 +1312,7 @@ test('calculateDistance works', () => {
 ---
 
 **Related Guidelines:**
+
 - For code review: [CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md)
 - For testing: [UNIT_TEST_GUIDE.md](./UNIT_TEST_GUIDE.md), [TDD_GUIDE.md](./TDD_GUIDE.md)
 - For functional programming: [REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md)

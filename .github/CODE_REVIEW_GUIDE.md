@@ -1,4 +1,4 @@
-# Code Review Guide for Guia.js
+# Code Review Guide for ibira.js
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@
 
 ## Overview
 
-This guide helps reviewers ensure code contributions meet the Guia.js project standards, with particular emphasis on **referential transparency**, **immutability**, and **functional programming principles**.
+This guide helps reviewers ensure code contributions meet the ibira.js project standards, with particular emphasis on **referential transparency**, **immutability**, and **functional programming principles**.
 
 ### Goals of Code Review
 
@@ -154,7 +154,7 @@ function formatAddress(address) {  // Pure
 async function saveAddress(address) {  // Impure (clear from name)
   const isValid = validateAddress(address);  // Pure
   if (!isValid) throw new Error('Invalid address');
-  
+
   const formatted = formatAddress(address);  // Pure
   await database.save(formatted);  // Side effect
 }
@@ -340,6 +340,7 @@ test('calculateDiscount does not modify inputs', () => {
 ### Issue: Hidden Global State
 
 **Problem:**
+
 ```javascript
 const cache = {};
 function getCachedData(key) {
@@ -348,6 +349,7 @@ function getCachedData(key) {
 ```
 
 **Solution:**
+
 ```javascript
 function getCachedData(cache, key) {
   return cache.get(key);
@@ -360,6 +362,7 @@ function getCachedData(cache, key) {
 ### Issue: Direct Array Mutation
 
 **Problem:**
+
 ```javascript
 function addToList(list, item) {
   list.push(item);
@@ -368,6 +371,7 @@ function addToList(list, item) {
 ```
 
 **Solution:**
+
 ```javascript
 function addToList(list, item) {
   return [...list, item];
@@ -380,6 +384,7 @@ function addToList(list, item) {
 ### Issue: Side Effects in Pure Logic
 
 **Problem:**
+
 ```javascript
 function processUser(user) {
   console.log('Processing:', user.name);
@@ -388,6 +393,7 @@ function processUser(user) {
 ```
 
 **Solution:**
+
 ```javascript
 function processUser(user) {
   return { ...user, processed: true };
@@ -405,6 +411,7 @@ function processAndLogUser(user) {
 ### Issue: Non-Deterministic Behavior
 
 **Problem:**
+
 ```javascript
 function createSession() {
   return {
@@ -415,6 +422,7 @@ function createSession() {
 ```
 
 **Solution:**
+
 ```javascript
 function createSession(randomId, currentTime) {
   return {
@@ -430,12 +438,13 @@ function createSession(randomId, currentTime) {
 ### Issue: Temporal Coupling
 
 **Problem:**
+
 ```javascript
 class DataLoader {
   load(id) {
     this.data = fetchData(id);
   }
-  
+
   getData() {
     return this.data;
   }
@@ -443,12 +452,13 @@ class DataLoader {
 ```
 
 **Solution:**
+
 ```javascript
 class DataLoader {
   async load(id) {
     return await fetchData(id);
   }
-  
+
   transform(data) {
     return processData(data);
   }
@@ -513,20 +523,22 @@ This ensures the original data isn't modified, making the code more predictable 
 ## Resources
 
 ### Project Guidelines
+
 - [REFERENTIAL_TRANSPARENCY.md](./REFERENTIAL_TRANSPARENCY.md) - Detailed guide on referential transparency
-- [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines including immutability principles
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines including immutability principles
 - [LOW_COUPLING_GUIDE.md](./LOW_COUPLING_GUIDE.md) - Architectural guidelines
 - [HIGH_COHESION_GUIDE.md](./HIGH_COHESION_GUIDE.md) - Single responsibility principle
 - [TDD_GUIDE.md](./TDD_GUIDE.md) - Test-driven development approach
 - [UNIT_TEST_GUIDE.md](./UNIT_TEST_GUIDE.md) - Unit testing best practices
 
 ### Architecture Documentation
-- [CLASS_DIAGRAM.md](../docs/architecture/CLASS_DIAGRAM.md) - Complete class architecture
-- [WEBGEOCODINGMANAGER_REFACTORING.md](../docs/architecture/WEBGEOCODINGMANAGER_REFACTORING.md) - Example of high-quality refactoring
-- [REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md) - Major refactoring history
+
+- [ARCHITECTURE.md](../docs/ARCHITECTURE.md) - Architecture overview and design decisions
+- [STRUCTURE_DIAGRAM.md](../docs/STRUCTURE_DIAGRAM.md) - Repository structure diagram
 
 ### Testing
-- [TESTING.md](../TESTING.md) - Test suite overview and running tests
+
+- [TESTING_WORKFLOW.md](../docs/TESTING_WORKFLOW.md) - Test suite overview and running tests
 
 ---
 

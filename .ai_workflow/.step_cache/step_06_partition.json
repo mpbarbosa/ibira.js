@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "partitionIndex": 0,
+  "totalPartitions": 1,
+  "filesHash": "01d3c443",
+  "partitionLabels": [
+    "test/config"
+  ],
+  "updatedAt": "2026-03-23T13:48:58.154Z"
+}

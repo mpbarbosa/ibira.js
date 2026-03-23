@@ -1,9 +1,49 @@
 #!/usr/bin/env node
 
-import { IbiraAPIFetcher } from './src/ibira.js';
+/**
+ * test_pure_fetcher.js - Pure Referential Transparency Demonstration
+ * 
+ * This script demonstrates and tests the pure functional core of IbiraAPIFetcher,
+ * proving perfect referential transparency (10/10 score) through comprehensive
+ * deterministic tests.
+ * 
+ * Purpose:
+ *   - Demonstrate pure functional programming principles
+ *   - Prove referential transparency with deterministic tests
+ *   - Show zero side effects in the pure core
+ *   - Validate time-travel debugging capabilities
+ *   - Compare pure vs practical wrapper behavior
+ * 
+ * Usage:
+ *   node test_pure_fetcher.js      # Run all tests
+ *   ./test_pure_fetcher.js         # Same as above (if executable)
+ * 
+ * Test Coverage:
+ *   Test 1: Pure function determinism (same inputs = same outputs)
+ *   Test 2: Cache hit behavior (pure computation)
+ *   Test 3: Cache expiration handling
+ *   Test 4: Error handling without side effects
+ *   Test 5: Cache size limits and LRU eviction
+ *   Practical Test: Side-effect wrapper validation
+ * 
+ * Benefits Demonstrated:
+ *   ✅ 100% Deterministic - predictable behavior
+ *   ✅ Zero Side Effects - no external mutations
+ *   ✅ Completely Testable - mock all dependencies
+ *   ✅ Fully Composable - results can be transformed
+ *   ✅ Time-Travel Debugging - replay with any timestamp
+ *   ✅ Concurrent Safe - no shared mutable state
+ * 
+ * @version 0.2.1-alpha
+ * @license MIT
+ * @see docs/IBIRA_API_FETCHER.md for detailed API documentation
+ */
+
+import { IbiraAPIFetcher } from './src/index.js';
 
 /**
  * Test suite demonstrating pure referential transparency
+ * Runs 5 comprehensive tests proving the pure functional core
  */
 async function testPureReferentialTransparency() {
     console.log('🧪 Testing Pure Referential Transparency\n');
@@ -113,6 +153,7 @@ async function testPureReferentialTransparency() {
 
 /**
  * Test practical wrapper that applies side effects
+ * Demonstrates the dual-layer architecture with automatic side-effect management
  */
 async function testPracticalWrapper() {
     console.log('\n🔧 Testing Practical Wrapper (with side effects)\n');
@@ -137,9 +178,27 @@ async function testPracticalWrapper() {
         console.log('⚠️  Network request failed (expected in some environments):', error.message);
         console.log('✅ Error handled gracefully');
     }
+    
+    console.log('\n📚 For More Information:');
+    console.log('  📖 docs/IBIRA_API_FETCHER.md - Complete API documentation');
+    console.log('  📖 docs/EXAMPLES.md - Real-world usage examples');
+    console.log('  📖 docs/FAQ.md - Frequently asked questions');
+    console.log('  🧪 npm test - Run full test suite (152 tests)');
 }
 
 // Run tests
+console.log('╔════════════════════════════════════════════════════════╗');
+console.log('║  ibira.js - Pure Referential Transparency Test Suite  ║');
+console.log('║  Version: 0.2.1-alpha                                  ║');
+console.log('╚════════════════════════════════════════════════════════╝\n');
+
 testPureReferentialTransparency()
     .then(() => testPracticalWrapper())
-    .catch(console.error);
+    .then(() => {
+        console.log('\n✨ All tests completed successfully!\n');
+        process.exit(0);
+    })
+    .catch((error) => {
+        console.error('\n❌ Test suite failed:', error);
+        process.exit(1);
+    });

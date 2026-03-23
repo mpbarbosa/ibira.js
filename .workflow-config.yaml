@@ -1,0 +1,57 @@
+# AI Workflow Automation Configuration
+# Project: ibira.js
+
+project:
+  name: "ibira.js"
+  type: "nodejs-library"
+  description: "Zero-dependency JavaScript/TypeScript library for API data fetching with LRU caching and observer pattern"
+  kind: "nodejs_library"
+  version: "0.4.7-alpha"
+
+tech_stack:
+  primary_language: "typescript"
+  build_system: "npm"
+  bundler: "tsup"
+  test_framework: "jest"
+  test_command: "npm test"
+  test_node_command: "npm run test:node"
+  validate_command: "npm run validate"
+  build_command: "npm run build"
+  node_version: ">=18.0.0"
+
+structure:
+  source_dirs:
+    - src
+  source_extension: "ts"
+  test_dirs:
+    - __tests__
+    - test
+  docs_dirs:
+    - docs
+  build_output: "dist"
+
+workflow:
+  smart_execution: true
+  parallel_execution: true
+  ai_cache_enabled: true
+  auto_commit: false
+  multi_stage_pipeline: false
+  ml_optimize: false
+
+publish:
+  registry: "https://registry.npmjs.org"
+  workflow: ".github/workflows/publish.yml"
+  trigger: "v* tags"
+
+deploy:
+  enabled: true
+  script: scripts/deploy.sh
+  description: "Tag, push, and refresh CDN URLs for ibira.js"
+
+skills:
+  version_sync:
+    command: "npm run version:sync"
+    check_command: "npm run version:check"
+    skill_doc: ".github/skills/sync-version/SKILL.md"
+    description: "Regenerates src/config/version.ts and propagates the version to all project files"
+

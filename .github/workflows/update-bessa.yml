@@ -1,0 +1,277 @@
+# update-bessa.yml
+# Checks for a new bessa_patterns.ts release on GitHub and updates the GitHub
+# shorthand reference in package.json, installs dependencies, validates
+# TypeScript, runs tests, adjusts related code/docs/tests, and opens a PR.
+#
+# bessa_patterns.ts is consumed via the GitHub shorthand format:
+#   "bessa_patterns.ts": "github:mpbarbosa/bessa_patterns.ts#<TAG>"
+#
+# Triggers:
+#   - Weekly schedule (Tuesday 09:00 UTC)
+#   - workflow_dispatch — pin to a specific version or force a refresh
+
+name: Update bessa_patterns.ts
+
+on:
+  schedule:
+    - cron: '0 9 * * 2'   # every Tuesday at 09:00 UTC
+  workflow_dispatch:
+    inputs:
+      version:
+        description: |
+          bessa_patterns.ts tag to update to (e.g. v0.13.0-alpha).
+          Leave blank to use the latest published release.
+        required: false
+        default: ''
+
+permissions:
+  contents: write        # push update branch
+  pull-requests: write   # open / update PR
+
+# Prevent concurrent runs from racing on the same PR branch.
+concurrency:
+  group: update-bessa-patterns
+  cancel-in-progress: false
+
+jobs:
+  update-bessa:
+    name: Check & Update bessa_patterns.ts
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Node.js setup ─────────────────────────────────────────────────────
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      # ── 3. Resolve target version ─────────────────────────────────────────────
+      - name: Resolve target bessa_patterns.ts version
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          INPUT_VERSION="${{ github.event.inputs.version }}"
+
+          if [[ -n "${INPUT_VERSION}" ]]; then
+            VERSION="${INPUT_VERSION#v}"
+            TAG="v${VERSION}"
+            echo "Source: workflow_dispatch input"
+          else
+            TAG="$(gh api repos/mpbarbosa/bessa_patterns.ts/releases/latest --jq '.tag_name')"
+            [[ -n "${TAG}" ]] || { echo "❌  Could not determine latest bessa_patterns.ts release." >&2; exit 1; }
+            VERSION="${TAG#v}"
+            echo "Source: GitHub latest release"
+          fi
+
+          # GitHub shorthand reference: github:mpbarbosa/bessa_patterns.ts#TAG
+          GH_REF="github:mpbarbosa/bessa_patterns.ts#${TAG}"
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}"         >> "$GITHUB_OUTPUT"
+          echo "gh_ref=${GH_REF}"   >> "$GITHUB_OUTPUT"
+          echo "ℹ️  Target: bessa_patterns.ts ${TAG}"
+          echo "ℹ️  Reference: ${GH_REF}"
+
+      # ── 4. Check current version ──────────────────────────────────────────────
+      - name: Check current bessa_patterns.ts version in package.json
+        id: current
+        run: |
+          CURRENT_REF="$(node -p "require('./package.json').dependencies?.['bessa_patterns.ts'] ?? ''")"
+          echo "current_ref=${CURRENT_REF}" >> "$GITHUB_OUTPUT"
+
+          # Extract just the tag from the current reference (e.g. "v0.12.3-alpha")
+          CURRENT_TAG="$(echo "${CURRENT_REF}" | sed 's|.*#||')"
+          echo "current_tag=${CURRENT_TAG}" >> "$GITHUB_OUTPUT"
+
+          TARGET_REF="${{ steps.resolve.outputs.gh_ref }}"
+
+          if [[ "${CURRENT_REF}" == "${TARGET_REF}" ]]; then
+            echo "up_to_date=true" >> "$GITHUB_OUTPUT"
+            echo "✅  bessa_patterns.ts is already at ${{ steps.resolve.outputs.tag }} — nothing to do."
+          else
+            echo "up_to_date=false" >> "$GITHUB_OUTPUT"
+            if [[ -z "${CURRENT_REF}" ]]; then
+              echo "ℹ️  bessa_patterns.ts is not yet a dependency — will add it."
+            else
+              echo "ℹ️  Updating bessa_patterns.ts:  ${CURRENT_REF}  →  ${TARGET_REF}"
+            fi
+          fi
+
+      # ── 5. Update package.json ────────────────────────────────────────────────
+      - name: Update bessa_patterns.ts in package.json
+        if: steps.current.outputs.up_to_date != 'true'
+        env:
+          TARGET_REF: ${{ steps.resolve.outputs.gh_ref }}
+        run: |
+          node - <<'EOF'
+          const fs  = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.dependencies = pkg.dependencies || {};
+          pkg.dependencies['bessa_patterns.ts'] = process.env.TARGET_REF;
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          console.log('✅  package.json updated.');
+          EOF
+
+      # ── 6. Install & lock ─────────────────────────────────────────────────────
+      # npm ci installs from the updated package.json, regenerating the
+      # lock entry for bessa_patterns.ts while leaving other entries untouched.
+      - name: Install dependencies (npm ci)
+        if: steps.current.outputs.up_to_date != 'true'
+        run: npm ci
+
+      # ── 7. Type-check ─────────────────────────────────────────────────────────
+      - name: Validate TypeScript (tsc --noEmit)
+        if: steps.current.outputs.up_to_date != 'true'
+        run: npm run validate
+
+      # ── 8. Tests ──────────────────────────────────────────────────────────────
+      - name: Run unit & integration tests
+        if: steps.current.outputs.up_to_date != 'true'
+        run: npm test
+
+      # ── 9. Adjust bessa_patterns.ts related code ──────────────────────────────
+      # Scans src/ for bessa_patterns.ts imports and updates any hardcoded
+      # version strings from the old tag to the new one, then re-validates.
+      - name: Adjust bessa_patterns.ts related code
+        if: steps.current.outputs.up_to_date != 'true'
+        run: |
+          NEW_VERSION="${{ steps.resolve.outputs.version }}"
+          CURRENT_TAG="${{ steps.current.outputs.current_tag }}"
+          OLD_VERSION="${CURRENT_TAG#v}"
+
+          echo "ℹ️  Scanning src/ for bessa_patterns.ts version strings…"
+
+          mapfile -t CODE_FILES < <(grep -rl \
+            "bessa_patterns\|bessa-patterns" \
+            src/ 2>/dev/null || true)
+
+          if [[ ${#CODE_FILES[@]} -eq 0 ]]; then
+            echo "ℹ️  No bessa_patterns.ts references found in src/ — nothing to adjust."
+          else
+            echo "📄  Files with bessa_patterns.ts references: ${CODE_FILES[*]}"
+
+            if [[ -n "${OLD_VERSION}" && "${OLD_VERSION}" != "${NEW_VERSION}" ]]; then
+              for f in "${CODE_FILES[@]}"; do
+                sed -i "s|${OLD_VERSION}|${NEW_VERSION}|g" "${f}"
+                echo "   ✏️  Updated version string in ${f}"
+              done
+            fi
+          fi
+
+          echo "🔍  Re-running TypeScript validation…"
+          npm run validate
+          echo "✅  TypeScript validation passed after code adjustment."
+
+      # ── 10. Update bessa_patterns.ts related documentation ────────────────────
+      # Replaces old version tags in all Markdown files so that CDN snippets
+      # and version references stay accurate.
+      - name: Update bessa_patterns.ts related documentation
+        if: steps.current.outputs.up_to_date != 'true'
+        run: |
+          NEW_VERSION="${{ steps.resolve.outputs.version }}"
+          NEW_TAG="${{ steps.resolve.outputs.tag }}"
+          NEW_REF="${{ steps.resolve.outputs.gh_ref }}"
+          CURRENT_TAG="${{ steps.current.outputs.current_tag }}"
+          OLD_REF="${{ steps.current.outputs.current_ref }}"
+          OLD_VERSION="${CURRENT_TAG#v}"
+
+          echo "ℹ️  Scanning Markdown files for bessa_patterns.ts references…"
+
+          mapfile -t DOC_FILES < <(find . -name '*.md' \
+            ! -path './node_modules/*' \
+            ! -path './.ai_workflow/*' \
+            -print 2>/dev/null || true)
+
+          UPDATED=0
+          for f in "${DOC_FILES[@]}"; do
+            if grep -q "bessa_patterns\|bessa-patterns" "${f}" 2>/dev/null; then
+              # Replace full GitHub ref first, then bare version strings
+              if [[ -n "${OLD_REF}" ]]; then
+                sed -i "s|${OLD_REF}|${NEW_REF}|g" "${f}"
+              fi
+              if [[ -n "${OLD_VERSION}" && "${OLD_VERSION}" != "${NEW_VERSION}" ]]; then
+                grep -n "bessa" "${f}" | grep -q "${OLD_VERSION}" && \
+                  sed -i "/bessa/s|${OLD_VERSION}|${NEW_VERSION}|g" "${f}" || true
+              fi
+              echo "   ✏️  Updated: ${f}"
+              UPDATED=$((UPDATED + 1))
+            fi
+          done
+
+          if [[ ${UPDATED} -eq 0 ]]; then
+            echo "ℹ️  No bessa_patterns.ts references found in documentation."
+          else
+            echo "✅  Updated ${UPDATED} documentation file(s)."
+          fi
+
+      # ── 11. Adjust bessa_patterns.ts related tests ────────────────────────────
+      # Updates version strings in test files and re-runs only affected tests.
+      - name: Adjust bessa_patterns.ts related tests
+        if: steps.current.outputs.up_to_date != 'true'
+        run: |
+          NEW_VERSION="${{ steps.resolve.outputs.version }}"
+          CURRENT_TAG="${{ steps.current.outputs.current_tag }}"
+          OLD_VERSION="${CURRENT_TAG#v}"
+
+          echo "ℹ️  Scanning test/ and __tests__/ for bessa_patterns.ts references…"
+
+          mapfile -t TEST_FILES < <(grep -rl \
+            "bessa_patterns\|bessa-patterns" \
+            test/ __tests__/ 2>/dev/null || true)
+
+          if [[ ${#TEST_FILES[@]} -eq 0 ]]; then
+            echo "ℹ️  No bessa_patterns.ts references found in test files — nothing to adjust."
+          else
+            echo "📄  Test files with bessa_patterns.ts references: ${TEST_FILES[*]}"
+
+            if [[ -n "${OLD_VERSION}" && "${OLD_VERSION}" != "${NEW_VERSION}" ]]; then
+              for f in "${TEST_FILES[@]}"; do
+                sed -i "s|${OLD_VERSION}|${NEW_VERSION}|g" "${f}"
+                echo "   ✏️  Updated version string in ${f}"
+              done
+            fi
+
+            echo "🧪  Re-running affected test files…"
+            npx jest --passWithNoTests "${TEST_FILES[@]}"
+            echo "✅  Affected tests passed after adjustment."
+          fi
+
+      # ── 12. Open pull request ─────────────────────────────────────────────────
+      - name: Create pull request
+        if: steps.current.outputs.up_to_date != 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/update-bessa-patterns-${{ steps.resolve.outputs.version }}
+          delete-branch: true
+          commit-message: |
+            chore(deps): update bessa_patterns.ts to ${{ steps.resolve.outputs.tag }}
+
+            Update bessa_patterns.ts GitHub reference to ${{ steps.resolve.outputs.tag }}.
+            Reference: ${{ steps.resolve.outputs.gh_ref }}
+          title: "chore(deps): update bessa_patterns.ts to ${{ steps.resolve.outputs.tag }}"
+          body: |
+            ## bessa_patterns.ts → ${{ steps.resolve.outputs.tag }}
+
+            Updates the `bessa_patterns.ts` dependency to the latest release.
+
+            | | |
+            |---|---|
+            | **Previous** | `${{ steps.current.outputs.current_ref }}` |
+            | **New** | `${{ steps.resolve.outputs.gh_ref }}` |
+
+            ### Checks
+            - [x] TypeScript validation (`tsc --noEmit`)
+            - [x] Unit & integration tests
+            - [x] bessa_patterns.ts related code adjusted (version strings in `src/` updated, TypeScript re-validated)
+            - [x] bessa_patterns.ts related documentation updated (version tags in `docs/` and root Markdown files)
+            - [x] bessa_patterns.ts related tests adjusted (version strings in `test/` updated, affected tests re-run)
+
+            > Triggered by: `${{ github.event_name }}`
+          labels: dependencies

@@ -1,0 +1,282 @@
+# sync-version.yml
+# Reads the canonical version from package.json and propagates it to every
+# file in the repository that carries a version string.  Any mismatch is
+# fixed, validated (tsc + jest), and committed.
+#
+# Authoritative source:  package.json → "version"
+#
+# Files checked:
+#   src/config/version.ts       — VERSION object (major/minor/patch/prerelease)
+#   src/index.ts                — @version JSDoc tag
+#   src/utils/debounce.ts       — @since JSDoc tag
+#   src/utils/throttle.ts       — @since JSDoc tag
+#   README.md                   — version badge, CDN URLs
+#   docs/API.md                 — version badge, example output
+#   docs/INDEX.md               — CDN production URL
+#   .workflow-config.yaml       — version field
+#   ROADMAP.md                  — "Current version:" header line only
+#
+# Triggers:
+#   - workflow_dispatch          — run manually at any time
+#   - push to main when package.json changes (auto-sync after version bump)
+
+name: Sync version strings
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: |
+          Override the target version (e.g. 0.5.0-alpha).
+          Leave blank to read from package.json on the current branch.
+        required: false
+        default: ''
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-version
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync version strings
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2    # needed to detect previous version via git diff
+
+      # ── 2. Node.js setup ──────────────────────────────────────────────────────
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      # ── 3. Resolve canonical version ──────────────────────────────────────────
+      - name: Resolve canonical version
+        id: resolve
+        run: |
+          INPUT="${{ github.event.inputs.version }}"
+
+          if [[ -n "${INPUT}" ]]; then
+            PKG_VERSION="${INPUT}"
+            echo "Source: workflow_dispatch input"
+          else
+            PKG_VERSION="$(node -p "require('./package.json').version")"
+            echo "Source: package.json"
+          fi
+
+          VERSION_CORE="${PKG_VERSION%%-*}"
+          PRERELEASE="${PKG_VERSION#*-}"
+          [[ "${PKG_VERSION}" == "${VERSION_CORE}" ]] && PRERELEASE=""
+
+          MAJOR="${VERSION_CORE%%.*}"
+          REST="${VERSION_CORE#*.}"
+          MINOR="${REST%%.*}"
+          PATCH="${REST#*.}"
+
+          echo "pkg_version=${PKG_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "major=${MAJOR}"             >> "$GITHUB_OUTPUT"
+          echo "minor=${MINOR}"             >> "$GITHUB_OUTPUT"
+          echo "patch=${PATCH}"             >> "$GITHUB_OUTPUT"
+          echo "prerelease=${PRERELEASE}"   >> "$GITHUB_OUTPUT"
+          echo "ℹ️  Canonical version: ${PKG_VERSION}"
+
+      # ── 4. Detect old version (for targeted replacement) ──────────────────────
+      - name: Detect previous version
+        id: previous
+        run: |
+          OLD="$(git diff HEAD~1 -- package.json 2>/dev/null \
+            | grep '^-.*"version"' \
+            | grep -oP '\d+\.\d+\.\d+(-\w+)?' | head -1)" || OLD=""
+
+          if [[ -z "${OLD}" ]]; then
+            # Fallback: scan src/config/version.ts for any version-like string
+            OLD="$(grep -oP '\d+\.\d+\.\d+(-\w+)?' src/config/version.ts \
+              | grep -v '${{ steps.resolve.outputs.pkg_version }}' | head -1)" || OLD=""
+          fi
+
+          echo "old_version=${OLD}" >> "$GITHUB_OUTPUT"
+          if [[ -n "${OLD}" ]]; then
+            echo "ℹ️  Previous version detected: ${OLD}"
+          else
+            echo "ℹ️  No previous version detected — will check files individually"
+          fi
+
+      # ── 5. Install dependencies ───────────────────────────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      # ── 6. Check & fix src/config/version.ts ──────────────────────────────────
+      - name: Check and fix src/config/version.ts
+        id: fix_version_ts
+        run: |
+          PKG_VERSION="${{ steps.resolve.outputs.pkg_version }}"
+          MAJOR="${{ steps.resolve.outputs.major }}"
+          MINOR="${{ steps.resolve.outputs.minor }}"
+          PATCH="${{ steps.resolve.outputs.patch }}"
+          PRERELEASE="${{ steps.resolve.outputs.prerelease }}"
+
+          node - <<EOF
+          const fs = require('fs');
+          const src = fs.readFileSync('src/config/version.ts', 'utf8');
+          const maj = Number('${MAJOR}');
+          const min = Number('${MINOR}');
+          const pat = Number('${PATCH}');
+          const pre = '${PRERELEASE}';
+          const full = '${PKG_VERSION}';
+
+          const checks = [
+            [new RegExp('\\\\bmajor:\\\\s*\\\\d+'),       \`major: expected \${maj}\`],
+            [new RegExp('\\\\bminor:\\\\s*\\\\d+'),       \`minor: expected \${min}\`],
+            [new RegExp('\\\\bpatch:\\\\s*\\\\d+'),       \`patch: expected \${pat}\`],
+            [new RegExp(\`prerelease:\\\\s*"\${pre}"\`),   \`prerelease: expected "\${pre}"\`],
+          ];
+
+          const majorOk = src.match(new RegExp(\`\\\\bmajor:\\\\s*\${maj}\\\\b\`));
+          const minorOk = src.match(new RegExp(\`\\\\bminor:\\\\s*\${min}\\\\b\`));
+          const patchOk = src.match(new RegExp(\`\\\\bpatch:\\\\s*\${pat}\\\\b\`));
+          const preOk   = src.includes(\`prerelease: "\${pre}"\`);
+          const exOk    = src.includes(\`// "\${full}"\`);
+
+          if (majorOk && minorOk && patchOk && preOk && exOk) {
+            console.log('OK: src/config/version.ts — all fields correct');
+            process.exit(0);
+          }
+
+          let out = src;
+          out = out.replace(/(\\bmajor:\\s*)\\d+/,        \`\$1\${maj}\`);
+          out = out.replace(/(\\bminor:\\s*)\\d+/,        \`\$1\${min}\`);
+          out = out.replace(/(\\bpatch:\\s*)\\d+/,        \`\$1\${pat}\`);
+          out = out.replace(/(prerelease:\\s*")[^"]*"/,   \`\$1\${pre}"\`);
+          out = out.replace(
+            /(VERSION\\.toString\\(\\);\\s*\\/\\/\\s*")[^"]*"/,
+            \`\$1\${full}"\`
+          );
+          fs.writeFileSync('src/config/version.ts', out);
+          console.log('FIXED: src/config/version.ts');
+          EOF
+
+      # ── 7. Check & fix remaining files ────────────────────────────────────────
+      - name: Check and fix version strings in all other files
+        run: |
+          PKG_VERSION="${{ steps.resolve.outputs.pkg_version }}"
+          OLD="${{ steps.previous.outputs.old_version }}"
+
+          # Files where every occurrence of OLD should become PKG_VERSION
+          GLOBAL_FILES=(
+            "src/index.ts"
+            "src/utils/debounce.ts"
+            "src/utils/throttle.ts"
+            "README.md"
+            "docs/API.md"
+            "docs/INDEX.md"
+            ".workflow-config.yaml"
+          )
+
+          FIXED=0
+
+          for FILE in "${GLOBAL_FILES[@]}"; do
+            [[ -f "${FILE}" ]] || continue
+
+            if [[ -n "${OLD}" && "${OLD}" != "${PKG_VERSION}" ]]; then
+              if grep -qF "${OLD}" "${FILE}"; then
+                sed -i "s|${OLD}|${PKG_VERSION}|g" "${FILE}"
+                echo "FIXED: ${FILE}"
+                FIXED=$((FIXED + 1))
+              else
+                echo "OK: ${FILE}"
+              fi
+            else
+              # No old version available — check if PKG_VERSION is present
+              if grep -qF "${PKG_VERSION}" "${FILE}" 2>/dev/null || ! grep -qP '\d+\.\d+\.\d+' "${FILE}" 2>/dev/null; then
+                echo "OK: ${FILE}"
+              else
+                # File contains a version string that doesn't match
+                OTHER="$(grep -oP '\d+\.\d+\.\d+(-\w+)?' "${FILE}" | grep -v "${PKG_VERSION}" | head -1)"
+                if [[ -n "${OTHER}" ]]; then
+                  sed -i "s|${OTHER}|${PKG_VERSION}|g" "${FILE}"
+                  echo "FIXED: ${FILE}  (${OTHER} → ${PKG_VERSION})"
+                  FIXED=$((FIXED + 1))
+                else
+                  echo "OK: ${FILE}"
+                fi
+              fi
+            fi
+          done
+
+          # ROADMAP.md — only the "Current version:" header line
+          if [[ -f ROADMAP.md ]]; then
+            if [[ -n "${OLD}" && "${OLD}" != "${PKG_VERSION}" ]]; then
+              if grep -q "${OLD}" ROADMAP.md; then
+                sed -i "/\*\*Current version:\*\*/s|${OLD}|${PKG_VERSION}|" ROADMAP.md
+                echo "FIXED: ROADMAP.md (header line only)"
+                FIXED=$((FIXED + 1))
+              else
+                echo "OK: ROADMAP.md"
+              fi
+            fi
+          fi
+
+          echo ""
+          echo "Files fixed: ${FIXED}"
+
+      # ── 8. Validate TypeScript ─────────────────────────────────────────────────
+      - name: Validate TypeScript
+        run: npm run validate
+
+      # ── 9. Run tests ──────────────────────────────────────────────────────────
+      - name: Run tests
+        run: npm test
+
+      # ── 10. Commit changes ─────────────────────────────────────────────────────
+      - name: Commit version sync
+        run: |
+          PKG_VERSION="${{ steps.resolve.outputs.pkg_version }}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage only the files that can be touched by this workflow
+          git add \
+            src/config/version.ts \
+            src/index.ts \
+            src/utils/debounce.ts \
+            src/utils/throttle.ts \
+            README.md \
+            docs/API.md \
+            docs/INDEX.md \
+            .workflow-config.yaml \
+            ROADMAP.md \
+            2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "✅  All version strings were already correct — nothing to commit."
+          else
+            git commit -m "chore(version): sync all version strings to ${PKG_VERSION}
+
+          Propagates the version bump from package.json to:
+          - src/config/version.ts (VERSION object fields + @example)
+          - src/index.ts (@version JSDoc)
+          - src/utils/debounce.ts, throttle.ts (@since JSDoc)
+          - README.md (version badge, CDN URLs)
+          - docs/API.md (version badge, example output)
+          - docs/INDEX.md (CDN production URL)
+          - .workflow-config.yaml (version field)
+          - ROADMAP.md (current version header)
+
+          Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+            git push
+            echo "✅  Committed and pushed version sync for ${PKG_VERSION}."
+          fi

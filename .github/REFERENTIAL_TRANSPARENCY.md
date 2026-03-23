@@ -22,7 +22,8 @@ When a function is referentially transparent, you can safely replace any functio
 ### Mathematical Foundation
 
 In mathematics, a function is referentially transparent by default:
-```
+
+```text
 f(x) = x + 2
 ```
 
@@ -31,6 +32,7 @@ If `x = 3`, then `f(3) = 5` always, and you can replace `f(3)` with `5` anywhere
 ### Programming Context
 
 In JavaScript, referential transparency means functions behave like mathematical functions:
+
 ```javascript
 // Referentially transparent
 function add(a, b) {
@@ -141,6 +143,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 ### Pure Functions (Referentially Transparent)
 
 Pure functions satisfy two conditions:
+
 1. **Deterministic**: Same input always produces same output
 2. **No side effects**: Don't modify external state or perform I/O
 
@@ -315,7 +318,7 @@ async function handleAddressSubmission(addressData) {
   if (!validateAddress(addressData)) {  // Pure
     throw new Error('Invalid address');
   }
-  
+
   const formatted = formatAddress(addressData);  // Pure
   await saveToDatabase(formatted);  // Impure: I/O
   console.log('Address saved');  // Impure: I/O
@@ -426,7 +429,7 @@ class UserService {
   loadUser(id) {
     this.currentUser = fetchUser(id);
   }
-  
+
   getUserName() {
     return this.currentUser.name;  // Depends on loadUser being called first
   }
@@ -437,7 +440,7 @@ class UserService {
   async loadUser(id) {
     return await fetchUser(id);
   }
-  
+
   getUserName(user) {
     return user.name;
   }
@@ -456,11 +459,11 @@ describe('calculateDistance', () => {
     const result = calculateDistance(0, 0, 1, 1);
     expect(result).toBeCloseTo(157249.6, 1);
   });
-  
+
   test('returns 0 for same point', () => {
     expect(calculateDistance(10, 20, 10, 20)).toBe(0);
   });
-  
+
   test('distance is symmetric', () => {
     const d1 = calculateDistance(1, 2, 3, 4);
     const d2 = calculateDistance(3, 4, 1, 2);
@@ -480,12 +483,12 @@ describe('pure function properties', () => {
     expect(add(3, 5)).toBe(add(5, 3));
     expect(add(-2, 7)).toBe(add(7, -2));
   });
-  
+
   test('add is associative', () => {
     // For all a, b, c: add(add(a, b), c) === add(a, add(b, c))
     expect(add(add(1, 2), 3)).toBe(add(1, add(2, 3)));
   });
-  
+
   test('multiple calls return same result', () => {
     const input = [1, 2, 3];
     const result1 = double(input);
@@ -508,17 +511,17 @@ describe('formatAddress', () => {
       city: 'São Paulo',
       state: 'SP'
     };
-    
+
     expect(formatAddress(address)).toBe('Rua Augusta, 123, São Paulo, SP');
   });
-  
+
   test('handles missing number', () => {
     const address = {
       street: 'Rua Augusta',
       city: 'São Paulo',
       state: 'SP'
     };
-    
+
     expect(formatAddress(address)).toBe('Rua Augusta, São Paulo, SP');
   });
 });
@@ -530,23 +533,23 @@ describe('formatAddress', () => {
 describe('referential transparency checks', () => {
   test('function is deterministic', () => {
     const inputs = [[1, 2], [3, 4], [-1, 0]];
-    
+
     inputs.forEach(([a, b]) => {
       const result1 = add(a, b);
       const result2 = add(a, b);
       const result3 = add(a, b);
-      
+
       expect(result1).toBe(result2);
       expect(result2).toBe(result3);
     });
   });
-  
+
   test('function does not modify inputs', () => {
     const original = [1, 2, 3];
     const copy = [...original];
-    
+
     const result = double(original);
-    
+
     expect(original).toEqual(copy);  // Input unchanged
     expect(result).not.toBe(original);  // Returns new array
   });
@@ -650,7 +653,7 @@ function generateColor(rand1, rand2, rand3) {
 
 ### Related Documentation
 
-- [CONTRIBUTING.md](./CONTRIBUTING.md) - Immutability principles and guidelines
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Immutability principles and guidelines
 - [CODE_REVIEW_GUIDE.md](./CODE_REVIEW_GUIDE.md) - Review checklist for referential transparency
 - [LOW_COUPLING_GUIDE.md](./LOW_COUPLING_GUIDE.md) - Architectural principles
 - [TDD_GUIDE.md](./TDD_GUIDE.md) - Test-driven development with pure functions
@@ -670,6 +673,7 @@ The ibira.js project demonstrates referential transparency in several areas:
 - **API Response Processing**: Pure functions for parsing and formatting data
 
 **Key Improvements for Referential Transparency:**
+
 - All time-dependent operations now accept `currentTime` as a parameter instead of calling `Date.now()` internally
 - Pure helper functions return values instead of mutating state
 - Side effects are isolated in wrapper functions that call pure helpers

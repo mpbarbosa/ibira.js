@@ -1,0 +1,20 @@
+{
+  // markdownlint-cli2 configuration for ibira.js
+  "config": {
+    // MD013: line-length — disabled; technical docs contain URLs, tables,
+    //   and code snippets that cannot reasonably be wrapped at 80 chars.
+    "MD013": false,
+    // MD033: inline-html — disabled; intentional use in docs (badges, etc.)
+    "MD033": false,
+    // MD034: bare-url — disabled; technical docs often link plain URLs
+    "MD034": false,
+    // MD060: table-column-style — enforce leading_and_trailing (| cell |)
+    //   for consistency and readability across all docs.
+    "MD060": { "style": "leading_and_trailing" },
+    // MD024: no-duplicate-heading — allow duplicate headings that are not
+    //   siblings; needed for API docs (each class has "Constructor"/"Methods")
+    //   and changelogs (each version has "New Features"/"Bug Fixes").
+    "MD024": { "siblings_only": true }
+  },
+  "ignores": ["node_modules", "coverage", "dist", ".ai_workflow"]
+}

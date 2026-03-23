@@ -35,11 +35,13 @@ Each workflow should have one primary responsibility and do it well.
 #### Example: copilot-coding-agent.yml
 
 This workflow focuses exclusively on validation and security:
+
 - JavaScript syntax validation
 - Security scanning
 - Basic code quality checks
 
 **Benefits**:
+
 - Clear purpose: "Validate code quality"
 - Easy to debug when validation fails
 - Can be triggered independently
@@ -48,17 +50,20 @@ This workflow focuses exclusively on validation and security:
 #### Example: modified-files.yml
 
 This workflow focuses on test execution and documentation:
+
 - Running tests for modified files
 - Updating documentation timestamps
 - Generating coverage reports
 
 **Benefits**:
+
 - Clear purpose: "Test and document changes"
 - Separated from validation concerns
 - Can be optimized for test performance
 - Documentation updates are automatic
 
 **Anti-pattern to Avoid**:
+
 ```yaml
 # DON'T: Mixed responsibilities
 name: Everything Workflow
@@ -93,12 +98,14 @@ Each action should perform one specific, well-defined task.
 ```
 
 **What it does**:
+
 - Takes JavaScript file paths as input
 - Runs Node.js syntax validation
 - Reports syntax errors
 - Returns success/failure status
 
 **What it doesn't do**:
+
 - Run tests (that's a different concern)
 - Check security (separate action)
 - Format code (different responsibility)
@@ -116,12 +123,14 @@ Each action should perform one specific, well-defined task.
 ```
 
 **What it does**:
+
 - Scans JavaScript files for security issues
 - Checks for common vulnerabilities
 - Reports findings
 - Fails on critical issues
 
 **What it doesn't do**:
+
 - Validate syntax (validate-js does that)
 - Run functional tests (test workflow does that)
 - Deploy code (deployment action does that)
@@ -137,6 +146,7 @@ Each template is specialized for a specific type of issue, with sections tailore
 **Purpose**: Track code quality and refactoring needs
 
 **Focused Sections**:
+
 - Code location and type of debt
 - Impact on maintainability
 - Refactoring considerations
@@ -149,6 +159,7 @@ Each template is specialized for a specific type of issue, with sections tailore
 **Purpose**: Propose new functionality
 
 **Focused Sections**:
+
 - Feature description and use case
 - Implementation considerations
 - Success criteria
@@ -161,6 +172,7 @@ Each template is specialized for a specific type of issue, with sections tailore
 **Purpose**: Address infrastructure and workflow issues
 
 **Focused Sections**:
+
 - Configuration issue type (workflow, action, CI/CD)
 - Environment details
 - Implementation considerations
@@ -177,6 +189,7 @@ Documentation files are organized by topic with clear, focused content.
 #### CLASS_DIAGRAM.md
 
 **Single Focus**: Architecture and class relationships
+
 - Class structure and responsibilities
 - Design patterns used
 - Refactoring history
@@ -186,6 +199,7 @@ Documentation files are organized by topic with clear, focused content.
 #### TESTING.md
 
 **Single Focus**: Test suite and testing practices
+
 - Test organization
 - Running tests
 - Coverage information
@@ -211,6 +225,7 @@ class APIDataManager {
 ```
 
 **Problems**:
+
 - Too many responsibilities in one class
 - Hard to understand what it does
 - Difficult to test independently
@@ -238,6 +253,7 @@ class IbiraAPIFetchManager {
 ```
 
 **Benefits Achieved**:
+
 1. **Improved Cohesion**: Each class has a single, well-defined responsibility
 2. **Better Maintainability**: Clear separation makes code easier to understand
 3. **Enhanced Testability**: Each concern can be tested independently
@@ -253,6 +269,7 @@ class IbiraAPIFetchManager {
 4. **Name descriptively**: The name should reflect the single purpose
 
 **Good Example**:
+
 ```yaml
 name: Test Modified Files
 jobs:
@@ -267,6 +284,7 @@ jobs:
 All steps relate to testing - high cohesion.
 
 **Poor Example**:
+
 ```yaml
 name: Mixed Workflow
 jobs:
@@ -289,6 +307,7 @@ Unrelated concerns mixed together - low cohesion.
 4. **No hidden responsibilities**: Don't mix unrelated functionality
 
 **High Cohesion Action**:
+
 ```yaml
 name: 'Validate JavaScript Syntax'
 description: 'Validates JavaScript files for syntax errors'
@@ -308,6 +327,7 @@ runs:
 4. **Clear purpose**: Users should know immediately which template to use
 
 **Template Cohesion Checklist**:
+
 - [ ] Template name clearly indicates purpose
 - [ ] All sections relate to the issue type
 - [ ] No sections borrowed from unrelated templates
@@ -326,21 +346,25 @@ runs:
 ### Signs of High Cohesion
 
 ✅ **Can describe the component in one sentence**
+
 - "This workflow validates JavaScript syntax"
 - "This template reports technical debt"
 - "This action runs security scans"
 
 ✅ **Changes are localized**
+
 - Security changes only affect security-check action
 - Test changes only affect test-related workflows
 - Template changes don't affect workflows
 
 ✅ **Easy to name**
+
 - Names clearly indicate purpose
 - No need for "and" or "or" in names
 - Names are specific, not generic
 
 ✅ **Independent testing**
+
 - Each component can be tested alone
 - Tests don't require unrelated setup
 - Failures are easy to diagnose
@@ -348,27 +372,31 @@ runs:
 ### Signs of Low Cohesion
 
 ❌ **Hard to describe simply**
+
 - "This workflow does validation and testing and deployment..."
 - "This action handles multiple different things"
 
 ❌ **Changes cascade**
+
 - Changing one thing breaks unrelated functionality
 - Updates require touching many files
 - Side effects are unpredictable
 
 ❌ **Generic or compound names**
+
 - "Utility workflow"
 - "Helper action"
 - "General template"
 
 ❌ **Tangled testing**
+
 - Tests require complex setup
 - Failures are hard to diagnose
 - Can't test parts independently
 
 ## Architecture Diagram
 
-```
+```text
 .github/
 ├── config.yml                          # Centralized configuration
 ├── LOW_COUPLING_GUIDE.md              # Loose coupling principles
@@ -452,18 +480,18 @@ test-suite:
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Run tests
       run: npm test
-    
+
     - name: Generate coverage
       run: npm run test:coverage
 ```
@@ -477,16 +505,16 @@ everything:
   steps:
     - name: Run tests
       run: npm test
-    
+
     - name: Build Docker image
       run: docker build .
-    
+
     - name: Send Slack notification
       run: curl -X POST slack-webhook
-    
+
     - name: Update documentation
       run: npm run docs
-    
+
     - name: Clean old releases
       run: gh release delete old
 ```
@@ -549,7 +577,7 @@ High cohesion and low coupling work together:
 
 ### Example: Actions Architecture
 
-```
+```text
 validate-js (high cohesion)
     ↓ (low coupling - simple interface)
 security-check (high cohesion)
@@ -558,6 +586,7 @@ test-runner (high cohesion)
 ```
 
 Each action:
+
 - ✅ **High cohesion**: Does one thing well
 - ✅ **Low coupling**: Minimal dependencies
 - ✅ **Clear interface**: Simple inputs/outputs
@@ -596,7 +625,7 @@ describe('IbiraAPIFetcher', () => {
     await fetcher.fetchData();
     expect(fetcher.data).toBeDefined();
   });
-  
+
   // All tests focus on fetching - one responsibility
 });
 
@@ -609,7 +638,7 @@ describe('IbiraAPIFetchManager', () => {
     // Verify both resolve to same promise
     expect(promise1).toBe(promise2);
   });
-  
+
   // All tests focus on coordination - different responsibility
 });
 ```
@@ -626,7 +655,8 @@ describe('IbiraAPIFetchManager', () => {
 - [JAVASCRIPT_BEST_PRACTICES.md](./JAVASCRIPT_BEST_PRACTICES.md) - JavaScript coding standards
 
 ### Architecture Examples
-- [src/ibira.js](../src/ibira.js) - Main library showing cohesive class design
+
+- [src/core/IbiraAPIFetcher.ts](../src/core/IbiraAPIFetcher.ts) - Main library showing cohesive class design
   - `IbiraAPIFetcher` - Focused on individual API fetching operations
   - `IbiraAPIFetchManager` - Focused on coordinating multiple fetchers
 
@@ -657,37 +687,42 @@ describe('IbiraAPIFetchManager', () => {
 
 ## Questions?
 
-If you have questions about applying high cohesion principles or need help refactoring for better cohesion, please open an issue using the [GitHub Configuration template](./ISSUE_TEMPLATE/github_config.md).
+If you have questions about applying high cohesion principles or need help refactoring for better cohesion, please open a GitHub issue.
 
 ## Summary Checklist
 
 Use this checklist when creating or reviewing `.github` components:
 
 ### Workflow Cohesion
+
 - [ ] Workflow has a single, clear purpose
 - [ ] All jobs relate to the main purpose
 - [ ] Unrelated concerns are in separate workflows
 - [ ] Name clearly indicates responsibility
 
 ### Action Cohesion
+
 - [ ] Action performs one specific task
 - [ ] All inputs relate to the main task
 - [ ] No hidden or unrelated functionality
 - [ ] Can describe purpose in one sentence
 
 ### Template Cohesion
+
 - [ ] Template addresses one type of issue
 - [ ] All sections relate to that issue type
 - [ ] No borrowed sections from unrelated templates
 - [ ] Purpose is immediately clear to users
 
 ### Documentation Cohesion
+
 - [ ] Document covers one topic area
 - [ ] All content relates to the main topic
 - [ ] Cross-references instead of duplicating
 - [ ] Easy to find information
 
 ### Overall Cohesion
+
 - [ ] Component does one thing well
 - [ ] Easy to understand and describe
 - [ ] Changes are localized
