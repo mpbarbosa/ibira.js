@@ -3,7 +3,7 @@
 Comprehensive Overview of All Documentation
 
 **Generated**: December 15, 2025
-**Project Version**: 0.2.1-alpha
+**Project Version**: 0.4.5-alpha
 **Total Documentation**: ~112KB across 11 documents
 
 ---
@@ -402,7 +402,7 @@ docs/
 
 ## 🎯 Documentation Goals
 
-### Current (v0.2.1-alpha)
+### Current (v0.4.5-alpha)
 
 - ✅ Complete API documentation
 - ✅ Comprehensive pattern guide
