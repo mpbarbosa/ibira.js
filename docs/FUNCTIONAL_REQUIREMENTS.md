@@ -1,7 +1,7 @@
 # Functional Requirements Specification
 
 **Project**: ibira.js
-**Version**: 0.4.6-alpha
+**Version**: 0.4.7-alpha
 **Date**: December 15, 2025
 **Status**: Active Development
 **Document Version**: 1.0.0
@@ -1610,7 +1610,7 @@ For version 1.0.0 release, the following must be met:
 - ⏳ TypeScript definitions (planned)
 - ⏳ Published to NPM (planned)
 
-### 11.2 Current Status (v0.4.6-alpha)
+### 11.2 Current Status (v0.4.7-alpha)
 
 | Category | Status | Notes |
 |----------|--------|-------|
@@ -1729,4 +1729,4 @@ For version 1.0.0 release, the following must be met:
 | RI-002 | step_13 | 2391 markdown lint violations (markdownlint-cli not available) | docs/ | Low | skipped |
 | RI-003 | step_19 | tsconfig missing noUnusedLocals/noUnusedParameters (exposed dead code) | tsconfig.json | Low | skipped |
 | RI-004 | step_09 | 4 low @tootallnate/once vulnerabilities (require --force breaking change) | package-lock.json | Low | skipped |
-| RI-005 | step_02 | 21 docs files referencing stale version 0.2.1-alpha (current: 0.4.6-alpha) | docs/ | Medium | done |
+| RI-005 | step_02 | 21 docs files referencing stale version 0.2.1-alpha (current: 0.4.7-alpha) | docs/ | Medium | done |

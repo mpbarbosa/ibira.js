@@ -74,7 +74,7 @@ npm update ibira.js
 **Install specific version:**
 
 ```bash
-npm install ibira.js@0.4.6-alpha
+npm install ibira.js@0.4.7-alpha
 ```
 
 ### 2. Import/Export Issues
@@ -720,4 +720,4 @@ When opening an issue, include:
 
 ---
 
-**ibira.js v0.4.6-alpha** | [Documentation](./INDEX.md) | [API Reference](./IBIRA_API_FETCHER.md)
+**ibira.js v0.4.7-alpha** | [Documentation](./INDEX.md) | [API Reference](./IBIRA_API_FETCHER.md)
