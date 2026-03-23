@@ -20,7 +20,7 @@ export interface Observer {
  *
  * Built on top of {@link DualObserverSubject} from
  * [bessa_patterns.ts](https://github.com/mpbarbosa/bessa_patterns.ts)
- * (v0.12.3-alpha), which provides the immutable-array observer management,
+ * (v0.12.5-alpha), which provides the immutable-array observer management,
  * null-safety, and per-observer error isolation.
  *
  * Wraps the `DualObserverSubject` GoF channel with the ibira.js-specific
