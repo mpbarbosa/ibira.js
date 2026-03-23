@@ -9,6 +9,7 @@
 ### Why should I use ibira.js instead of plain fetch?
 
 ibira.js provides:
+
 - **Built-in caching** - Automatic response caching with configurable TTL
 - **Retry logic** - Automatic retries with exponential backoff
 - **Observer pattern** - Event notifications for fetch lifecycle
@@ -19,6 +20,7 @@ ibira.js provides:
 ### Is ibira.js production-ready?
 
 ibira.js is currently in **alpha** (v0.2.1-alpha). It has:
+
 - ✅ 90%+ test coverage (152 tests)
 - ✅ Comprehensive error handling
 - ✅ Backward compatibility guarantee
@@ -288,11 +290,13 @@ const fetcher = new IbiraAPIFetcher(
 ### Which errors trigger retries?
 
 Retries are triggered for:
+
 - Network errors (connection failures)
 - Timeout errors (AbortError)
 - Server errors (5xx status codes)
 
 **NOT retried:**
+
 - Client errors (4xx status codes like 400, 401, 403, 404)
 - Successful responses (2xx status codes)
 
@@ -301,6 +305,7 @@ Retries are triggered for:
 ### What is the observer pattern in ibira.js?
 
 The observer pattern allows you to subscribe to fetch lifecycle events:
+
 - `fetch:start` - Request started
 - `fetch:success` - Request succeeded
 - `fetch:error` - Request failed
@@ -357,6 +362,7 @@ eventNotifier.subscribe(uiUpdater);
 ### What is "referential transparency"?
 
 Referential transparency means a function always returns the same output for the same inputs, with no side effects. ibira.js achieves this through:
+
 - Pure functional core (`fetchDataPure`)
 - Dependency injection (cache, eventNotifier)
 - Immutable return values (Object.freeze)
@@ -364,6 +370,7 @@ Referential transparency means a function always returns the same output for the
 ### When should I use the pure functional API?
 
 Use `fetchDataPure()` when you need:
+
 - Maximum testability
 - Side-effect isolation
 - Explicit control over when side effects occur
@@ -451,6 +458,7 @@ const users: User[] = await fetcher.fetchData();
 ### My requests are not being cached
 
 Check:
+
 1. Is `enableCache` set to `true`? (default is `true`)
 2. Are you using the same URL for repeated requests?
 3. Has the cache expired? (default: 5 minutes)
@@ -461,6 +469,7 @@ Check:
 CORS errors occur when the API server doesn't allow cross-origin requests. This is **not an ibira.js issue**.
 
 Solutions:
+
 - Configure the API server to allow CORS
 - Use a proxy server
 - Make requests from the same origin
@@ -468,6 +477,7 @@ Solutions:
 ### My POST/PUT requests are being cached
 
 POST/PUT/DELETE requests should not be cached. If this happens:
+
 1. Disable caching: `enableCache: false`
 2. Or clear cache after mutation: `fetcher.clearCache()`
 
@@ -491,16 +501,17 @@ Or use Node.js 18+ which has native fetch support.
 ### How can I optimize performance?
 
 1. **Use shared cache** for multiple fetchers:
+
 ```javascript
 const sharedCache = new DefaultCache({ maxSize: 100 });
 const fetcher1 = new IbiraAPIFetcher(url1, { cache: sharedCache });
 const fetcher2 = new IbiraAPIFetcher(url2, { cache: sharedCache });
 ```
 
-2. **Increase cache size** for frequently accessed data
-3. **Adjust cache TTL** based on data volatility
-4. **Use IbiraAPIFetchManager** for parallel requests
-5. **Disable caching** for real-time data
+1. **Increase cache size** for frequently accessed data
+2. **Adjust cache TTL** based on data volatility
+3. **Use IbiraAPIFetchManager** for parallel requests
+4. **Disable caching** for real-time data
 
 ### What is the memory footprint?
 
@@ -515,6 +526,7 @@ Total footprint is typically < 200 KB for default configuration.
 ### I'm upgrading from v0.1.0, what changed?
 
 v0.2.x is **100% backward compatible**. Main changes:
+
 - Modular architecture (internal reorganization)
 - New `IbiraAPIFetchManager` for multi-endpoint coordination
 - Enhanced test coverage (40 → 152 tests)
@@ -531,6 +543,7 @@ Yes, all v0.1.0 code works unchanged in v0.2.x.
 ### How can I contribute?
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
+
 - Development setup
 - Code standards
 - Testing guidelines
@@ -539,6 +552,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
 ### I found a bug, where do I report it?
 
 Open an issue on [GitHub](https://github.com/mpbarbosa/ibira.js/issues) with:
+
 - Description of the bug
 - Steps to reproduce
 - Expected vs actual behavior
@@ -557,6 +571,7 @@ Open an issue on [GitHub](https://github.com/mpbarbosa/ibira.js/issues) with:
 ### Is there a community?
 
 We're building a community! Connect via:
+
 - GitHub Discussions (coming soon)
 - Issue tracker for questions and feature requests
 

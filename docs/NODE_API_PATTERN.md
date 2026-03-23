@@ -8,16 +8,16 @@
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Architecture Overview](#architecture-overview)
-3. [Directory Structure](#directory-structure)
-4. [Module Organization](#module-organization)
-5. [Design Patterns](#design-patterns)
-6. [API Documentation](#api-documentation)
-7. [Usage Examples](#usage-examples)
-8. [Best Practices](#best-practices)
-9. [Contributing Guidelines](#contributing-guidelines)
-10. [Testing Strategy](#testing-strategy)
+1. [Introduction](#1-introduction)
+2. [Architecture Overview](#2-architecture-overview)
+3. [Directory Structure](#3-directory-structure)
+4. [Module Organization](#4-module-organization)
+5. [Design Patterns](#5-design-patterns)
+6. [API Documentation](#6-api-documentation)
+7. [Usage Examples](#7-usage-examples)
+8. [Best Practices](#8-best-practices)
+9. [Contributing Guidelines](#9-contributing-guidelines)
+10. [Testing Strategy](#10-testing-strategy)
 
 ---
 
@@ -1032,7 +1032,7 @@ console.log('Total cached items:', sharedCache.size);
 
 ### 8.1 Module Design
 
-#### ✅ DO:
+#### ✅ DO
 
 - Keep modules focused (single responsibility)
 - Use named exports for clarity
@@ -1046,7 +1046,7 @@ import { IbiraAPIFetcher } from 'ibira.js';
 export class MyClass { ... }
 ```
 
-#### ❌ DON'T:
+#### ❌ DON'T
 
 - Mix concerns in one module
 - Use default exports
@@ -1063,7 +1063,7 @@ export default class { ... }
 
 ### 8.2 Dependency Management
 
-#### ✅ DO:
+#### ✅ DO
 
 - Inject dependencies
 - Use interfaces (duck typing)
@@ -1078,7 +1078,7 @@ constructor(url, cache, options = {}) {
 }
 ```
 
-#### ❌ DON'T:
+#### ❌ DON'T
 
 - Create dependencies internally
 - Use global state
@@ -1095,7 +1095,7 @@ constructor(url) {
 
 ### 8.3 Error Handling
 
-#### ✅ DO:
+#### ✅ DO
 
 - Use try-catch for async operations
 - Provide meaningful error messages
@@ -1114,7 +1114,7 @@ try {
 }
 ```
 
-#### ❌ DON'T:
+#### ❌ DON'T
 
 - Swallow errors silently
 - Use generic error messages
@@ -1133,7 +1133,7 @@ try {
 
 ### 8.4 Testing
 
-#### ✅ DO:
+#### ✅ DO
 
 - Test public APIs
 - Use dependency injection for mocking
@@ -1151,7 +1151,7 @@ const mockCache = {
 const fetcher = new IbiraAPIFetcher(url, mockCache);
 ```
 
-#### ❌ DON'T:
+#### ❌ DON'T
 
 - Test implementation details
 - Use real network in tests
@@ -1161,7 +1161,7 @@ const fetcher = new IbiraAPIFetcher(url, mockCache);
 
 ### 8.5 Performance
 
-#### ✅ DO:
+#### ✅ DO
 
 - Use caching effectively
 - Implement request deduplication
@@ -1175,7 +1175,7 @@ if (this.pendingRequests.has(key)) {
 }
 ```
 
-#### ❌ DON'T:
+#### ❌ DON'T
 
 - Make redundant requests
 - Keep unlimited cache
@@ -1274,14 +1274,14 @@ describe('NewFeature', () => {
 
 ### 9.2 Modifying Existing Code
 
-#### Guidelines:
+#### Guidelines
 
 1. **Maintain backward compatibility** unless major version bump
 2. **Add deprecation warnings** before removing features
 3. **Update tests** to cover new behavior
 4. **Document breaking changes** in MIGRATION.md
 
-#### Example:
+#### Example
 
 ```javascript
 /**

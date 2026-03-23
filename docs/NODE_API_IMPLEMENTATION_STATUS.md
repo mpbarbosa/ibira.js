@@ -52,9 +52,8 @@ The ibira.js project has been successfully restructured to follow the Node.js AP
 
 ### Directory Layout
 
-```
+```text
 src/
-├── index.js                    ✅ Entry point
 ├── core/                       ✅ Core logic
 │   ├── IbiraAPIFetcher.js
 │   └── IbiraAPIFetchManager.js
@@ -67,7 +66,7 @@ src/
 
 ### Module Dependencies
 
-```
+```text
 index.js (Entry)
     ↓
 core/ (Business Logic)
@@ -178,7 +177,7 @@ config/ (Constants)
 
 ### Test Coverage
 
-```
+```text
 Test Suites: 1 passed, 1 total
 Tests:       40 passed, 1 skipped, 41 total
 Snapshots:   0 total
@@ -265,24 +264,28 @@ Time:        0.706 s
 ## 🎓 Learning Paths Available
 
 ### Path 1: Quick Start (30 min)
-```
+
+```text
 QUICK_REFERENCE.md → NODE_API_PATTERN.md (§7) → Start Coding
 ```
 
 ### Path 2: Comprehensive (2-3 hours)
-```
+
+```text
 QUICK_REFERENCE.md → NODE_API_PATTERN.md → STRUCTURE_DIAGRAM.md
 → IBIRA_API_FETCHER.md → ARCHITECTURE.md
 ```
 
 ### Path 3: Contributing (1.5 hours)
-```
+
+```text
 QUICK_REFERENCE.md → NODE_API_PATTERN.md (§4,5,9)
 → STRUCTURE_DIAGRAM.md → TEST_RESULTS.md
 ```
 
 ### Path 4: FP Deep Dive (2 hours)
-```
+
+```text
 NODE_API_PATTERN.md (§5.5) → referential_transparency/
 → NODE_API_PATTERN.md (§6.1)
 ```
@@ -318,12 +321,14 @@ NODE_API_PATTERN.md (§5.5) → referential_transparency/
 ## 🏆 Achievements
 
 ### Code Organization
+
 - ✅ Monolithic file split into 7 focused modules
 - ✅ Clear separation of concerns (core, utils, config)
 - ✅ No circular dependencies
 - ✅ Layered architecture implemented
 
 ### Documentation
+
 - ✅ 212 KB of comprehensive documentation
 - ✅ 100% API coverage
 - ✅ 50+ code examples
@@ -331,12 +336,14 @@ NODE_API_PATTERN.md (§5.5) → referential_transparency/
 - ✅ Multiple learning paths
 
 ### Quality
+
 - ✅ All tests passing (40/41)
 - ✅ 75%+ test coverage maintained
 - ✅ No breaking changes introduced
 - ✅ Professional standards met
 
 ### Developer Experience
+
 - ✅ Quick reference guide created
 - ✅ Visual structure diagrams provided
 - ✅ Contributing guidelines documented

@@ -153,6 +153,7 @@ const silentFetcher = IbiraAPIFetcher.withoutEvents('https://api.example.com');
 ## 🧪 **Benefits for Testing**
 
 ### **1. Deterministic Tests**
+
 ```javascript
 // Same inputs = same outputs, always
 const result1 = await fetcher.fetchDataPure(cache, timestamp, mockNetwork);
@@ -161,6 +162,7 @@ expect(result1).toEqual(result2); // Always passes
 ```
 
 ### **2. State Isolation**
+
 ```javascript
 // No accidental state sharing between tests
 const cache = new Map();
@@ -169,6 +171,7 @@ expect(cache.size).toBe(0); // Original cache unchanged
 ```
 
 ### **3. Error Testing**
+
 ```javascript
 // Test error scenarios without side effects
 const errorNetwork = () => Promise.reject(new Error('Network down'));
@@ -180,6 +183,7 @@ expect(result.error.message).toBe('Network down');
 ## 🔄 **Migration Guide**
 
 ### **From Old Version:**
+
 ```javascript
 // Old way - with side effects
 const fetcher = new IbiraAPIFetcher('https://api.example.com');
@@ -187,6 +191,7 @@ const data = await fetcher.fetchData();
 ```
 
 ### **To Pure Version:**
+
 ```javascript
 // Pure way - explicit state management
 const fetcher = IbiraAPIFetcher.pure('https://api.example.com');
@@ -200,6 +205,7 @@ if (result.success) {
 ```
 
 ### **To Practical Version:**
+
 ```javascript
 // Practical way - same API, better internals
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com');

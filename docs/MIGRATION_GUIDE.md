@@ -9,6 +9,7 @@ This guide documents the transformation of IbiraAPIFetcher from a traditional ob
 ### State Management
 
 #### ❌ Before (Impure)
+
 ```javascript
 class IbiraAPIFetcher {
     constructor(url) {
@@ -24,6 +25,7 @@ class IbiraAPIFetcher {
 ```
 
 #### ✅ After (Pure)
+
 ```javascript
 class IbiraAPIFetcher {
     constructor(url, cache, options = {}) {
@@ -44,6 +46,7 @@ class IbiraAPIFetcher {
 ### Method Implementation
 
 #### ❌ Before (Side Effects Mixed with Logic)
+
 ```javascript
 async fetchData() {
     this.loading = true;                    // Side effect
@@ -69,6 +72,7 @@ async fetchData() {
 ```
 
 #### ✅ After (Pure Core + Side Effects Wrapper)
+
 ```javascript
 // Pure functional core - zero side effects
 async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider = null) {
@@ -206,6 +210,7 @@ _applySideEffects(result, activeCache) {
 ## Step-by-Step Transformation Process
 
 ### Step 1: Remove Mutable Properties
+
 ```diff
 class IbiraAPIFetcher {
     constructor(url, cache, options = {}) {
@@ -225,6 +230,7 @@ class IbiraAPIFetcher {
 ```
 
 ### Step 2: Externalize Dependencies
+
 ```diff
 - const fetcher = new IbiraAPIFetcher(url);
 + const cache = new Map();
@@ -233,6 +239,7 @@ class IbiraAPIFetcher {
 ```
 
 ### Step 3: Create Pure Core Function
+
 ```javascript
 // Add pure functional core
 async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider = null) {
@@ -250,6 +257,7 @@ async fetchDataPure(currentCacheState, currentTime = Date.now(), networkProvider
 ```
 
 ### Step 4: Implement Side Effects Layer
+
 ```javascript
 // Wrapper that uses pure core and applies side effects
 async fetchData(cacheOverride = null) {
@@ -265,6 +273,7 @@ async fetchData(cacheOverride = null) {
 ```
 
 ### Step 5: Add Static Factory Methods
+
 ```javascript
 static withDefaultCache(url, options = {}) {
     const cache = this._createDefaultCache(options);
@@ -284,6 +293,7 @@ static withoutCache(url, options = {}) {
 ## Migration Benefits
 
 ### Before Migration Issues
+
 - ❌ **Unpredictable behavior** due to mutable state
 - ❌ **Difficult testing** requiring complex mocking
 - ❌ **Race conditions** with concurrent access
@@ -291,6 +301,7 @@ static withoutCache(url, options = {}) {
 - ❌ **Side effects everywhere** making debugging difficult
 
 ### After Migration Benefits
+
 - ✅ **Predictable behavior** with pure functions
 - ✅ **Easy testing** with deterministic inputs/outputs
 - ✅ **Thread-safe** operations without race conditions
@@ -302,6 +313,7 @@ static withoutCache(url, options = {}) {
 ## Testing Migration
 
 ### Before (Complex Mocking)
+
 ```javascript
 describe('IbiraAPIFetcher', () => {
     test('should set loading state', async () => {
@@ -321,6 +333,7 @@ describe('IbiraAPIFetcher', () => {
 ```
 
 ### After (Simple Assertions)
+
 ```javascript
 describe('IbiraAPIFetcher', () => {
     test('should return pure operation description', async () => {
@@ -348,20 +361,24 @@ describe('IbiraAPIFetcher', () => {
 ## Performance Impact
 
 ### Memory Usage
+
 - **Before**: Mutable objects with hidden state
 - **After**: Immutable objects that can be safely cached and reused
 
 ### CPU Usage
+
 - **Before**: Complex state management overhead
 - **After**: Pure computation with efficient caching
 
 ### Concurrency
+
 - **Before**: Race conditions with shared mutable state
 - **After**: Safe parallel execution with immutable data
 
 ## Backward Compatibility
 
 ### Existing Code Continues to Work
+
 ```javascript
 // This still works exactly as before
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
@@ -370,6 +387,7 @@ console.log(data);
 ```
 
 ### New Functional Patterns Available
+
 ```javascript
 // New pure functional usage
 const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');

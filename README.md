@@ -241,14 +241,7 @@ The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `Abor
 - If tests fail: fix failing tests before deploying
 - If tag already exists: bump the version in `package.json` first
 
-#### Deploy Script
-
-**Purpose:** Tag a release, push to remote, and regenerate CDN URLs
-**Prerequisites:**
-
-- Clean git working tree (no uncommitted changes)
-- Git remote `origin` configured and writable
-- Tests must pass (runs automatically before tagging)
+#### Deploy Script Reference
 - Node.js and npm available
 
 **Usage:** `./scripts/deploy.sh [version]`

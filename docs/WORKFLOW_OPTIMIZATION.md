@@ -13,7 +13,7 @@ This document describes adaptive workflow optimizations to improve development e
 ## Table of Contents
 
 1. [Immediate Workflow Modifications](#immediate-workflow-modifications)
-2. [Cleanup Automation](#cleanup-automation)
+2. [Cleanup Automation](#step-10-cleanup-old-artifacts)
 3. [Development Workflow Enhancements](#development-workflow-enhancements)
 4. [Quality Assurance Automation](#quality-assurance-automation)
 5. [Documentation Workflow](#documentation-workflow)
@@ -28,6 +28,7 @@ This document describes adaptive workflow optimizations to improve development e
 **Purpose:** Automatically clean up old workflow artifacts and temporary files to prevent repository bloat.
 
 **Configuration:**
+
 ```yaml
 # .ai_workflow/config.yml
 cleanup_old_artifacts:
@@ -175,6 +176,7 @@ RETENTION_DAYS=10 ./scripts/cleanup-artifacts.sh
 **NPM Script Integration:**
 
 Add to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -617,16 +619,19 @@ Add these to `package.json`:
 ## Monitoring & Maintenance
 
 ### Weekly Tasks
+
 - Review cleanup logs
 - Check artifact disk usage
 - Verify hooks are functioning
 
 ### Monthly Tasks
+
 - Review and adjust retention periods
 - Update cleanup patterns
 - Optimize script performance
 
 ### Quarterly Tasks
+
 - Audit entire workflow
 - Gather team feedback
 - Implement improvements

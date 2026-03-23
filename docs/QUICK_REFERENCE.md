@@ -1,6 +1,6 @@
 # ibira.js Quick Reference Guide
 
-**Quick lookup for common tasks and patterns**
+Quick lookup for common tasks and patterns
 
 ---
 
@@ -289,7 +289,7 @@ const fetcher = new IbiraAPIFetcher(url, mockCache);
 
 ## File Structure Quick Reference
 
-```
+```text
 src/
 ├── index.js              # Import from here
 ├── core/
@@ -307,14 +307,18 @@ src/
 ## Common Issues
 
 ### Issue: Import not found
+
 **Solution**: Use correct import path
+
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';  // ✅ Correct
 import IbiraAPIFetcher from 'ibira.js';       // ❌ Wrong (no default export)
 ```
 
 ### Issue: Cache not working
+
 **Solution**: Check cache configuration
+
 ```javascript
 // Ensure cache is properly configured
 const cache = new DefaultCache({
@@ -324,7 +328,9 @@ const cache = new DefaultCache({
 ```
 
 ### Issue: Events not firing
+
 **Solution**: Subscribe observer before fetching
+
 ```javascript
 fetcher.subscribe(observer);  // Subscribe first
 await fetcher.fetchData();     // Then fetch

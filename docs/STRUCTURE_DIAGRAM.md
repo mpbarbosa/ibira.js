@@ -4,7 +4,7 @@ Visual representation of the Node.js API pattern structure in ibira.js.
 
 ## Project Structure Tree
 
-```
+```text
 ibira.js/
 │
 ├── 📦 Package Root
@@ -71,7 +71,7 @@ ibira.js/
 
 ## Module Dependency Graph
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                     index.js                            │
 │              (Public API Entry Point)                   │
@@ -100,7 +100,7 @@ ibira.js/
 
 ## Class Relationship Diagram
 
-```
+```text
                     IbiraAPIFetchManager
                             │
                             │ manages
@@ -125,7 +125,7 @@ ibira.js/
 
 ### Fetch Request Flow
 
-```
+```text
 User Request
      │
      ▼
@@ -170,7 +170,7 @@ User Request
 
 ### Pure Functional Flow
 
-```
+```text
 fetchDataPure(cacheState, time, network)
      │
      ▼
@@ -200,7 +200,7 @@ fetchDataPure(cacheState, time, network)
 
 ## Layer Architecture
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │                  Application Layer                    │
 │              (User code using ibira.js)              │
@@ -236,7 +236,7 @@ fetchDataPure(cacheState, time, network)
 
 ## File Size Distribution
 
-```
+```text
 Core Classes (Large - 400-700 lines each)
 │
 ├── IbiraAPIFetcher.js          ████████████████████ (700 lines)
@@ -281,7 +281,7 @@ import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
 
 ## Design Pattern Map
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │         Design Patterns in ibira.js             │
 ├─────────────────────────────────────────────────┤
@@ -322,7 +322,7 @@ import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
 
 ## Test Coverage Map
 
-```
+```text
 ┌─────────────────────────────────────────────────┐
 │            Test Coverage Distribution            │
 ├─────────────────────────────────────────────────┤
@@ -346,7 +346,7 @@ import { IbiraAPIFetcher } from './IbiraAPIFetcher.js';
 
 ## Deployment View
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │           NPM Package Structure              │
 ├─────────────────────────────────────────────┤

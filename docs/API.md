@@ -7,8 +7,8 @@
 
 ## Table of Contents
 
-- [IbiraAPIFetcher](#ibiraaapifetcher)
-- [IbiraAPIFetchManager](#ibiraaapifetchmanager)
+- [IbiraAPIFetcher](#ibiraapifetcher)
+- [IbiraAPIFetchManager](#ibiraapifetchmanager)
 - [DefaultCache](#defaultcache)
 - [DefaultEventNotifier](#defaulteventnotifier)
 - [throttle](#throttle)

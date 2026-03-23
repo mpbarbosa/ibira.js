@@ -111,6 +111,7 @@ While unit tests take time to write, they save time by:
 Each test should verify a single behavior:
 
 ✅ **Good:**
+
 ```javascript
 test('should return URL for empty params', () => {
     const url = 'https://api.example.com';
@@ -125,6 +126,7 @@ test('should include params in cache key', () => {
 ```
 
 ❌ **Avoid:**
+
 ```javascript
 test('cache key generation', () => {
     // Testing multiple behaviors in one test
@@ -156,6 +158,7 @@ test('should format CEP correctly', () => {
 Focus on what the function does, not how it does it:
 
 ✅ **Good: Testing behavior**
+
 ```javascript
 test('should return sorted cities', () => {
     const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
@@ -167,6 +170,7 @@ test('should return sorted cities', () => {
 ```
 
 ❌ **Avoid: Testing implementation**
+
 ```javascript
 test('should call Array.sort with correct comparator', () => {
     const sortSpy = jest.spyOn(Array.prototype, 'sort');
@@ -181,6 +185,7 @@ test('should call Array.sort with correct comparator', () => {
 Each test should set up its own data and not rely on other tests:
 
 ✅ **Good:**
+
 ```javascript
 describe('AddressCache', () => {
     let cache;
@@ -224,7 +229,7 @@ test('calculates distance quickly', () => {
 
 ### Project Structure
 
-```
+```text
 ibira.js/
 ├── src/
 │   └── ibira.js             # Source code
@@ -283,6 +288,7 @@ npm run test:verbose
 Use descriptive names that explain the scenario and expected outcome:
 
 ✅ **Good:**
+
 ```javascript
 test('should return empty string when address is null', () => {});
 test('should format complete Brazilian address with all components', () => {});
@@ -291,6 +297,7 @@ test('should throw error when CEP has invalid length', () => {});
 ```
 
 ❌ **Avoid:**
+
 ```javascript
 test('test1', () => {});
 test('address test', () => {});
@@ -399,6 +406,7 @@ describe('getCacheKey', () => {
 ```
 
 **Why this is easy to test:**
+
 - ✅ No setup or teardown needed
 - ✅ No mocks required
 - ✅ Deterministic output
@@ -516,6 +524,7 @@ describe('Geocoding Functions', () => {
 ```
 
 **Benefits of this approach:**
+
 - ✅ Pure functions (`buildGeocodingUrl`, `parseGeocodingResponse`) tested without mocks
 - ✅ Side effect (`fetch`) isolated to one function
 - ✅ Easier to test, maintain, and understand
@@ -528,6 +537,7 @@ describe('Geocoding Functions', () => {
 Tests should be simpler than the code they test:
 
 ✅ **Good:**
+
 ```javascript
 test('should format address', () => {
     const result = formatAddress({ street: 'Av. Paulista', number: '1000' });
@@ -536,6 +546,7 @@ test('should format address', () => {
 ```
 
 ❌ **Avoid:**
+
 ```javascript
 test('should format address', () => {
     const addresses = generateTestAddresses(100);
@@ -584,6 +595,7 @@ describe('formatCEP edge cases', () => {
 Test the public API, not internal mechanics:
 
 ✅ **Good:**
+
 ```javascript
 test('cache should return stored value', () => {
     cache.set('key', 'value');
@@ -592,6 +604,7 @@ test('cache should return stored value', () => {
 ```
 
 ❌ **Avoid:**
+
 ```javascript
 test('cache should use Map internally', () => {
     expect(cache._internalMap).toBeInstanceOf(Map);
@@ -661,6 +674,7 @@ describe('calculateDistance error handling', () => {
 Tests should not depend on each other:
 
 ❌ **Avoid:**
+
 ```javascript
 let sharedData;
 
@@ -677,6 +691,7 @@ test('should process data', () => {
 ```
 
 ✅ **Good:**
+
 ```javascript
 test('should create data', () => {
     const data = createData();
@@ -1431,6 +1446,7 @@ npm test -- --coverage --collectCoverageFrom="src/utils.js"
 - **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines
 
 ### Architecture Examples with Tests
+
 - **IbiraAPIFetcher** - Well-tested class for API data fetching with caching
 - **IbiraAPIFetchManager** - Comprehensive test coverage for managing multiple fetch operations
 - **Observer Pattern** - Unit tests for subscribe/unsubscribe operations
@@ -1468,6 +1484,7 @@ npm test -- --coverage --collectCoverageFrom="src/utils.js"
 ## Quick Reference Card
 
 ### Unit Test Commands
+
 ```bash
 npm test                    # Run all tests
 npm test file.test.js       # Run specific file
@@ -1479,6 +1496,7 @@ npm run test:all            # Validate + test
 ```
 
 ### Unit Test Structure
+
 ```javascript
 describe('Feature/Module', () => {
     beforeEach(() => {
@@ -1503,6 +1521,7 @@ describe('Feature/Module', () => {
 ```
 
 ### Testing Principles
+
 - ✅ Test one thing at a time
 - ✅ Use descriptive test names
 - ✅ Follow AAA pattern (Arrange-Act-Assert)
@@ -1513,6 +1532,7 @@ describe('Feature/Module', () => {
 - ✅ Keep tests simple and readable
 
 ### Pure Functions + Unit Tests
+
 - ✅ Pure functions are easiest to test
 - ✅ No mocks needed for pure functions
 - ✅ Deterministic = predictable tests

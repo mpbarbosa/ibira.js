@@ -4,7 +4,7 @@ This directory contains the source code for ibira.js, organized following the No
 
 ## Directory Structure
 
-```
+```text
 src/
 ├── index.js                  # Main entry point - exports public API
 ├── core/                     # Core business logic
@@ -20,12 +20,16 @@ src/
 ## Module Organization
 
 ### Core (`/core`)
+
 Contains the main business logic and core classes:
+
 - **IbiraAPIFetcher**: The primary class for fetching and caching API data
 - **IbiraAPIFetchManager**: Coordinates multiple fetchers and handles race conditions
 
 ### Utils (`/utils`)
+
 Helper classes and utility functions:
+
 - **DefaultCache**: Map-based cache with LRU eviction and expiration
 - **DefaultEventNotifier**: Observer pattern implementation for event handling
 

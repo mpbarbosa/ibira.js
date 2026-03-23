@@ -28,6 +28,7 @@ All NPM scripts are defined in `package.json` and can be run with `npm run <scri
 ### Testing Scripts
 
 #### `npm test`
+
 **Command:** `jest`
 **Purpose:** Run all tests once
 **Output:** Test results with pass/fail summary
@@ -43,6 +44,7 @@ npm test
 ```
 
 **When to Use:**
+
 - Pre-commit validation
 - Manual test execution
 - CI/CD pipelines
@@ -53,6 +55,7 @@ npm test
 ---
 
 #### `npm run test:watch`
+
 **Command:** `jest --watch`
 **Purpose:** Run tests in watch mode with file monitoring
 **Output:** Interactive test runner
@@ -70,12 +73,14 @@ npm run test:watch
 ```
 
 **When to Use:**
+
 - Active development
 - TDD workflow
 - Continuous feedback during coding
 - Debugging tests
 
 **Best Practices:**
+
 - Keep running in separate terminal
 - Use `o` to run only affected tests
 - Use `f` to focus on failures
@@ -85,6 +90,7 @@ npm run test:watch
 ---
 
 #### `npm run test:coverage`
+
 **Command:** `jest --coverage`
 **Purpose:** Run tests and generate coverage report
 **Output:** Coverage percentages + HTML report
@@ -101,17 +107,20 @@ npm run test:coverage
 ```
 
 **Generates:**
+
 - `coverage/lcov-report/index.html` - Visual coverage report
 - `coverage/coverage-summary.json` - JSON summary
 - `coverage/lcov.info` - LCOV format for CI tools
 
 **When to Use:**
+
 - Before committing changes
 - Code review preparation
 - Quality assurance checks
 - Identifying untested code
 
 **Thresholds:**
+
 - Statements: 75% minimum
 - Branches: 75% minimum
 - Functions: 75% minimum
@@ -122,6 +131,7 @@ npm run test:coverage
 ---
 
 #### `npm run test:verbose`
+
 **Command:** `jest --verbose`
 **Purpose:** Run tests with detailed output
 **Output:** Individual test names and execution times
@@ -138,6 +148,7 @@ npm run test:verbose
 ```
 
 **When to Use:**
+
 - Debugging test failures
 - Understanding test execution flow
 - Identifying slow tests
@@ -148,6 +159,7 @@ npm run test:verbose
 ---
 
 #### `npm run validate`
+
 **Command:** `node -c src/index.js`
 **Purpose:** Validate JavaScript syntax without running tests
 **Output:** Silent on success, error on syntax issues
@@ -163,12 +175,14 @@ npm run validate
 ```
 
 **When to Use:**
+
 - Quick syntax check (< 1 second)
 - Pre-test validation
 - Editor/IDE integration
 - CI/CD fast fail
 
 **Advantages:**
+
 - Very fast (< 1 second)
 - No dependencies needed
 - Catches syntax errors early
@@ -179,6 +193,7 @@ npm run validate
 ---
 
 #### `npm run test:all`
+
 **Command:** `npm run validate && npm test`
 **Purpose:** Validate syntax then run all tests
 **Output:** Combined validation and test output
@@ -193,12 +208,14 @@ npm run test:all
 ```
 
 **When to Use:**
+
 - Pre-commit workflow
 - CI/CD pipelines
 - Comprehensive validation
 - Single command quality check
 
 **Workflow:**
+
 ```bash
 # Only commits if everything passes
 npm run test:all && git commit -m "feat: new feature"
@@ -220,6 +237,7 @@ Scripts located in the repository root for development and testing assistance.
 **Permissions:** `-rwxrwxr-x` (775)
 
 **Usage:**
+
 ```bash
 # Method 1: Direct execution
 ./test-runner.js
@@ -229,6 +247,7 @@ node test-runner.js
 ```
 
 **Output:**
+
 - Available test commands
 - Test file structure
 - Test statistics (152 tests, 90%+ coverage)
@@ -238,12 +257,14 @@ node test-runner.js
 **Note:** Informational only - does not run tests
 
 **When to Use:**
+
 - First-time project setup
 - Quick command reference
 - Onboarding new contributors
 - Documentation lookup
 
 **Related Files:**
+
 - Source: `test-runner.js`
 - Documentation: [UTILITY_SCRIPTS.md](./UTILITY_SCRIPTS.md#1-test-runnerjs)
 
@@ -257,6 +278,7 @@ node test-runner.js
 **Permissions:** `-rwxrwxr-x` (775)
 
 **Usage:**
+
 ```bash
 # Method 1: Direct execution
 ./test_pure_fetcher.js
@@ -266,6 +288,7 @@ node test_pure_fetcher.js
 ```
 
 **Tests Performed:**
+
 1. Pure function determinism (same inputs = same outputs)
 2. Cache hit behavior (pure computation)
 3. Cache expiration handling
@@ -274,10 +297,12 @@ node test_pure_fetcher.js
 6. Practical wrapper comparison
 
 **Exit Codes:**
+
 - `0` - All tests passed
 - `1` - Test failure
 
 **When to Use:**
+
 - Verify referential transparency
 - Demonstrate pure functional programming
 - Before major releases
@@ -285,6 +310,7 @@ node test_pure_fetcher.js
 - Debugging pure vs side-effect behavior
 
 **Related Files:**
+
 - Source: `test_pure_fetcher.js`
 - Documentation: [UTILITY_SCRIPTS.md](./UTILITY_SCRIPTS.md#2-test_pure_fetcherjs)
 
@@ -302,12 +328,14 @@ Bash scripts for automation and tooling.
 **Permissions:** `-rwxrwxr-x` (775)
 
 **Prerequisites:**
+
 - Git installed and repository initialized
 - Node.js and npm available
 - Run from repository root
 - At least one git commit exists
 
 **Usage:**
+
 ```bash
 # Method 1: Direct execution
 ./cdn-delivery.sh
@@ -317,28 +345,33 @@ bash cdn-delivery.sh
 ```
 
 **Output:**
+
 - CDN URLs displayed in terminal
 - `cdn-urls.txt` file created with all URLs
 - Latest version, specific version, and minified URLs
 
 **Generated URLs:**
+
 - Latest version (auto-updating)
 - Specific version (pinned to release)
 - Individual module URLs
 - Minified versions
 
 **When to Use:**
+
 - Before publishing new release
 - Updating documentation with CDN links
 - Providing installation options
 - Testing CDN delivery
 
 **Troubleshooting:**
+
 - Git not found: `sudo apt-get install git`
 - Permission denied: `chmod +x cdn-delivery.sh`
 - Version mismatch: Commit and push latest changes
 
 **Related Files:**
+
 - Source: `cdn-delivery.sh`
 - Output: `cdn-urls.txt`
 - Documentation: [UTILITY_SCRIPTS.md](./UTILITY_SCRIPTS.md#3-cdn-deliverysh)
@@ -441,6 +474,7 @@ open coverage/lcov-report/IbiraAPIFetcher.js.html
 ### Script Execution Issues
 
 #### Script Not Found
+
 ```bash
 # Error: ./script.js: No such file or directory
 
@@ -452,6 +486,7 @@ cd /path/to/ibira.js
 ```
 
 #### Permission Denied
+
 ```bash
 # Error: bash: ./script.js: Permission denied
 
@@ -464,6 +499,7 @@ ls -la script.js
 ```
 
 #### NPM Script Not Found
+
 ```bash
 # Error: npm ERR! missing script: test:xyz
 
@@ -477,6 +513,7 @@ cat package.json | grep "\"scripts\""
 ### Test Execution Issues
 
 #### Tests Failing After Clean Install
+
 ```bash
 # Clean and reinstall
 rm -rf node_modules package-lock.json
@@ -485,6 +522,7 @@ npm test
 ```
 
 #### Watch Mode Not Working
+
 ```bash
 # Restart watch mode
 # Press 'q' to quit, then:
@@ -495,6 +533,7 @@ cat /proc/sys/fs/inotify/max_user_watches
 ```
 
 #### Coverage Below Threshold
+
 ```bash
 # Identify uncovered code
 npm run test:coverage
@@ -507,6 +546,7 @@ open coverage/lcov-report/index.html
 ### Shell Script Issues
 
 #### Shebang Not Working
+
 ```bash
 # Error: ./script.sh: bad interpreter
 
@@ -529,6 +569,7 @@ When the project moves beyond alpha stage, consider implementing:
 #### GitHub Actions
 
 **Suggested Workflow:**
+
 ```yaml
 # .github/workflows/ci.yml
 name: CI
@@ -557,6 +598,7 @@ jobs:
 #### GitLab CI
 
 **Suggested Pipeline:**
+
 ```yaml
 # .gitlab-ci.yml
 stages:
@@ -598,6 +640,7 @@ test:
    - Require passing RT demonstration
 
 **Benefits:**
+
 - ✅ Automated testing on every commit
 - ✅ Multi-version Node.js testing
 - ✅ Coverage tracking over time
@@ -605,6 +648,7 @@ test:
 - ✅ Consistent validation across contributors
 
 **Recommended Tools:**
+
 - **Codecov** - Coverage tracking and visualization
 - **SonarQube** - Code quality analysis
 - **Dependabot** - Dependency updates
@@ -660,6 +704,7 @@ test:
 ## Maintenance
 
 This document should be updated when:
+
 - New scripts are added
 - Script behavior changes
 - New workflows are established

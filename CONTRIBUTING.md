@@ -52,6 +52,7 @@ See [Referential Transparency Guide](.github/REFERENTIAL_TRANSPARENCY.md) and [H
 ## Reporting Issues
 
 Please open a GitHub Issue with:
+
 - A minimal reproduction case.
 - The version of ibira.js you're using (`npm list ibira.js`).
 - Node.js version (`node --version`).

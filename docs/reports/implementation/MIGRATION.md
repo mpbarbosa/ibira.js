@@ -7,13 +7,15 @@ The ibira.js project has been refactored to follow the Node.js API pattern folde
 ## What Changed
 
 ### Before (Monolithic Structure)
-```
+
+```text
 src/
 └── ibira.js  # Single file with all code (~1200 lines)
 ```
 
 ### After (Modular Structure)
-```
+
+```text
 src/
 ├── index.js                    # Main entry point
 ├── core/                       # Core business logic
@@ -28,7 +30,7 @@ src/
 
 ## Breaking Changes
 
-### ❌ None!
+### ❌ None
 
 **The public API remains exactly the same.** All imports continue to work:
 
@@ -42,14 +44,15 @@ import { DefaultCache, DefaultEventNotifier, VERSION } from 'ibira.js';
 
 ## For Contributors
 
-### When adding new features:
+### When adding new features
 
 1. **Core functionality**: Add to `src/core/`
 2. **Utilities/Helpers**: Add to `src/utils/`
 3. **Configuration**: Add to `src/config/`
 4. **Always export**: Update `src/index.js` to export new public APIs
 
-### File naming conventions:
+### File naming conventions
+
 - Use PascalCase for class files: `MyClass.js`
 - Use camelCase for utility files: `myHelper.js`
 - One primary export per file

@@ -20,24 +20,28 @@ Before diving into specific issues, verify:
 #### Issue: "Cannot find module 'ibira.js'"
 
 **Symptoms:**
-```
+
+```text
 Error: Cannot find module 'ibira.js'
 ```
 
 **Solutions:**
 
 1. **Verify installation:**
+
    ```bash
    npm list ibira.js
    ```
 
 2. **Reinstall the package:**
+
    ```bash
    npm uninstall ibira.js
    npm install ibira.js
    ```
 
 3. **Check import path:**
+
    ```javascript
    // ✅ Correct
    import { IbiraAPIFetcher } from 'ibira.js';
@@ -47,6 +51,7 @@ Error: Cannot find module 'ibira.js'
    ```
 
 4. **Clear npm cache:**
+
    ```bash
    npm cache clean --force
    npm install
@@ -55,16 +60,19 @@ Error: Cannot find module 'ibira.js'
 #### Issue: Version mismatch or outdated version
 
 **Check current version:**
+
 ```bash
 npm list ibira.js
 ```
 
 **Update to latest:**
+
 ```bash
 npm update ibira.js
 ```
 
 **Install specific version:**
+
 ```bash
 npm install ibira.js@0.2.1-alpha
 ```
@@ -74,7 +82,8 @@ npm install ibira.js@0.2.1-alpha
 #### Issue: "fetch is not defined" (Node.js)
 
 **Symptoms:**
-```
+
+```text
 ReferenceError: fetch is not defined
 ```
 
@@ -83,12 +92,14 @@ ReferenceError: fetch is not defined
 **Solutions:**
 
 1. **Upgrade to Node.js 18+** (recommended):
+
    ```bash
    node --version  # Check current version
    # Upgrade to Node.js 18 or higher
    ```
 
 2. **Install fetch polyfill:**
+
    ```bash
    npm install node-fetch
    ```
@@ -101,6 +112,7 @@ ReferenceError: fetch is not defined
    ```
 
 3. **Use undici (Node.js 16+):**
+
    ```bash
    npm install undici
    ```
@@ -113,13 +125,15 @@ ReferenceError: fetch is not defined
 #### Issue: "IbiraAPIFetcher is not a constructor"
 
 **Symptoms:**
-```
+
+```text
 TypeError: IbiraAPIFetcher is not a constructor
 ```
 
 **Cause:** Incorrect import syntax.
 
 **Solution:**
+
 ```javascript
 // ✅ Correct - Named import
 import { IbiraAPIFetcher } from 'ibira.js';
@@ -131,6 +145,7 @@ import IbiraAPIFetcher from 'ibira.js';
 #### Issue: ESM vs CommonJS conflicts
 
 **For ES Modules (recommended):**
+
 ```javascript
 // package.json
 {
@@ -142,6 +157,7 @@ import { IbiraAPIFetcher } from 'ibira.js';
 ```
 
 **For CommonJS:**
+
 ```javascript
 // Use dynamic import
 async function loadFetcher() {
@@ -155,7 +171,8 @@ async function loadFetcher() {
 #### Issue: CORS errors in browser
 
 **Symptoms:**
-```
+
+```text
 Access to fetch at 'https://api.example.com' from origin 'http://localhost:3000'
 has been blocked by CORS policy
 ```
@@ -165,6 +182,7 @@ has been blocked by CORS policy
 **Solutions:**
 
 1. **Configure API server to allow CORS** (backend fix):
+
    ```javascript
    // Express.js example
    app.use((req, res, next) => {
@@ -175,6 +193,7 @@ has been blocked by CORS policy
    ```
 
 2. **Use a proxy during development:**
+
    ```javascript
    // package.json (Create React App)
    {
@@ -183,6 +202,7 @@ has been blocked by CORS policy
    ```
 
 3. **Use CORS proxy service** (development only):
+
    ```javascript
    const url = 'https://cors-anywhere.herokuapp.com/https://api.example.com/data';
    const fetcher = IbiraAPIFetcher.withDefaultCache(url);
@@ -194,13 +214,15 @@ has been blocked by CORS policy
 #### Issue: Network timeout errors
 
 **Symptoms:**
-```
+
+```text
 AbortError: The operation was aborted
 ```
 
 **Solutions:**
 
 1. **Increase timeout:**
+
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache(),
@@ -210,16 +232,19 @@ AbortError: The operation was aborted
    ```
 
 2. **Check network connectivity:**
+
    ```bash
    curl -I https://api.example.com
    ```
 
 3. **Verify API endpoint is responding:**
+
    ```bash
    curl https://api.example.com/your-endpoint
    ```
 
 4. **Test with retries:**
+
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache(),
@@ -232,7 +257,8 @@ AbortError: The operation was aborted
 #### Issue: Connection refused
 
 **Symptoms:**
-```
+
+```text
 TypeError: fetch failed
 cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 ```
@@ -243,6 +269,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 2. **Check URL is correct** (http vs https, port number)
 3. **Check firewall settings**
 4. **Test endpoint with curl:**
+
    ```bash
    curl http://localhost:3000/api/data
    ```
@@ -256,6 +283,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 **Solutions:**
 
 1. **Verify caching is enabled:**
+
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache(),
@@ -265,6 +293,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
    ```
 
 2. **Check cache hasn't expired:**
+
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache({
@@ -275,6 +304,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
    ```
 
 3. **Verify URL is identical:**
+
    ```javascript
    // ❌ These are different URLs (different cache keys)
    fetcher1 = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');
@@ -287,6 +317,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
    ```
 
 4. **Check cache size limit:**
+
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache({
@@ -303,11 +334,13 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 **Solutions:**
 
 1. **Clear cache manually:**
+
    ```javascript
    fetcher.clearCache();
    ```
 
 2. **Reduce cache TTL:**
+
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache({
@@ -318,6 +351,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
    ```
 
 3. **Disable caching for real-time data:**
+
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache(),
@@ -327,6 +361,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
    ```
 
 4. **Implement cache invalidation:**
+
    ```javascript
    // After POST/PUT/DELETE operations
    await fetcher.fetchData({ method: 'POST', body: data });
@@ -338,6 +373,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 **Symptoms:** Mutation requests return cached data.
 
 **Solution:** Disable caching for mutations:
+
 ```javascript
 const writeFetcher = new IbiraAPIFetcher(url, {
   cache: new DefaultCache(),
@@ -356,6 +392,7 @@ const writeFetcher = new IbiraAPIFetcher(url, {
 **Symptoms:** Unhandled promise rejections.
 
 **Solution:** Always use try-catch:
+
 ```javascript
 // ✅ Correct
 try {
@@ -372,6 +409,7 @@ const data = await fetcher.fetchData();
 #### Issue: Need to distinguish error types
 
 **Solution:** Check error properties:
+
 ```javascript
 try {
     const data = await fetcher.fetchData();
@@ -416,6 +454,7 @@ try {
 **Solutions:**
 
 1. **Increase timeout:**
+
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
      cache: new DefaultCache(),
@@ -435,6 +474,7 @@ try {
 **Solutions:**
 
 1. **Reduce cache size:**
+
    ```javascript
    const cache = new DefaultCache({
      maxSize: 20,  // Lower limit
@@ -443,6 +483,7 @@ try {
    ```
 
 2. **Clear cache periodically:**
+
    ```javascript
    setInterval(() => {
      fetcher.clearCache();
@@ -450,6 +491,7 @@ try {
    ```
 
 3. **Use shared cache for multiple fetchers:**
+
    ```javascript
    const sharedCache = new DefaultCache({ maxSize: 50 });
    const fetcher1 = new IbiraAPIFetcher(url1, { cache: sharedCache });
@@ -459,6 +501,7 @@ try {
 #### Issue: Too many parallel requests
 
 **Use IbiraAPIFetchManager:**
+
 ```javascript
 import { IbiraAPIFetchManager } from 'ibira.js';
 
@@ -479,6 +522,7 @@ const results = await manager.fetchAll();
 **Solutions:**
 
 1. **Verify observer is subscribed:**
+
    ```javascript
    const observer = {
      update(event, data) {
@@ -490,6 +534,7 @@ const results = await manager.fetchAll();
    ```
 
 2. **Check observer has update method:**
+
    ```javascript
    // ✅ Correct
    const observer = {
@@ -507,6 +552,7 @@ const results = await manager.fetchAll();
    ```
 
 3. **Ensure eventNotifier is passed to fetcher:**
+
    ```javascript
    const eventNotifier = new DefaultEventNotifier();
    eventNotifier.subscribe(observer);
@@ -521,6 +567,7 @@ const results = await manager.fetchAll();
 #### Issue: Memory leak from observers
 
 **Solution:** Always unsubscribe when done:
+
 ```javascript
 // Subscribe
 eventNotifier.subscribe(observer);
@@ -555,6 +602,7 @@ const fetcher = new IbiraAPIFetcher(url, {
 #### Issue: Headers not being sent
 
 **Solution:** Ensure headers are properly formatted:
+
 ```javascript
 // ✅ Correct
 const fetcher = new IbiraAPIFetcher(url, {
@@ -662,6 +710,7 @@ process.env.NODE_DEBUG = 'fetch';
 5. **Open a new issue:** [Create Issue](https://github.com/mpbarbosa/ibira.js/issues/new)
 
 When opening an issue, include:
+
 - ibira.js version (`npm list ibira.js`)
 - Node.js/browser version
 - Operating system

@@ -19,6 +19,7 @@ All scripts are **executable** and can be run directly.
 ## 1. test-runner.js
 
 ### Purpose
+
 Display available test commands, test structure, and coverage information for developers.
 
 ### Usage
@@ -32,6 +33,7 @@ node test-runner.js
 ```
 
 ### What It Does
+
 - Lists all available test commands
 - Shows test file structure
 - Displays test statistics (152 tests, 90%+ coverage)
@@ -39,7 +41,8 @@ node test-runner.js
 - Shows quick start instructions
 
 ### Output Example
-```
+
+```text
 🧪 ibira.js Test Suite
 ========================
 
@@ -56,11 +59,13 @@ Test Statistics:
 ```
 
 ### When to Use
+
 - First-time setup to learn test commands
 - Quick reference for test options
 - Documentation for new contributors
 
 ### Note
+
 **Informational only** - this script does not run tests, it only displays information. Use `npm test` to run actual tests.
 
 ---
@@ -68,6 +73,7 @@ Test Statistics:
 ## 2. test_pure_fetcher.js
 
 ### Purpose
+
 Interactive demonstration of pure referential transparency principles in ibira.js, proving the 10/10 RT score.
 
 ### Usage
@@ -81,6 +87,7 @@ node test_pure_fetcher.js
 ```
 
 ### What It Does
+
 Runs 6 comprehensive tests demonstrating:
 
 1. **Pure Function Determinism** - Same inputs produce identical outputs
@@ -91,7 +98,8 @@ Runs 6 comprehensive tests demonstrating:
 6. **Practical Wrapper** - Side-effect wrapper comparison
 
 ### Output Example
-```
+
+```text
 ╔════════════════════════════════════════════════════════╗
 ║  ibira.js - Pure Referential Transparency Test Suite  ║
 ║  Version: 0.2.1-alpha                                  ║
@@ -115,6 +123,7 @@ Runs 6 comprehensive tests demonstrating:
 ```
 
 ### When to Use
+
 - Learn about referential transparency concepts
 - Demonstrate pure functional programming principles
 - Verify RT properties during development
@@ -122,6 +131,7 @@ Runs 6 comprehensive tests demonstrating:
 - Debugging pure vs side-effect behavior
 
 ### Benefits Demonstrated
+
 - ✅ 100% Deterministic behavior
 - ✅ Zero side effects in pure core
 - ✅ Complete testability
@@ -130,6 +140,7 @@ Runs 6 comprehensive tests demonstrating:
 - ✅ Composable results
 
 ### Exit Codes
+
 - `0` - All tests passed successfully
 - `1` - Test suite failed (check error output)
 
@@ -138,17 +149,20 @@ Runs 6 comprehensive tests demonstrating:
 ## 3. cdn-delivery.sh
 
 ### Purpose
+
 Generate CDN URLs for distributing ibira.js via jsDelivr CDN.
 
 ### Prerequisites
 
 **Required:**
+
 - Git installed and repository initialized
 - Git repository has at least one commit
 - Node.js and npm available (for package.json version)
 - Script executed from repository root
 
 **Check Prerequisites:**
+
 ```bash
 # Check Git
 git --version
@@ -191,7 +205,8 @@ bash cdn-delivery.sh
 ### Output
 
 **Terminal Output:**
-```
+
+```text
 🌐 ibira.js CDN Delivery URLs
 ==============================
 
@@ -210,7 +225,8 @@ Specific Version (Production):
 ```
 
 **File Output (`cdn-urls.txt`):**
-```
+
+```text
 ibira.js CDN Delivery URLs
 Version: 0.2.1-alpha
 Generated: 2025-12-31
@@ -223,6 +239,7 @@ Generated: 2025-12-31
 ```
 
 ### When to Use
+
 - Before publishing a new release
 - Updating documentation with CDN links
 - Providing installation options to users
@@ -230,7 +247,9 @@ Generated: 2025-12-31
 - Generating URLs for external integrations
 
 ### Command-Line Arguments
+
 **None** - This script does not accept command-line arguments. Configuration is automatic based on:
+
 - Repository location (detected via `git`)
 - Package version (from `package.json`)
 - File structure (from `src/` directory)
@@ -238,11 +257,13 @@ Generated: 2025-12-31
 ### Error Handling
 
 #### Error: Git not found
+
 ```bash
 ./cdn-delivery.sh: line X: git: command not found
 ```
 
 **Solution:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install git
@@ -255,11 +276,13 @@ git --version
 ```
 
 #### Error: Not a git repository
+
 ```bash
 fatal: not a git repository (or any parent up to mount point)
 ```
 
 **Solution:**
+
 ```bash
 # Initialize git repository
 git init
@@ -272,11 +295,13 @@ git commit -m "Initial commit"
 ```
 
 #### Error: Package.json not found
+
 ```bash
 cat: package.json: No such file or directory
 ```
 
 **Solution:**
+
 ```bash
 # Ensure you're in repository root
 cd /path/to/ibira.js
@@ -289,11 +314,13 @@ ls -la package.json
 ```
 
 #### Error: Permission denied
+
 ```bash
 bash: ./cdn-delivery.sh: Permission denied
 ```
 
 **Solution:**
+
 ```bash
 # Make script executable
 chmod +x cdn-delivery.sh
@@ -319,12 +346,14 @@ ls -la cdn-delivery.sh
 ### Advanced Usage
 
 #### Customize Output Location
+
 ```bash
 # Redirect output to custom file
 ./cdn-delivery.sh > my-custom-urls.txt
 ```
 
 #### Extract Specific URLs
+
 ```bash
 # Get only minified URLs
 ./cdn-delivery.sh | grep "min.js"
@@ -334,6 +363,7 @@ ls -la cdn-delivery.sh
 ```
 
 #### Automate in CI/CD
+
 ```yaml
 # GitHub Actions example
 - name: Generate CDN URLs

@@ -22,6 +22,7 @@
 3. **Refactor** (Refactor) - Improve the code while keeping tests green
 
 TDD ensures that:
+
 - Every feature has tests from the start
 - Code is designed to be testable
 - Tests serve as living documentation
@@ -32,6 +33,7 @@ TDD ensures that:
 > "Code without tests is broken by design." - Jacob Kaplan-Moss
 
 TDD inverts the traditional development process:
+
 - **Traditional**: Code → Test → Debug
 - **TDD**: Test → Code → Refactor
 
@@ -40,6 +42,7 @@ TDD inverts the traditional development process:
 ### 1. **Better Design**
 
 Writing tests first forces you to think about:
+
 - Function interfaces and APIs
 - Dependencies and coupling
 - Edge cases and error handling
@@ -48,6 +51,7 @@ Writing tests first forces you to think about:
 ### 2. **Higher Confidence**
 
 With TDD, you know:
+
 - ✅ Your code works as expected
 - ✅ Changes don't break existing functionality
 - ✅ Edge cases are handled
@@ -56,6 +60,7 @@ With TDD, you know:
 ### 3. **Living Documentation**
 
 Tests serve as:
+
 - Examples of how to use your code
 - Specifications of expected behavior
 - Documentation that never goes out of date
@@ -63,6 +68,7 @@ Tests serve as:
 ### 4. **Faster Development**
 
 TDD may seem slower initially, but:
+
 - Less time debugging
 - Fewer production bugs
 - Easier maintenance
@@ -71,6 +77,7 @@ TDD may seem slower initially, but:
 ### 5. **Aligns with Referential Transparency**
 
 TDD naturally encourages:
+
 - Pure functions (easier to test)
 - Isolated side effects (testable boundaries)
 - Deterministic behavior (predictable tests)
@@ -108,12 +115,14 @@ describe('ApiResponseParser', () => {
 ```
 
 **What to do:**
+
 1. Think about the function signature
 2. Consider inputs and expected outputs
 3. Write the test as if the function exists
 4. Run the test - it should fail (Red)
 
 **Why it fails:**
+
 - Function doesn't exist yet
 - This is expected and good!
 
@@ -135,12 +144,14 @@ module.exports = { parseApiResponse };
 ```
 
 **What to do:**
+
 1. Implement the minimum code to pass the test
 2. Don't worry about perfection yet
 3. Run the test - it should pass (Green)
 4. Commit if test passes
 
 **Principles:**
+
 - Keep it simple
 - Don't add features not covered by tests
 - Make the test pass first, optimize later
@@ -166,6 +177,7 @@ module.exports = { parseApiResponse };
 ```
 
 **What to do:**
+
 1. Improve code quality, readability, performance
 2. Extract functions if needed
 3. Apply referential transparency principles
@@ -173,6 +185,7 @@ module.exports = { parseApiResponse };
 5. Commit when refactoring is complete
 
 **Safe refactorings:**
+
 - Rename variables
 - Extract functions
 - Remove duplication
@@ -183,7 +196,7 @@ module.exports = { parseApiResponse };
 
 ### Step-by-Step Process
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  1. Write a failing test (RED)          │
 │     - Define expected behavior          │
@@ -239,6 +252,7 @@ module.exports = { parseApiResponse };
 ### Daily TDD Workflow
 
 **Morning:**
+
 ```bash
 # 1. Pull latest changes
 git pull origin main
@@ -251,6 +265,7 @@ npm run test:coverage
 ```
 
 **During Development:**
+
 ```bash
 # 1. Create feature branch
 git checkout -b feature/address-validation
@@ -281,6 +296,7 @@ git commit -m "test: add Brazilian address validation"
 ```
 
 **Before Push:**
+
 ```bash
 # 1. Run full test suite
 npm run test:all
@@ -301,7 +317,8 @@ TDD and referential transparency work together perfectly. Pure functions are eas
 
 ### Pure Functions are Easy to Test
 
-**Good Example: Pure Function**
+#### Good Example: Pure Function
+
 ```javascript
 // src/utils.js - Pure function
 function calculateDistance(coord1, coord2) {
@@ -339,6 +356,7 @@ describe('calculateDistance', () => {
 ```
 
 **Why this is easy to test:**
+
 - No dependencies to mock
 - Deterministic output
 - No side effects
@@ -346,7 +364,8 @@ describe('calculateDistance', () => {
 
 ### Isolate Side Effects for Testing
 
-**Good Example: Separate Pure and Impure**
+#### Good Example: Separate Pure and Impure
+
 ```javascript
 // src/geocoding.js
 
@@ -398,6 +417,7 @@ describe('fetchGeocodingData', () => {
 ```
 
 **Benefits:**
+
 - Pure `buildGeocodingUrl` tested without mocks
 - Side effect (`fetch`) isolated to `fetchGeocodingData`
 - Easier to test, maintain, and understand
@@ -407,6 +427,7 @@ describe('fetchGeocodingData', () => {
 ### 1. Write the Test First (Always)
 
 ❌ **Don't:**
+
 ```javascript
 // Writing code first
 function processAddress(address) {
@@ -420,6 +441,7 @@ test('should process address', () => {
 ```
 
 ✅ **Do:**
+
 ```javascript
 // Write test first
 test('should process address', () => {
@@ -439,6 +461,7 @@ function processAddress(address) {
 Focus on one behavior per test:
 
 ✅ **Good:**
+
 ```javascript
 test('should format street address', () => {
     const address = { street: 'Av. Paulista', number: '1000' };
@@ -452,6 +475,7 @@ test('should handle missing street number', () => {
 ```
 
 ❌ **Avoid:**
+
 ```javascript
 test('should format address in all cases', () => {
     // Testing multiple behaviors in one test
@@ -464,6 +488,7 @@ test('should format address in all cases', () => {
 ### 3. Test Behavior, Not Implementation
 
 ✅ **Good: Testing behavior**
+
 ```javascript
 test('should return sorted cities by name', () => {
     const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
@@ -475,6 +500,7 @@ test('should return sorted cities by name', () => {
 ```
 
 ❌ **Avoid: Testing implementation**
+
 ```javascript
 test('should call Array.sort', () => {
     const sortSpy = jest.spyOn(Array.prototype, 'sort');
@@ -505,6 +531,7 @@ test('calculateDistance is fast', () => {
 ### 5. Test Edge Cases
 
 Always test:
+
 - Empty inputs
 - Null/undefined
 - Invalid data types
@@ -530,6 +557,7 @@ describe('formatAddress edge cases', () => {
 ### 6. Use Descriptive Test Names
 
 ✅ **Good:**
+
 ```javascript
 test('should return empty string when address is null', () => { });
 test('should format complete Brazilian address with all components', () => { });
@@ -537,6 +565,7 @@ test('should preserve Portuguese special characters in city names', () => { });
 ```
 
 ❌ **Avoid:**
+
 ```javascript
 test('test 1', () => { });
 test('address formatting', () => { });
@@ -566,6 +595,7 @@ test('should calculate distance between cities', () => {
 Each test should be able to run in isolation:
 
 ✅ **Good:**
+
 ```javascript
 describe('AddressCache', () => {
     let cache;
@@ -679,7 +709,8 @@ describe('immutability', () => {
 
 **Feature**: Validate Brazilian phone numbers
 
-**Step 1: Write failing test (RED)**
+#### Step 1: Write failing test (RED)
+
 ```javascript
 // __tests__/PhoneValidator.test.js
 const { isValidBrazilianPhone } = require('../src/PhoneValidator');
@@ -698,7 +729,8 @@ describe('Brazilian Phone Validator', () => {
 // Result: FAIL - function doesn't exist
 ```
 
-**Step 2: Make test pass (GREEN)**
+#### Step 2: Make test pass (GREEN)
+
 ```javascript
 // src/PhoneValidator.js
 function isValidBrazilianPhone(phone) {
@@ -712,7 +744,8 @@ module.exports = { isValidBrazilianPhone };
 // Result: PASS
 ```
 
-**Step 3: Refactor (REFACTOR)**
+#### Step 3: Refactor (REFACTOR)
+
 ```javascript
 // src/PhoneValidator.js
 function isValidBrazilianPhone(phone) {
@@ -727,7 +760,8 @@ function isValidBrazilianPhone(phone) {
 // Result: PASS - tests still green after refactor
 ```
 
-**Step 4: Add more tests**
+#### Step 4: Add more tests
+
 ```javascript
 test('should validate landline with 10 digits', () => {
     expect(isValidBrazilianPhone('(11) 3456-7890')).toBe(true);
@@ -742,7 +776,8 @@ test('should reject phone with invalid area code', () => {
 
 **Scenario**: Refactor impure function to be pure
 
-**Before: Impure function**
+#### Before: Impure function
+
 ```javascript
 // Hard to test - depends on Date
 function greetUser(name) {
@@ -752,7 +787,8 @@ function greetUser(name) {
 }
 ```
 
-**Step 1: Write tests for new pure function**
+#### Step 1: Write tests for new pure function
+
 ```javascript
 // __tests__/greeting.test.js
 describe('generateGreeting (pure)', () => {
@@ -766,7 +802,8 @@ describe('generateGreeting (pure)', () => {
 });
 ```
 
-**Step 2: Implement pure function**
+#### Step 2: Implement pure function
+
 ```javascript
 // src/greeting.js
 function generateGreeting(name, hour) {
@@ -782,6 +819,7 @@ module.exports = { generateGreeting, greetUser };
 ```
 
 **Result**:
+
 - `generateGreeting` is pure and easy to test
 - `greetUser` is impure but thin (delegates to pure function)
 - Side effect isolated at boundary
@@ -793,10 +831,12 @@ module.exports = { generateGreeting, greetUser };
 The project includes automated workflows that run tests on every push:
 
 **`.github/workflows/modified-files.yml`** runs tests when:
+
 - Source files change (`src/*.js`)
 - Test files change (`__tests__/*.test.js`)
 
 **Local Testing Before Push:**
+
 ```bash
 # Run all tests
 npm test
@@ -820,6 +860,7 @@ npm run test:all
 ### Continuous Testing
 
 The workflow ensures:
+
 1. Tests run on every commit
 2. Failed tests block merges
 3. Coverage is reported
@@ -828,6 +869,7 @@ The workflow ensures:
 ### TDD in Pull Requests
 
 When opening a PR:
+
 1. ✅ All tests pass
 2. ✅ New tests cover new features
 3. ✅ Coverage hasn't decreased
@@ -844,6 +886,7 @@ When opening a PR:
 - **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines
 
 ### Architecture Examples
+
 - **IbiraAPIFetcher** - Well-tested class for API data fetching
 - **IbiraAPIFetchManager** - TDD implementation example for managing multiple fetch operations
 - **Observer Pattern** - Refactoring with tests for subscribe/unsubscribe operations
@@ -879,6 +922,7 @@ When opening a PR:
 ## Quick Reference Card
 
 ### TDD Commands
+
 ```bash
 npm test                    # Run all tests
 npm run test:watch          # Watch mode
@@ -889,12 +933,14 @@ npm run test:all            # Validate + test
 ```
 
 ### TDD Cycle
+
 1. 🔴 **RED** - Write failing test
 2. 🟢 **GREEN** - Make it pass
 3. 🔵 **REFACTOR** - Improve code
 4. ✅ **COMMIT** - Save progress
 
 ### Testing Principles
+
 - ✅ Test behavior, not implementation
 - ✅ One assertion concept per test
 - ✅ Tests should be fast
@@ -904,6 +950,7 @@ npm run test:all            # Validate + test
 - ✅ Test edge cases
 
 ### Referential Transparency + TDD
+
 - ✅ Pure functions are easy to test
 - ✅ Isolate side effects at boundaries
 - ✅ Use dependency injection

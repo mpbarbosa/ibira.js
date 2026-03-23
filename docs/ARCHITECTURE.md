@@ -4,7 +4,7 @@
 
 The IbiraAPIFetcher employs a **dual-layer architecture** that separates pure functional computation from side effects, achieving perfect referential transparency while maintaining practical usability.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    IbiraAPIFetcher                          │
 ├─────────────────────────────────────────────────────────────┤
@@ -36,35 +36,43 @@ The IbiraAPIFetcher employs a **dual-layer architecture** that separates pure fu
 ## Component Breakdown
 
 ### 1. Pure Functional Core
+
 **Purpose**: Mathematical computation without side effects
 
 **Key Methods**:
+
 - `fetchDataPure()` - Main pure computation
 - `_getExpiredCacheKeys()` - Pure cache analysis
 - `_applyCacheSizeLimitsPure()` - Pure cache sizing
 - `_calculateCacheEvictions()` - Pure eviction calculation
 
 **Characteristics**:
+
 - No mutations of external state
 - All results frozen for immutability
 - Dependency injection for all external resources
 - Returns operation descriptions instead of executing them
 
 ### 2. Side Effects Layer
+
 **Purpose**: Apply computed operations to real world
 
 **Key Methods**:
+
 - `fetchData()` - Practical wrapper
 - `_applySideEffects()` - Execute operations from pure core
 - `notifyObservers()` - Event notification wrapper
 
 **Operations Applied**:
+
 - Cache mutations (set, update, delete)
 - Event notifications (loading-start, success, error)
 - Network requests (via fetch API)
 
 ### 3. Dependency Management
+
 **Injected Dependencies**:
+
 ```javascript
 // Cache dependency
 const cache = new Map();
@@ -81,7 +89,8 @@ const fetcher = new IbiraAPIFetcher(url, cache, { eventNotifier });
 ## Data Flow
 
 ### Pure Computation Flow
-```
+
+```text
 Input Parameters → fetchDataPure() → Immutable Result Object
      ↓                  ↓                      ↓
 [cacheState]     [zero mutations]      [operation descriptions]
@@ -90,7 +99,8 @@ Input Parameters → fetchDataPure() → Immutable Result Object
 ```
 
 ### Side Effects Application Flow
-```
+
+```text
 Pure Result → _applySideEffects() → Real World Changes
      ↓               ↓                      ↓
 [cacheOperations] [apply to cache]    [cache updated]
@@ -122,12 +132,14 @@ IbiraAPIFetcher.withEventCallback(url, eventHandler)
 ## Performance Characteristics
 
 ### Memory Management
+
 - **LRU Cache Eviction**: Oldest entries removed when size limits exceeded
 - **Expired Entry Cleanup**: Automatic removal of stale cache entries
 - **Immutable Objects**: Safe to cache and reuse without mutation concerns
 - **Object Pooling**: Frozen objects can be safely shared across calls
 
 ### Computational Efficiency
+
 - **Deterministic Caching**: Pure function results can be memoized
 - **Parallel Safe**: No shared mutable state enables concurrent execution
 - **Minimal Allocations**: Reuses cache state objects when possible
@@ -136,6 +148,7 @@ IbiraAPIFetcher.withEventCallback(url, eventHandler)
 ## Error Handling Strategy
 
 ### Pure Core Error Handling
+
 ```javascript
 // Errors returned as data (no exceptions in pure core)
 return {
@@ -146,6 +159,7 @@ return {
 ```
 
 ### Wrapper Error Handling
+
 ```javascript
 // Traditional exception throwing for backward compatibility
 if (!result.success) {
@@ -157,12 +171,14 @@ return result.data;
 ## Testing Strategy
 
 ### Pure Function Testing
+
 - **No mocking required** for core logic
 - **Deterministic inputs/outputs** enable reliable assertions
 - **Isolated testing** of computation vs side effects
 - **Property-based testing** possible due to purity
 
 ### Integration Testing
+
 - **Mock dependencies** (cache, eventNotifier, networkProvider)
 - **Side effects verification** through spy functions
 - **End-to-end workflows** with real integrations
@@ -172,6 +188,7 @@ return result.data;
 ### From Impure (v0.0.x) to Pure (v0.1.0+)
 
 **Old Usage**:
+
 ```javascript
 const fetcher = new IbiraAPIFetcher(url);
 fetcher.data; // Mutable state
@@ -180,6 +197,7 @@ await fetcher.fetchData(); // Side effects mixed with logic
 ```
 
 **New Usage (Backward Compatible)**:
+
 ```javascript
 const fetcher = IbiraAPIFetcher.withDefaultCache(url);
 // No exposed mutable state
@@ -187,6 +205,7 @@ const data = await fetcher.fetchData(); // Clean separation
 ```
 
 **New Usage (Pure Functional)**:
+
 ```javascript
 const fetcher = IbiraAPIFetcher.pure(url);
 const result = await fetcher.fetchDataPure(cacheState, Date.now());
@@ -196,6 +215,7 @@ const result = await fetcher.fetchDataPure(cacheState, Date.now());
 ## Extensibility
 
 ### Custom Cache Implementations
+
 ```javascript
 class RedisCache {
     async get(key) { /* Redis get */ }
@@ -207,6 +227,7 @@ const fetcher = IbiraAPIFetcher.withExternalCache(url, new RedisCache());
 ```
 
 ### Custom Event Handlers
+
 ```javascript
 const customEventHandler = (event, data) => {
     switch(event) {

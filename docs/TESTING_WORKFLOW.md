@@ -74,6 +74,7 @@ npm run test:watch
 ### NPM Test Commands
 
 #### `npm test` - Standard Test Execution
+
 **Purpose:** Run all tests once
 **Use Case:** Pre-commit checks, manual verification
 **Output:** Pass/fail summary with any failures
@@ -90,9 +91,11 @@ npm test
 ```
 
 #### `npm run test:watch` - Watch Mode
+
 **Purpose:** Automatically re-run tests on file changes
 **Use Case:** Active development, TDD workflow
 **Features:**
+
 - Watches for file changes
 - Only re-runs affected tests
 - Interactive mode with filtering options
@@ -110,6 +113,7 @@ npm run test:watch
 ```
 
 **Watch Mode Workflow:**
+
 ```bash
 # 1. Start watch mode
 npm run test:watch
@@ -123,6 +127,7 @@ npm run test:watch
 ```
 
 #### `npm run test:coverage` - Coverage Report
+
 **Purpose:** Generate detailed coverage report
 **Use Case:** Pre-commit, code review, quality checks
 **Output:** Coverage percentages + HTML report
@@ -141,7 +146,8 @@ npm run test:coverage
 ```
 
 **Coverage Files Generated:**
-```
+
+```text
 coverage/
 ├── lcov-report/
 │   └── index.html          # Open in browser for visual report
@@ -150,6 +156,7 @@ coverage/
 ```
 
 **View Coverage Report:**
+
 ```bash
 # After running test:coverage
 open coverage/lcov-report/index.html  # macOS
@@ -157,6 +164,7 @@ xdg-open coverage/lcov-report/index.html  # Linux
 ```
 
 #### `npm run test:verbose` - Detailed Output
+
 **Purpose:** Show detailed test execution information
 **Use Case:** Debugging test failures, understanding test flow
 **Output:** Individual test names and execution times
@@ -176,6 +184,7 @@ npm run test:verbose
 ```
 
 #### `npm run validate` - Syntax Validation
+
 **Purpose:** Check JavaScript syntax without running tests
 **Use Case:** Quick syntax check, pre-commit validation
 **Speed:** Fast (< 1 second)
@@ -190,6 +199,7 @@ npm run validate
 ```
 
 #### `npm run test:all` - Complete Validation
+
 **Purpose:** Validate syntax + run all tests
 **Use Case:** Pre-commit workflow, CI/CD pipeline
 **Combines:** `validate` + `test`
@@ -209,6 +219,7 @@ npm run test:all
 ### Manual Test Scripts
 
 #### 1. test-runner.js - Test Information Display
+
 **Purpose:** Display test commands and structure
 **Type:** Informational (doesn't run tests)
 
@@ -224,6 +235,7 @@ npm run test:all
 ```
 
 #### 2. test_pure_fetcher.js - RT Demonstration
+
 **Purpose:** Manual verification of referential transparency
 **Type:** Interactive demonstration with live results
 
@@ -241,12 +253,14 @@ npm run test:all
 ```
 
 **When to Run:**
+
 - Before major releases
 - After refactoring pure functional core
 - When demonstrating RT properties
 - Debugging pure vs side-effect behavior
 
 #### 3. Manual API Testing
+
 **Purpose:** Test real API endpoints
 
 ```bash
@@ -283,6 +297,7 @@ node test-manual-api.js
 ### Pattern 1: Test-Driven Development (TDD)
 
 **Workflow:**
+
 ```bash
 # 1. Start watch mode
 npm run test:watch
@@ -320,6 +335,7 @@ git commit -m "feat: add new feature"
 ### Pattern 2: Pre-Commit Checklist
 
 **Manual Workflow:**
+
 ```bash
 # 1. Validate syntax
 npm run validate
@@ -347,6 +363,7 @@ git push
 ```
 
 **Automated Workflow (using test:all):**
+
 ```bash
 # Single command validation
 npm run test:all && git commit -m "type: description"
@@ -415,6 +432,7 @@ git commit -m "fix: handle edge case XYZ"
 ### Pattern 5: Code Review Preparation
 
 **Pre-Review Checklist:**
+
 ```bash
 # 1. Full test suite
 npm run test:all
@@ -574,6 +592,7 @@ exit 0
 ```
 
 **Install pre-commit hook:**
+
 ```bash
 # Make executable
 chmod +x .git/hooks/pre-commit
@@ -622,9 +641,11 @@ Configured in `package.json`:
 
 1. **Write tests first** (TDD approach)
 2. **Check coverage impact:**
+
    ```bash
    npm run test:coverage
    ```
+
 3. **Review uncovered lines:**
    - Open `coverage/lcov-report/index.html`
    - Click on file name
@@ -634,12 +655,14 @@ Configured in `package.json`:
 
 4. **Add tests for uncovered code**
 5. **Verify coverage improves:**
+
    ```bash
    npm run test:coverage
    ```
 
 **Coverage Reports Location:**
-```
+
+```text
 coverage/
 ├── lcov-report/
 │   ├── index.html           # Main coverage report
@@ -658,6 +681,7 @@ coverage/
 **Issue:** Tests pass in CI but fail locally
 
 **Solutions:**
+
 ```bash
 # 1. Clean install
 rm -rf node_modules package-lock.json
@@ -675,6 +699,7 @@ npm run test:verbose
 **Issue:** Files change but tests don't re-run
 
 **Solutions:**
+
 ```bash
 # 1. Restart watch mode
 # Press 'q' to quit, then restart
@@ -695,6 +720,7 @@ sudo sysctl -p
 **Issue:** Coverage below 75% threshold
 
 **Solutions:**
+
 ```bash
 # 1. Identify uncovered code
 npm run test:coverage
@@ -710,6 +736,7 @@ npm run test:coverage
 ### Specific Test Failures
 
 **Debug single test:**
+
 ```bash
 # Run specific test file
 npm test -- IbiraAPIFetcher.test.js
@@ -726,6 +753,7 @@ npm run test:verbose -- IbiraAPIFetcher.test.js
 **Issue:** Tests running slowly
 
 **Solutions:**
+
 ```bash
 # 1. Run tests in parallel (default)
 npm test
@@ -743,6 +771,7 @@ npm run test:watch
 ## Best Practices
 
 ### 1. Always Write Tests First (TDD)
+
 ```bash
 # Good workflow
 npm run test:watch  # Start watch mode
@@ -750,6 +779,7 @@ npm run test:watch  # Start watch mode
 ```
 
 ### 2. Use Meaningful Test Names
+
 ```javascript
 // ✅ Good
 test('should cache response after successful fetch', () => {});
@@ -759,6 +789,7 @@ test('test 1', () => {});
 ```
 
 ### 3. Maintain High Coverage
+
 ```bash
 # Check coverage before every commit
 npm run test:coverage
@@ -767,18 +798,21 @@ npm run test:coverage
 ```
 
 ### 4. Run Full Suite Before Pushing
+
 ```bash
 # Pre-push validation
 npm run test:all
 ```
 
 ### 5. Use Watch Mode During Development
+
 ```bash
 # Start watch mode and keep it running
 npm run test:watch
 ```
 
 ### 6. Document Complex Tests
+
 ```javascript
 // ✅ Good - explains why
 test('should retry on 503 status (temporary server error)', async () => {
@@ -797,6 +831,7 @@ test('should retry on 503 status (temporary server error)', async () => {
 ## Quick Reference
 
 ### Automated Tests
+
 ```bash
 npm test                 # Run all tests
 npm run test:watch       # Watch mode
@@ -807,18 +842,21 @@ npm run test:all         # Validate + test
 ```
 
 ### Manual Tests
+
 ```bash
 ./test-runner.js         # Show test info
 ./test_pure_fetcher.js   # RT demonstration
 ```
 
 ### Coverage
+
 ```bash
 npm run test:coverage                        # Generate report
 open coverage/lcov-report/index.html         # View HTML report
 ```
 
 ### Workflow
+
 ```bash
 # TDD: npm run test:watch → write test → implement → refactor
 # Pre-commit: npm run test:all

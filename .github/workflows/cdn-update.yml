@@ -1,0 +1,130 @@
+# cdn-update.yml
+# Builds the ibira.js TypeScript package, commits dist/ artifacts, updates
+# cdn-urls.txt, and force-updates the version tag so jsDelivr serves the
+# compiled files directly from GitHub.
+#
+# Triggers:
+#   - Push of any v* tag (normal release flow via scripts/deploy.sh)
+#   - workflow_dispatch for manual CDN refreshes (e.g. after a hotfix)
+#
+# Required repository permissions:  Settings → Actions → General →
+#   "Read and write permissions" (or grant `contents: write` via environment).
+
+name: CDN Update
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag to build and publish (e.g. v0.4.4-alpha). Leave blank to use current package.json version.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write   # needed to push commits and force-update tags
+
+jobs:
+  cdn-update:
+    name: Build & Publish to CDN
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # full history so tag operations work correctly
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Node.js setup ─────────────────────────────────────────────────────
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      # ── 3. Install dependencies ───────────────────────────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      # ── 4. Validate version sync ──────────────────────────────────────────────
+      - name: Check version.ts is in sync with package.json
+        run: npm run version:check
+
+      # ── 5. Type-check ─────────────────────────────────────────────────────────
+      - name: Validate TypeScript (tsc --noEmit)
+        run: npm run validate
+
+      # ── 6. Tests ──────────────────────────────────────────────────────────────
+      - name: Run tests (jsdom environment)
+        run: npm test
+
+      - name: Run tests (Node.js environment)
+        run: npm run test:node
+
+      # ── 7. Build dist/ ────────────────────────────────────────────────────────
+      - name: Build TypeScript (tsup → CJS + ESM + types)
+        run: npm run build
+
+      # ── 8. Generate CDN URLs ──────────────────────────────────────────────────
+      - name: Generate cdn-urls.txt
+        run: bash cdn-delivery.sh > cdn-urls.txt
+
+      # ── 9. Commit build artifacts & CDN URLs ──────────────────────────────────
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit dist/ and cdn-urls.txt
+        id: commit_artifacts
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          TAG="${{ github.event.inputs.tag }}"
+          TAG="${TAG:-v${PACKAGE_VERSION}}"
+
+          # Force-add dist/ even though it is listed in .gitignore
+          git add -f dist/ cdn-urls.txt
+
+          if git diff --cached --quiet; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "ℹ️  No changes to commit — artifacts are already up to date."
+          else
+            git commit -m "chore(cdn): build artifacts for ${TAG} [skip ci]"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 10. Force-update tag to include build artifacts ───────────────────────
+      - name: Update version tag to include dist/
+        if: steps.commit_artifacts.outputs.skip != 'true'
+        run: |
+          TAG="${{ steps.commit_artifacts.outputs.tag }}"
+          git tag -fa "${TAG}" -m "Release ${TAG} (with CDN artifacts)"
+          git push origin HEAD --force
+          git push origin "${TAG}" --force
+          echo "✅  Tag ${TAG} updated — jsDelivr will serve dist/ within a few minutes."
+
+      # ── 11. Verify CDN availability ───────────────────────────────────────────
+      - name: Verify package.json is reachable on jsDelivr
+        if: steps.commit_artifacts.outputs.skip != 'true'
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          TAG="${{ steps.commit_artifacts.outputs.tag }}"
+          CDN_URL="https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@${TAG}/package.json"
+          echo "🌐  Checking: ${CDN_URL}"
+          # jsDelivr may take a few minutes to sync; poll up to ~3 minutes
+          for attempt in 1 2 3 4 5 6; do
+            if curl -sf -o /dev/null "${CDN_URL}"; then
+              echo "✅  CDN is serving ibira.js ${TAG}"
+              exit 0
+            fi
+            echo "   Attempt ${attempt}/6 — not available yet, waiting 30s…"
+            sleep 30
+          done
+          echo "⚠️  CDN not yet available after 3 minutes — jsDelivr may still be syncing."
+          echo "   Production URL: https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@${TAG}/dist/index.mjs"
+          exit 0   # non-fatal: CDN sync delay is expected

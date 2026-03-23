@@ -10,9 +10,9 @@
    - [Pure Functional Usage](#pure-functional-usage)
 5. [Class Reference](#ibiraapifetcher-class-reference)
    - [Constructor](#constructor)
-   - [Static Methods](#static-methods)
+   - [Static Methods](#static-factory-methods)
    - [Instance Methods](#instance-methods)
-6. [IbiraAPIFetchManager](#ibiraapifetchmanager)
+6. [IbiraAPIFetchManager](#multiple-fetchers-with-shared-cache)
 7. [Configuration Options](#configuration-options)
 8. [Error Handling](#error-handling)
 9. [Events](#events)
@@ -52,6 +52,7 @@ npm install ibira.js
 ## Quick Start
 
 ### Basic Usage (Backward Compatible)
+
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';
 
@@ -69,6 +70,7 @@ try {
 ```
 
 ### Pure Functional Usage
+
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';
 
@@ -115,7 +117,7 @@ if (result.success) {
 }
 ```
 
-# IbiraAPIFetcher Class Reference
+## IbiraAPIFetcher Class Reference
 
 ## Constructor
 
@@ -124,11 +126,13 @@ if (result.success) {
 Creates a new IbiraAPIFetcher instance. **Note:** It's recommended to use static factory methods instead of calling the constructor directly.
 
 **Parameters:**
+
 - `url` (string): The API endpoint URL
 - `cache` (Object): Cache instance implementing Map-like interface
 - `options` (Object): Configuration options
 
 **Options:**
+
 - `timeout` (number): Request timeout in milliseconds (default: 10000)
 - `maxRetries` (number): Maximum retry attempts (default: 3)
 - `retryDelay` (number): Initial retry delay in milliseconds (default: 1000)
@@ -145,12 +149,14 @@ Creates a new IbiraAPIFetcher instance. **Note:** It's recommended to use static
 Creates an instance with reasonable default cache settings (100 entries, 5-minute expiration).
 
 **Parameters:**
+
 - `url` (string): The API endpoint URL
 - `options` (Object): Optional configuration
 
 **Returns:** `IbiraAPIFetcher` instance
 
 **Example:**
+
 ```javascript
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data', {
     maxCacheSize: 100,        // Maximum cache entries
@@ -167,6 +173,7 @@ const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data',
 Uses an external cache instance for shared caching scenarios. Ideal for multiple fetchers sharing the same cache.
 
 **Parameters:**
+
 - `url` (string): The API endpoint URL
 - `cache` (Object): External cache instance (Map-like interface)
 - `options` (Object): Optional configuration
@@ -174,6 +181,7 @@ Uses an external cache instance for shared caching scenarios. Ideal for multiple
 **Returns:** `IbiraAPIFetcher` instance
 
 **Example:**
+
 ```javascript
 const sharedCache = new Map();
 sharedCache.maxSize = 200;
@@ -191,12 +199,14 @@ const fetcher = IbiraAPIFetcher.withExternalCache(
 Disables caching completely. Every request results in a fresh network call.
 
 **Parameters:**
+
 - `url` (string): The API endpoint URL
 - `options` (Object): Optional configuration
 
 **Returns:** `IbiraAPIFetcher` instance
 
 **Example:**
+
 ```javascript
 const fetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
 ```
@@ -206,6 +216,7 @@ const fetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
 Uses callback functions for event handling instead of observer pattern.
 
 **Parameters:**
+
 - `url` (string): The API endpoint URL
 - `callback` (Function): Event callback function `(event, data) => void`
 - `options` (Object): Optional configuration
@@ -213,6 +224,7 @@ Uses callback functions for event handling instead of observer pattern.
 **Returns:** `IbiraAPIFetcher` instance
 
 **Example:**
+
 ```javascript
 const eventHandler = (event, data) => {
     switch (event) {
@@ -239,12 +251,14 @@ const fetcher = IbiraAPIFetcher.withEventCallback(
 Disables all event notifications for maximum simplicity and pure functionality.
 
 **Parameters:**
+
 - `url` (string): The API endpoint URL
 - `options` (Object): Optional configuration
 
 **Returns:** `IbiraAPIFetcher` instance
 
 **Example:**
+
 ```javascript
 const fetcher = IbiraAPIFetcher.withoutEvents('https://api.example.com/data');
 ```
@@ -254,12 +268,14 @@ const fetcher = IbiraAPIFetcher.withoutEvents('https://api.example.com/data');
 Creates a pure functional instance with no side effects. Use with `fetchDataPure()` for maximum referential transparency.
 
 **Parameters:**
+
 - `url` (string): The API endpoint URL
 - `options` (Object): Optional configuration
 
 **Returns:** `IbiraAPIFetcher` instance
 
 **Example:**
+
 ```javascript
 const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
 const result = await fetcher.fetchDataPure(new Map(), Date.now());
@@ -274,6 +290,7 @@ const result = await fetcher.fetchDataPure(new Map(), Date.now());
 **🟡 Practical Wrapper Method** - Applies side effects from pure computation. This is the main method for practical usage.
 
 **Parameters:**
+
 - `cacheOverride` (Object, optional): Alternative cache instance to use
 
 **Returns:** `Promise<any>` - Resolves with fetched data
@@ -281,6 +298,7 @@ const result = await fetcher.fetchDataPure(new Map(), Date.now());
 **Throws:** `Error` - Network, HTTP, or parsing errors
 
 **Example:**
+
 ```javascript
 try {
     const data = await fetcher.fetchData();
@@ -295,6 +313,7 @@ try {
 **🔵 Pure Functional Core** - Computes fetch result without side effects. Perfect referential transparency with deterministic behavior.
 
 **Parameters:**
+
 - `currentCacheState` (Map): Current cache state (not mutated)
 - `currentTime` (number, optional): Current timestamp for deterministic behavior (default: Date.now())
 - `networkProvider` (Function, optional): Pure network function for testing
@@ -302,6 +321,7 @@ try {
 **Returns:** `Promise<Object>` - Pure result object with complete operation description
 
 **Result Object Properties:**
+
 - `success` (boolean): Whether the operation succeeded
 - `data` (any): Retrieved data (if successful)
 - `error` (Error): Error object (if failed)
@@ -312,6 +332,7 @@ try {
 - `meta` (Object): Additional metadata
 
 **Example:**
+
 ```javascript
 const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
 const cacheState = new Map();
@@ -333,9 +354,11 @@ if (result.success) {
 Subscribes an observer to receive event notifications.
 
 **Parameters:**
+
 - `observer` (Object): Observer with `update(event, data)` method
 
 **Example:**
+
 ```javascript
 const observer = {
     update(event, data) {
@@ -351,9 +374,11 @@ fetcher.subscribe(observer);
 Removes an observer from event notifications.
 
 **Parameters:**
+
 - `observer` (Object): Observer to remove
 
 **Example:**
+
 ```javascript
 fetcher.unsubscribe(observer);
 ```
@@ -365,6 +390,7 @@ Returns the cache key for this fetcher instance. Override in subclasses for cust
 **Returns:** `string` - Cache key (defaults to URL)
 
 **Example:**
+
 ```javascript
 const cacheKey = fetcher.getCacheKey();
 console.log('Cache key:', cacheKey);
@@ -398,9 +424,11 @@ All properties are **immutable** and **frozen** for complete referential transpa
 The fetcher emits the following events through the observer pattern or callback functions:
 
 #### `'loading-start'`
+
 Fired when a network request begins.
 
 **Payload:**
+
 ```javascript
 {
     url: string,        // The API endpoint URL
@@ -409,14 +437,17 @@ Fired when a network request begins.
 ```
 
 #### `'success'`
+
 Fired when a request completes successfully.
 
 **Payload:** `any` - The fetched data
 
 #### `'error'`
+
 Fired when a request fails.
 
 **Payload:**
+
 ```javascript
 {
     error: Error    // The error that occurred
@@ -426,6 +457,7 @@ Fired when a request fails.
 ### Event Handling Examples
 
 **Observer Pattern:**
+
 ```javascript
 const observer = {
     update(event, data) {
@@ -447,6 +479,7 @@ fetcher.subscribe(observer);
 ```
 
 **Callback Pattern:**
+
 ```javascript
 const fetcher = IbiraAPIFetcher.withEventCallback(
     'https://api.example.com/data',
@@ -498,6 +531,7 @@ Cache instances should implement the following interface:
 ```
 
 **Default Cache Settings:**
+
 - `maxSize`: 100 entries
 - `expiration`: 300000ms (5 minutes)
 
@@ -573,22 +607,27 @@ const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
 ### Core Methods
 
 #### `fetchData(cacheOverride?)`
+
 Practical wrapper method that applies side effects.
 
 **Parameters:**
+
 - `cacheOverride` (optional): Alternative cache to use for this request
 
 **Returns:** Promise that resolves to fetched data or rejects with error
 
 **Example:**
+
 ```javascript
 const data = await fetcher.fetchData();
 ```
 
 #### `fetchDataPure(currentCacheState, currentTime?, networkProvider?)`
+
 Pure functional core method with zero side effects.
 
 **Parameters:**
+
 - `currentCacheState`: Map representing current cache state
 - `currentTime` (optional): Current timestamp for deterministic behavior
 - `networkProvider` (optional): Function for network requests (testing)
@@ -596,6 +635,7 @@ Pure functional core method with zero side effects.
 **Returns:** Promise that resolves to operation description object
 
 **Result Object:**
+
 ```javascript
 {
     success: boolean,           // Whether operation succeeded
@@ -616,6 +656,7 @@ Pure functional core method with zero side effects.
 ```
 
 **Example:**
+
 ```javascript
 const result = await fetcher.fetchDataPure(cacheState, Date.now());
 ```
@@ -675,6 +716,7 @@ Events describe notifications to be fired:
 ## Configuration Options
 
 ### Constructor Options
+
 ```javascript
 {
     eventNotifier: EventNotifier,  // Custom event notifier
@@ -687,6 +729,7 @@ Events describe notifications to be fired:
 ```
 
 ### Cache Configuration
+
 ```javascript
 {
     maxCacheSize: number,     // Maximum cache entries (default: 100)
@@ -697,6 +740,7 @@ Events describe notifications to be fired:
 ## Advanced Usage
 
 ### Custom Event Notifier
+
 ```javascript
 class CustomEventNotifier {
     constructor() {
@@ -744,16 +788,7 @@ const fetcher = IbiraAPIFetcher.withExternalCache(
 );
 ```
 
-### Custom Event Notifier
-
-```javascript
-class CustomEventNotifier {
-    constructor() {
-        this.listeners = new Map();
-    }
-
-    subscribe(listener) {
-        const id = Symbol();
+### Custom Event Notifier (Implementation Example)
         this.listeners.set(id, listener);
         return id;
     }
@@ -877,24 +912,29 @@ const [users, posts] = await Promise.all([
 The fetcher can throw the following types of errors:
 
 #### Network Errors
+
 - **`TypeError`**: Network connectivity issues
 - **`AbortError`**: Request timeout or cancellation
 
 #### HTTP Errors
+
 - **`Error`**: HTTP status errors (4xx, 5xx responses)
 - Message format: `"HTTP error! status: {statusCode}"`
 
 #### JSON Parsing Errors
+
 - **`SyntaxError`**: Invalid JSON response
 
 ### Retry Configuration
 
 Retries are automatically attempted for:
+
 - Network errors (no response received)
 - Timeout errors
 - Specific HTTP status codes (configurable)
 
 **Default Retryable Status Codes:**
+
 - `408` - Request Timeout
 - `429` - Too Many Requests
 - `500` - Internal Server Error
@@ -928,17 +968,20 @@ try {
 ## Performance Considerations
 
 ### Caching Strategy
+
 - **LRU Eviction**: Oldest entries removed when cache is full
 - **Expiration**: Automatic cleanup of expired entries
 - **Size Limits**: Configurable maximum cache size to prevent memory leaks
 
 ### Memory Management
+
 - All objects are immutable and frozen
 - Automatic cleanup of expired cache entries
 - Configurable cache size limits
 - Efficient Map-based storage
 
 ### Best Practices
+
 1. **Shared Cache**: Use `withExternalCache()` for multiple fetchers
 2. **Pure Functions**: Use `fetchDataPure()` for testing and functional programming
 3. **Event Callbacks**: Use `withEventCallback()` for simpler event handling
@@ -1005,7 +1048,8 @@ interface PureResult {
 const fetcher = new IbiraAPIFetcher(url, cache, {
     eventNotifier: new CustomEventNotifier()
 });
-```
+
+```javascript
 
 ### Testing with Dependency Injection
 ```javascript
@@ -1023,6 +1067,7 @@ expect(result.data).toEqual({ id: 123, name: 'Test Data' });
 ```
 
 ### Error Handling
+
 ```javascript
 try {
     const data = await fetcher.fetchData();
@@ -1041,6 +1086,7 @@ try {
 ## Best Practices
 
 ### 1. Use Appropriate Factory Methods
+
 ```javascript
 // For most applications
 const fetcher = IbiraAPIFetcher.withDefaultCache(url);
@@ -1056,6 +1102,7 @@ const fetcher = IbiraAPIFetcher.pure(url);
 ```
 
 ### 2. Handle Cache Appropriately
+
 ```javascript
 // Configure cache based on your needs
 const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
@@ -1065,6 +1112,7 @@ const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
 ```
 
 ### 3. Error Handling Strategy
+
 ```javascript
 const fetcher = IbiraAPIFetcher.withEventCallback(url, (event, data) => {
     switch (event) {
@@ -1077,6 +1125,7 @@ const fetcher = IbiraAPIFetcher.withEventCallback(url, (event, data) => {
 ```
 
 ### 4. Testing Pure Functions
+
 ```javascript
 describe('API fetching', () => {
     test('should handle successful response', async () => {
@@ -1096,19 +1145,18 @@ describe('API fetching', () => {
 });
 ```
 
-## Performance Considerations
-
-### Cache Management
-- Set appropriate `maxCacheSize` based on memory constraints
+## Performance Optimization
 - Use `cacheExpiration` to balance freshness vs performance
 - Consider shared caches for multiple fetcher instances
 
 ### Network Optimization
+
 - Configure `timeout` based on expected response times
 - Adjust `maxRetries` and `retryDelay` for your error tolerance
 - Use appropriate `retryableStatusCodes` for your API
 
 ### Memory Usage
+
 - Pure functional design enables safe object reuse
 - Immutable objects can be cached without mutation concerns
 - Consider using `withoutCache` for one-time requests
@@ -1119,9 +1167,7 @@ describe('API fetching', () => {
 - **Node.js**: Requires fetch polyfill (node-fetch, etc.)
 - **IE11**: Requires fetch and Map polyfills
 
-## TypeScript Support
-
-Type definitions are included:
+## TypeScript Type Definitions
 
 ```typescript
 import { IbiraAPIFetcher } from 'ibira.js';
@@ -1172,6 +1218,7 @@ console.log('Total cached items:', sharedCache.size);
 ```
 
 **Benefits:**
+
 - Reduced memory footprint with shared cache
 - Consistent cache invalidation across endpoints
 - Coordinated parallel requests with single configuration
@@ -1234,6 +1281,7 @@ try {
 ```
 
 **Best Practices:**
+
 - Use exponential backoff to avoid overwhelming servers
 - Set reasonable timeouts to prevent hanging requests
 - Log retry attempts for monitoring and debugging
@@ -1380,6 +1428,7 @@ fetchWithStatusHandling().then(result => {
 ```
 
 **Key Strategies:**
+
 - **4xx errors**: Usually client issues - validate input, refresh auth
 - **5xx errors**: Server issues - implement retry with backoff
 - **Network errors**: Check connectivity, use cached data
@@ -1471,6 +1520,7 @@ eventNotifier.unsubscribe(uiUpdater);
 ```
 
 **Observer Pattern Benefits:**
+
 - Decoupled components - observers don't know about each other
 - Easy to add/remove monitoring without modifying core logic
 - Supports multiple concerns (logging, UI, analytics) simultaneously
@@ -1579,6 +1629,7 @@ console.log('Data:', data);
 ```
 
 **Adaptive Configuration Benefits:**
+
 - Optimizes performance based on network conditions
 - Extends cache lifetime on poor connections
 - Adjusts retry strategies dynamically

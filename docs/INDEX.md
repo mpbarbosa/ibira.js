@@ -11,16 +11,16 @@
 
 ## 📖 Table of Contents
 
-- [Overview](#overview)
-- [Getting Started](#getting-started)
-- [Core Library](#core-library)
-- [Architecture & Design Principles](#architecture--design-principles)
-- [Development Guides](#development-guides)
-- [Testing & Quality](#testing--quality)
-- [Configuration Files](#configuration-files)
-- [Contributing](#contributing)
-- [Project Principles](#project-principles)
-- [Resources](#resources)
+- [Overview](#-overview)
+- [Getting Started](#-getting-started)
+- [Core Library](#-core-library)
+- [Architecture & Design Principles](#️-architecture--design-principles)
+- [Development Guides](#-development-guides)
+- [Testing & Quality](#-testing--quality)
+- [Configuration Files](#️-configuration-files)
+- [Contributing](#-contributing)
+- [Project Principles](#-project-principles)
+- [Resources](#-resources)
 
 ---
 
@@ -284,6 +284,7 @@ The project emphasizes test-driven development and comprehensive unit testing wi
 ### Test Suite Overview
 
 **Current Statistics:**
+
 - 📊 **Total Tests:** 152 (151 passing, 1 skipped)
 - ✅ **Statements:** 90.45% (target: 75%)
 - ✅ **Branches:** 82.14% (target: 75%)
@@ -291,6 +292,7 @@ The project emphasizes test-driven development and comprehensive unit testing wi
 - ✅ **Lines:** 91.72% (target: 75%)
 
 **Test Files:**
+
 - `IbiraAPIFetcher.test.js` - 60+ tests (core functionality)
 - `IbiraAPIFetchManager.test.js` - 40+ tests (manager coordination)
 - `DefaultCache.test.js` - 30+ tests (cache implementation)
@@ -343,6 +345,7 @@ See [TESTING_WORKFLOW.md](./TESTING_WORKFLOW.md) for complete workflows and [UTI
 | `cdn-urls.txt` | Pre-generated CDN URLs for quick reference | Contains production, development, and version-range URLs |
 
 **CDN Features:**
+
 - ✅ Multiple version strategies (specific, range, branch)
 - ✅ SRI (Subresource Integrity) support
 - ✅ ES Module and script tag examples
@@ -586,9 +589,11 @@ This achievement required:
 ## 🆕 Latest Documentation (December 2025)
 
 ### [Node.js API Pattern Guide](./NODE_API_PATTERN.md) ⭐ NEW
-**Complete 32KB comprehensive guide covering the entire Node.js API pattern implementation**
+
+Complete 32KB comprehensive guide covering the entire Node.js API pattern implementation
 
 This is the most comprehensive documentation available, covering:
+
 - Complete architecture overview with diagrams
 - Module organization and structure details
 - All design patterns used (Factory, Observer, Strategy, etc.)
@@ -601,9 +606,11 @@ This is the most comprehensive documentation available, covering:
 👉 **Start here for a complete understanding of the project!**
 
 ### [Structure Diagram](./STRUCTURE_DIAGRAM.md) ⭐ NEW
-**Visual representation of the entire project structure**
+
+Visual representation of the entire project structure
 
 Includes:
+
 - ASCII tree diagrams of file structure
 - Module dependency graphs
 - Data flow diagrams
@@ -611,4 +618,3 @@ Includes:
 - Design pattern maps
 - Test coverage distribution
 - Import patterns
-

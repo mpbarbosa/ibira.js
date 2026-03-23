@@ -2,7 +2,8 @@
 
 This directory contains the Jest test suite for the JavaScript source modules of ibira.js.
 
-> **Two test directories exist intentionally:**
+> __Two test directories exist intentionally:__
+>
 > - `__tests__/` — JavaScript (`.js`) tests for the main library modules; runs with jsdom
 > - `test/` — TypeScript (`.ts`) tests for TypeScript-specific source files (e.g. `src/config/version.ts`); uses ts-jest
 >
@@ -10,7 +11,7 @@ This directory contains the Jest test suite for the JavaScript source modules of
 
 ## Structure
 
-```
+```text
 __tests__/
 ├── IbiraAPIFetcher.test.js       # Core fetcher — caching, retry, observers, pure API, AbortController, validateStatus
 ├── IbiraAPIFetchManager.test.js  # Orchestrator — concurrency, deduplication, cache lifecycle, retry config
@@ -65,7 +66,7 @@ Coverage thresholds are enforced in `package.json → jest.coverageThreshold`. T
 
 ## Environment
 
-Tests run in **jsdom** (configured in `package.json → jest.testEnvironment`). Babel (`@babel/preset-env` targeting current Node) transpiles ESM for Jest.
+Tests run in __jsdom__ (configured in `package.json → jest.testEnvironment`). Babel (`@babel/preset-env` targeting current Node) transpiles ESM for Jest.
 
 ## Mocking Patterns
 

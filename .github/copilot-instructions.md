@@ -24,7 +24,7 @@ No lint command is configured.
 
 ## Architecture
 
-```
+```text
 src/
 ├── index.js                      # Public API barrel export
 ├── core/
@@ -44,10 +44,13 @@ src/
 ## Key Conventions
 
 ### Immutability
+
 Every class instance is frozen with `Object.freeze(this)` in the constructor. Nested arrays/objects are also frozen individually. Never mutate instance state directly — return new values instead.
 
 ### Factory methods over constructors
+
 Prefer the static factory methods for instantiation:
+
 ```js
 IbiraAPIFetcher.withDefaultCache(url)       // default LRU cache
 IbiraAPIFetcher.withCustomCache(url, cache) // injected cache
@@ -55,21 +58,25 @@ IbiraAPIFetcher.pure(url)                   // no cache
 ```
 
 ### JSDoc is mandatory
+
 Every class, method, and typedef must have full JSDoc including `@param` (with types), `@returns`, `@throws`, and `@example`. Use `@typedef` for complex parameter objects. Files include a `@fileoverview`, `@module`, `@license`, and `@copyright` header.
 
 ### Naming
+
 - Classes: `PascalCase`
 - Methods/variables: `camelCase`
 - Constants: `UPPER_SNAKE_CASE`
 - Private methods: leading underscore (`_startPeriodicCleanup`)
 
 ### Code style
+
 - Indentation: **tabs**
 - Semicolons: yes
 - No `var`; use `const`/`let`
 - Arrow functions for callbacks and event handlers
 
 ### Test organization
+
 - One test file per source module in `__tests__/`
 - `describe` blocks group by behaviour (e.g., `"Constructor and Immutability"`)
 - Test names start with `"should"`
@@ -77,6 +84,7 @@ Every class, method, and typedef must have full JSDoc including `@param` (with t
 - Coverage thresholds: 75% on branches, functions, lines, and statements
 
 ### Error handling
+
 - Retryable HTTP status codes: `408, 429, 500, 502, 503, 504`
 - Retry uses exponential backoff: `retryDelay * retryMultiplier^retryCount`
 
