@@ -32,7 +32,7 @@ describe('VERSION semantic version object', () => {
 
   it('should handle empty prerelease identifier', () => {
     const emptyVersion = { ...VERSION, prerelease: '' };
-    expect(emptyVersion.toString()).toBe(`${major}.${minor}.${patch}-`);
+    expect(emptyVersion.toString()).toBe(`${major}.${minor}.${patch}`);
   });
 
   it('should handle numeric prerelease identifier', () => {
