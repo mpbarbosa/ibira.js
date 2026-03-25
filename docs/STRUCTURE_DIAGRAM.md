@@ -48,7 +48,7 @@ ibira.js/
 │   │
 │   ├── 📂 config/                   # Configuration
 │   │   └── version.js               # Semantic versioning
-│   │       └── VERSION object (0.4.9-alpha)
+│   │       └── VERSION object (0.4.10-alpha)
 │   │
 │   └── 📄 README.md                 # Source documentation
 │

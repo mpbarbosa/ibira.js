@@ -1,11 +1,10 @@
 {
   "version": 1,
-  "partitionIndex": 1,
-  "totalPartitions": 2,
-  "filesHash": "884c9ba4",
+  "partitionIndex": 0,
+  "totalPartitions": 1,
+  "filesHash": "ef9682a7",
   "partitionLabels": [
-    "src/config, src, src/utils",
-    "package-lock.json, package.json"
+    ".ai_workflow/cache"
   ],
-  "updatedAt": "2026-03-25T15:21:02.835Z"
+  "updatedAt": "2026-03-25T20:36:05.190Z"
 }

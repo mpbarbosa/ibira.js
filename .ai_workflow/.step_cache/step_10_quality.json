@@ -160,6 +160,11 @@
       "score": 100,
       "issueCount": 0,
       "lastAnalyzed": "2026-03-23T15:54:03.661Z"
+    },
+    ".ai_workflow/cache/step_21_doc_consolidation.json": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-25T20:36:05.189Z"
     }
   }
 }

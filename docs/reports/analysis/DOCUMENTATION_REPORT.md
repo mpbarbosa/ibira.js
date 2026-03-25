@@ -1,7 +1,7 @@
 # 📚 ibira.js - Documentation Validation Report
 
 **Date:** 2026-01-01
-**Version:** 0.4.9-alpha
+**Version:** 0.4.10-alpha
 **Status:** ✅ PASSED - All requirements met
 
 ---
@@ -215,7 +215,7 @@ The documentation is **ready for production use** and exceeds typical open-sourc
 
 ## 📚 Additional Resources
 
-- [Documentation Enhancement Summary](../../DOCUMENTATION_SUMMARY.md)
+- [Documentation Index](../../docs/INDEX.md)
 - [JSDoc Official Documentation](https://jsdoc.app/)
 - [TypeScript JSDoc Reference](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
 
