@@ -1,6 +1,6 @@
 // __tests__/DefaultEventNotifier.test.js
 // Unit tests for DefaultEventNotifier class
-// DefaultEventNotifier delegates to DualObserverSubject from bessa_patterns.ts (v0.12.7-alpha)
+// DefaultEventNotifier delegates to DualObserverSubject from bessa_patterns.ts (v0.12.9-alpha)
 
 import { DefaultEventNotifier } from '../src/utils/DefaultEventNotifier.js';
 
