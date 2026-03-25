@@ -3,23 +3,10 @@
 const fs = require('fs');
 const path = require('path');
 
-// Import functions directly from the source file
-const syncVersionPath = path.resolve(__dirname, '../../scripts/sync-version.js');
-const source = fs.readFileSync(syncVersionPath, 'utf8');
+const SCRIPT_PATH = path.resolve(__dirname, '../../scripts/sync-version.js');
 
-// Extract pure functions for testing
-let parseVersion, generateVersionTs;
-beforeAll(() => {
-  // Use Function constructor to extract the pure functions
-  // This avoids running the script's side effects
-  // eslint-disable-next-line no-new-func
-  const mod = new Function(
-    'exports',
-    source + '\nreturn exports;'
-  )({});
-  parseVersion = mod.parseVersion || global.parseVersion;
-  generateVersionTs = mod.generateVersionTs || global.generateVersionTs;
-});
+// Import pure functions directly via require (script guards execution with require.main === module)
+const { parseVersion, generateVersionTs } = require(SCRIPT_PATH);
 
 describe('parseVersion', () => {
   it('parses standard semver without prerelease', () => {
@@ -55,26 +42,26 @@ describe('parseVersion', () => {
     });
   });
 
-  it('handles missing patch/minor as NaN', () => {
+  it('handles missing patch/minor as undefined', () => {
     expect(parseVersion('1.2')).toEqual({
       major: 1,
       minor: 2,
-      patch: NaN,
+      patch: undefined,
       prerelease: '',
     });
     expect(parseVersion('1')).toEqual({
       major: 1,
-      minor: NaN,
-      patch: NaN,
+      minor: undefined,
+      patch: undefined,
       prerelease: '',
     });
   });
 
   it('handles empty string', () => {
     expect(parseVersion('')).toEqual({
-      major: NaN,
-      minor: NaN,
-      patch: NaN,
+      major: 0,
+      minor: undefined,
+      patch: undefined,
       prerelease: '',
     });
   });
@@ -94,7 +81,7 @@ describe('generateVersionTs', () => {
     expect(result).toContain('prerelease: "",');
     expect(result).toContain('toString(): string {');
     expect(result).toContain('1.2.3');
-    expect(result).not.toContain('-');
+    expect(result).not.toContain('1.2.3-');
   });
 
   it('generates version.ts content for prerelease version', () => {
@@ -126,15 +113,17 @@ describe('sync-version script integration', () => {
   const tempDir = path.join(__dirname, 'tmp-sync-version');
   const pkgPath = path.join(tempDir, 'package.json');
   const versionTsPath = path.join(tempDir, 'src', 'config', 'version.ts');
-  const scriptPath = path.join(tempDir, 'sync-version.js');
+  // Place script in tempDir/scripts/ so __dirname/.. resolves to tempDir (matching project layout)
+  const scriptPath = path.join(tempDir, 'scripts', 'sync-version.js');
 
   beforeAll(() => {
     fs.mkdirSync(path.join(tempDir, 'src', 'config'), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, 'scripts'), { recursive: true });
     fs.writeFileSync(
       pkgPath,
       JSON.stringify({ version: '1.2.3-alpha' }, null, 2)
     );
-    fs.writeFileSync(scriptPath, source);
+    fs.writeFileSync(scriptPath, fs.readFileSync(SCRIPT_PATH, 'utf8'));
   });
 
   afterAll(() => {

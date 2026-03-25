@@ -87,31 +87,37 @@ function generateVersionTs({ major, minor, patch, prerelease }) {
 		`\tpatch: ${patch},`,
 		`\tprerelease: "${prerelease}", // Indicates unstable development`,
 		'\ttoString(): string {',
-		'\t\treturn `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;',
+		'\t\treturn this.prerelease',
+		'\t\t\t? `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`',
+		'\t\t\t: `${this.major}.${this.minor}.${this.patch}`;',
 		'\t},',
 		'};',
 		'',
 	].join('\n');
 }
 
-const pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf8'));
-const parsed = parseVersion(pkg.version);
-const expected = generateVersionTs(parsed);
-const checkMode = process.argv.includes('--check');
+if (require.main === module) {
+	const pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf8'));
+	const parsed = parseVersion(pkg.version);
+	const expected = generateVersionTs(parsed);
+	const checkMode = process.argv.includes('--check');
 
-if (checkMode) {
-	const current = fs.existsSync(VERSION_TS_PATH)
-		? fs.readFileSync(VERSION_TS_PATH, 'utf8')
-		: '';
-	if (current === expected) {
-		console.log(`✅  version.ts is in sync with package.json (${pkg.version})`);
-		process.exit(0);
+	if (checkMode) {
+		const current = fs.existsSync(VERSION_TS_PATH)
+			? fs.readFileSync(VERSION_TS_PATH, 'utf8')
+			: '';
+		if (current === expected) {
+			console.log(`✅  version.ts is in sync with package.json (${pkg.version})`);
+			process.exit(0);
+		} else {
+			console.error(`❌  version.ts is out of sync with package.json (${pkg.version})`);
+			console.error('    Run: npm run version:sync');
+			process.exit(1);
+		}
 	} else {
-		console.error(`❌  version.ts is out of sync with package.json (${pkg.version})`);
-		console.error('    Run: npm run version:sync');
-		process.exit(1);
+		fs.writeFileSync(VERSION_TS_PATH, expected, 'utf8');
+		console.log(`✅  Synced version.ts → ${pkg.version}`);
 	}
-} else {
-	fs.writeFileSync(VERSION_TS_PATH, expected, 'utf8');
-	console.log(`✅  Synced version.ts → ${pkg.version}`);
 }
+
+module.exports = { parseVersion, generateVersionTs };
