@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Import functions directly from the source file
-const syncVersionPath = path.resolve(__dirname, '../scripts/sync-version.js');
+const syncVersionPath = path.resolve(__dirname, '../../scripts/sync-version.js');
 const source = fs.readFileSync(syncVersionPath, 'utf8');
 
 // Extract pure functions for testing
