@@ -1,6 +1,6 @@
 # ibira.js API Reference
 
-**Version:** 0.4.11-alpha  
+**Version:** 0.4.12-alpha  
 **License:** MIT
 
 ---
@@ -296,7 +296,7 @@ const VERSION: { major: number; minor: number; patch: number; prerelease: string
 
 ```js
 import { VERSION } from 'ibira.js';
-console.log(VERSION.toString()); // "0.4.11-alpha"
+console.log(VERSION.toString()); // "0.4.12-alpha"
 ```
 
 ---
