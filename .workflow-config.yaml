@@ -4,25 +4,29 @@
 project:
   name: "ibira.js"
   type: "nodejs-library"
-  description: "Zero-dependency JavaScript/TypeScript library for API data fetching with LRU caching and observer pattern"
-  kind: "nodejs_library"
-  version: "0.4.9-alpha"
+  kind: "nodejs_library"  # domain classification: zero-dependency API fetching library
+  version: "0.4.9-alpha"  # keep in sync with package.json
+  description: "Zero-dependency JavaScript library for API data fetching with LRU caching and observer pattern"
 
 tech_stack:
-  primary_language: "typescript"
+  primary_language: "javascript"
   build_system: "npm"
   bundler: "tsup"
   test_framework: "jest"
+  test_runner: "babel-jest"  # Babel transpiles ESM for Jest
   test_command: "npm test"
   test_node_command: "npm run test:node"
   validate_command: "npm run validate"
   build_command: "npm run build"
+  lint_command: "npm run lint"
+  lint_commands:
+    javascript: "npm run lint"   # ESLint (src/, __tests__/, test/)
   node_version: ">=18.0.0"
 
 structure:
   source_dirs:
     - src
-  source_extension: "ts"
+  source_extension: "js"
   test_dirs:
     - __tests__
     - test
@@ -35,8 +39,57 @@ workflow:
   parallel_execution: true
   ai_cache_enabled: true
   auto_commit: false
-  multi_stage_pipeline: false
+  multi_stage_pipeline: true
   ml_optimize: false
+  stages:
+    quick:
+      enabled: true
+      steps:
+        - step_00  # pre-analysis / environment scan
+        - step_01  # documentation analysis
+        - step_02  # consistency analysis
+    medium:
+      enabled: true
+      steps:
+        - step_00  # pre-analysis / environment scan
+        - step_01  # documentation analysis
+        - step_02  # consistency analysis
+        - step_03  # script reference analysis
+        - step_04  # config validation
+        - step_05  # directory structure validation
+    full:
+      enabled: true
+      steps:
+        - step_00  # pre-analysis / environment scan
+        - step_01  # documentation analysis
+        - step_02  # consistency analysis
+        - step_03  # script reference analysis
+        - step_04  # config validation
+        - step_05  # directory structure validation
+        - step_06  # integration tests
+        - step_07  # coverage report generation
+        - step_08  # release readiness check
+        - step_0f  # artifact commit: versions and commits all workflow outputs to the repo
+
+validation:
+  documentation:
+    required: true
+    min_coverage: 80  # 80% of public API surface must be documented
+  testing:
+    required: true
+    min_coverage: 75  # 75% branch/function/line/statement threshold; enforced by jest --coverage
+
+# Linting Configuration
+linting:
+  js_linter: "eslint"
+  js_config: "eslint.config.mjs"
+  js_glob: "src/**/*.js"
+
+git:
+  # Tag creation is owned by the deploy flow (scripts/deploy.sh),
+  # which runs after the build so the tag always captures fresh dist/ artifacts.
+  # Disable tagging during workflow runs to prevent premature tags.
+  tag_on_run: false
 
 publish:
   registry: "https://registry.npmjs.org"
@@ -45,13 +98,266 @@ publish:
 
 deploy:
   enabled: true
-  script: scripts/deploy.sh
+  script: "scripts/deploy.sh"  # Invoked by: ai-workflow deploy
   description: "Tag, push, and refresh CDN URLs for ibira.js"
+
+# Conditional Step Execution Configuration
+conditionals:
+  step_08_release_readiness:
+    skip_if:
+      - no_code_changes: true
+      - only_docs_changed: true
+    run_if:
+      - "src/**/*.js": changed
+      - "__tests__/**/*.js": changed
+    description: "Skip release-readiness check if only documentation or non-code files changed"
+
+  step_05_directory_structure:
+    skip_if:
+      - no_new_files: true
+    cache_duration: 24h
+    description: "Cache directory structure scan for 24 hours if no new files"
+
+  step_03_script_validation:
+    skip_if:
+      - no_js_changes: true
+    run_if:
+      - "src/**/*.js": changed
+      - "scripts/**/*.sh": changed
+    description: "Skip script-reference validation if no JavaScript or shell files changed"
+
+  step_07_coverage_report:
+    skip_if:
+      - only_docs_changed: true
+      - only_tests_changed: true
+    run_if:
+      - "src/**/*.js": changed
+    description: "Skip coverage generation for docs-only or test-only changes"
+
+# Change Detection Patterns
+change_patterns:
+  code_files:
+    - "src/**/*.js"
+  test_files:
+    - "__tests__/**/*.js"
+    - "test/**/*.js"
+  documentation_files:
+    - "**/*.md"
+    - "docs/**/*"
+  config_files:
+    - "package.json"
+    - "tsconfig.json"
+    - "tsup.config.ts"
+    - "babel.config.mjs"
+    - "eslint.config.mjs"
+    - ".github/**/*.yml"
+    - ".workflow-config.yaml"
+
+# Version Configuration
+# The version field above must agree with package.json → "version" at all times.
+version:
+  source_of_truth: "package.json"
+
+# Change-Type Detection Configuration (Conventional Commits)
+change_detection:
+  enabled: true
+  convention: "conventional_commits"
+
+  types:
+    feat:
+      description: "New features"
+      impact: "high"
+      test_strategy: "all"
+      examples:
+        - "feat: add request deduplication to IbiraAPIFetchManager"
+        - "feat(cache): add TTL expiry support to DefaultCache"
+
+    fix:
+      description: "Bug fixes"
+      impact: "medium"
+      test_strategy: "related"
+      examples:
+        - "fix: correct retry backoff calculation in IbiraAPIFetcher"
+        - "fix(cache): handle LRU eviction edge case on empty cache"
+
+    docs:
+      description: "Documentation only"
+      impact: "low"
+      test_strategy: "none"
+      examples:
+        - "docs: update README CDN URLs"
+        - "docs(api): improve JSDoc for fetchData return type"
+
+    refactor:
+      description: "Code refactoring"
+      impact: "medium"
+      test_strategy: "comprehensive"
+      examples:
+        - "refactor: extract retry logic into private helper"
+        - "refactor(fetcher): simplify fetchDataPure dependency injection"
+
+    test:
+      description: "Test changes only"
+      impact: "low"
+      test_strategy: "tests_only"
+      examples:
+        - "test: add edge cases for LRU eviction in DefaultCache"
+        - "test(fetcher): improve coverage for concurrent request deduplication"
+
+    style:
+      description: "Code style/formatting"
+      impact: "low"
+      test_strategy: "syntax_only"
+      examples:
+        - "style: format with prettier"
+        - "style: fix eslint warnings in IbiraAPIFetcher"
+
+    perf:
+      description: "Performance improvements"
+      impact: "medium"
+      test_strategy: "all"
+      examples:
+        - "perf: optimise LRU cache lookup in DefaultCache"
+        - "perf(notifier): reduce observer notification overhead"
+
+    chore:
+      description: "Maintenance tasks"
+      impact: "low"
+      test_strategy: "minimal"
+      examples:
+        - "chore: update dependencies"
+        - "chore(build): configure tsup dual CJS+ESM output"
+
+    ci:
+      description: "CI/CD changes"
+      impact: "low"
+      test_strategy: "minimal"
+      examples:
+        - "ci: add GitHub Actions publish workflow"
+        - "ci: update test coverage threshold"
+
+    build:
+      description: "Build system changes"
+      impact: "low"
+      test_strategy: "minimal"
+      examples:
+        - "build: update npm scripts"
+        - "build: switch bundler to tsup"
+
+  # Step routing based on change type
+  routing:
+    feat:
+      steps:
+        - syntax_validation
+        - directory_structure
+        - test_execution
+        - coverage_report
+        - quality_checks
+        - doc_validation
+        - git_finalization
+      description: "Run all validation steps for new features"
+
+    fix:
+      steps:
+        - syntax_validation
+        - test_execution
+        - quality_checks
+        - git_finalization
+      description: "Focus on testing and quality for bug fixes"
+
+    docs:
+      steps:
+        - syntax_validation
+        - doc_validation
+        - git_finalization
+      description: "Minimal validation for documentation changes"
+
+    refactor:
+      steps:
+        - syntax_validation
+        - test_execution
+        - coverage_report
+        - quality_checks
+        - git_finalization
+      description: "Comprehensive testing for refactoring"
+
+    test:
+      steps:
+        - syntax_validation
+        - test_execution
+        - git_finalization
+      description: "Run test suite for test changes"
+
+    style:
+      steps:
+        - syntax_validation
+        - quality_checks
+        - git_finalization
+      description: "Syntax and style validation only"
+
+    perf:
+      steps:
+        - syntax_validation
+        - test_execution
+        - coverage_report
+        - git_finalization
+      description: "Full testing for performance changes"
+
+    chore:
+      steps:
+        - syntax_validation
+        - git_finalization
+      description: "Minimal validation for maintenance tasks"
+
+    ci:
+      steps:
+        - syntax_validation
+        - git_finalization
+      description: "Syntax check only for CI changes"
+
+    build:
+      steps:
+        - syntax_validation
+        - test_execution
+        - git_finalization
+      description: "Validate build system changes"
+
+  # Fallback configuration
+  fallback:
+    steps:
+      - syntax_validation
+      - test_execution
+      - coverage_report
+      - git_finalization
+    description: "Default steps when type cannot be determined"
+
+  # Pattern detection (if commit message doesn't follow convention)
+  pattern_detection:
+    enabled: true
+    patterns:
+      - regex: "^(add|implement|create)\\s"
+        type: "feat"
+      - regex: "^(fix|repair|correct|resolve)\\s"
+        type: "fix"
+      - regex: "^(doc|document|readme)\\s"
+        type: "docs"
+      - regex: "^(refactor|restructure|reorganize)\\s"
+        type: "refactor"
+      - regex: "^(test|spec)\\s"
+        type: "test"
+      - regex: "^(style|format|lint)\\s"
+        type: "style"
+      - regex: "^(perf|optimize|speed)\\s"
+        type: "perf"
 
 skills:
   version_sync:
-    command: "npm run version:sync"
-    check_command: "npm run version:check"
     skill_doc: ".github/skills/sync-version/SKILL.md"
-    description: "Regenerates src/config/version.ts and propagates the version to all project files"
+    description: >
+      Audits and fixes version strings in src/config/version.js,
+      src/index.js, README.md, docs/API.md, docs/INDEX.md,
+      .workflow-config.yaml, and ROADMAP.md so they match the
+      canonical version in package.json.
+    check_command: "npm run version:check"
+    command: "npm run version:sync"
 
