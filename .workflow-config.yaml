@@ -5,7 +5,7 @@ project:
   name: "ibira.js"
   type: "nodejs-library"
   kind: "nodejs_library"  # domain classification: zero-dependency API fetching library
-  version: "0.4.9-alpha"  # keep in sync with package.json
+  version: "0.4.10-alpha"  # keep in sync with package.json
   description: "Zero-dependency JavaScript library for API data fetching with LRU caching and observer pattern"
 
 tech_stack:
