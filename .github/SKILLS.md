@@ -28,7 +28,8 @@ repository state.
 | [Publish](#publishyml) | `publish.yml` | Release / manual | Publish package |
 | [Validate logs](#validate-logs) | _(Copilot skill)_ | Manual | Validate `.ai_workflow/logs` against codebase; write `plan.md` |
 | [Fix log issues](#fix-log-issues) | _(Copilot skill)_ | Manual (after validate-logs) | Consume `plan.md`, apply fixes, update roadmap |
-| [Audit and fix](#audit-and-fix) | _(Copilot skill)_ | Manual | Run validate-logs then fix-log-issues in one pass |
+| [Audit and fix](#audit-and-fix) | _(Copilot skill)_ | Manual | Run validate-logs → fix-log-issues → purge-workflow-logs in one pass |
+| [Purge workflow logs](#purge-workflow-logs) | _(Copilot skill)_ | Manual | Delete transient `.ai_workflow/` artefacts (logs/, backlog/, summaries/) |
 
 ---
 
@@ -143,7 +144,7 @@ corresponding `.yml` workflow file.
 **Skill docs:** `.github/skills/sync-version/SKILL.md`
 
 Reads `package.json → version` and checks it against all files that carry
-a version string. Fixes any mismatch, validates TypeScript, runs tests, and
+a version string. Fixes any mismatch, validates JavaScript, runs tests, and
 commits. Also available as `.github/workflows/sync-version.yml`.
 
 ### Validate logs
@@ -158,10 +159,18 @@ structured issue list to `.ai_workflow/plan.md`.
 **Skill docs:** `.github/skills/fix-log-issues/SKILL.md`
 
 Consumes `.ai_workflow/plan.md` and applies each confirmed fix, then
-updates the project roadmap in `docs/FUNCTIONAL_REQUIREMENTS.md`.
+updates the project roadmap in `ROADMAP.md`.
 
 ### Audit and fix
 
 **Skill docs:** `.github/skills/audit-and-fix/SKILL.md`
 
-Runs validate-logs then fix-log-issues in a single pass.
+Orchestrates the full log-remediation pipeline: validate-logs →
+fix-log-issues → purge-workflow-logs in a single pass.
+
+### Purge workflow logs
+
+**Skill docs:** `.github/skills/purge-workflow-logs/SKILL.md`
+
+Deletes all transient artefacts under `.ai_workflow/` (logs/, backlog/,
+summaries/) while retaining plan.md and other permanent files.
