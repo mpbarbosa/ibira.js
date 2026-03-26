@@ -230,3 +230,8 @@ Open an issue or start a discussion in the repository to propose features, repor
 | RI-006 | workflow_20260325_172923 / step_07 | `__tests__/README.md` structure diagram missing `test/scripts/sync-version.test.js` | `__tests__/README.md` | Low | ✅ done |
 | RI-007 | validate-logs audit | MD026 trailing `?` in 39 FAQ.md section headers | `docs/FAQ.md` | Low | ✅ done |
 | RI-008 | validate-logs audit | MD031 missing blank lines around 26 fenced code blocks | `docs/IBIRA_API_FETCHER.md` | Low | ✅ done |
+| RI-009 | workflow_20260325_222738 / step_13 | MD022/MD032 missing blank lines around headings/lists | `CHANGELOG.md` | Low | ✅ done |
+| RI-010 | workflow_20260325_222738 / step_13 | MD022/MD032/MD046/MD040 heading, indented code block, missing fence language | `docs/IBIRA_API_FETCHER.md` | Low | ✅ done |
+| RI-011 | workflow_20260325_222738 / step_13 | MD022/MD032 missing blank lines around Deploy Script Reference heading | `README.md` | Low | ✅ done |
+| RI-012 | workflow_20260325_222738 / step_13 | MD001 heading level skips h3→h4 at line 363 | `docs/referential_transparency/VERIFICATION_REPORT.md` | Low | ✅ done |
+| RI-013 | workflow_20260325_222738 / step_13 | MD001 heading level skips h3→h4 at line 210 | `docs/reports/analysis/DOCUMENTATION_REPORT.md` | Low | ✅ done |
