@@ -58,10 +58,24 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
 	exit 1
 fi
 
-# ── Step 1/5: Build ───────────────────────────────────────────────────────────
-info "Step 1/5 — Building …"
-npm run build
-success "Build complete"
+# ── Step 1/5: Build (only if needed) ─────────────────────────────────────────
+BUILD_SENTINEL="dist/index.js"
+BUILD_NEEDED=false
+
+if [[ ! -f "${BUILD_SENTINEL}" ]]; then
+	BUILD_NEEDED=true
+elif find src tsup.config.ts package.json tsconfig.json \
+		-newer "${BUILD_SENTINEL}" -print -quit 2>/dev/null | grep -q .; then
+	BUILD_NEEDED=true
+fi
+
+if [[ "${BUILD_NEEDED}" == "true" ]]; then
+	info "Step 1/5 — Building …"
+	npm run build
+	success "Build complete"
+else
+	success "Step 1/5 — Build artifacts are up to date, skipping"
+fi
 echo ""
 
 # ── Step 2/5: Run tests ───────────────────────────────────────────────────────
