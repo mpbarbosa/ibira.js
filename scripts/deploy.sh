@@ -58,7 +58,7 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
 	exit 1
 fi
 
-# ── Step 1/5: Build (only if needed) ─────────────────────────────────────────
+# ── Step 1/6: Build (only if needed) ─────────────────────────────────────────
 BUILD_SENTINEL="dist/index.js"
 BUILD_NEEDED=false
 
@@ -70,16 +70,16 @@ elif find src tsup.config.ts package.json tsconfig.json \
 fi
 
 if [[ "${BUILD_NEEDED}" == "true" ]]; then
-	info "Step 1/5 — Building …"
+	info "Step 1/6 — Building …"
 	npm run build
 	success "Build complete"
 else
-	success "Step 1/5 — Build artifacts are up to date, skipping"
+	success "Step 1/6 — Build artifacts are up to date, skipping"
 fi
 echo ""
 
-# ── Step 2/5: Run tests ───────────────────────────────────────────────────────
-info "Step 2/5 — Running tests …"
+# ── Step 2/6: Run tests ───────────────────────────────────────────────────────
+info "Step 2/6 — Running tests …"
 if ! npm test --silent; then
 	error "Tests failed. Fix failing tests before deploying."
 	exit 2
@@ -87,8 +87,8 @@ fi
 success "All tests passed"
 echo ""
 
-# ── Step 3/5: Commit build artifacts ─────────────────────────────────────────
-info "Step 3/5 — Committing build artifacts …"
+# ── Step 3/6: Commit build artifacts ─────────────────────────────────────────
+info "Step 3/6 — Committing build artifacts …"
 
 # Regenerate cdn-urls.txt now so it is included in this commit
 bash "${PROJECT_ROOT}/cdn-delivery.sh" > /dev/null 2>&1 || true
@@ -105,8 +105,8 @@ else
 fi
 echo ""
 
-# ── Step 4/5: Tag & push ──────────────────────────────────────────────────────
-info "Step 4/5 — Tagging and pushing …"
+# ── Step 4/6: Tag & push ──────────────────────────────────────────────────────
+info "Step 4/6 — Tagging and pushing …"
 
 # Detect current branch dynamically (avoids hardcoding 'main')
 CURRENT_BRANCH="$(git branch --show-current)"
@@ -133,8 +133,8 @@ fi
 success "Pushed to origin/${CURRENT_BRANCH}"
 echo ""
 
-# ── Step 5/5: Show CDN URLs ───────────────────────────────────────────────────
-info "Step 5/5 — CDN URLs (from cdn-urls.txt committed in step 3) …"
+# ── Step 5/6: Show CDN URLs ───────────────────────────────────────────────────
+info "Step 5/6 — CDN URLs (from cdn-urls.txt committed in step 3) …"
 if [[ -f "${PROJECT_ROOT}/cdn-urls.txt" ]]; then
 	cat "${PROJECT_ROOT}/cdn-urls.txt"
 else
@@ -144,5 +144,43 @@ echo ""
 
 success "Deployment of ${TAG} complete! 🚀"
 echo "    CDN will pick up the new tag automatically via jsDelivr within a few minutes."
+echo ""
+
+# ── Step 6/6: CDN availability check ─────────────────────────────────────────
+info "Step 6/6 — Checking CDN availability for ${TAG} …"
+
+GITHUB_USER="$(git remote get-url origin | sed -E 's|.*[:/]([^/]+)/[^/]+$|\1|; s|\.git$||')"
+GITHUB_REPO="$(basename "$(git remote get-url origin)" .git)"
+CDN_IBIRA_URL="https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${VERSION}/dist/index.mjs"
+
+BESSA_VERSION="$(node -p "require('./node_modules/bessa_patterns.ts/package.json').version" 2>/dev/null || true)"
+CDN_BESSA_URL=""
+[[ -n "${BESSA_VERSION}" ]] && CDN_BESSA_URL="https://cdn.jsdelivr.net/gh/${GITHUB_USER}/bessa_patterns.ts@v${BESSA_VERSION}/dist/index.mjs"
+
+_cdn_check() {
+	local label="$1" url="$2" max_retries=5 interval=30
+	for ((attempt=1; attempt<=max_retries; attempt++)); do
+		if curl -s -f -o /dev/null --max-time 10 "${url}"; then
+			success "${label} is live on jsDelivr ✓"
+			echo "    ${url}"
+			return 0
+		fi
+		if [[ ${attempt} -lt ${max_retries} ]]; then
+			warn "${label}: not ready yet (attempt ${attempt}/${max_retries}) — retrying in ${interval}s …"
+			sleep "${interval}"
+		fi
+	done
+	warn "${label}: not yet available on CDN after ${max_retries} attempts."
+	echo "    Check manually: ${url}"
+	return 1
+}
+
+if command -v curl &>/dev/null; then
+	_cdn_check "ibira.js ${TAG}" "${CDN_IBIRA_URL}"
+	[[ -n "${CDN_BESSA_URL}" ]] && _cdn_check "bessa_patterns.ts v${BESSA_VERSION}" "${CDN_BESSA_URL}"
+else
+	warn "curl not found — skipping CDN check"
+	echo "    Verify manually: ${CDN_IBIRA_URL}"
+fi
 echo ""
 
