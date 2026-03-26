@@ -1105,7 +1105,7 @@ interface PureResult {
 
 ## Version Information
 
-- **Version**: 0.4.19-alpha
+- **Version**: 0.4.20-alpha
 - **License**: MIT
 - **Repository**: https://github.com/mpbarbosa/ibira.js
 - **Author**: Marcelo Pereira Barbosa
@@ -1747,5 +1747,5 @@ MIT License
 
 ---
 
-**IbiraAPIFetcher v0.4.19-alpha**
+**IbiraAPIFetcher v0.4.20-alpha**
 *Achieving perfect referential transparency in JavaScript API fetching*

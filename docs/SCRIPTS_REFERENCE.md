@@ -1,6 +1,6 @@
 # Scripts Reference Guide
 
-**Version:** 0.4.19-alpha
+**Version:** 0.4.20-alpha
 **Last Updated:** December 31, 2025
 **Purpose:** Centralized reference for all scripts in the ibira.js project
 
@@ -715,6 +715,6 @@ This document should be updated when:
 
 ---
 
-**Version:** 0.4.19-alpha
+**Version:** 0.4.20-alpha
 **Last Updated:** December 31, 2025
 **Maintained By:** ibira.js Contributors

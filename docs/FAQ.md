@@ -19,7 +19,7 @@ ibira.js provides:
 
 ### Is ibira.js production-ready
 
-ibira.js is currently in **alpha** (v0.4.19-alpha). It has:
+ibira.js is currently in **alpha** (v0.4.20-alpha). It has:
 
 - ✅ 90%+ test coverage (152 tests)
 - ✅ Comprehensive error handling
@@ -42,7 +42,7 @@ Yes! You can use it via CDN:
 
 ```html
 <script type="module">
-  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.19-alpha/src/index.js';
+  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/src/index.js';
 
   const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
   const data = await fetcher.fetchData();

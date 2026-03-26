@@ -102,7 +102,7 @@ Runs 6 comprehensive tests demonstrating:
 ```text
 ╔════════════════════════════════════════════════════════╗
 ║  ibira.js - Pure Referential Transparency Test Suite  ║
-║  Version: 0.4.19-alpha                                  ║
+║  Version: 0.4.20-alpha                                  ║
 ╚════════════════════════════════════════════════════════╝
 
 🧪 Testing Pure Referential Transparency
@@ -210,7 +210,7 @@ bash cdn-delivery.sh
 🌐 ibira.js CDN Delivery URLs
 ==============================
 
-📦 Package Version: 0.4.19-alpha
+📦 Package Version: 0.4.20-alpha
 
 Latest Version (Auto-updating):
   Main: https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js/src/index.js
@@ -218,7 +218,7 @@ Latest Version (Auto-updating):
   ...
 
 Specific Version (Production):
-  Main: https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.4.19-alpha/src/index.js
+  Main: https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@0.4.20-alpha/src/index.js
   ...
 
 ✅ URLs saved to: cdn-urls.txt
@@ -228,13 +228,13 @@ Specific Version (Production):
 
 ```text
 ibira.js CDN Delivery URLs
-Version: 0.4.19-alpha
+Version: 0.4.20-alpha
 Generated: 2025-12-31
 
 === Latest Version (Auto-updating) ===
 ...
 
-=== Specific Version (0.4.19-alpha) ===
+=== Specific Version (0.4.20-alpha) ===
 ...
 ```
 
@@ -359,7 +359,7 @@ ls -la cdn-delivery.sh
 ./cdn-delivery.sh | grep "min.js"
 
 # Get only specific version URLs
-./cdn-delivery.sh | grep "@0.4.19-alpha"
+./cdn-delivery.sh | grep "@0.4.20-alpha"
 ```
 
 #### Automate in CI/CD
@@ -437,6 +437,6 @@ For issues with these scripts:
 
 ---
 
-**Version:** 0.4.19-alpha
+**Version:** 0.4.20-alpha
 **Last Updated:** December 31, 2025
 **Maintained By:** ibira.js Contributors
