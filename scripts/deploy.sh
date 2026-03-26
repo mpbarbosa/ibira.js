@@ -89,7 +89,13 @@ echo ""
 
 # ── Step 3/5: Commit build artifacts ─────────────────────────────────────────
 info "Step 3/5 — Committing build artifacts …"
-git add dist/ cdn-delivery.sh 2>/dev/null || true
+
+# Regenerate cdn-urls.txt now so it is included in this commit
+bash "${PROJECT_ROOT}/cdn-delivery.sh" > /dev/null 2>&1 || true
+
+# Force-add dist/ to bypass .gitignore — gitignored during local development
+# but must be committed at release time so jsDelivr can serve it from GitHub.
+git add -f dist/ cdn-delivery.sh cdn-urls.txt 2>/dev/null || true
 
 if git diff --cached --quiet; then
 	warn "Nothing to commit — build artifacts are up to date"
