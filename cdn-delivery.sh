@@ -170,7 +170,6 @@ BESSA_VERSION=$(node -p "require('./node_modules/bessa_patterns.ts/package.json'
 
 cat > "${OUTPUT_FILE}" << EOF
 jsDelivr CDN URLs for ${GITHUB_USER}/${GITHUB_REPO} v${PACKAGE_VERSION}
-Generated from commit: $(git log -1 --format=%ci HEAD) ($(git rev-parse --short HEAD))
 =============================================================================
 
 PRODUCTION (Recommended - Specific Version):
