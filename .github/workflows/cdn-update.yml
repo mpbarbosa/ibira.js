@@ -34,14 +34,17 @@ jobs:
     steps:
       # ── 1. Checkout ──────────────────────────────────────────────────────────
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0        # full history so tag operations work correctly
           token: ${{ secrets.GITHUB_TOKEN }}
+          # Always check out the default branch to avoid detached HEAD when
+          # the workflow is triggered by a tag push (mirrors bessa_patterns pattern)
+          ref: ${{ github.event.repository.default_branch }}
 
       # ── 2. Node.js setup ─────────────────────────────────────────────────────
       - name: Set up Node.js 20
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: npm
@@ -98,16 +101,19 @@ jobs:
             echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           fi
 
-      # ── 10. Force-update tag to include build artifacts ───────────────────────
+      # ── 10. Push branch & force-update tag ───────────────────────────────────
       - name: Update version tag to include dist/
         if: steps.commit_artifacts.outputs.skip != 'true'
         run: |
           TAG="${{ steps.commit_artifacts.outputs.tag }}"
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          # Pull latest to guarantee a fast-forward push (bessa_patterns pattern:
+          # never force-push to a protected branch)
+          git pull --rebase origin "${DEFAULT_BRANCH}"
+          # Force-update the tag to point to the new commit (updating an existing
+          # tag always requires --force; this is safe for tags, not branches)
           git tag -fa "${TAG}" -m "Release ${TAG} (with CDN artifacts)"
-          # Resolve the default branch to avoid detached-HEAD push failures
-          # (the workflow may be triggered by a tag push, leaving HEAD detached)
-          DEFAULT_BRANCH=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
-          git push origin "HEAD:refs/heads/${DEFAULT_BRANCH}" --force
+          git push origin "${DEFAULT_BRANCH}"
           git push origin "${TAG}" --force
           echo "✅  Tag ${TAG} updated — jsDelivr will serve dist/ within a few minutes."
 
