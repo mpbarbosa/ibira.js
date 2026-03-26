@@ -220,3 +220,13 @@ ibira.js follows [Semantic Versioning](https://semver.org/):
 ## 💬 Feedback
 
 Open an issue or start a discussion in the repository to propose features, report gaps, or vote on priorities.
+
+---
+
+## 🔧 Roadmap — Minor Issues (audit-and-fix)
+
+| ID | Source step | Description | File/Path | Priority | Status |
+|----|-------------|-------------|-----------|----------|--------|
+| RI-006 | workflow_20260325_172923 / step_07 | `__tests__/README.md` structure diagram missing `test/scripts/sync-version.test.js` | `__tests__/README.md` | Low | ✅ done |
+| RI-007 | validate-logs audit | MD026 trailing `?` in 39 FAQ.md section headers | `docs/FAQ.md` | Low | ✅ done |
+| RI-008 | validate-logs audit | MD031 missing blank lines around 26 fenced code blocks | `docs/IBIRA_API_FETCHER.md` | Low | ✅ done |
