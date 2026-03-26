@@ -26,9 +26,10 @@ repository state.
 | [Sync version strings](#sync-versionyml) | `sync-version.yml` | Push to main (`package.json`) / manual | Propagate version from package.json to all files |
 | [CDN Update](#cdn-updateyml) | `cdn-update.yml` | Manual | Update CDN delivery URLs |
 | [Publish](#publishyml) | `publish.yml` | Release / manual | Publish package |
+| [Verify workflow efficacy](#verify-workflow-efficacy) | _(Copilot skill)_ | Manual | Assess the most recent ai_workflow.js run; produce an efficacy score (0–100) |
 | [Validate logs](#validate-logs) | _(Copilot skill)_ | Manual | Validate `.ai_workflow/logs` against codebase; write `plan.md` |
 | [Fix log issues](#fix-log-issues) | _(Copilot skill)_ | Manual (after validate-logs) | Consume `plan.md`, apply fixes, update roadmap |
-| [Audit and fix](#audit-and-fix) | _(Copilot skill)_ | Manual | Run validate-logs → fix-log-issues → purge-workflow-logs in one pass |
+| [Audit and fix](#audit-and-fix) | _(Copilot skill)_ | Manual | Run verify-workflow-efficacy → validate-logs → fix-log-issues → purge-workflow-logs in one pass |
 | [Purge workflow logs](#purge-workflow-logs) | _(Copilot skill)_ | Manual | Delete transient `.ai_workflow/` artefacts (logs/, backlog/, summaries/) |
 
 ---
@@ -147,6 +148,15 @@ Reads `package.json → version` and checks it against all files that carry
 a version string. Fixes any mismatch, validates JavaScript, runs tests, and
 commits. Also available as `.github/workflows/sync-version.yml`.
 
+### Verify workflow efficacy
+
+**Skill docs:** `.github/skills/verify-workflow-efficacy/SKILL.md`
+
+Reads the most recent `.ai_workflow/` run (logs, backlog, summaries) and
+produces an efficacy score (0–100) with classification (High / Medium / Low).
+Use before running `audit-and-fix` to confirm the workflow produced meaningful
+output worth acting on.
+
 ### Validate logs
 
 **Skill docs:** `.github/skills/validate-logs/SKILL.md`
@@ -165,8 +175,9 @@ updates the project roadmap in `ROADMAP.md`.
 
 **Skill docs:** `.github/skills/audit-and-fix/SKILL.md`
 
-Orchestrates the full log-remediation pipeline: validate-logs →
-fix-log-issues → purge-workflow-logs in a single pass.
+Orchestrates the full log-remediation pipeline: verify-workflow-efficacy →
+validate-logs → fix-log-issues → purge-workflow-logs in a single pass.
+Low-efficacy runs pause for confirmation before proceeding.
 
 ### Purge workflow logs
 

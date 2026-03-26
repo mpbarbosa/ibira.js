@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Version tag to build and publish (e.g. v0.4.13-alpha). Leave blank to use current package.json version.'
+        description: 'Version tag to build and publish (e.g. v0.4.14-alpha). Leave blank to use current package.json version.'
         required: false
         default: ''
 

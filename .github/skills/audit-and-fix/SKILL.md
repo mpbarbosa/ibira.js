@@ -1,25 +1,29 @@
 ---
 name: audit-and-fix
 description: >
-  Orchestrate the full log-audit pipeline in a single pass: run validate-logs
-  to produce .ai_workflow/plan.md, then immediately run fix-log-issues to
-  apply every confirmed fix and update the project roadmap, then run
-  purge-workflow-logs to clean up all transient artefacts. Use this skill
-  when asked to audit and fix workflow logs end-to-end, or any time you want
-  both steps executed without a manual handoff between them.
+  Orchestrate the full log-audit pipeline in a single pass: run
+  verify-workflow-efficacy to confirm the ai_workflow.js run produced
+  meaningful output, then run validate-logs to produce .ai_workflow/plan.md,
+  then immediately run fix-log-issues to apply every confirmed fix and update
+  the project roadmap, then run purge-workflow-logs to clean up all transient
+  artefacts. Use this skill when asked to audit and fix workflow logs
+  end-to-end, or any time you want all steps executed without a manual
+  handoff between them.
 ---
 
 # audit-and-fix
 
 ## Overview
 
-This skill is a thin coordinator that runs the three-step log-remediation
+This skill is a thin coordinator that runs the four-step log-remediation
 pipeline back-to-back:
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
 │                       audit-and-fix                           │
 │                                                               │
+│  0. verify-workflow-efficacy ──►  efficacy report + gate      │
+│                                      ▼                        │
 │  1. validate-logs      ──►  .ai_workflow/plan.md              │
 │                                      ▼                        │
 │  2. fix-log-issues     ──►  fixes applied + roadmap updated   │
@@ -44,6 +48,30 @@ conditions that apply when running them together.
   ```
 
 ## Execution order
+
+### Phase 0 — verify-workflow-efficacy
+
+Execute the full `verify-workflow-efficacy` skill as documented in
+`.github/skills/verify-workflow-efficacy/SKILL.md`.
+
+**Expected outcome:** An efficacy report is printed to the console and the
+run is classified as **High**, **Medium**, or **Low**.
+
+**Abort condition (Low efficacy):** If the efficacy score is below 50
+(classified **Low**), pause and ask the user to confirm before continuing.
+If the user does not confirm, abort with:
+
+```
+✗ audit-and-fix aborted — workflow efficacy too low to proceed safely.
+  Re-run ai_workflow.js or invoke audit-and-fix again to override.
+```
+
+**Continue condition (Medium or High):** Proceed automatically to Phase 1.
+For Medium efficacy, print a caution notice:
+
+```
+⚠️ Proceeding with Medium efficacy — review validate-logs output carefully.
+```
 
 ### Phase 1 — validate-logs
 
@@ -94,23 +122,25 @@ If execution is interrupted mid-phase (e.g., a fix fails verification):
 - `plan.md` retains accurate statuses — issues touched so far are `done` or
   `in-progress`; untouched issues remain `open`.
 - To resume, invoke `fix-log-issues` directly (not `audit-and-fix`) so
-  Phase 1 is not re-run and the existing `plan.md` is not overwritten.
+  Phases 0 and 1 are not re-run and the existing `plan.md` is not overwritten.
 - Run `purge-workflow-logs` manually once `fix-log-issues` has finished.
 
 ## Final summary
 
-Print a consolidated summary after all three phases complete:
+Print a consolidated summary after all four phases complete:
 
 ```
 ✓ audit-and-fix complete
-  Phase 1 — validate-logs:       N issue(s) written to plan.md
-  Phase 2 — fix-log-issues:      N fixed  |  N skipped
-  Phase 3 — purge-workflow-logs: logs/, backlog/, summaries/ removed
+  Phase 0 — verify-workflow-efficacy: score N/100 (<classification>)
+  Phase 1 — validate-logs:            N issue(s) written to plan.md
+  Phase 2 — fix-log-issues:           N fixed  |  N skipped
+  Phase 3 — purge-workflow-logs:      logs/, backlog/, summaries/ removed
   Roadmap updated: ROADMAP.md
 ```
 
 ## Related files
 
+- `.github/skills/verify-workflow-efficacy/SKILL.md` — Phase 0 skill
 - `.github/skills/validate-logs/SKILL.md` — Phase 1 skill
 - `.github/skills/fix-log-issues/SKILL.md` — Phase 2 skill
 - `.github/skills/purge-workflow-logs/SKILL.md` — Phase 3 skill

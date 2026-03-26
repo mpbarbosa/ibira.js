@@ -1,6 +1,6 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.4.13-alpha — v0.4.x Beta Preparation in progress
+> **Current version:** 0.4.14-alpha — v0.4.x Beta Preparation in progress
 > **Status:** Active development — retry loop wired, `throttle`/`debounce` utilities shipped; several v0.4.x items remain
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
@@ -17,7 +17,7 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
 | **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
 | **0.3.6-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
-| **0.4.13-alpha** | Request/response interceptors, pluggable retry strategy, `DefaultCache<T>` generics, TypeScript ESLint coverage, 251 tests |
+| **0.4.14-alpha** | Request/response interceptors, pluggable retry strategy, `DefaultCache<T>` generics, TypeScript ESLint coverage, 251 tests |
 
 ---
 
