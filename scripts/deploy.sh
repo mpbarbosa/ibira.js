@@ -161,14 +161,23 @@ info "Step 6/6 — Checking CDN availability for ${TAG} …"
 
 GITHUB_USER="$(git remote get-url origin | sed -E 's|.*[:/]([^/]+)/[^/]+$|\1|; s|\.git$||')"
 GITHUB_REPO="$(basename "$(git remote get-url origin)" .git)"
-CDN_IBIRA_URL="https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${VERSION}/dist/index.mjs"
+CDN_IBIRA_URL="https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${TAG}/dist/index.mjs"
 
 BESSA_VERSION="$(node -p "require('./node_modules/bessa_patterns.ts/package.json').version" 2>/dev/null || true)"
 CDN_BESSA_URL=""
 [[ -n "${BESSA_VERSION}" ]] && CDN_BESSA_URL="https://cdn.jsdelivr.net/gh/${GITHUB_USER}/bessa_patterns.ts@v${BESSA_VERSION}/dist/index.mjs"
 
+_cdn_purge() {
+	local url="$1"
+	# Purge path: swap cdn.jsdelivr.net for purge.jsdelivr.net
+	local purge_url="${url/cdn.jsdelivr.net/purge.jsdelivr.net}"
+	curl -s -o /dev/null --max-time 10 "${purge_url}" || true
+}
+
 _cdn_check() {
 	local label="$1" url="$2" max_retries=5 interval=30
+	# Trigger jsDelivr cache purge before polling to speed up propagation
+	_cdn_purge "${url}"
 	for ((attempt=1; attempt<=max_retries; attempt++)); do
 		if curl -s -f -o /dev/null --max-time 10 "${url}"; then
 			success "${label} is live on jsDelivr ✓"
@@ -182,12 +191,13 @@ _cdn_check() {
 	done
 	warn "${label}: not yet available on CDN after ${max_retries} attempts."
 	echo "    Check manually: ${url}"
-	return 1
+	# CDN propagation delay is normal — do not fail the deployment
+	return 0
 }
 
 if command -v curl &>/dev/null; then
-	_cdn_check "ibira.js ${TAG}" "${CDN_IBIRA_URL}"
-	[[ -n "${CDN_BESSA_URL}" ]] && _cdn_check "bessa_patterns.ts v${BESSA_VERSION}" "${CDN_BESSA_URL}"
+	_cdn_check "ibira.js ${TAG}" "${CDN_IBIRA_URL}" || true
+	[[ -n "${CDN_BESSA_URL}" ]] && { _cdn_check "bessa_patterns.ts v${BESSA_VERSION}" "${CDN_BESSA_URL}" || true; }
 else
 	warn "curl not found — skipping CDN check"
 	echo "    Verify manually: ${CDN_IBIRA_URL}"
