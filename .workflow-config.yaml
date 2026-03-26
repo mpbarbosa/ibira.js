@@ -86,8 +86,11 @@ linting:
   js_glob: "src/**/*.js"
 
 git:
-  # Tag creation is owned by the deploy flow (scripts/deploy.sh),
-  # which runs after the build so the tag always captures fresh dist/ artifacts.
+  # Tag creation and management is owned by the deploy flow (scripts/deploy.sh).
+  # The deploy script commits dist/ first, then creates (or moves) the version tag
+  # so the tag always captures fresh build artifacts.  If the tag already exists
+  # but points to a commit that predates the dist/ commit (stale tag), deploy.sh
+  # detects the mismatch, deletes the remote tag, and re-creates it at HEAD.
   # Disable tagging during workflow runs to prevent premature tags.
   tag_on_run: false
 
@@ -99,7 +102,10 @@ publish:
 deploy:
   enabled: true
   script: "scripts/deploy.sh"  # Invoked by: ai-workflow deploy
-  description: "Tag, push, and refresh CDN URLs for ibira.js"
+  description: "Build dist/, move/create version tag, push to GitHub, verify CDN"
+  cdn_check_url: "https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@v{version}/dist/index.mjs"
+  # cdn_check_url is the canonical jsDelivr URL pattern for this project.
+  # The {version} placeholder is replaced with project.version at deploy time.
 
 # Conditional Step Execution Configuration
 conditionals:
