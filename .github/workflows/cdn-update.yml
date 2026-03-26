@@ -104,7 +104,10 @@ jobs:
         run: |
           TAG="${{ steps.commit_artifacts.outputs.tag }}"
           git tag -fa "${TAG}" -m "Release ${TAG} (with CDN artifacts)"
-          git push origin HEAD --force
+          # Resolve the default branch to avoid detached-HEAD push failures
+          # (the workflow may be triggered by a tag push, leaving HEAD detached)
+          DEFAULT_BRANCH=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
+          git push origin "HEAD:refs/heads/${DEFAULT_BRANCH}" --force
           git push origin "${TAG}" --force
           echo "✅  Tag ${TAG} updated — jsDelivr will serve dist/ within a few minutes."
 
