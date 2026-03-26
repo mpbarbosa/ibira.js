@@ -2,11 +2,11 @@
 
 ## General Questions
 
-### What is ibira.js?
+### What is ibira.js
 
 **ibira.js** is a JavaScript library for fetching and caching API data with observer pattern support. It achieves **perfect referential transparency (10/10)** while maintaining practical usability through a dual-layer architecture.
 
-### Why should I use ibira.js instead of plain fetch?
+### Why should I use ibira.js instead of plain fetch
 
 ibira.js provides:
 
@@ -17,7 +17,7 @@ ibira.js provides:
 - **Pure functional core** - Predictable, testable code
 - **TypeScript support** - Type definitions included
 
-### Is ibira.js production-ready?
+### Is ibira.js production-ready
 
 ibira.js is currently in **alpha** (v0.4.12-alpha). It has:
 
@@ -30,13 +30,13 @@ We recommend thorough testing in your specific use case before production deploy
 
 ## Installation & Setup
 
-### How do I install ibira.js?
+### How do I install ibira.js
 
 ```bash
 npm install ibira.js
 ```
 
-### Can I use ibira.js in the browser?
+### Can I use ibira.js in the browser
 
 Yes! You can use it via CDN:
 
@@ -50,7 +50,7 @@ Yes! You can use it via CDN:
 </script>
 ```
 
-### Does ibira.js work with Node.js?
+### Does ibira.js work with Node.js
 
 Yes, but you need a fetch polyfill for Node.js versions < 18:
 
@@ -70,7 +70,7 @@ Node.js 18+ has native fetch support, no polyfill needed.
 
 ## Usage Questions
 
-### How do I make a simple GET request?
+### How do I make a simple GET request
 
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';
@@ -80,7 +80,7 @@ const users = await fetcher.fetchData();
 // Returns: [{ id: 1, name: 'John' }, { id: 2, name: 'Jane' }, ...]
 ```
 
-### How do I make a POST request?
+### How do I make a POST request
 
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';
@@ -96,7 +96,7 @@ const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users'
 const newUser = await fetcher.fetchData();
 ```
 
-### How do I add authentication headers?
+### How do I add authentication headers
 
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';
@@ -111,7 +111,7 @@ const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/protec
 const data = await fetcher.fetchData();
 ```
 
-### How do I disable caching for a specific request?
+### How do I disable caching for a specific request
 
 ```javascript
 import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
@@ -128,7 +128,7 @@ const fetcher = new IbiraAPIFetcher(
 const data = await fetcher.fetchData();
 ```
 
-### How do I clear the cache?
+### How do I clear the cache
 
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';
@@ -145,7 +145,7 @@ fetcher.clearCache();
 await fetcher.fetchData();
 ```
 
-### How do I handle errors?
+### How do I handle errors
 
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';
@@ -170,11 +170,11 @@ try {
 
 ## Caching Questions
 
-### How long are responses cached by default?
+### How long are responses cached by default
 
 Default cache expiration is **5 minutes (300,000 ms)**.
 
-### Can I change the cache expiration time?
+### Can I change the cache expiration time
 
 Yes:
 
@@ -192,11 +192,11 @@ const fetcher = new IbiraAPIFetcher(
 );
 ```
 
-### What is the maximum cache size?
+### What is the maximum cache size
 
 Default maximum cache size is **50 entries**. Oldest entries are evicted when the limit is reached (LRU policy).
 
-### Can I increase the cache size?
+### Can I increase the cache size
 
 Yes:
 
@@ -214,7 +214,7 @@ const fetcher = new IbiraAPIFetcher(
 );
 ```
 
-### Can I use a custom cache implementation?
+### Can I use a custom cache implementation
 
 Yes! Implement the cache interface:
 
@@ -244,11 +244,11 @@ const fetcher = new IbiraAPIFetcher(
 
 ## Retry & Timeout Questions
 
-### How many times does ibira.js retry failed requests?
+### How many times does ibira.js retry failed requests
 
 Default is **3 retries** with **1 second (1000ms)** delay between attempts.
 
-### Can I configure retry behavior?
+### Can I configure retry behavior
 
 Yes:
 
@@ -266,11 +266,11 @@ const fetcher = new IbiraAPIFetcher(
 );
 ```
 
-### What is the default timeout?
+### What is the default timeout
 
 Default timeout is **30 seconds (30,000 ms)**.
 
-### Can I change the timeout?
+### Can I change the timeout
 
 Yes:
 
@@ -287,7 +287,7 @@ const fetcher = new IbiraAPIFetcher(
 );
 ```
 
-### Which errors trigger retries?
+### Which errors trigger retries
 
 Retries are triggered for:
 
@@ -302,7 +302,7 @@ Retries are triggered for:
 
 ## Observer Pattern Questions
 
-### What is the observer pattern in ibira.js?
+### What is the observer pattern in ibira.js
 
 The observer pattern allows you to subscribe to fetch lifecycle events:
 
@@ -312,7 +312,7 @@ The observer pattern allows you to subscribe to fetch lifecycle events:
 - `cache:hit` - Data served from cache
 - `cache:miss` - Data not in cache
 
-### How do I subscribe to events?
+### How do I subscribe to events
 
 ```javascript
 import { IbiraAPIFetcher, DefaultEventNotifier } from 'ibira.js';
@@ -337,13 +337,13 @@ const fetcher = IbiraAPIFetcher.withDefaultCache(
 await fetcher.fetchData();
 ```
 
-### How do I unsubscribe from events?
+### How do I unsubscribe from events
 
 ```javascript
 eventNotifier.unsubscribe(observer);
 ```
 
-### Can I have multiple observers?
+### Can I have multiple observers
 
 Yes! You can subscribe multiple observers to the same eventNotifier:
 
@@ -359,7 +359,7 @@ eventNotifier.subscribe(uiUpdater);
 
 ## Advanced Questions
 
-### What is "referential transparency"?
+### What is "referential transparency"
 
 Referential transparency means a function always returns the same output for the same inputs, with no side effects. ibira.js achieves this through:
 
@@ -367,7 +367,7 @@ Referential transparency means a function always returns the same output for the
 - Dependency injection (cache, eventNotifier)
 - Immutable return values (Object.freeze)
 
-### When should I use the pure functional API?
+### When should I use the pure functional API
 
 Use `fetchDataPure()` when you need:
 
@@ -376,7 +376,7 @@ Use `fetchDataPure()` when you need:
 - Explicit control over when side effects occur
 - Functional programming paradigms
 
-### How do I use IbiraAPIFetchManager?
+### How do I use IbiraAPIFetchManager
 
 For managing multiple API endpoints:
 
@@ -396,7 +396,7 @@ console.log('Users:', results.users);
 console.log('Posts:', results.posts);
 ```
 
-### Can I use ibira.js with React?
+### Can I use ibira.js with React
 
 Yes! Here's a basic example:
 
@@ -436,7 +436,7 @@ function UserList() {
 }
 ```
 
-### Does ibira.js support TypeScript?
+### Does ibira.js support TypeScript
 
 Yes! Type definitions are included:
 
@@ -498,7 +498,7 @@ Or use Node.js 18+ which has native fetch support.
 
 ## Performance Questions
 
-### How can I optimize performance?
+### How can I optimize performance
 
 1. **Use shared cache** for multiple fetchers:
 
@@ -513,7 +513,7 @@ const fetcher2 = new IbiraAPIFetcher(url2, { cache: sharedCache });
 3. **Use IbiraAPIFetchManager** for parallel requests
 4. **Disable caching** for real-time data
 
-### What is the memory footprint?
+### What is the memory footprint
 
 - Each cache entry: ~1-2 KB (depends on response size)
 - Default cache (50 entries): ~50-100 KB
@@ -523,7 +523,7 @@ Total footprint is typically < 200 KB for default configuration.
 
 ## Migration Questions
 
-### I'm upgrading from v0.1.0, what changed?
+### I'm upgrading from v0.1.0, what changed
 
 v0.2.x is **100% backward compatible**. Main changes:
 
@@ -534,13 +534,13 @@ v0.2.x is **100% backward compatible**. Main changes:
 
 See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for details.
 
-### Can I use v0.1.0 and v0.2.0 code together?
+### Can I use v0.1.0 and v0.2.0 code together
 
 Yes, all v0.1.0 code works unchanged in v0.2.x.
 
 ## Contributing
 
-### How can I contribute?
+### How can I contribute
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
 
@@ -549,7 +549,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
 - Testing guidelines
 - Pull request process
 
-### I found a bug, where do I report it?
+### I found a bug, where do I report it
 
 Open an issue on [GitHub](https://github.com/mpbarbosa/ibira.js/issues) with:
 
@@ -560,7 +560,7 @@ Open an issue on [GitHub](https://github.com/mpbarbosa/ibira.js/issues) with:
 
 ## Support
 
-### Where can I get help?
+### Where can I get help
 
 1. Check this FAQ
 2. Read the [API documentation](./IBIRA_API_FETCHER.md)
@@ -568,7 +568,7 @@ Open an issue on [GitHub](https://github.com/mpbarbosa/ibira.js/issues) with:
 4. Check [troubleshooting guide](./TROUBLESHOOTING.md)
 5. Open an issue on [GitHub](https://github.com/mpbarbosa/ibira.js/issues)
 
-### Is there a community?
+### Is there a community
 
 We're building a community! Connect via:
 
