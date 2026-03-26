@@ -1652,7 +1652,7 @@ function debounce(fn, wait) {
 var VERSION = {
   major: 0,
   minor: 4,
-  patch: 19,
+  patch: 20,
   prerelease: "alpha",
   // Indicates unstable development
   toString() {
