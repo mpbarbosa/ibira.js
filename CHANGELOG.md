@@ -53,10 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **IMPROVED**: Linting and formatting — ESLint and Prettier configs updated for strict TypeScript and Node.js 18+ compatibility
 
 ### 🐛 Bug Fixes (TypeScript Migration)
+
 - **FIXED**: Observer error isolation in `DefaultEventNotifier`
 - **FIXED**: Caching logic edge cases in `DefaultCache`
 
 ### 📚 Documentation (TypeScript Migration)
+
 - **UPDATED**: `.github/REFERENTIAL_TRANSPARENCY.md` — expanded referential transparency guidance for reviewers and contributors
 - **UPDATED**: `.github/HIGH_COHESION_GUIDE.md` — new high cohesion principles and examples for configuration and workflows
 - **UPDATED**: `CONTRIBUTING.md` — developer setup, code standards, testing, PR flow
