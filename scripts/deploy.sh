@@ -118,9 +118,19 @@ fi
 # Pull latest remote changes before pushing to avoid non-fast-forward rejection
 git pull --rebase origin "${CURRENT_BRANCH}"
 
-# Create annotated tag (skip gracefully if it already exists)
+# Create or move annotated tag to the current HEAD commit
 if git rev-parse "${TAG}" >/dev/null 2>&1; then
-	warn "Tag ${TAG} already exists — skipping tag creation"
+	EXISTING_TAG_SHA="$(git rev-parse "${TAG}")"
+	HEAD_SHA="$(git rev-parse HEAD)"
+	if [[ "${EXISTING_TAG_SHA}" == "${HEAD_SHA}" ]]; then
+		warn "Tag ${TAG} already points to HEAD — skipping tag creation"
+	else
+		warn "Tag ${TAG} exists but points to ${EXISTING_TAG_SHA:0:7}, not HEAD (${HEAD_SHA:0:7}) — moving tag"
+		git tag -d "${TAG}"
+		git push origin ":refs/tags/${TAG}" 2>/dev/null || true
+		git tag -a "${TAG}" -m "Release ${TAG}"
+		success "Moved tag ${TAG} to HEAD"
+	fi
 else
 	git tag -a "${TAG}" -m "Release ${TAG}"
 	success "Created tag ${TAG}"
