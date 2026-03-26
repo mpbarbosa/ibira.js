@@ -118,9 +118,11 @@ fi
 # Pull latest remote changes before pushing to avoid non-fast-forward rejection
 git pull --rebase origin "${CURRENT_BRANCH}"
 
-# Create or move annotated tag to the current HEAD commit
+# Create or move lightweight tag to the current HEAD commit.
+# NOTE: jsDelivr cannot dereference annotated tag objects (type "tag" in
+# GitHub API); it requires lightweight tags (type "commit") to resolve files.
 if git rev-parse "${TAG}" >/dev/null 2>&1; then
-	EXISTING_TAG_SHA="$(git rev-parse "${TAG}")"
+	EXISTING_TAG_SHA="$(git rev-parse "${TAG}^{commit}")"
 	HEAD_SHA="$(git rev-parse HEAD)"
 	if [[ "${EXISTING_TAG_SHA}" == "${HEAD_SHA}" ]]; then
 		warn "Tag ${TAG} already points to HEAD — skipping tag creation"
@@ -128,11 +130,11 @@ if git rev-parse "${TAG}" >/dev/null 2>&1; then
 		warn "Tag ${TAG} exists but points to ${EXISTING_TAG_SHA:0:7}, not HEAD (${HEAD_SHA:0:7}) — moving tag"
 		git tag -d "${TAG}"
 		git push origin ":refs/tags/${TAG}" 2>/dev/null || true
-		git tag -a "${TAG}" -m "Release ${TAG}"
+		git tag "${TAG}"
 		success "Moved tag ${TAG} to HEAD"
 	fi
 else
-	git tag -a "${TAG}" -m "Release ${TAG}"
+	git tag "${TAG}"
 	success "Created tag ${TAG}"
 fi
 
@@ -174,6 +176,14 @@ _cdn_purge() {
 	curl -s -o /dev/null --max-time 10 "${purge_url}" || true
 }
 
+# Verify content exists on raw GitHub (independent of jsDelivr indexing lag).
+# Returns 0 if the file is reachable on GitHub, 1 otherwise.
+_github_raw_check() {
+	local gh_user="$1" gh_repo="$2" git_tag="$3" rel_path="$4"
+	local raw_url="https://raw.githubusercontent.com/${gh_user}/${gh_repo}/${git_tag}/${rel_path}"
+	curl -s -f -o /dev/null --max-time 10 "${raw_url}"
+}
+
 _cdn_check() {
 	local label="$1" url="$2" max_retries=5 interval=30
 	# Trigger jsDelivr cache purge before polling to speed up propagation
@@ -196,6 +206,12 @@ _cdn_check() {
 }
 
 if command -v curl &>/dev/null; then
+	# Confirm the build artifact exists on GitHub before polling jsDelivr
+	if _github_raw_check "${GITHUB_USER}" "${GITHUB_REPO}" "${TAG}" "dist/index.mjs"; then
+		success "dist/index.mjs is committed and visible on GitHub ✓"
+	else
+		warn "dist/index.mjs not found on GitHub — CDN delivery will fail"
+	fi
 	_cdn_check "ibira.js ${TAG}" "${CDN_IBIRA_URL}" || true
 	[[ -n "${CDN_BESSA_URL}" ]] && { _cdn_check "bessa_patterns.ts v${BESSA_VERSION}" "${CDN_BESSA_URL}" || true; }
 else
