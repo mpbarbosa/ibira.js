@@ -1714,7 +1714,7 @@ export {
 /**
  * @fileoverview ibira.js - A JavaScript library for fetching and caching API data with observer pattern support
  * @module ibira.js
- * @version 0.4.18-alpha
+ * @version 0.4.19-alpha
  * @license MIT
  * @author Marcelo Pereira Barbosa
  * @copyright 2026 Marcelo Pereira Barbosa
