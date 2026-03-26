@@ -242,6 +242,7 @@ The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `Abor
 - If tag already exists: bump the version in `package.json` first
 
 #### Deploy Script Reference
+
 - Node.js and npm available
 
 **Usage:** `./scripts/deploy.sh [version]`
