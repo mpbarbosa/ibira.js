@@ -1,6 +1,6 @@
 # Testing Workflow Guide
 
-**Version:** 0.4.17-alpha
+**Version:** 0.4.18-alpha
 **Last Updated:** December 31, 2025
 
 ---
@@ -875,6 +875,6 @@ open coverage/lcov-report/index.html         # View HTML report
 
 ---
 
-**Version:** 0.4.17-alpha
+**Version:** 0.4.18-alpha
 **Maintained By:** ibira.js Contributors
 **Last Updated:** December 31, 2025

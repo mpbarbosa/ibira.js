@@ -24,7 +24,7 @@
     "src/config/version.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-25T21:02:31.382Z"
+      "lastAnalyzed": "2026-03-26T16:17:52.579Z"
     },
     "src/core/IbiraAPIFetchManager.ts": {
       "score": 100,
@@ -39,7 +39,7 @@
     "src/index.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-25T21:02:31.382Z"
+      "lastAnalyzed": "2026-03-26T16:17:52.579Z"
     },
     ".ai_workflow/commit_history.json": {
       "score": 100,
@@ -49,12 +49,12 @@
     "package-lock.json": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-25T21:02:31.382Z"
+      "lastAnalyzed": "2026-03-26T16:17:52.579Z"
     },
     "package.json": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-25T21:02:31.382Z"
+      "lastAnalyzed": "2026-03-26T16:17:52.579Z"
     },
     "src/utils/DefaultCache.ts": {
       "score": 100,
@@ -165,6 +165,11 @@
       "score": 100,
       "issueCount": 0,
       "lastAnalyzed": "2026-03-25T20:36:05.189Z"
+    },
+    "babel.config.cjs": {
+      "score": 100,
+      "issueCount": 0,
+      "lastAnalyzed": "2026-03-26T16:17:52.579Z"
     }
   }
 }

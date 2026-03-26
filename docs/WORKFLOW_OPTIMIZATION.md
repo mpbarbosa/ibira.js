@@ -1,6 +1,6 @@
 # Adaptive Workflow Optimization
 
-**Version:** 0.4.17-alpha
+**Version:** 0.4.18-alpha
 **Last Updated:** December 31, 2025
 **Purpose:** Workflow optimization strategies and automation improvements for ibira.js
 
@@ -53,7 +53,7 @@ cleanup_old_artifacts:
 
 # cleanup-artifacts.sh
 # Automated cleanup of old workflow artifacts
-# Version: 0.4.17-alpha
+# Version: 0.4.18-alpha
 
 set -e
 
@@ -646,6 +646,6 @@ Add these to `package.json`:
 
 ---
 
-**Version:** 0.4.17-alpha
+**Version:** 0.4.18-alpha
 **Last Updated:** December 31, 2025
 **Maintained By:** ibira.js Contributors

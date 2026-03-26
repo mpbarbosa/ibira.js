@@ -1,8 +1,11 @@
 {
   "version": 1,
-  "partitionIndex": 0,
-  "totalPartitions": 0,
-  "filesHash": "e3b0c442",
-  "partitionLabels": [],
-  "updatedAt": "2026-03-26T14:23:25.545Z"
+  "partitionIndex": 1,
+  "totalPartitions": 2,
+  "filesHash": "981d2cd4",
+  "partitionLabels": [
+    "babel.config.cjs, package-lock.json, package.json, src/config, src",
+    "src/utils, cdn-delivery.sh, scripts"
+  ],
+  "updatedAt": "2026-03-26T16:17:52.580Z"
 }
