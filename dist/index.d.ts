@@ -1276,7 +1276,7 @@ interface ThrottledFunction<TArgs extends unknown[], TReturn> {
  * throttledFetch.flush();
  * const fresh = await throttledFetch(); // executes immediately
  *
- * @since 0.4.19-alpha
+ * @since 0.4.20-alpha
  */
 declare function throttle<TArgs extends unknown[], TReturn>(fn: (...args: TArgs) => TReturn, wait: number): ThrottledFunction<TArgs, TReturn>;
 
@@ -1348,7 +1348,7 @@ interface DebouncedFunction<TArgs extends unknown[], TReturn> {
  * // Force immediate execution regardless of the wait timer
  * submitButton.addEventListener('click', () => debouncedFetch.flush());
  *
- * @since 0.4.19-alpha
+ * @since 0.4.20-alpha
  */
 declare function debounce<TArgs extends unknown[], TReturn>(fn: (...args: TArgs) => TReturn | Promise<TReturn>, wait: number): DebouncedFunction<TArgs, TReturn>;
 
@@ -1378,7 +1378,7 @@ declare function debounce<TArgs extends unknown[], TReturn>(fn: (...args: TArgs)
  *
  * @example
  * import { VERSION } from 'ibira.js';
- * console.log(VERSION.toString()); // "0.4.19-alpha"
+ * console.log(VERSION.toString()); // "0.4.20-alpha"
  * console.log(`v${VERSION.major}.${VERSION.minor}.${VERSION.patch}`);
  */
 declare const VERSION: {
