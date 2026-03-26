@@ -1008,4 +1008,4 @@ setTimeout(() => poller.stop(), 60000);
 
 ---
 
-**ibira.js v0.4.15-alpha** | [Documentation](./INDEX.md) | [API Reference](./IBIRA_API_FETCHER.md) | [FAQ](./FAQ.md)
+**ibira.js v0.4.16-alpha** | [Documentation](./INDEX.md) | [API Reference](./IBIRA_API_FETCHER.md) | [FAQ](./FAQ.md)
