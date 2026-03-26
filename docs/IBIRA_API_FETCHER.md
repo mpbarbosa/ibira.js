@@ -852,6 +852,8 @@ const fetcher = IbiraAPIFetcher.withExternalCache(
 ```
 
 ### Custom Event Notifier (Implementation Example)
+
+```javascript
         this.listeners.set(id, listener);
         return id;
     }
@@ -1233,6 +1235,7 @@ describe('API fetching', () => {
 ```
 
 ## Performance Optimization
+
 - Use `cacheExpiration` to balance freshness vs performance
 - Consider shared caches for multiple fetcher instances
 
