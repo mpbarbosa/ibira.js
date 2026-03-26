@@ -5,7 +5,7 @@ This directory contains the Jest test suite for the JavaScript source modules of
 > __Two test directories exist intentionally:__
 >
 > - `__tests__/` — JavaScript (`.js`) tests for the main library modules; runs with jsdom
-> - `test/` — TypeScript (`.ts`) tests for TypeScript-specific source files (e.g. `src/config/version.ts`); uses ts-jest
+> - `test/` — TypeScript (`.ts`) and JavaScript (`.js`) tests for TypeScript-specific source files and utility scripts; uses ts-jest/babel-jest
 >
 > Both directories are discovered by the default `npm test` command.
 
@@ -22,8 +22,10 @@ __tests__/
 └── index.test.js                 # Public API barrel — export validation
 
 test/
-└── config/
-    └── version.test.ts           # TypeScript VERSION object — semver format and toString()
+├── config/
+│   └── version.test.ts           # TypeScript VERSION object — semver format and toString()
+└── scripts/
+    └── sync-version.test.js      # sync-version.js — parseVersion and generateVersionTs pure functions
 ```
 
 ## Running Tests
