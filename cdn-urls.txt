@@ -1,5 +1,5 @@
 jsDelivr CDN URLs for mpbarbosa/ibira.js v0.4.16-alpha
-Generated: Thu Mar 26 10:40:24 -03 2026
+Generated: Thu Mar 26 10:44:06 -03 2026
 =============================================================================
 
 PRODUCTION (Recommended - Specific Version):
