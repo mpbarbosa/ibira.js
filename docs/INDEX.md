@@ -2,7 +2,7 @@
 
 > **Comprehensive guide to all documentation, guides, and configuration files in the ibira.js repository**
 
-**Version:** 0.4.13-alpha
+**Version:** 0.4.14-alpha
 **Status:** ✅ **REFERENTIALLY TRANSPARENT** - Perfect 10/10 Score Achieved
 **License:** MIT
 **Achievement:** 🏆 **Perfect Functional Purity**
@@ -67,7 +67,7 @@
 
 **ibira.js** is available via jsDelivr CDN for easy browser integration:
 
-- **Production URL:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.13-alpha/dist/index.mjs`
+- **Production URL:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.14-alpha/dist/index.mjs`
 - **Documentation:** See README.md CDN section or run `./cdn-delivery.sh`
 - **Generated URLs:** Check `cdn-urls.txt` for all available CDN options
 
@@ -478,7 +478,7 @@ Maintain high standards through code review and best practices. See [Code Review
 
 ## 📊 Project Status
 
-**Current Version:** 0.4.13-alpha
+**Current Version:** 0.4.14-alpha
 **Status:** Early Development (Alpha)
 
 ### Development Roadmap
