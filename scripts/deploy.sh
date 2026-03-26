@@ -133,13 +133,12 @@ fi
 success "Pushed to origin/${CURRENT_BRANCH}"
 echo ""
 
-# ── Step 5/5: Generate CDN URLs ───────────────────────────────────────────────
-info "Step 5/5 — Generating jsDelivr CDN URLs …"
-if [[ -f "${PROJECT_ROOT}/cdn-delivery.sh" ]]; then
-	bash "${PROJECT_ROOT}/cdn-delivery.sh"
-	success "cdn-urls.txt updated"
+# ── Step 5/5: Show CDN URLs ───────────────────────────────────────────────────
+info "Step 5/5 — CDN URLs (from cdn-urls.txt committed in step 3) …"
+if [[ -f "${PROJECT_ROOT}/cdn-urls.txt" ]]; then
+	cat "${PROJECT_ROOT}/cdn-urls.txt"
 else
-	warn "cdn-delivery.sh not found — skipping CDN URL regeneration"
+	warn "cdn-urls.txt not found"
 fi
 echo ""
 
