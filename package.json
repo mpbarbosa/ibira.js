@@ -32,7 +32,8 @@
     "test:all": "npm run version:check && npm run validate && npm test",
     "prepublishOnly": "npm run validate && npm test && npm run build",
     "lint": "eslint src/ __tests__/ test/",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "audit": "npm audit --audit-level=high"
   },
   "jest": {
     "testEnvironment": "jsdom",
