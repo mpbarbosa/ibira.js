@@ -24,7 +24,7 @@
     "src/config/version.ts": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-26T16:34:51.765Z"
+      "lastAnalyzed": "2026-03-27T13:48:05.011Z"
     },
     "src/core/IbiraAPIFetchManager.ts": {
       "score": 100,
@@ -49,12 +49,12 @@
     "package-lock.json": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-26T16:34:51.765Z"
+      "lastAnalyzed": "2026-03-27T13:48:05.011Z"
     },
     "package.json": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-26T16:34:51.765Z"
+      "lastAnalyzed": "2026-03-27T13:48:05.011Z"
     },
     "src/utils/DefaultCache.ts": {
       "score": 100,
@@ -114,7 +114,7 @@
     "scripts/sync-version.js": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-25T21:02:31.382Z"
+      "lastAnalyzed": "2026-03-27T13:48:05.011Z"
     },
     "scripts/deploy.sh": {
       "score": 100,
@@ -149,7 +149,7 @@
     "tsconfig.json": {
       "score": 100,
       "issueCount": 0,
-      "lastAnalyzed": "2026-03-20T02:20:48.918Z"
+      "lastAnalyzed": "2026-03-27T13:48:05.011Z"
     },
     "scripts/colors.sh": {
       "score": 100,

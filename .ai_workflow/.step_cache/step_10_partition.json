@@ -1,11 +1,12 @@
 {
   "version": 1,
-  "partitionIndex": 0,
-  "totalPartitions": 2,
-  "filesHash": "b893a34e",
+  "partitionIndex": 1,
+  "totalPartitions": 3,
+  "filesHash": "81835954",
   "partitionLabels": [
-    "package-lock.json, package.json, src/config, src",
-    "src/utils, scripts"
+    "scripts, package-lock.json, package.json, tsconfig.json, src/config",
+    "src/core, src",
+    "src/utils"
   ],
-  "updatedAt": "2026-03-26T17:25:11.679Z"
+  "updatedAt": "2026-03-27T13:48:05.012Z"
 }
