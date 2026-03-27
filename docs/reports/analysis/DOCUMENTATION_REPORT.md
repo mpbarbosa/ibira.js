@@ -215,7 +215,7 @@ The documentation is **ready for production use** and exceeds typical open-sourc
 
 ## 📚 Additional Resources
 
-- [Documentation Index](../../docs/INDEX.md)
+- [Documentation Index](../../INDEX.md)
 - [JSDoc Official Documentation](https://jsdoc.app/)
 - [TypeScript JSDoc Reference](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
 
