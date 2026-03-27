@@ -565,26 +565,6 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
     return cacheEntry !== null && cacheEntry !== void 0 && currentTime < cacheEntry.expiresAt;
   }
   /**
-   * Enforces cache size limits by removing oldest entries
-   * Uses LRU (Least Recently Used) eviction strategy
-   * 
-   * @private
-   * @param {Object} [cache] - Optional cache instance, defaults to this.cache
-   */
-  _enforceCacheSizeLimit(cache = null) {
-    const activeCache = cache || this.cache;
-    const maxSize = activeCache.maxSize || 50;
-    if (activeCache.size <= maxSize) {
-      return;
-    }
-    const entries = Array.from(activeCache.entries());
-    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
-    const entriesToRemove = activeCache.size - maxSize;
-    for (let i2 = 0; i2 < entriesToRemove; i2++) {
-      activeCache.delete(entries[i2][0]);
-    }
-  }
-  /**
    * Identifies expired cache entries that should be removed
    * This is a pure function that returns keys to delete without mutating state
    * 
@@ -601,19 +581,6 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
       }
     }
     return expiredKeys;
-  }
-  /**
-   * Cleans up expired cache entries
-   * Should be called periodically to prevent memory leaks
-   * 
-   * @private
-   * @param {Object} [cache] - Optional cache instance, defaults to this.cache
-   */
-  _cleanupExpiredCache(cache = null) {
-    const activeCache = cache || this.cache;
-    const now = Date.now();
-    const expiredKeys = this._getExpiredCacheKeys(activeCache, now);
-    expiredKeys.forEach((key) => activeCache.delete(key));
   }
   /**
    * Determines if an error is retryable based on error type and status code
@@ -1116,21 +1083,6 @@ var IbiraAPIFetchManager = class {
     for (let i2 = 0; i2 < entriesToRemove; i2++) {
       this.globalCache.delete(entries[i2][0]);
     }
-  }
-  /**
-   * Creates a cache entry with timestamp for expiration tracking
-   * 
-   * @private
-   * @param {any} data - The data to cache
-   * @param {number} currentTime - Current timestamp in milliseconds
-   * @returns {Object} Cache entry with data and timestamp
-   */
-  _createCacheEntry(data, currentTime) {
-    return {
-      data,
-      timestamp: currentTime,
-      expiresAt: currentTime + this.cacheExpiration
-    };
   }
   /**
    * Checks if a cache entry is still valid (not expired)
@@ -1684,7 +1636,7 @@ function debounce(fn, wait) {
 var VERSION = {
   major: 0,
   minor: 4,
-  patch: 20,
+  patch: 22,
   prerelease: "alpha",
   // Indicates unstable development
   toString() {

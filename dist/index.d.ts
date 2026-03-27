@@ -162,7 +162,7 @@ interface Observer {
  *
  * Built on top of {@link DualObserverSubject} from
  * [bessa_patterns.ts](https://github.com/mpbarbosa/bessa_patterns.ts)
- * (v0.12.13-alpha), which provides the immutable-array observer management,
+ * (v0.12.15-alpha), which provides the immutable-array observer management,
  * null-safety, and per-observer error isolation.
  *
  * Wraps the `DualObserverSubject` GoF channel with the ibira.js-specific
@@ -611,14 +611,6 @@ declare class IbiraAPIFetcher {
      */
     private _isCacheEntryValid;
     /**
-     * Enforces cache size limits by removing oldest entries
-     * Uses LRU (Least Recently Used) eviction strategy
-     *
-     * @private
-     * @param {Object} [cache] - Optional cache instance, defaults to this.cache
-     */
-    private _enforceCacheSizeLimit;
-    /**
      * Identifies expired cache entries that should be removed
      * This is a pure function that returns keys to delete without mutating state
      *
@@ -628,14 +620,6 @@ declare class IbiraAPIFetcher {
      * @returns {string[]} Array of cache keys that have expired
      */
     private _getExpiredCacheKeys;
-    /**
-     * Cleans up expired cache entries
-     * Should be called periodically to prevent memory leaks
-     *
-     * @private
-     * @param {Object} [cache] - Optional cache instance, defaults to this.cache
-     */
-    private _cleanupExpiredCache;
     /**
      * Determines if an error is retryable based on error type and status code
      *
@@ -983,15 +967,6 @@ declare class IbiraAPIFetchManager {
      * @private
      */
     private _enforceCacheSizeLimit;
-    /**
-     * Creates a cache entry with timestamp for expiration tracking
-     *
-     * @private
-     * @param {any} data - The data to cache
-     * @param {number} currentTime - Current timestamp in milliseconds
-     * @returns {Object} Cache entry with data and timestamp
-     */
-    private _createCacheEntry;
     /**
      * Checks if a cache entry is still valid (not expired)
      *
@@ -1378,7 +1353,7 @@ declare function debounce<TArgs extends unknown[], TReturn>(fn: (...args: TArgs)
  *
  * @example
  * import { VERSION } from 'ibira.js';
- * console.log(VERSION.toString()); // "0.4.20-alpha"
+ * console.log(VERSION.toString()); // "0.4.22-alpha"
  * console.log(`v${VERSION.major}.${VERSION.minor}.${VERSION.patch}`);
  */
 declare const VERSION: {
