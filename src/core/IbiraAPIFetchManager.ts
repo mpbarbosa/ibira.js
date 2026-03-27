@@ -287,22 +287,6 @@ export class IbiraAPIFetchManager {
 	}
 
 	/**
-	 * Creates a cache entry with timestamp for expiration tracking
-	 * 
-	 * @private
-	 * @param {any} data - The data to cache
-	 * @param {number} currentTime - Current timestamp in milliseconds
-	 * @returns {Object} Cache entry with data and timestamp
-	 */
-	private _createCacheEntry(data: unknown, currentTime: number): CacheEntry {
-		return {
-			data: data,
-			timestamp: currentTime,
-			expiresAt: currentTime + this.cacheExpiration
-		};
-	}
-
-	/**
 	 * Checks if a cache entry is still valid (not expired)
 	 * 
 	 * @private

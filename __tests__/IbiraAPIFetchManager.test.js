@@ -404,16 +404,6 @@ describe('IbiraAPIFetchManager', () => {
 	});
 
 	describe('Helper Methods', () => {
-		it('should create cache entry with correct structure', () => {
-			const data = { test: 'data' };
-			const currentTime = Date.now();
-			const entry = manager._createCacheEntry(data, currentTime);
-			
-			expect(entry.data).toBe(data);
-			expect(entry.timestamp).toBe(currentTime);
-			expect(entry.expiresAt).toBe(currentTime + manager.cacheExpiration);
-		});
-
 		it('should validate cache entry correctly', () => {
 			const currentTime = Date.now();
 			const validEntry = { expiresAt: currentTime + 10000 };

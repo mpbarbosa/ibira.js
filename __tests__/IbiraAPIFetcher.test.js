@@ -764,33 +764,6 @@ describe('IbiraAPIFetcher', () => {
             expect(expiredKeys).not.toContain('valid2');
         });
 
-        test('_cleanupExpiredCache should remove expired entries', () => {
-            const currentTime = Date.now();
-            cache.set('valid', { expiresAt: currentTime + 10000 });
-            cache.set('expired', { expiresAt: currentTime - 1000 });
-            
-            expect(cache.size).toBe(2);
-            fetcher._cleanupExpiredCache(cache);
-            expect(cache.size).toBe(1);
-            expect(cache.has('valid')).toBe(true);
-            expect(cache.has('expired')).toBe(false);
-        });
-
-        test('_enforceCacheSizeLimit should remove oldest entries', () => {
-            const smallCache = new Map();
-            smallCache.maxSize = 2;
-            
-            smallCache.set('key1', { data: 'old', timestamp: 100 });
-            smallCache.set('key2', { data: 'newer', timestamp: 200 });
-            smallCache.set('key3', { data: 'newest', timestamp: 300 });
-            
-            fetcher._enforceCacheSizeLimit(smallCache);
-            
-            expect(smallCache.size).toBe(2);
-            expect(smallCache.has('key1')).toBe(false);
-            expect(smallCache.has('key2')).toBe(true);
-            expect(smallCache.has('key3')).toBe(true);
-        });
     });
 
     describe('Additional Methods and Edge Cases', () => {
@@ -909,18 +882,6 @@ describe('IbiraAPIFetcher', () => {
             
             expect(result).toEqual(mockData);
             expect(minimalCache.size).toBeGreaterThan(0);
-        });
-
-        test('should handle very large cache sizes', () => {
-            const largeCache = new Map();
-            largeCache.maxSize = 1000;
-            
-            for (let i = 0; i < 100; i++) {
-                largeCache.set(`key${i}`, { data: i, timestamp: Date.now() + i });
-            }
-            
-            fetcher._enforceCacheSizeLimit(largeCache);
-            expect(largeCache.size).toBeLessThanOrEqual(1000);
         });
 
         test('should handle multiple sequential calls with caching', async () => {

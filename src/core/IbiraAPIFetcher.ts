@@ -478,36 +478,6 @@ export class IbiraAPIFetcher {
 	}
 
 	/**
-	 * Enforces cache size limits by removing oldest entries
-	 * Uses LRU (Least Recently Used) eviction strategy
-	 * 
-	 * @private
-	 * @param {Object} [cache] - Optional cache instance, defaults to this.cache
-	 */
-	private _enforceCacheSizeLimit(cache: CacheInterface | null = null): void {
-		const activeCache = cache || this.cache;
-		const maxSize = activeCache.maxSize || 50; // Use cache's own maxSize or default
-		
-		if (activeCache.size <= maxSize) {
-			return;
-		}
-
-		// Convert cache entries to array for sorting
-		const entries = Array.from(activeCache.entries());
-		
-		// Sort by timestamp (oldest first)
-		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
-		
-		// Calculate how many entries to remove
-		const entriesToRemove = activeCache.size - maxSize;
-		
-		// Remove oldest entries
-		for (let i = 0; i < entriesToRemove; i++) {
-			activeCache.delete(entries[i][0]);
-		}
-	}
-
-	/**
 	 * Identifies expired cache entries that should be removed
 	 * This is a pure function that returns keys to delete without mutating state
 	 * 
@@ -527,22 +497,6 @@ export class IbiraAPIFetcher {
 		}
 
 		return expiredKeys;
-	}
-
-	/**
-	 * Cleans up expired cache entries
-	 * Should be called periodically to prevent memory leaks
-	 * 
-	 * @private
-	 * @param {Object} [cache] - Optional cache instance, defaults to this.cache
-	 */
-	private _cleanupExpiredCache(cache: CacheInterface | null = null): void {
-		const activeCache = cache || this.cache;
-		const now = Date.now();
-		const expiredKeys = this._getExpiredCacheKeys(activeCache, now);
-
-		// Remove expired entries
-		expiredKeys.forEach(key => activeCache.delete(key));
 	}
 
 	/**
