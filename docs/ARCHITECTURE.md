@@ -244,7 +244,7 @@ const fetcher = IbiraAPIFetcher.withEventCallback(url, customEventHandler);
 
 ## Automation Scripts
 
-Two shell scripts handle CDN URL generation and release deployment.
+Three shell scripts handle CDN URL generation, release deployment, and shared terminal formatting.
 
 ### `cdn-delivery.sh`
 
@@ -270,6 +270,17 @@ Tags a release, pushes to remote, and regenerates CDN URLs. Runs tests automatic
 ```
 
 **Exit codes:** `0` success · `1` dirty tree · `2` tests failed · `3` tag exists · `4` push failed
+
+### `scripts/colors.sh`
+
+Provides shared ANSI color constants (`RED`, `GREEN`, `YELLOW`, `BLUE`, `NC`) for use by other shell scripts. Source it instead of duplicating color escape codes:
+
+```bash
+source "$(dirname "${BASH_SOURCE[0]}")/colors.sh"
+echo -e "${GREEN}OK${NC}"
+```
+
+Not intended to be executed directly.
 
 ---
 
