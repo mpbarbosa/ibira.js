@@ -235,3 +235,7 @@ Open an issue or start a discussion in the repository to propose features, repor
 | RI-011 | workflow_20260325_222738 / step_13 | MD022/MD032 missing blank lines around Deploy Script Reference heading | `README.md` | Low | ✅ done |
 | RI-012 | workflow_20260325_222738 / step_13 | MD001 heading level skips h3→h4 at line 363 | `docs/referential_transparency/VERIFICATION_REPORT.md` | Low | ✅ done |
 | RI-013 | workflow_20260325_222738 / step_13 | MD001 heading level skips h3→h4 at line 210 | `docs/reports/analysis/DOCUMENTATION_REPORT.md` | Low | ✅ done |
+| RI-014 | workflow_20260326_141323 / step_13 | Broken relative link `../../docs/INDEX.md` → should be `../../INDEX.md` | `docs/reports/analysis/DOCUMENTATION_REPORT.md` | Low | ✅ done |
+| RI-015 | workflow_20260326_141323 / step_08 | `scripts/colors.sh` undocumented — omitted from ARCHITECTURE.md Automation Scripts section | `docs/ARCHITECTURE.md` | Low | ✅ done |
+| RI-016 | workflow_20260326_141323 / step_19 | `noUnusedLocals` and `noUnusedParameters` absent from tsconfig; dead private methods undetected | `tsconfig.json`, `src/core/IbiraAPIFetcher.ts`, `src/core/IbiraAPIFetchManager.ts` | Low | ✅ done |
+| RI-017 | workflow_20260326_141323 / step_09 | No `audit` script in package.json; vulnerability checks not discoverable | `package.json` | Low | ✅ done |
