@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.21-alpha] — 2026-03-27
+
+### 🐛 Bug Fixes
+
+- **FIXED**: `scripts/sync-version.js` — `parseVersion()` now throws a clear `Error` with message `Malformed version string: "…"` when any numeric component is `NaN` (e.g. a `package.json` version of `"x.y.z"`); the main script block wraps execution in `try/catch` and exits with code `1`, preventing silent `NaN.NaN.NaN-alpha` writes to `version.ts`
+
+### 🔧 Developer Experience
+
+- **REFACTORED**: Version test consolidated — `test/config/version.test.ts` moved to `__tests__/version.test.ts`; empty `test/config/` directory removed; added `makeVersion(overrides)` helper to eliminate spread boilerplate; prerelease-variation assertions converted to `it.each` parameterised table; total tests: 270 (was 268)
+- **ADDED**: 2 new tests in `test/scripts/sync-version.test.js` covering the NaN guard: unit test (`throws for malformed version strings`) and integration test (`exits non-zero if package.json has a malformed version`)
+
+---
+
 ## [0.4.20-alpha] — 2026-03-17
 
 ### 🚀 New Features (Pipeline Customisation)

@@ -30,6 +30,11 @@ function parseVersion(versionString) {
 	const core = dashIdx === -1 ? versionString : versionString.slice(0, dashIdx);
 	const prerelease = dashIdx === -1 ? '' : versionString.slice(dashIdx + 1);
 	const [major, minor, patch] = core.split('.').map(Number);
+	if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
+		throw new Error(
+			`Malformed version string: "${versionString}". Expected MAJOR.MINOR.PATCH[-PRERELEASE] format with numeric components.`
+		);
+	}
 	return { major, minor, patch, prerelease };
 }
 
@@ -97,26 +102,31 @@ function generateVersionTs({ major, minor, patch, prerelease }) {
 }
 
 if (require.main === module) {
-	const pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf8'));
-	const parsed = parseVersion(pkg.version);
-	const expected = generateVersionTs(parsed);
-	const checkMode = process.argv.includes('--check');
+	try {
+		const pkg = JSON.parse(fs.readFileSync(PKG_PATH, 'utf8'));
+		const parsed = parseVersion(pkg.version);
+		const expected = generateVersionTs(parsed);
+		const checkMode = process.argv.includes('--check');
 
-	if (checkMode) {
-		const current = fs.existsSync(VERSION_TS_PATH)
-			? fs.readFileSync(VERSION_TS_PATH, 'utf8')
-			: '';
-		if (current === expected) {
-			console.log(`✅  version.ts is in sync with package.json (${pkg.version})`);
-			process.exit(0);
+		if (checkMode) {
+			const current = fs.existsSync(VERSION_TS_PATH)
+				? fs.readFileSync(VERSION_TS_PATH, 'utf8')
+				: '';
+			if (current === expected) {
+				console.log(`✅  version.ts is in sync with package.json (${pkg.version})`);
+				process.exit(0);
+			} else {
+				console.error(`❌  version.ts is out of sync with package.json (${pkg.version})`);
+				console.error('    Run: npm run version:sync');
+				process.exit(1);
+			}
 		} else {
-			console.error(`❌  version.ts is out of sync with package.json (${pkg.version})`);
-			console.error('    Run: npm run version:sync');
-			process.exit(1);
+			fs.writeFileSync(VERSION_TS_PATH, expected, 'utf8');
+			console.log(`✅  Synced version.ts → ${pkg.version}`);
 		}
-	} else {
-		fs.writeFileSync(VERSION_TS_PATH, expected, 'utf8');
-		console.log(`✅  Synced version.ts → ${pkg.version}`);
+	} catch (err) {
+		console.error(`❌  ${err.message}`);
+		process.exit(1);
 	}
 }
 

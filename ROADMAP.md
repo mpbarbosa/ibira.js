@@ -1,6 +1,6 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.4.20-alpha — v0.4.x Beta Preparation in progress
+> **Current version:** 0.4.21-alpha — v0.4.x Beta Preparation in progress
 > **Status:** Active development — retry loop wired, `throttle`/`debounce` utilities shipped; several v0.4.x items remain
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
@@ -17,6 +17,7 @@ This roadmap evolves alongside the project. Priorities may shift based on feedba
 | **0.2.2-alpha** | `.workflow-config.yaml` corrections, `copilot-instructions.md` |
 | **0.3.0-alpha** | ESLint, AbortController, `validateStatus`, branch coverage 90%+, deploy script, API review |
 | **0.3.6-alpha** | Version sync, observer error isolation, broken doc cross-refs fixed, test quality hardening |
+| **0.4.21-alpha** | Request/response interceptors, pluggable retry strategy, `DefaultCache<T>` generics, TypeScript ESLint coverage, 269 tests |
 | **0.4.20-alpha** | Request/response interceptors, pluggable retry strategy, `DefaultCache<T>` generics, TypeScript ESLint coverage, 251 tests |
 
 ---
@@ -55,19 +56,18 @@ Low-priority housekeeping items that improve contributor experience without chan
   add integration tests covering cross-module flows (`IbiraAPIFetchManager` ↔ `DefaultCache` ↔
   `DefaultEventNotifier`) and at least one e2e scenario exercising the full fetch-cache-notify
   pipeline; maintain the test pyramid (unit → integration → e2e) as the codebase grows
-- [ ] **Version test consolidation** _(step_06)_ — `test/config/version.test.js` deleted (duplicate
+- [x] **Version test consolidation** _(step_06)_ — `test/config/version.test.js` deleted (duplicate
   of `version.test.ts`; anti-pattern custom `toString` overrides removed); remaining work: move
   `test/config/version.test.ts` to `__tests__/` for consistent test location, and refactor
   prerelease-variation tests to `it.each` parameterised table with a `makeVersion(overrides)` helper
-- [ ] **`version.ts toString()` SemVer compliance** _(step_10)_ — when `prerelease` is empty,
-  `toString()` currently outputs a trailing hyphen (e.g. `"0.4.1-"`), which is not valid SemVer.
-  Change to omit the hyphen when `prerelease === ''` so output is `"0.4.1"`. Requires updating the
-  corresponding test assertion in `test/config/version.test.ts` (the "empty prerelease" case) and
-  updating `generateVersionTs()` in `scripts/sync-version.js` to match the new behaviour.
-- [ ] **`sync-version.js` NaN guard** _(step_10)_ — after `core.split('.').map(Number)`, add
+- [x] **`version.ts toString()` SemVer compliance** _(step_10)_ — when `prerelease` is empty,
+  `toString()` correctly omits the trailing hyphen (verified: uses truthiness check, returns
+  `"0.4.1"` not `"0.4.1-"`); no code change required — behaviour was already correct post
+  TypeScript migration
+- [x] **`sync-version.js` NaN guard** _(step_10)_ — after `core.split('.').map(Number)`, added
   `if (isNaN(major) || isNaN(minor) || isNaN(patch)) throw new Error(...)` so a malformed
   `package.json` version (e.g. `"x.y.z"`) produces a clear error instead of silently writing
-  `NaN.NaN.NaN-alpha` to `version.ts`.
+  `NaN.NaN.NaN-alpha` to `version.ts`; main block wrapped in `try/catch` for clean stderr output
 - [ ] **Automated dependency management** _(step_09)_ — enable Dependabot or Renovate for automated
   PR-based dependency updates; add `npm audit` as a CI step; document in `CONTRIBUTING.md` that
   `package-lock.json` must be committed; pin critical tooling versions (`typescript`, `jest`,

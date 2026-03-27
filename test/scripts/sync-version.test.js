@@ -42,28 +42,11 @@ describe('parseVersion', () => {
     });
   });
 
-  it('handles missing patch/minor as undefined', () => {
-    expect(parseVersion('1.2')).toEqual({
-      major: 1,
-      minor: 2,
-      patch: undefined,
-      prerelease: '',
-    });
-    expect(parseVersion('1')).toEqual({
-      major: 1,
-      minor: undefined,
-      patch: undefined,
-      prerelease: '',
-    });
-  });
-
-  it('handles empty string', () => {
-    expect(parseVersion('')).toEqual({
-      major: 0,
-      minor: undefined,
-      patch: undefined,
-      prerelease: '',
-    });
+  it('throws for malformed version strings (NaN guard)', () => {
+    expect(() => parseVersion('x.y.z')).toThrow(/Malformed version/);
+    expect(() => parseVersion('1.2')).toThrow(/Malformed version/);
+    expect(() => parseVersion('1')).toThrow(/Malformed version/);
+    expect(() => parseVersion('')).toThrow(/Malformed version/);
   });
 });
 
@@ -188,5 +171,18 @@ describe('sync-version script integration', () => {
     });
     expect(result.status).not.toBe(0);
     expect(result.stderr).toMatch(/ENOENT/);
+  });
+
+  it('exits non-zero if package.json has a malformed version (NaN guard)', () => {
+    const { spawnSync } = require('child_process');
+    // Recreate package.json with a non-numeric version
+    fs.mkdirSync(path.dirname(pkgPath), { recursive: true });
+    fs.writeFileSync(pkgPath, JSON.stringify({ version: 'x.y.z' }, null, 2));
+    const result = spawnSync('node', [scriptPath], {
+      cwd: tempDir,
+      encoding: 'utf8',
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/Malformed version/);
   });
 });
