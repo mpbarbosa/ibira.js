@@ -1,11 +1,17 @@
 ---
 name: fix-log-issues
 description: >
-  Consume the .ai_workflow/plan.md file produced by the validate-logs skill
+  Consume the $project_root/.ai_workflow/plan.md file produced by the validate-logs skill
   and fix each open issue in the codebase. After every fix is applied and
   verified, insert the resolved items into the project roadmap. Use this skill
   when asked to apply, resolve, or close the issues listed in plan.md, or
   immediately after running validate-logs.
+parameters:
+  project_root:
+    description: >
+      Root directory of the project to operate on.
+      Defaults to the current GitHub Copilot CLI working directory.
+    default: $PWD
 ---
 
 # fix-log-issues
@@ -15,17 +21,17 @@ description: >
 This skill is the second half of the log-validation pipeline:
 
 ```text
-validate-logs  →  .ai_workflow/plan.md  →  fix-log-issues
+validate-logs  →  $project_root/.ai_workflow/plan.md  →  fix-log-issues
 ```
 
-It reads `.ai_workflow/plan.md`, works through every issue with status
+It reads `$project_root/.ai_workflow/plan.md`, works through every issue with status
 `open` in dependency order, applies the minimal fix required, verifies the
 fix, updates the issue status in `plan.md`, and finally records all resolved
 items in the project roadmap (`ROADMAP.md`).
 
 ## Prerequisites
 
-- `.ai_workflow/plan.md` must exist and contain at least one issue with
+- `$project_root/.ai_workflow/plan.md` must exist and contain at least one issue with
   `**Status:** open`.
 - Run `validate-logs` first if `plan.md` is absent or empty.
 
@@ -83,10 +89,10 @@ One or more markdown formatting issues are present in the file at `Path`.
 
 **Fix procedure:**
 
-1. Run `npm audit --audit-level=moderate` to reproduce the warning.
-1. If the advisory has a fix available: run `npm audit fix` (non-breaking
+1. Run `cd "$project_root" && npm audit --audit-level=moderate` to reproduce the warning.
+1. If the advisory has a fix available: run `cd "$project_root" && npm audit fix` (non-breaking
    only — do not use `--force`).
-1. Run `npm ci && npm test` to confirm nothing regressed.
+1. Run `cd "$project_root" && npm ci && npm test` to confirm nothing regressed.
 1. If no automated fix exists, add a comment to `package.json` (or open a
    GitHub issue) and mark the plan item as `skipped` with a reason.
 
@@ -96,11 +102,11 @@ A JavaScript syntax or validation error was reported.
 
 **Fix procedure:**
 
-1. Run `npm run validate` to reproduce.
+1. Run `cd "$project_root" && npm run validate` to reproduce.
 1. Edit the file at `Path` to resolve the error using the minimum
    change that preserves existing behaviour.
-1. Re-run `npm run validate` and confirm zero new errors.
-1. Run `npm test` to confirm no test regressions.
+1. Re-run `cd "$project_root" && npm run validate` and confirm zero new errors.
+1. Run `cd "$project_root" && npm test` to confirm no test regressions.
 
 ### `architecture-mismatch`
 
@@ -123,7 +129,7 @@ A module or exported function has no corresponding test.
 1. Create or extend the matching test file under `__tests__/` following the
    existing test structure.
 1. Write tests covering the normal path and any documented edge cases.
-1. Run `npm run test:coverage` and confirm the new code is covered.
+1. Run `cd "$project_root" && npm run test:coverage` and confirm the new code is covered.
 
 ### `docs-outdated`
 
@@ -172,7 +178,7 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 ## Updating the project roadmap
 
 After all issues have been processed (status `done` or `skipped`), append
-the results to `ROADMAP.md` under a
+the results to `$project_root/ROADMAP.md` under a
 `## Roadmap — Minor Issues` section (create if absent):
 
 ```markdown
@@ -207,7 +213,7 @@ Print a console summary when all issues have been processed:
   Total:   N
 
 plan.md updated — all issues are now done or skipped.
-Roadmap updated in ROADMAP.md.
+Roadmap updated in $project_root/ROADMAP.md.
 ```
 
 ## What NOT to do
@@ -221,7 +227,7 @@ Roadmap updated in ROADMAP.md.
 
 ## Related files
 
-- `.ai_workflow/plan.md` — input: structured issue list from `validate-logs`
-- `ROADMAP.md` — output: roadmap updated with results
+- `$project_root/.ai_workflow/plan.md` — input: structured issue list from `validate-logs`
+- `$project_root/ROADMAP.md` — output: roadmap updated with results
 - `.github/skills/validate-logs/SKILL.md` — the upstream skill that creates plan.md
 - `.github/SKILLS.md` — skills index for this project

@@ -3,12 +3,18 @@ name: audit-and-fix
 description: >
   Orchestrate the full log-audit pipeline in a single pass: run
   verify-workflow-efficacy to confirm the ai_workflow.js run produced
-  meaningful output, then run validate-logs to produce .ai_workflow/plan.md,
+  meaningful output, then run validate-logs to produce $project_root/.ai_workflow/plan.md,
   then immediately run fix-log-issues to apply every confirmed fix and update
   the project roadmap, then run purge-workflow-logs to clean up all transient
   artefacts. Use this skill when asked to audit and fix workflow logs
   end-to-end, or any time you want all steps executed without a manual
   handoff between them.
+parameters:
+  project_root:
+    description: >
+      Root directory of the project to operate on.
+      Defaults to the current GitHub Copilot CLI working directory.
+    default: $PWD
 ---
 
 # audit-and-fix
@@ -24,7 +30,7 @@ pipeline back-to-back:
 │                                                               │
 │  0. verify-workflow-efficacy ──►  efficacy report + gate      │
 │                                      ▼                        │
-│  1. validate-logs      ──►  .ai_workflow/plan.md              │
+│  1. validate-logs      ──►  $project_root/.ai_workflow/plan.md              │
 │                                      ▼                        │
 │  2. fix-log-issues     ──►  fixes applied + roadmap updated   │
 │                                      ▼                        │
@@ -39,12 +45,12 @@ conditions that apply when running them together.
 
 ## Prerequisites
 
-- `.ai_workflow/logs/` must exist and contain at least one workflow run
+- `$project_root/.ai_workflow/logs/` must exist and contain at least one workflow run
   directory. If it is empty or absent, abort with:
 
   ```
   ✗ audit-and-fix aborted — no workflow run directories found under
-    .ai_workflow/logs/. Run a workflow first, then retry.
+    $project_root/.ai_workflow/logs/. Run a workflow first, then retry.
   ```
 
 ## Execution order
@@ -53,6 +59,8 @@ conditions that apply when running them together.
 
 Execute the full `verify-workflow-efficacy` skill as documented in
 `.github/skills/verify-workflow-efficacy/SKILL.md`.
+
+> **Note:** Pass `project_root` to the sub-skill.
 
 **Expected outcome:** An efficacy report is printed to the console and the
 run is classified as **High**, **Medium**, or **Low**.
@@ -78,7 +86,9 @@ For Medium efficacy, print a caution notice:
 Execute the full `validate-logs` skill as documented in
 `.github/skills/validate-logs/SKILL.md`.
 
-**Expected outcome:** `.ai_workflow/plan.md` exists and contains one or more
+> **Note:** Pass `project_root` to the sub-skill.
+
+**Expected outcome:** `$project_root/.ai_workflow/plan.md` exists and contains one or more
 issue blocks.
 
 **Abort condition:** If `validate-logs` produces a `plan.md` with zero
@@ -96,7 +106,9 @@ a success notice and stop — there is nothing for Phase 2 to do:
 Execute the full `fix-log-issues` skill as documented in
 `.github/skills/fix-log-issues/SKILL.md`.
 
-Read `.ai_workflow/plan.md` (written in Phase 1) and process every `open`
+> **Note:** Pass `project_root` to the sub-skill.
+
+Read `$project_root/.ai_workflow/plan.md` (written in Phase 1) and process every `open`
 issue.
 
 **Expected outcome:** All issues are `done` or `skipped`, roadmap updated,
@@ -107,8 +119,10 @@ all commits pushed.
 Execute the full `purge-workflow-logs` skill as documented in
 `.github/skills/purge-workflow-logs/SKILL.md`.
 
-**Expected outcome:** `.ai_workflow/logs/`, `.ai_workflow/backlog/`, and
-`.ai_workflow/summaries/` are deleted. `plan.md` and all other `.ai_workflow/`
+> **Note:** Pass `project_root` to the sub-skill.
+
+**Expected outcome:** `$project_root/.ai_workflow/logs/`, `$project_root/.ai_workflow/backlog/`, and
+`$project_root/.ai_workflow/summaries/` are deleted. `plan.md` and all other `$project_root/.ai_workflow/`
 content are retained.
 
 **Note:** Phase 3 always runs after Phase 2 completes (or is skipped due to
@@ -135,7 +149,7 @@ Print a consolidated summary after all four phases complete:
   Phase 1 — validate-logs:            N issue(s) written to plan.md
   Phase 2 — fix-log-issues:           N fixed  |  N skipped
   Phase 3 — purge-workflow-logs:      logs/, backlog/, summaries/ removed
-  Roadmap updated: ROADMAP.md
+  Roadmap updated: $project_root/ROADMAP.md
 ```
 
 ## Related files
@@ -144,6 +158,6 @@ Print a consolidated summary after all four phases complete:
 - `.github/skills/validate-logs/SKILL.md` — Phase 1 skill
 - `.github/skills/fix-log-issues/SKILL.md` — Phase 2 skill
 - `.github/skills/purge-workflow-logs/SKILL.md` — Phase 3 skill
-- `.ai_workflow/plan.md` — intermediate handoff artifact
-- `ROADMAP.md` — final roadmap destination
+- `$project_root/.ai_workflow/plan.md` — intermediate handoff artifact
+- `$project_root/ROADMAP.md` — final roadmap destination
 - `.github/SKILLS.md` — skills index for this project
