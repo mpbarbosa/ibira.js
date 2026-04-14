@@ -176,7 +176,7 @@ Goal: let consumers customise the request/response pipeline.
 - [x] **Async error propagation audit** — all `fetch` call sites in `IbiraAPIFetcher` and `IbiraAPIFetchManager` confirmed to have explicit `try/catch`; error surfaces to caller via `throw`; documented in JSDoc `@throws`
 - [ ] **Result/Either pattern for fetch operations** — replace throw-based error handling with `Result<T, E> = { ok: true; value: T } | { ok: false; error: E }` for explicit, type-safe error paths; consumers no longer need try/catch at call sites
 - [ ] **Runtime API response validation** — integrate a validation library (Zod or io-ts) to narrow `unknown` API responses to typed shapes at runtime; prevents type assertion bugs from unpredictable external payloads
-- [x] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — `DefaultEventNotifier` now delegates to `DualObserverSubject` (v0.12.15-alpha) from the `bessa_patterns.ts` project via composition; bundled into the ibira.js dist (zero peer dependencies) via `noExternal` tsup config. CDN URL: `https://cdn.jsdelivr.net/gh/mpbarbosa/bessa_patterns.ts@v0.12.15-alpha/dist/index.mjs`
+- [x] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — `DefaultEventNotifier` now delegates to `DualObserverSubject` (v0.12.16-alpha) from the `bessa_patterns.ts` project via composition; bundled into the ibira.js dist (zero peer dependencies) via `noExternal` tsup config. CDN URL: `https://cdn.jsdelivr.net/gh/mpbarbosa/bessa_patterns.ts@v0.12.16-alpha/dist/index.mjs`
 
 ---
 

@@ -106,6 +106,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "bessa_patterns.ts": "github:mpbarbosa/bessa_patterns.ts#v0.12.15-alpha"
+    "bessa_patterns.ts": "github:mpbarbosa/bessa_patterns.ts#v0.12.16-alpha"
   }
 }
