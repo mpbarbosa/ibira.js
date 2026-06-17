@@ -52,7 +52,7 @@ Low-priority housekeeping items that improve contributor experience without chan
   Jest matchers (`toBeUndefined`, `toBeNull`, `toHaveLength`, `toBeInstanceOf`, `toHaveBeenCalledTimes`,
   `toHaveBeenCalledWith`) over generic `toEqual`; use `.resolves`/`.rejects` for async assertions;
   ensure all mocks and timers are reset in `afterEach` for test isolation
-- [ ] **Integration & e2e test layer** — the current suite is unit-heavy (6 files, 1 directory);
+- [x] **Integration & e2e test layer** — the current suite is unit-heavy (6 files, 1 directory);
   add integration tests covering cross-module flows (`IbiraAPIFetchManager` ↔ `DefaultCache` ↔
   `DefaultEventNotifier`) and at least one e2e scenario exercising the full fetch-cache-notify
   pipeline; maintain the test pyramid (unit → integration → e2e) as the codebase grows
