@@ -178,6 +178,96 @@ Goal: let consumers customise the request/response pipeline.
 - [ ] **Runtime API response validation** — integrate a validation library (Zod or io-ts) to narrow `unknown` API responses to typed shapes at runtime; prevents type assertion bugs from unpredictable external payloads
 - [x] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — `DefaultEventNotifier` now delegates to `DualObserverSubject` (v0.12.15-alpha) from the `bessa_patterns.ts` project via composition; bundled into the ibira.js dist (zero peer dependencies) via `noExternal` tsup config. CDN URL: `https://cdn.jsdelivr.net/gh/mpbarbosa/bessa_patterns.ts@v0.12.15-alpha/dist/index.mjs`
 
+### Resilience patterns
+
+Goal: add production-grade resilience to the request pipeline, closing the gap between ibira.js and battle-tested HTTP clients used in server-side applications.
+
+#### Circuit breaker
+
+A circuit breaker sits above the retry loop and prevents the library from hammering an unreachable
+upstream. It tracks consecutive failures per URL, opens the circuit after a configurable threshold,
+and probes with a single request after a timeout before closing again.
+
+**Motivation:** the existing retry + exponential backoff strategy handles transient errors well, but
+it still fires all retries against a fully-down endpoint. A circuit breaker short-circuits after N
+consecutive failures, preserving resources and enabling immediate fallback to stale cache or a
+secondary data source — without waiting for all retry attempts to exhaust.
+
+**Design: standalone `CircuitBreakerManager` wrapper (preferred)**
+
+The frozen, immutable `IbiraAPIFetcher` is not the right home for mutable circuit state.
+`IbiraAPIFetchManager` already maintains per-URL fetcher instances, making it the natural anchor.
+The cleanest implementation is a thin wrapper that satisfies the same `fetch(url, options)`
+interface, keeps circuit state per URL in an internal `Map`, and delegates all actual fetching to
+an inner `IbiraAPIFetchManager` instance. Zero changes to existing classes; fully composable.
+
+```
+CircuitBreakerManager
+  ├─> breakers: Map<url, CircuitBreaker>   // per-URL state machines
+  └─> inner: IbiraAPIFetchManager          // existing fetch + cache + dedup layer
+```
+
+State machine (standard three-state model):
+
+```
+CLOSED ──(N consecutive failures)──> OPEN
+  ^                                    |
+  |                                 (timeout)
+  |                                    v
+  └──(M consecutive successes)── HALF-OPEN
+```
+
+**Deliverables:**
+
+- [ ] **`CircuitBreaker` state machine** (`src/resilience/CircuitBreaker.ts`, ~150 lines) —
+  pure class with no I/O; tracks `state: 'closed' | 'open' | 'half-open'`, `failureCount`,
+  `successCount`, `nextRetryTime`; exposes `canAttempt(): boolean`, `recordSuccess(): void`,
+  `recordFailure(error: Error): void`, `getState()`, `reset()`; configurable via
+  `CircuitBreakerConfig`:
+  - `failureThreshold: number` — consecutive failures before opening (default: `5`)
+  - `successThreshold: number` — consecutive successes in half-open before closing (default: `2`)
+  - `timeout: number` — milliseconds before transitioning open → half-open (default: `60000`)
+  - `onStateChange?: (from: CircuitState, to: CircuitState, url: string) => void` — optional
+    callback for monitoring / logging / metrics
+
+- [ ] **`CircuitBreakerManager` wrapper** (`src/resilience/CircuitBreakerManager.ts`, ~100 lines)
+  — wraps `IbiraAPIFetchManager`; on each `fetch(url, options)` call:
+  1. Looks up (or creates) the `CircuitBreaker` for that URL
+  2. If `!breaker.canAttempt()`, calls the optional `fallback(url)` callback or throws
+     `CircuitOpenError` (a typed subclass of `Error` carrying `url` and `retryAfter`)
+  3. Delegates to inner `IbiraAPIFetchManager.fetch()`
+  4. Calls `breaker.recordSuccess()` on resolution, `breaker.recordFailure(error)` on rejection
+  5. Re-throws the original error after recording
+  - Constructor accepts `inner: IbiraAPIFetchManager`, `config: CircuitBreakerConfig`, and an
+    optional `fallback?: (url: string) => unknown` for stale-cache or secondary-source strategies
+
+- [ ] **Observer events for state transitions** — reuse `DefaultEventNotifier` to emit
+  `'breaker-open'`, `'breaker-half-open'`, and `'breaker-closed'` events carrying
+  `{ url, failureCount, retryAfter? }` payload; wired via the `onStateChange` callback
+
+- [ ] **`CircuitOpenError`** (`src/resilience/CircuitOpenError.ts`) — typed `Error` subclass;
+  carries `url: string` and `retryAfter: number` (timestamp); lets consumers distinguish a
+  breaker-blocked call from a network error at the type level
+
+- [ ] **Public exports** — re-export `CircuitBreaker`, `CircuitBreakerManager`, `CircuitOpenError`,
+  `CircuitBreakerConfig` from `src/index.ts`; no changes to existing exports
+
+- [ ] **Tests** (`__tests__/CircuitBreaker.test.ts`, ~200 lines; `__tests__/CircuitBreakerManager.test.ts`,
+  ~150 lines) — cover:
+  - All state transitions (closed → open → half-open → closed and closed → open → half-open → open)
+  - Threshold counts: exact boundary (N-1 failures keep closed, N opens)
+  - Half-open probe: one success advances to closed; one failure returns to open
+  - `timeout` window with Jest fake timers
+  - Per-URL isolation: failure on URL-A does not affect URL-B
+  - `fallback` callback invoked when circuit is open
+  - `CircuitOpenError` carries correct `url` and `retryAfter`
+  - Observer events emitted on each state transition
+  - Integration: `CircuitBreakerManager` + real `IbiraAPIFetchManager` with mocked `fetch`
+
+- [ ] **`docs/CIRCUIT_BREAKER.md`** — usage guide with configuration reference, state diagram,
+  a worked example showing `fallback` serving stale cache, and guidance on tuning thresholds for
+  fast vs. slow external APIs
+
 ---
 
 ## 🎯 v1.0.0 — Stable Release
