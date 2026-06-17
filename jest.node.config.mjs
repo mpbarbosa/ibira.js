@@ -11,6 +11,7 @@
  */
 export default {
 	testEnvironment: 'node',
+	testPathIgnorePatterns: ['/node_modules/', '/__tests__/helpers\\.js$'],
 	transform: {
 		'^.+\\.ts$': 'ts-jest',
 		'^.+\\.js$': 'babel-jest',

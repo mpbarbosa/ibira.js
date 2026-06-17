@@ -1,4 +1,5 @@
-// ibira.js
+/* eslint-disable */
+// ibira.js — legacy pre-TypeScript source, kept for historical reference only
 // A JavaScript library for fetching and caching API data with observer pattern support.
 // JSON response handling and robust error management.
 // Version: 0.1.0-alpha

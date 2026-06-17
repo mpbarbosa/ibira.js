@@ -34,13 +34,303 @@ structure:
     - docs
   build_output: "dist"
 
+ai_personas:
+  enabled:
+    - async_performance_engineer  # API fetching, LRU cache, retry/backoff, deduplication, debounce/throttle — all async
+    - test_engineer               # Jest + Babel (jsdom + node), 75% coverage threshold enforced
+    - code_quality_analyst        # JavaScript code quality, anti-patterns, ESLint compliance
+    - documentation_expert        # 80% API doc coverage required; 14 docs/ files
+    - technical_writer            # Markdown docs (API.md, ARCHITECTURE.md, EXAMPLES.md, FAQ.md, etc.), CHANGELOG, README
+    - git_specialist              # Release workflow: deploy.sh, semver tagging, npm + jsDelivr CDN publish
+    - devops_engineer             # tsup.config.ts, babel.config.mjs, jest configs, .github/workflows/publish.yml
+    - dependency_analyst          # bessa_patterns.ts prod dep + full devDep suite audit
+    - architecture_reviewer       # IbiraAPIFetchManager, DefaultCache (LRU), DefaultEventNotifier, IbiraAPIFetcher architecture
+  disabled:
+    - typescript_reviewer         # JS-primary project (index.ts is only entry shim; core source is .js)
+    - security_expert             # Client-side fetch library; no server, no auth endpoints, no credential storage
+    - prompt_engineer             # Not an AI project
+    - ux_analyst                  # No UI (jsdom used for test harness only, not for rendering)
+    - accessibility_expert        # No HTML or DOM output
+    - aws_serverless_engineer     # No AWS resources
+    - api_designer                # API client/fetcher library — not an HTTP API server
+    - performance_engineer        # No frontend performance concerns; async_performance_engineer covers this project's needs
+
 workflow:
-  smart_execution: true
-  parallel_execution: true
-  ai_cache_enabled: true
-  auto_commit: false
-  multi_stage_pipeline: true
-  ml_optimize: false
+  settings:
+    smart_execution: true
+    parallel_execution: true
+    ai_cache_enabled: true
+    auto_commit: false
+    multi_stage_pipeline: true
+    ml_optimize: false
+
+  steps:
+    - id: step_00
+      name: "Pre-Analysis / Environment Scan"
+      file: "step_00.js"
+      description: "Scan project structure, detect project kind, validate environment"
+      phase: 1
+      enabled: true
+      can_parallelize: false
+      dependencies: []
+      ai_persona: documentation_expert
+
+    - id: step_01
+      name: "Documentation Analysis"
+      file: "step_01.js"
+      description: "Validate README, API.md, ARCHITECTURE.md, docs/ coverage against 80% threshold"
+      phase: 1
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_00]
+      ai_persona: documentation_expert
+
+    - id: step_02
+      name: "Consistency Analysis"
+      file: "step_02.js"
+      description: "Cross-check docs/code consistency; verify JSDoc matches implementation in src/"
+      phase: 1
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_01]
+      ai_persona: documentation_expert
+
+    - id: step_03
+      name: "Script Reference Analysis"
+      file: "step_03.js"
+      description: "Validate package.json scripts, tsup.config.ts, babel.config.mjs references"
+      phase: 1
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_00]
+      ai_persona: devops_engineer
+
+    - id: step_04
+      name: "Config Validation"
+      file: "step_04.js"
+      description: "Validate jest.config, tsconfig.json, eslint.config.mjs, .workflow-config.yaml"
+      phase: 1
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_00]
+      ai_persona: devops_engineer
+
+    - id: step_05
+      name: "Directory Structure Validation"
+      file: "step_05.js"
+      description: "Validate src/, __tests__/, test/, dist/ structure and module boundaries"
+      phase: 1
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_00]
+      ai_persona: architecture_reviewer
+
+    - id: step_06
+      name: "Integration Tests"
+      file: "step_06.js"
+      description: "Run Jest suite (jsdom + node environments); enforce 75% branch/line/function threshold"
+      phase: 2
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_03, step_04]
+      ai_persona: test_engineer
+
+    - id: step_07
+      name: "Coverage Report Generation"
+      file: "step_07.js"
+      description: "Generate coverage report; verify 75% threshold across IbiraAPIFetcher, DefaultCache, DefaultEventNotifier"
+      phase: 2
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_06]
+      ai_persona: test_engineer
+
+    - id: step_08
+      name: "Release Readiness Check"
+      file: "step_08.js"
+      description: "Validate version sync across package.json, src/config/version.js, README.md, docs/; CDN URL verification"
+      phase: 2
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_07]
+      ai_persona: git_specialist
+
+    - id: step_09
+      name: "Dependency Audit"
+      file: "step_09.js"
+      description: "Audit bessa_patterns.ts production dep and all devDeps for security issues and outdated versions"
+      phase: 2
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_00]
+      ai_persona: dependency_analyst
+
+    - id: step_10
+      name: "Code Quality Analysis"
+      file: "step_10.js"
+      description: "Run ESLint (eslint.config.mjs) against src/**/*.js; check for anti-patterns in fetcher/cache/notifier"
+      phase: 2
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_06]
+      ai_persona: code_quality_analyst
+
+    - id: step_11
+      name: "Context Optimization"
+      file: "step_11.js"
+      description: "Optimize AI context for subsequent steps using project analysis results"
+      phase: 2
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_01, step_02]
+      ai_persona: documentation_expert
+
+    - id: step_12
+      name: "Git Status Analysis"
+      file: "step_12.js"
+      description: "Analyze git diff, stage changes, validate conventional commit message format"
+      phase: 3
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_10]
+      ai_persona: git_specialist
+
+    - id: step_13
+      name: "Markdown Lint"
+      file: "step_13.js"
+      description: "Lint all 14 docs/ markdown files and README.md; enforce consistent style"
+      phase: 3
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_01]
+      ai_persona: technical_writer
+
+    - id: step_14
+      name: "Prompt Engineering Review"
+      file: "step_14.js"
+      description: "Review AI prompt structure and optimization for workflow effectiveness"
+      phase: 3
+      enabled: false
+      reason: "ibira.js is not an AI project; no AI prompt artifacts to review"
+      can_parallelize: true
+      dependencies: [step_11]
+      ai_persona: prompt_engineer
+
+    - id: step_15
+      name: "UX Analysis"
+      file: "step_15.js"
+      description: "UX and accessibility analysis for interactive interfaces"
+      phase: 3
+      enabled: false
+      reason: "Library with no UI; jsdom used only in test harness"
+      can_parallelize: true
+      dependencies: [step_10]
+      ai_persona: ux_analyst
+
+    - id: step_16
+      name: "Version Update"
+      file: "step_16.js"
+      description: "Bump semver version; sync across package.json, src/config/version.js, docs/, .workflow-config.yaml"
+      phase: 3
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_08, step_12]
+      ai_persona: git_specialist
+
+    - id: step_17
+      name: "Summary Generation"
+      file: "step_17.js"
+      description: "Generate workflow execution summary and backlog report"
+      phase: 3
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_16]
+      ai_persona: technical_writer
+
+    - id: step_18
+      name: "Debugging Analysis"
+      file: "step_18.js"
+      description: "Analyze async bugs in IbiraAPIFetcher (retry/backoff), DefaultCache (LRU eviction), DefaultEventNotifier"
+      phase: 2
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_06]
+      ai_persona: async_performance_engineer
+
+    - id: step_19
+      name: "TypeScript Review"
+      file: "step_19.js"
+      description: "Review index.ts entry shim and tsup.config.ts for type correctness"
+      phase: 2
+      enabled: false
+      reason: "JavaScript-primary project; TypeScript only used for build entry (index.ts) and bundler config (tsup)"
+      can_parallelize: true
+      dependencies: [step_10]
+      ai_persona: typescript_reviewer
+
+    - id: step_20
+      name: "Async Performance Review"
+      file: "step_20.js"
+      description: "Review async patterns: request deduplication, LRU eviction, observer notification chains, debounce/throttle, retry backoff — all performance-critical paths"
+      phase: 2
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_06]
+      ai_persona: async_performance_engineer
+
+    - id: step_21
+      name: "Architecture Review"
+      file: "step_21.js"
+      description: "Review IbiraAPIFetchManager/Fetcher/Cache/Notifier composition; bessa_patterns.ts integration pattern"
+      phase: 2
+      enabled: true
+      can_parallelize: true
+      dependencies: [step_05]
+      ai_persona: architecture_reviewer
+
+    - id: step_22
+      name: "Accessibility Review"
+      file: "step_22.js"
+      description: "HTML/CSS accessibility and WCAG compliance audit"
+      phase: 3
+      enabled: false
+      reason: "Zero-dependency async fetching library with no HTML/CSS layer"
+      can_parallelize: true
+      dependencies: [step_10]
+      ai_persona: accessibility_expert
+
+    - id: step_23
+      name: "Performance Review"
+      file: "step_23.js"
+      description: "Frontend rendering and load performance review"
+      phase: 3
+      enabled: false
+      reason: "Covered by async_performance_engineer; LRU cache performance is event-loop focused"
+      can_parallelize: true
+      dependencies: [step_10]
+      ai_persona: performance_engineer
+
+    - id: step_0b
+      name: "Bootstrap Documentation"
+      file: "step_0b.js"
+      description: "Bootstrap missing docs for new modules; generate JSDoc stubs for undocumented exports"
+      phase: 1
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_01]
+      ai_persona: documentation_expert
+
+    - id: step_0f
+      name: "Artifact Commit"
+      file: "step_0f.js"
+      description: "Commit all workflow outputs (backlog, metrics, logs) to repo"
+      phase: 3
+      enabled: true
+      can_parallelize: false
+      dependencies: [step_17]
+      ai_persona: git_specialist
+
+  # Legacy stages kept for backwards compatibility
   stages:
     quick:
       enabled: true

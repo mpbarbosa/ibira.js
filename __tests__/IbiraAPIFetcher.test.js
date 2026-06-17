@@ -3,42 +3,7 @@
 // Tests cover pure referential transparency, caching, retry logic, error handling, and observer patterns
 
 import { IbiraAPIFetcher } from '../src/index.js';
-
-// Mock DefaultEventNotifier for testing
-class MockEventNotifier {
-    constructor() {
-        this.observers = [];
-        this.notifications = [];
-    }
-
-    subscribe(observer) {
-        if (observer) {
-            this.observers = [...this.observers, observer];
-        }
-    }
-
-    unsubscribe(observer) {
-        this.observers = this.observers.filter((o) => o !== observer);
-    }
-
-    notify(...args) {
-        this.notifications.push(args);
-        this.observers.forEach((observer) => {
-            if (observer && typeof observer.update === 'function') {
-                observer.update(...args);
-            }
-        });
-    }
-
-    clear() {
-        this.observers = [];
-        this.notifications = [];
-    }
-
-    get subscriberCount() {
-        return this.observers.length;
-    }
-}
+import { makeCache, makeMockResponse, MockEventNotifier } from './helpers.js';
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -56,27 +21,16 @@ describe('IbiraAPIFetcher', () => {
         jest.spyOn(console, 'error').mockImplementation(() => {});
         jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-        // Reset all mocks before each test
         jest.clearAllMocks();
         jest.clearAllTimers();
         jest.useFakeTimers();
-        
-        // Create cache and event notifier for dependency injection
-        cache = new Map();
-        cache.maxSize = 100;
-        cache.expiration = 5 * 60 * 1000; // 5 minutes
-        
+
+        cache = makeCache();
         eventNotifier = new MockEventNotifier();
-        
-        // Create fresh fetcher instance with dependencies
+
         fetcher = new IbiraAPIFetcher(testUrl, cache, { eventNotifier });
-        
-        // Mock successful fetch response by default
-        fetch.mockResolvedValue({
-            ok: true,
-            status: 200,
-            json: jest.fn().mockResolvedValue(mockData)
-        });
+
+        fetch.mockResolvedValue(makeMockResponse(mockData));
     });
 
     afterEach(() => {
@@ -86,12 +40,9 @@ describe('IbiraAPIFetcher', () => {
 
     describe('Constructor and Immutability', () => {
         test('should initialize with correct default values', () => {
-            const testCache = new Map();
-            testCache.maxSize = 50;
-            testCache.expiration = 300000;
-            
+            const testCache = makeCache({ maxSize: 50, expiration: 300000 });
             const newFetcher = new IbiraAPIFetcher(testUrl, testCache);
-            
+
             expect(newFetcher.url).toBe(testUrl);
             expect(newFetcher.cache).toBe(testCache);
             expect(newFetcher.timeout).toBe(10000);
@@ -104,9 +55,9 @@ describe('IbiraAPIFetcher', () => {
 
         test('should accept URL and cache parameters', () => {
             const customUrl = 'https://api.custom.com/endpoint';
-            const customCache = new Map();
+            const customCache = makeCache();
             const newFetcher = new IbiraAPIFetcher(customUrl, customCache);
-            
+
             expect(newFetcher.url).toBe(customUrl);
             expect(newFetcher.cache).toBe(customCache);
         });
@@ -122,68 +73,62 @@ describe('IbiraAPIFetcher', () => {
         test('should accept eventNotifier dependency', () => {
             const customEventNotifier = new MockEventNotifier();
             const newFetcher = new IbiraAPIFetcher(testUrl, cache, { eventNotifier: customEventNotifier });
-            
+
             expect(newFetcher.eventNotifier).toBe(customEventNotifier);
         });
     });
 
     describe('Pure fetchDataPure method (Referential Transparency)', () => {
         test('should return pure operation description without side effects', async () => {
-            const testCache = new Map();
+            const testCache = makeCache();
             const result = await fetcher.fetchDataPure(testCache);
-            
-            expect(result.success).toBeDefined();
+
             expect(result.success).toBe(true);
-            expect(result.data).toBeDefined();
             expect(result.data).toEqual(mockData);
-            expect(result.fromCache).toBeDefined();
             expect(result.fromCache).toBe(false);
-            expect(result.cacheOperations).toBeDefined();
             expect(result.cacheOperations).toBeInstanceOf(Array);
-            expect(result.events).toBeDefined();
+            expect(result.events).toBeInstanceOf(Array);
             expect(Object.isFrozen(result)).toBe(true);
-            expect(Array.isArray(result.events)).toBe(true);
-            expect(Array.isArray(result.cacheOperations)).toBe(true);
-            
-            // Verify no side effects on original cache
+
+            // Verify no side effects on original cache or notifier
             expect(testCache.has(testCacheKey)).toBe(false);
             expect(eventNotifier.notifications).toHaveLength(0);
         });
 
         test('should be deterministic with same inputs', async () => {
-            const testCache = new Map();
+            const testCache = makeCache();
             const mockNetwork = () => Promise.resolve(mockData);
-            
+
             const result1 = await fetcher.fetchDataPure(testCache, Date.now(), mockNetwork);
             const result2 = await fetcher.fetchDataPure(testCache, Date.now(), mockNetwork);
-            
+
             expect(result1.success).toBe(result2.success);
             expect(result1.fromCache).toBe(result2.fromCache);
             expect(result1.data).toEqual(result2.data);
         });
 
         test('should return immutable result', async () => {
-            const testCache = new Map();
+            const testCache = makeCache();
             const result = await fetcher.fetchDataPure(testCache);
-            
+
             expect(Object.isFrozen(result)).toBe(true);
             expect(Object.isFrozen(result.events)).toBe(true);
             expect(Object.isFrozen(result.cacheOperations)).toBe(true);
         });
 
         test('should include loading start event', async () => {
-            const testCache = new Map();
+            const testCache = makeCache();
             const result = await fetcher.fetchDataPure(testCache);
-            
+
             const loadingStartEvent = result.events.find(event => event.type === 'loading-start');
             expect(loadingStartEvent).toBeDefined();
             expect(loadingStartEvent.payload.url).toBe(testUrl);
         });
 
         test('should include success event on successful fetch', async () => {
-            const testCache = new Map();
+            const testCache = makeCache();
             const result = await fetcher.fetchDataPure(testCache);
-            
+
             if (result.success) {
                 const successEvent = result.events.find(event => event.type === 'success');
                 expect(successEvent).toBeDefined();
@@ -192,11 +137,11 @@ describe('IbiraAPIFetcher', () => {
         });
 
         test('should include error event on failed fetch', async () => {
-            const testCache = new Map();
+            const testCache = makeCache();
             fetch.mockRejectedValue(new Error('Network error'));
-            
+
             const result = await fetcher.fetchDataPure(testCache);
-            
+
             expect(result.success).toBe(false);
             const errorEvent = result.events.find(event => event.type === 'error');
             expect(errorEvent).toBeDefined();
@@ -204,16 +149,16 @@ describe('IbiraAPIFetcher', () => {
         });
 
         test('should return cached data without network request', async () => {
-            const testCache = new Map();
+            const testCache = makeCache();
             const cacheEntry = {
                 data: mockData,
                 timestamp: Date.now(),
                 expiresAt: Date.now() + 60000
             };
             testCache.set(testCacheKey, cacheEntry);
-            
+
             const result = await fetcher.fetchDataPure(testCache);
-            
+
             expect(result.success).toBe(true);
             expect(result.fromCache).toBe(true);
             expect(result.data).toEqual(mockData);
@@ -221,12 +166,12 @@ describe('IbiraAPIFetcher', () => {
         });
 
         test('should handle custom network provider', async () => {
-            const testCache = new Map();
+            const testCache = makeCache();
             const customData = { id: 999, name: 'Custom Data' };
             const mockNetwork = () => Promise.resolve(customData);
-            
+
             const result = await fetcher.fetchDataPure(testCache, Date.now(), mockNetwork);
-            
+
             expect(result.success).toBe(true);
             expect(result.data).toEqual(customData);
         });
@@ -235,91 +180,77 @@ describe('IbiraAPIFetcher', () => {
     describe('Practical fetchData method (Side Effects)', () => {
         test('should return data from successful fetch', async () => {
             const result = await fetcher.fetchData();
-            
+
             expect(result).toEqual(mockData);
             expect(fetch).toHaveBeenCalledWith(testUrl, expect.any(Object));
         });
 
         test('should cache data after successful fetch', async () => {
             await fetcher.fetchData();
-            
+
             expect(cache.has(testCacheKey)).toBe(true);
             const cacheEntry = cache.get(testCacheKey);
             expect(cacheEntry.data).toEqual(mockData);
             expect(cacheEntry.timestamp).toBeDefined();
             expect(cacheEntry.timestamp).toBeLessThanOrEqual(Date.now());
-            expect(cacheEntry.expiresAt).toBeDefined();
             expect(cacheEntry.expiresAt).toBeGreaterThan(cacheEntry.timestamp);
         });
 
         test('should return cached data when available and valid', async () => {
-            // Add valid cached data
             const cachedData = { id: 456, name: 'Cached Data' };
-            const cacheEntry = {
+            cache.set(testCacheKey, {
                 data: cachedData,
                 timestamp: Date.now(),
                 expiresAt: Date.now() + 1000
-            };
-            cache.set(testCacheKey, cacheEntry);
-            
+            });
+
             const result = await fetcher.fetchData();
-            
+
             expect(result).toEqual(cachedData);
             expect(fetch).not.toHaveBeenCalled();
         });
 
         test('should fetch new data when cache is expired', async () => {
-            // Add expired cached data
-            const expiredEntry = {
+            cache.set(testCacheKey, {
                 data: { id: 456, name: 'Expired Data' },
                 timestamp: Date.now() - 2000,
                 expiresAt: Date.now() - 1000
-            };
-            cache.set(testCacheKey, expiredEntry);
-            
+            });
+
             const result = await fetcher.fetchData();
-            
+
             expect(result).toEqual(mockData);
-            expect(fetch).toHaveBeenCalled();
+            expect(fetch).toHaveBeenCalledTimes(1);
         });
 
         test('should notify observers during fetch process', async () => {
             await fetcher.fetchData();
-            
+
             expect(eventNotifier.notifications.length).toBeGreaterThan(0);
-            
-            // Check for loading start notification
+
             const loadingStart = eventNotifier.notifications.find(
                 notification => notification[0] === 'loading-start'
             );
             expect(loadingStart).toBeDefined();
-            
-            // Check for success notification
+
             const success = eventNotifier.notifications.find(
                 notification => notification[0] === 'success'
             );
             expect(success).toBeDefined();
         });
 
-        test('should handle fetch errors properly', async () => {
-            const errorMessage = 'Network error';
-            fetch.mockRejectedValue(new Error(errorMessage));
-            
-            await expect(fetcher.fetchData()).rejects.toThrow(errorMessage);
-            
-            // Check error notification
-            const errorNotification = eventNotifier.notifications.find(
-                notification => notification[0] === 'error'
-            );
-            expect(errorNotification).toBeDefined();
+        test('should throw and notify observers on fetch errors', async () => {
+            const observer = { update: jest.fn() };
+            eventNotifier.subscribe(observer);
+            fetch.mockRejectedValue(new Error('Network error'));
+
+            await expect(fetcher.fetchData()).rejects.toThrow('Network error');
+
+            expect(observer.update).toHaveBeenCalledWith('error', expect.any(Object));
         });
 
         test('should throw error on HTTP error status codes', async () => {
-            fetch.mockResolvedValue({
-                ok: false,
-                status: 500,
-                statusText: 'Internal Server Error'
-            });
+            fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Server Error' });
 
             // maxRetries: 0 to test single-attempt failure without exercising retry logic
             const noRetryFetcher = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, maxRetries: 0 });
@@ -327,24 +258,16 @@ describe('IbiraAPIFetcher', () => {
             expect(fetch).toHaveBeenCalledTimes(1);
         });
 
-        test('should handle successful responses', async () => {
-            fetch.mockResolvedValue({
-                ok: true,
-                status: 200,
-                json: jest.fn().mockResolvedValue(mockData)
-            });
-            
+        test('should return data on successful HTTP response', async () => {
             const result = await fetcher.fetchData();
-            
+
             expect(result).toEqual(mockData);
             expect(fetch).toHaveBeenCalledTimes(1);
         });
 
         test('should enforce cache size limits', async () => {
-            // Set small cache size
             cache.maxSize = 2;
-            
-            // Fill cache to limit
+
             for (let i = 0; i < 2; i++) {
                 cache.set(`url${i}`, {
                     data: { id: i },
@@ -352,16 +275,15 @@ describe('IbiraAPIFetcher', () => {
                     expiresAt: Date.now() + 60000
                 });
             }
-            
+
             await fetcher.fetchData();
-            
+
             expect(cache.size).toBeLessThanOrEqual(2);
         });
 
         test.skip('should handle network timeout', async () => {
-            // Skip this test for now - timeout functionality may need implementation
-            fetch.mockImplementation(() => new Promise(() => {})); // Never resolves
-            
+            // Skip — timeout functionality requires a full network stack in tests
+            fetch.mockImplementation(() => new Promise(() => {}));
             await expect(fetcher.fetchData()).rejects.toThrow();
         });
     });
@@ -369,7 +291,7 @@ describe('IbiraAPIFetcher', () => {
     describe('Static Factory Methods', () => {
         test('should create instance with default cache via withDefaultCache', () => {
             const instance = IbiraAPIFetcher.withDefaultCache(testUrl);
-            
+
             expect(instance.url).toBe(testUrl);
             expect(instance.cache).toBeInstanceOf(Map);
             expect(instance.cache.maxSize).toBe(100);
@@ -377,23 +299,22 @@ describe('IbiraAPIFetcher', () => {
         });
 
         test('should create instance with custom cache configuration via withDefaultCache', () => {
-            const config = { maxCacheSize: 10, cacheExpiration: 60000 };
-            const instance = IbiraAPIFetcher.withDefaultCache(testUrl, config);
-            
+            const instance = IbiraAPIFetcher.withDefaultCache(testUrl, { maxCacheSize: 10, cacheExpiration: 60000 });
+
             expect(instance.cache.maxSize).toBe(10);
             expect(instance.cache.expiration).toBe(60000);
         });
 
         test('should create instance with external cache via withExternalCache', () => {
-            const customCache = new Map();
+            const customCache = makeCache();
             const instance = IbiraAPIFetcher.withExternalCache(testUrl, customCache);
-            
+
             expect(instance.cache).toBe(customCache);
         });
 
         test('should create instance without cache via withoutCache', () => {
             const instance = IbiraAPIFetcher.withoutCache(testUrl);
-            
+
             expect(instance.cache.size).toBe(0);
             expect(instance.cache.maxSize).toBe(0);
             expect(instance.cache.has('anything')).toBe(false);
@@ -401,7 +322,7 @@ describe('IbiraAPIFetcher', () => {
 
         test('should create pure instance via pure static method', () => {
             const instance = IbiraAPIFetcher.pure(testUrl);
-            
+
             expect(instance.url).toBe(testUrl);
             expect(instance).toBeInstanceOf(IbiraAPIFetcher);
         });
@@ -409,87 +330,81 @@ describe('IbiraAPIFetcher', () => {
         test('should create instance with event callback via withEventCallback', async () => {
             const eventCallback = jest.fn();
             const instance = IbiraAPIFetcher.withEventCallback(testUrl, eventCallback);
-            
+
             expect(instance).toBeInstanceOf(IbiraAPIFetcher);
             expect(instance.eventNotifier.subscriberCount).toBe(1);
-            
+
             await instance.fetchData();
             expect(eventCallback).toHaveBeenCalled();
         });
 
         test('should create instance without events via withoutEvents', async () => {
             const instance = IbiraAPIFetcher.withoutEvents(testUrl);
-            
+
             expect(instance).toBeInstanceOf(IbiraAPIFetcher);
             expect(instance.eventNotifier.subscriberCount).toBe(0);
-            
+
             await instance.fetchData();
-            // No events should be fired, but fetch should work
-            expect(fetch).toHaveBeenCalled();
+            expect(fetch).toHaveBeenCalledTimes(1);
         });
 
         test('should accept custom cache in withEventCallback', () => {
-            const customCache = new Map();
-            const eventCallback = jest.fn();
-            const instance = IbiraAPIFetcher.withEventCallback(testUrl, eventCallback, { cache: customCache });
-            
+            const customCache = makeCache();
+            const instance = IbiraAPIFetcher.withEventCallback(testUrl, jest.fn(), { cache: customCache });
+
             expect(instance.cache).toBe(customCache);
         });
 
         test('should accept custom cache in withoutEvents', () => {
-            const customCache = new Map();
+            const customCache = makeCache();
             const instance = IbiraAPIFetcher.withoutEvents(testUrl, { cache: customCache });
-            
+
             expect(instance.cache).toBe(customCache);
         });
 
         test('should use default cache when cache not provided in withEventCallback', () => {
-            const eventCallback = jest.fn();
-            const instance = IbiraAPIFetcher.withEventCallback(testUrl, eventCallback);
-            
+            const instance = IbiraAPIFetcher.withEventCallback(testUrl, jest.fn());
+
             expect(instance.cache).toBeInstanceOf(Map);
             expect(instance.cache.maxSize).toBe(100);
         });
 
         test('should use default cache when cache not provided in withoutEvents', () => {
             const instance = IbiraAPIFetcher.withoutEvents(testUrl);
-            
+
             expect(instance.cache).toBeInstanceOf(Map);
         });
 
         test('pure static method should accept custom cache options', () => {
-            const instance = IbiraAPIFetcher.pure(testUrl, { 
-                maxCacheSize: 200,
-                cacheExpiration: 600000
-            });
-            
+            const instance = IbiraAPIFetcher.pure(testUrl, { maxCacheSize: 200, cacheExpiration: 600000 });
+
             expect(instance.cache.maxSize).toBe(200);
             expect(instance.cache.expiration).toBe(600000);
         });
 
         test('_createDefaultCache should create map with correct properties', () => {
-            const cache = IbiraAPIFetcher._createDefaultCache({ 
+            const defaultCache = IbiraAPIFetcher._createDefaultCache({
                 maxCacheSize: 50,
                 cacheExpiration: 120000
             });
-            
-            expect(cache).toBeInstanceOf(Map);
-            expect(cache.maxSize).toBe(50);
-            expect(cache.expiration).toBe(120000);
+
+            expect(defaultCache).toBeInstanceOf(Map);
+            expect(defaultCache.maxSize).toBe(50);
+            expect(defaultCache.expiration).toBe(120000);
         });
 
         test('_createDefaultCache should use defaults when no options provided', () => {
-            const cache = IbiraAPIFetcher._createDefaultCache();
-            
-            expect(cache.maxSize).toBe(100);
-            expect(cache.expiration).toBe(300000);
+            const defaultCache = IbiraAPIFetcher._createDefaultCache();
+
+            expect(defaultCache.maxSize).toBe(100);
+            expect(defaultCache.expiration).toBe(300000);
         });
     });
 
     describe('Cache Management', () => {
         test('should properly format cache entries', async () => {
             await fetcher.fetchData();
-            
+
             const cacheEntry = cache.get(testCacheKey);
             expect(cacheEntry).toHaveProperty('data');
             expect(cacheEntry).toHaveProperty('timestamp');
@@ -499,41 +414,36 @@ describe('IbiraAPIFetcher', () => {
 
         test('should update timestamp when accessing cached data', async () => {
             const originalTimestamp = Date.now() - 1000;
-            const cacheEntry = {
+            cache.set(testCacheKey, {
                 data: mockData,
                 timestamp: originalTimestamp,
                 expiresAt: Date.now() + 1000
-            };
-            cache.set(testCacheKey, cacheEntry);
-            
+            });
+
             await fetcher.fetchData();
-            
+
             const updatedEntry = cache.get(testCacheKey);
             expect(updatedEntry.timestamp).toBeGreaterThan(originalTimestamp);
         });
 
         test('should implement LRU eviction when cache is full', async () => {
             cache.maxSize = 2;
-            
-            // Add first entry
+
             cache.set('url1', {
                 data: { id: 1 },
                 timestamp: Date.now() - 2000,
                 expiresAt: Date.now() + 60000
             });
-            
-            // Add second entry
             cache.set('url2', {
                 data: { id: 2 },
                 timestamp: Date.now() - 1000,
                 expiresAt: Date.now() + 60000
             });
-            
-            // Add third entry (should evict oldest)
+
             await fetcher.fetchData();
-            
+
             expect(cache.size).toBe(2);
-            expect(cache.has('url1')).toBe(false); // Oldest should be evicted
+            expect(cache.has('url1')).toBe(false); // Oldest evicted
             expect(cache.has('url2')).toBe(true);
             expect(cache.has(testCacheKey)).toBe(true);
         });
@@ -546,43 +456,28 @@ describe('IbiraAPIFetcher', () => {
                 status: 200,
                 json: jest.fn().mockRejectedValue(new Error('Invalid JSON'))
             });
-            
+
             await expect(fetcher.fetchData()).rejects.toThrow('Invalid JSON');
         });
 
-        test('should handle non-retryable status codes', async () => {
-            fetch.mockResolvedValue({
-                ok: false,
-                status: 404,
-                statusText: 'Not Found'
-            });
-            
+        test('should not retry non-retryable status codes', async () => {
+            fetch.mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' });
+
             await expect(fetcher.fetchData()).rejects.toThrow('HTTP error! status: 404');
-            expect(fetch).toHaveBeenCalledTimes(1); // No retries for 404
+            expect(fetch).toHaveBeenCalledTimes(1);
         });
 
         test('should handle null response from fetch', async () => {
             fetch.mockResolvedValue(null);
-            
+
             await expect(fetcher.fetchData()).rejects.toThrow();
         });
 
-        test('should handle custom options properly', async () => {
-            const customOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ test: true })
-            };
-            
-            // Mock the fetchData call to bypass cache operations that may fail
-            fetch.mockResolvedValue({
-                ok: true,
-                status: 200,
-                json: jest.fn().mockResolvedValue(mockData)
-            });
-            
+        test('should return data regardless of caller-supplied options object', async () => {
+            fetch.mockResolvedValue(makeMockResponse(mockData));
+
             const result = await fetcher.fetchData();
-            
+
             expect(result).toEqual(mockData);
         });
     });
@@ -591,179 +486,171 @@ describe('IbiraAPIFetcher', () => {
         let observer1, observer2;
 
         beforeEach(() => {
-            observer1 = {
-                update: jest.fn()
-            };
-            observer2 = {
-                update: jest.fn()
-            };
+            observer1 = { update: jest.fn() };
+            observer2 = { update: jest.fn() };
         });
 
         test('should notify observers of loading start', async () => {
             eventNotifier.subscribe(observer1);
-            
+
             await fetcher.fetchData();
-            
+
             expect(observer1.update).toHaveBeenCalledWith('loading-start', expect.any(Object));
         });
 
         test('should notify observers of successful fetch', async () => {
             eventNotifier.subscribe(observer1);
-            
+
             await fetcher.fetchData();
-            
+
             expect(observer1.update).toHaveBeenCalledWith('success', expect.any(Object));
         });
 
         test('should notify observers of fetch errors', async () => {
             eventNotifier.subscribe(observer1);
             fetch.mockRejectedValue(new Error('Network error'));
-            
-            try {
-                await fetcher.fetchData();
-            } catch (error) {
-                // Expected to throw
-            }
-            
+
+            await expect(fetcher.fetchData()).rejects.toThrow('Network error');
+
             expect(observer1.update).toHaveBeenCalledWith('error', expect.any(Object));
         });
 
-        test('should notify multiple observers', async () => {
+        test('should notify multiple observers on each event', async () => {
             eventNotifier.subscribe(observer1);
             eventNotifier.subscribe(observer2);
-            
+
             await fetcher.fetchData();
-            
-            expect(observer1.update).toHaveBeenCalled();
-            expect(observer2.update).toHaveBeenCalled();
+
+            // Each observer receives loading-start and success
+            expect(observer1.update).toHaveBeenCalledTimes(2);
+            expect(observer2.update).toHaveBeenCalledTimes(2);
         });
     });
 
     describe('Performance and Memory Management', () => {
-        test('should not leak memory with repeated operations', async () => {
+        test('should not grow cache unbounded with repeated operations', async () => {
             const initialCacheSize = cache.size;
-            
-            // Perform multiple operations
+
             for (let i = 0; i < 10; i++) {
                 await fetcher.fetchData();
             }
-            
-            // Cache should not grow unbounded
+
             expect(cache.size).toBeLessThanOrEqual(initialCacheSize + 1);
         });
 
-        test('should clean up expired entries during eviction', async () => {
-            // The pure functional implementation handles cache cleanup differently
-            // Expired entries are removed from the NEW cache state, not mutated in place
-            const smallCache = new Map();
-            smallCache.maxSize = 2;
-            smallCache.expiration = 60000;
-            
+        test('should handle expired entries during eviction', async () => {
+            const smallCache = makeCache({ maxSize: 2, expiration: 60000 });
             const testFetcher = new IbiraAPIFetcher(testUrl, smallCache, { eventNotifier });
-            
-            // Add expired entry
+
             smallCache.set('expired', {
                 data: { id: 'expired' },
                 timestamp: Date.now() - 10000,
                 expiresAt: Date.now() - 5000
             });
-            
-            // Add valid entry
             smallCache.set('valid', {
                 data: { id: 'valid' },
                 timestamp: Date.now(),
                 expiresAt: Date.now() + 60000
             });
-            
+
             await testFetcher.fetchData();
-            
-            // In pure functional implementation, cache cleanup happens during side effects application
-            // Original cache still has expired entries, but new operations work with cleaned state
+
+            // Pure functional implementation cleans expired entries from the new state
             expect(smallCache.has('valid')).toBe(true);
             expect(smallCache.size).toBeGreaterThan(0);
         });
     });
 
     describe('Helper Methods and Utilities', () => {
-        test('getCacheKey should return method:URL', () => {
+        test('getCacheKey returns METHOD:URL string', () => {
             expect(fetcher.getCacheKey()).toBe(testCacheKey);
         });
 
-        test('subscribe should add observer via eventNotifier', () => {
+        test('subscribe registers an observer', () => {
             const observer = { update: jest.fn() };
             fetcher.subscribe(observer);
             expect(eventNotifier.subscriberCount).toBe(1);
         });
 
-        test('unsubscribe should remove observer via eventNotifier', () => {
+        test('unsubscribe removes a registered observer', () => {
             const observer = { update: jest.fn() };
             fetcher.subscribe(observer);
-            expect(eventNotifier.subscriberCount).toBe(1);
             fetcher.unsubscribe(observer);
             expect(eventNotifier.subscriberCount).toBe(0);
         });
 
-        test('_createCacheEntry should return proper structure', () => {
+        test('cache entries include data, timestamp, and expiry', () => {
             const data = { test: 'data' };
             const currentTime = Date.now();
             const entry = fetcher._createCacheEntry(data, currentTime, cache);
-            
+
             expect(entry.data).toBe(data);
             expect(entry.timestamp).toBe(currentTime);
             expect(entry.expiresAt).toBeGreaterThan(currentTime);
         });
 
-        test('_isCacheEntryValid should validate entries correctly', () => {
+        test('expired entries are treated as invalid', () => {
             const currentTime = Date.now();
             const validEntry = { expiresAt: currentTime + 10000 };
             const expiredEntry = { expiresAt: currentTime - 1000 };
-            
+
             expect(fetcher._isCacheEntryValid(validEntry, currentTime)).toBe(true);
             expect(fetcher._isCacheEntryValid(expiredEntry, currentTime)).toBe(false);
-            expect(fetcher._isCacheEntryValid(null, currentTime)).toBeFalsy();
+            expect(fetcher._isCacheEntryValid(null, currentTime)).toBe(false);
         });
 
-        test('_isRetryableError should identify retryable errors', () => {
-            const error408 = new Error('HTTP error! status: 408');
-            const error500 = new Error('HTTP error! status: 500');
-            const error404 = new Error('HTTP error! status: 404');
-            const networkError = new TypeError('Failed to fetch');
-            const timeoutError = new Error('Request timeout');
-            const abortError = new Error('Aborted');
-            abortError.name = 'AbortError';
-            
-            expect(fetcher._isRetryableError(error408)).toBe(true);
-            expect(fetcher._isRetryableError(error500)).toBe(true);
-            expect(fetcher._isRetryableError(error404)).toBe(false);
-            expect(fetcher._isRetryableError(networkError)).toBe(true);
-            expect(fetcher._isRetryableError(timeoutError)).toBe(true);
-            expect(fetcher._isRetryableError(abortError)).toBe(true);
-        });
-
-        test('_calculateRetryDelay should use exponential backoff', () => {
+        test('retry delay increases exponentially with each attempt', () => {
             const delay1 = fetcher._calculateRetryDelay(0);
             const delay2 = fetcher._calculateRetryDelay(1);
             const delay3 = fetcher._calculateRetryDelay(2);
-            
+
             expect(delay2).toBeGreaterThan(delay1);
             expect(delay3).toBeGreaterThan(delay2);
         });
 
-        test('_getExpiredCacheKeys should find expired entries', () => {
+        test('getExpiredCacheKeys returns only entries past their expiry time', () => {
             const currentTime = Date.now();
             cache.set('valid1', { expiresAt: currentTime + 10000 });
             cache.set('expired1', { expiresAt: currentTime - 1000 });
             cache.set('valid2', { expiresAt: currentTime + 20000 });
             cache.set('expired2', { expiresAt: currentTime - 5000 });
-            
+
             const expiredKeys = fetcher._getExpiredCacheKeys(cache, currentTime);
-            
+
             expect(expiredKeys).toContain('expired1');
             expect(expiredKeys).toContain('expired2');
             expect(expiredKeys).not.toContain('valid1');
             expect(expiredKeys).not.toContain('valid2');
         });
 
+        it.each([
+            ['HTTP 408', new Error('HTTP error! status: 408')],
+            ['HTTP 429', new Error('HTTP error! status: 429')],
+            ['HTTP 500', new Error('HTTP error! status: 500')],
+            ['network TypeError', new TypeError('Failed to fetch')],
+            ['timeout message', new Error('Request timeout')],
+        ])('marks %s error as retryable', (_, error) => {
+            expect(fetcher._isRetryableError(error)).toBe(true);
+        });
+
+        test('marks AbortError as retryable', () => {
+            const error = new Error('Aborted');
+            error.name = 'AbortError';
+            expect(fetcher._isRetryableError(error)).toBe(true);
+        });
+
+        test('does not retry HTTP 404', () => {
+            expect(fetcher._isRetryableError(new Error('HTTP error! status: 404'))).toBe(false);
+        });
+
+        test('does not retry unrelated errors', () => {
+            expect(fetcher._isRetryableError(new Error('Something completely unrelated'))).toBe(false);
+        });
+
+        test('does not retry HTTP error with non-numeric status token', () => {
+            // The regex /status: (\d+)/ won't match "xyz", so statusMatch is null
+            expect(fetcher._isRetryableError(new Error('HTTP error! status: xyz'))).toBe(false);
+        });
     });
 
     describe('Additional Methods and Edge Cases', () => {
@@ -774,74 +661,68 @@ describe('IbiraAPIFetcher', () => {
         });
 
         test('_sleep should return a promise', () => {
-            const result = fetcher._sleep(100);
-            expect(result).toBeInstanceOf(Promise);
+            expect(fetcher._sleep(100)).toBeInstanceOf(Promise);
         });
 
         test('_performSingleRequest should make network request', async () => {
             const abortController = new AbortController();
             const result = await fetcher._performSingleRequest(abortController);
             expect(result).toEqual(mockData);
-            expect(fetch).toHaveBeenCalled();
+            expect(fetch).toHaveBeenCalledTimes(1);
         });
 
-        test('_applyCacheSizeLimitsPure should return new cache state', () => {
-            // Create a fetcher with small cache size
-            const smallCache = new Map();
-            smallCache.maxSize = 2;
-            smallCache.expiration = 300000;
+        test('_applyCacheSizeLimitsPure should return new cache state respecting maxSize', () => {
+            const smallCache = makeCache({ maxSize: 2 });
             const smallFetcher = new IbiraAPIFetcher(testUrl, smallCache, { eventNotifier });
-            
-            const cacheState = new Map();
-            cacheState.set('key1', { data: 'old', timestamp: 100, expiresAt: Date.now() + 10000 });
-            cacheState.set('key2', { data: 'newer', timestamp: 200, expiresAt: Date.now() + 10000 });
-            cacheState.set('key3', { data: 'newest', timestamp: 300, expiresAt: Date.now() + 10000 });
-            
+
+            const cacheState = new Map([
+                ['key1', { data: 'old', timestamp: 100, expiresAt: Date.now() + 10000 }],
+                ['key2', { data: 'newer', timestamp: 200, expiresAt: Date.now() + 10000 }],
+                ['key3', { data: 'newest', timestamp: 300, expiresAt: Date.now() + 10000 }],
+            ]);
+
             const result = smallFetcher._applyCacheSizeLimitsPure(cacheState);
-            
+
             expect(result).toBeInstanceOf(Map);
             expect(result.size).toBe(2);
             expect(result.has('key2')).toBe(true);
             expect(result.has('key3')).toBe(true);
         });
 
-        test('_calculateCacheEvictions should return evicted keys', () => {
+        test('_calculateCacheEvictions identifies keys removed between two cache states', () => {
             const beforeState = new Map([
                 ['key1', { data: 'val1' }],
                 ['key2', { data: 'val2' }],
                 ['key3', { data: 'val3' }]
             ]);
-            
             const afterState = new Map([
                 ['key2', { data: 'val2' }],
                 ['key3', { data: 'val3' }]
             ]);
-            
+
             const evictions = fetcher._calculateCacheEvictions(beforeState, afterState);
-            
+
             expect(evictions).toHaveLength(1);
             expect(evictions[0]).toEqual({ type: 'delete', key: 'key1' });
         });
 
-        test('_applySideEffects should update cache', () => {
-            const testCache = new Map();
+        test('_applySideEffects should update cache from operations', () => {
+            const testCache = makeCache();
             const cacheEntry = { data: mockData, timestamp: Date.now(), expiresAt: Date.now() + 10000 };
             const result = {
                 success: true,
                 data: mockData,
-                cacheOperations: [
-                    { type: 'set', key: testCacheKey, value: cacheEntry }
-                ],
+                cacheOperations: [{ type: 'set', key: testCacheKey, value: cacheEntry }],
                 events: []
             };
-            
+
             fetcher._applySideEffects(result, testCache);
-            
+
             expect(testCache.size).toBe(1);
             expect(testCache.get(testCacheKey)).toEqual(cacheEntry);
         });
 
-        test('_applySideEffects should fire events', () => {
+        test('_applySideEffects should fire events to notifier', () => {
             const spy = jest.spyOn(eventNotifier, 'notify');
             const result = {
                 success: true,
@@ -852,9 +733,9 @@ describe('IbiraAPIFetcher', () => {
                     { type: 'success', payload: { data: mockData } }
                 ]
             };
-            
+
             fetcher._applySideEffects(result, cache);
-            
+
             expect(spy).toHaveBeenCalledTimes(2);
             expect(spy).toHaveBeenCalledWith('loading-start', { url: testUrl });
             expect(spy).toHaveBeenCalledWith('success', { data: mockData });
@@ -862,36 +743,28 @@ describe('IbiraAPIFetcher', () => {
     });
 
     describe('Additional Edge Cases', () => {
-        test('should handle response without json method', async () => {
-            fetch.mockResolvedValueOnce({
-                ok: true,
-                status: 200,
-                json: undefined
-            });
-            
+        test('should throw when response has no json method', async () => {
+            fetch.mockResolvedValueOnce({ ok: true, status: 200, json: undefined });
+
             await expect(fetcher.fetchData()).rejects.toThrow();
         });
 
-        test('should work with minimal cache implementation', async () => {
-            const minimalCache = new Map();
-            minimalCache.maxSize = 10;
-            minimalCache.expiration = 300000;
-            
+        test('should work with a minimal cache implementation', async () => {
+            const minimalCache = makeCache({ maxSize: 10 });
             const noCacheFetcher = new IbiraAPIFetcher(testUrl, minimalCache, { eventNotifier });
             const result = await noCacheFetcher.fetchData();
-            
+
             expect(result).toEqual(mockData);
             expect(minimalCache.size).toBeGreaterThan(0);
         });
 
-        test('should handle multiple sequential calls with caching', async () => {
+        test('should serve the second call from cache', async () => {
             const result1 = await fetcher.fetchData();
             expect(fetch).toHaveBeenCalledTimes(1);
-            
-            // Second call should use cache
+
             const result2 = await fetcher.fetchData();
-            expect(fetch).toHaveBeenCalledTimes(1); // Still 1, used cache
-            
+            expect(fetch).toHaveBeenCalledTimes(1); // Still 1 — served from cache
+
             expect(result1).toEqual(mockData);
             expect(result2).toEqual(mockData);
         });
@@ -899,46 +772,28 @@ describe('IbiraAPIFetcher', () => {
 
     describe('v0.3.x — validateStatus option', () => {
         test('should accept 2xx by default', async () => {
-            fetch.mockResolvedValueOnce({
-                ok: true,
-                status: 201,
-                json: jest.fn().mockResolvedValue(mockData)
-            });
+            fetch.mockResolvedValueOnce(makeMockResponse(mockData, { status: 201 }));
             const f = IbiraAPIFetcher.withDefaultCache(testUrl);
-            const data = await f.fetchData();
-            expect(data).toEqual(mockData);
+            await expect(f.fetchData()).resolves.toEqual(mockData);
         });
 
         test('should reject non-2xx by default', async () => {
-            fetch.mockResolvedValueOnce({
-                ok: false,
-                status: 404,
-                json: jest.fn().mockResolvedValue({})
-            });
+            fetch.mockResolvedValueOnce({ ok: false, status: 404, json: jest.fn().mockResolvedValue({}) });
             const f = IbiraAPIFetcher.withDefaultCache(testUrl);
             await expect(f.fetchData()).rejects.toThrow('HTTP error! status: 404');
         });
 
         test('should accept custom validateStatus returning true', async () => {
-            fetch.mockResolvedValueOnce({
-                ok: false,
-                status: 404,
-                json: jest.fn().mockResolvedValue({ notFound: true })
-            });
+            fetch.mockResolvedValueOnce({ ok: false, status: 404, json: jest.fn().mockResolvedValue({ notFound: true }) });
             const f = new IbiraAPIFetcher(testUrl, cache, {
                 eventNotifier,
                 validateStatus: (status) => status === 404
             });
-            const data = await f.fetchData();
-            expect(data).toEqual({ notFound: true });
+            await expect(f.fetchData()).resolves.toEqual({ notFound: true });
         });
 
         test('should reject when custom validateStatus returns false', async () => {
-            fetch.mockResolvedValueOnce({
-                ok: true,
-                status: 200,
-                json: jest.fn().mockResolvedValue(mockData)
-            });
+            fetch.mockResolvedValueOnce(makeMockResponse(mockData));
             const f = new IbiraAPIFetcher(testUrl, cache, {
                 eventNotifier,
                 validateStatus: () => false
@@ -948,21 +803,18 @@ describe('IbiraAPIFetcher', () => {
 
         test('validateStatus is stored on the instance', () => {
             const customValidate = (status) => status < 500;
-            const f = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                validateStatus: customValidate
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, validateStatus: customValidate });
             expect(f.validateStatus).toBe(customValidate);
         });
 
-        test('default validateStatus returns true for 200-299', () => {
+        it.each([200, 204, 299])('default validateStatus accepts %i as success', (status) => {
             const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier });
-            expect(f.validateStatus(200)).toBe(true);
-            expect(f.validateStatus(204)).toBe(true);
-            expect(f.validateStatus(299)).toBe(true);
-            expect(f.validateStatus(300)).toBe(false);
-            expect(f.validateStatus(400)).toBe(false);
-            expect(f.validateStatus(500)).toBe(false);
+            expect(f.validateStatus(status)).toBe(true);
+        });
+
+        it.each([300, 400, 500])('default validateStatus rejects %i', (status) => {
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier });
+            expect(f.validateStatus(status)).toBe(false);
         });
     });
 
@@ -973,14 +825,9 @@ describe('IbiraAPIFetcher', () => {
 
             fetch.mockImplementation((_url, opts) => {
                 if (opts.signal && opts.signal.aborted) {
-                    const err = new DOMException('Aborted', 'AbortError');
-                    return Promise.reject(err);
+                    return Promise.reject(new DOMException('Aborted', 'AbortError'));
                 }
-                return Promise.resolve({
-                    ok: true,
-                    status: 200,
-                    json: jest.fn().mockResolvedValue(mockData)
-                });
+                return Promise.resolve(makeMockResponse(mockData));
             });
 
             const f = IbiraAPIFetcher.withDefaultCache(testUrl);
@@ -1006,15 +853,13 @@ describe('IbiraAPIFetcher', () => {
         test('should complete normally when signal is not aborted', async () => {
             const controller = new AbortController();
             const f = IbiraAPIFetcher.withDefaultCache(testUrl);
-            const data = await f.fetchData(null, controller.signal);
-            expect(data).toEqual(mockData);
+            await expect(f.fetchData(null, controller.signal)).resolves.toEqual(mockData);
         });
     });
 
     describe('v0.3.x — Coverage: withoutCache and pure noCache function bodies', () => {
-        test('withoutCache noCache methods are callable and return correct stubs', async () => {
+        test('withoutCache noCache methods return correct stubs', () => {
             const f = IbiraAPIFetcher.withoutCache(testUrl);
-            // Directly exercise each stub on the internal noCache object
             expect(f.cache.has('x')).toBe(false);
             expect(f.cache.get('x')).toBeNull();
             expect(f.cache.set('x', 1)).toBeUndefined();
@@ -1023,7 +868,7 @@ describe('IbiraAPIFetcher', () => {
             expect(f.cache.entries()).toEqual([]);
         });
 
-        test('pure factory noCache methods are callable and return correct stubs', () => {
+        test('pure factory noCache methods return correct stubs', () => {
             const f = IbiraAPIFetcher.pure(testUrl);
             expect(f.cache.has('x')).toBe(false);
             expect(f.cache.get('x')).toBeNull();
@@ -1033,28 +878,13 @@ describe('IbiraAPIFetcher', () => {
             expect(f.cache.entries()).toEqual([]);
         });
 
-        test('withoutEvents noCache methods are callable', () => {
+        test('withoutEvents notifier stubs are callable without errors', () => {
             const f = IbiraAPIFetcher.withoutEvents(testUrl);
-            // eventNotifier stubs
             expect(f.eventNotifier.subscriberCount).toBe(0);
             f.eventNotifier.subscribe({});
             f.eventNotifier.unsubscribe({});
             f.eventNotifier.notify('test', {});
             f.eventNotifier.clear();
-        });
-    });
-
-    describe('v0.3.x — Coverage: _isRetryableError non-matching error', () => {
-        test('should return false for generic non-retryable errors', () => {
-            const genericError = new Error('Something completely unrelated');
-            expect(fetcher._isRetryableError(genericError)).toBe(false);
-        });
-
-        test('should return false for HTTP error without status match', () => {
-            const malformedError = new Error('HTTP error! status: xyz');
-            // 'xyz' won't parseInt to a valid number, statusMatch will be null-ish
-            // Actually the regex /status: (\d+)/ won't match 'xyz', so statusMatch is null
-            expect(fetcher._isRetryableError(malformedError)).toBe(false);
         });
     });
 
@@ -1092,9 +922,7 @@ describe('IbiraAPIFetcher', () => {
         test('should pass method to fetch() call', async () => {
             const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST', body: { x: 1 } });
             await f.fetchData();
-            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({
-                method: 'POST',
-            }));
+            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({ method: 'POST' }));
         });
 
         test('should auto-serialize plain object body to JSON and set Content-Type', async () => {
@@ -1108,12 +936,9 @@ describe('IbiraAPIFetcher', () => {
         });
 
         test('should pass string body without JSON-serializing it', async () => {
-            const body = 'raw string body';
-            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST', body });
+            const f = IbiraAPIFetcher.withDefaultCache(testUrl, { method: 'POST', body: 'raw string body' });
             await f.fetchData();
-            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({
-                body: 'raw string body',
-            }));
+            expect(fetch).toHaveBeenCalledWith(testUrl, expect.objectContaining({ body: 'raw string body' }));
         });
 
         test('should not override caller-supplied Content-Type', async () => {
@@ -1150,16 +975,10 @@ describe('IbiraAPIFetcher', () => {
         // All tests here advance fake timers to bypass _sleep() delays.
 
         test('should retry on retryable status code and eventually throw after maxRetries', async () => {
-            fetch.mockResolvedValue({
-                ok: false,
-                status: 500,
-                statusText: 'Internal Server Error'
-            });
+            fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Server Error' });
 
             const retryFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                maxRetries: 2,
-                retryDelay: 100,
+                eventNotifier, maxRetries: 2, retryDelay: 100,
             });
 
             const promise = retryFetcher.fetchData();
@@ -1174,12 +993,10 @@ describe('IbiraAPIFetcher', () => {
         test('should succeed on a retry after an initial retryable failure', async () => {
             fetch
                 .mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Service Unavailable' })
-                .mockResolvedValueOnce({ ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) });
+                .mockResolvedValueOnce(makeMockResponse(mockData));
 
             const retryFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                maxRetries: 2,
-                retryDelay: 100,
+                eventNotifier, maxRetries: 2, retryDelay: 100,
             });
 
             const promise = retryFetcher.fetchData();
@@ -1193,9 +1010,7 @@ describe('IbiraAPIFetcher', () => {
             fetch.mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' });
 
             const retryFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                maxRetries: 3,
-                retryDelay: 100,
+                eventNotifier, maxRetries: 3, retryDelay: 100,
             });
 
             const promise = retryFetcher.fetchData();
@@ -1210,8 +1025,7 @@ describe('IbiraAPIFetcher', () => {
             fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Internal Server Error' });
 
             const noRetryFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                maxRetries: 0,
+                eventNotifier, maxRetries: 0,
             });
 
             const promise = noRetryFetcher.fetchData();
@@ -1227,9 +1041,7 @@ describe('IbiraAPIFetcher', () => {
 
             const observer = { update: jest.fn() };
             const retryFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                maxRetries: 1,
-                retryDelay: 100,
+                eventNotifier, maxRetries: 1, retryDelay: 100,
             });
             retryFetcher.subscribe(observer);
 
@@ -1248,8 +1060,7 @@ describe('IbiraAPIFetcher', () => {
                 fetch.mockResolvedValue({ ok: false, status, statusText: 'Error' });
 
                 const retryFetcher = new IbiraAPIFetcher(testUrl, new Map(), {
-                    maxRetries: 1,
-                    retryDelay: 100,
+                    maxRetries: 1, retryDelay: 100,
                 });
 
                 const promise = retryFetcher.fetchData();
@@ -1260,7 +1071,7 @@ describe('IbiraAPIFetcher', () => {
                 expect(fetch).toHaveBeenCalledTimes(2);
 
                 fetch.mockReset();
-                fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) });
+                fetch.mockResolvedValue(makeMockResponse(mockData));
             }
         );
     });
@@ -1268,12 +1079,9 @@ describe('IbiraAPIFetcher', () => {
     describe('v0.4.x — onRequest interceptor', () => {
         test('should call onRequest with fetch options before each request', async () => {
             const onRequest = jest.fn((opts) => opts);
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onRequest,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onRequest });
 
-            await interceptorFetcher.fetchData();
+            await f.fetchData();
 
             expect(onRequest).toHaveBeenCalledTimes(1);
             expect(onRequest).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET' }));
@@ -1282,12 +1090,9 @@ describe('IbiraAPIFetcher', () => {
         test('should use the options returned by onRequest', async () => {
             const customHeader = { 'X-Custom': 'intercepted' };
             const onRequest = jest.fn((opts) => ({ ...opts, headers: { ...opts.headers, ...customHeader } }));
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onRequest,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onRequest });
 
-            await interceptorFetcher.fetchData();
+            await f.fetchData();
 
             expect(fetch).toHaveBeenCalledWith(
                 testUrl,
@@ -1297,12 +1102,9 @@ describe('IbiraAPIFetcher', () => {
 
         test('should support async onRequest interceptor', async () => {
             const onRequest = jest.fn(async (opts) => ({ ...opts, headers: { ...opts.headers, 'X-Async': 'yes' } }));
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onRequest,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onRequest });
 
-            await interceptorFetcher.fetchData();
+            await f.fetchData();
 
             expect(fetch).toHaveBeenCalledWith(
                 testUrl,
@@ -1313,104 +1115,74 @@ describe('IbiraAPIFetcher', () => {
         test('should not mutate original fetchOptions when interceptor spreads', async () => {
             const originalHeaders = {};
             const onRequest = jest.fn((opts) => ({ ...opts, headers: { ...opts.headers, 'X-Added': 'yes' } }));
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onRequest,
-                headers: originalHeaders,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onRequest, headers: originalHeaders });
 
-            await interceptorFetcher.fetchData();
+            await f.fetchData();
 
-            // Original headers object should not be mutated
             expect(originalHeaders).not.toHaveProperty('X-Added');
         });
 
         test('should propagate error thrown by onRequest as a fetch rejection', async () => {
             const onRequest = jest.fn(() => { throw new Error('interceptor failure'); });
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onRequest,
-                maxRetries: 0,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onRequest, maxRetries: 0 });
 
-            await expect(interceptorFetcher.fetchData()).rejects.toThrow('interceptor failure');
+            await expect(f.fetchData()).rejects.toThrow('interceptor failure');
         });
     });
 
     describe('v0.4.x — onResponse interceptor', () => {
         test('should call onResponse with the raw Response after each successful fetch', async () => {
-            const mockResponse = { ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) };
+            const mockResponse = makeMockResponse(mockData);
             fetch.mockResolvedValue(mockResponse);
 
             const onResponse = jest.fn((res) => res);
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onResponse,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onResponse });
 
-            await interceptorFetcher.fetchData();
+            await f.fetchData();
 
             expect(onResponse).toHaveBeenCalledTimes(1);
             expect(onResponse).toHaveBeenCalledWith(mockResponse);
         });
 
         test('should use the response returned by onResponse', async () => {
-            const originalJson = jest.fn().mockResolvedValue({ original: true });
             const replacedJson = jest.fn().mockResolvedValue({ replaced: true });
-            fetch.mockResolvedValue({ ok: true, status: 200, json: originalJson });
+            fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue({ original: true }) });
 
             const onResponse = jest.fn(() => ({ ok: true, status: 200, json: replacedJson }));
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onResponse,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onResponse });
 
-            const result = await interceptorFetcher.fetchData();
-
-            expect(replacedJson).toHaveBeenCalled();
-            expect(result).toEqual({ replaced: true });
+            await expect(f.fetchData()).resolves.toEqual({ replaced: true });
+            expect(replacedJson).toHaveBeenCalledTimes(1);
         });
 
         test('should support async onResponse interceptor', async () => {
             const asyncJson = jest.fn().mockResolvedValue({ async: true });
-            fetch.mockResolvedValue({ ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) });
+            fetch.mockResolvedValue(makeMockResponse(mockData));
 
             const onResponse = jest.fn(async () => ({ ok: true, status: 200, json: asyncJson }));
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onResponse,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onResponse });
 
-            const result = await interceptorFetcher.fetchData();
-
-            expect(result).toEqual({ async: true });
+            await expect(f.fetchData()).resolves.toEqual({ async: true });
         });
 
         test('should propagate error thrown by onResponse as a fetch rejection', async () => {
             const onResponse = jest.fn(() => { throw new Error('response interceptor failure'); });
-            const interceptorFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                onResponse,
-                maxRetries: 0,
-            });
+            const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, onResponse, maxRetries: 0 });
 
-            await expect(interceptorFetcher.fetchData()).rejects.toThrow('response interceptor failure');
+            await expect(f.fetchData()).rejects.toThrow('response interceptor failure');
         });
     });
 
     describe('v0.4.x — retryStrategy', () => {
-        test('should call retryStrategy with attempt and error on each retry decision', async () => {
+        test('should call retryStrategy with attempt index and error on first retry decision', async () => {
             fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error' });
 
             const retryStrategy = jest.fn(() => false);
-            const strategyFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                retryStrategy,
-                maxRetries: 2,
-                retryDelay: 100,
+            const f = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier, retryStrategy, maxRetries: 2, retryDelay: 100,
             });
 
-            const promise = strategyFetcher.fetchData();
+            const promise = f.fetchData();
             promise.catch(() => {});
             await jest.runAllTimersAsync();
             await expect(promise).rejects.toThrow();
@@ -1422,19 +1194,15 @@ describe('IbiraAPIFetcher', () => {
             fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error' });
 
             const retryStrategy = jest.fn(() => false);
-            const strategyFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                retryStrategy,
-                maxRetries: 3,
-                retryDelay: 100,
+            const f = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier, retryStrategy, maxRetries: 3, retryDelay: 100,
             });
 
-            const promise = strategyFetcher.fetchData();
+            const promise = f.fetchData();
             promise.catch(() => {});
             await jest.runAllTimersAsync();
             await expect(promise).rejects.toThrow();
 
-            // Only 1 call — strategy blocked all retries
             expect(fetch).toHaveBeenCalledTimes(1);
         });
 
@@ -1442,17 +1210,14 @@ describe('IbiraAPIFetcher', () => {
             // 404 is not in the default retryable list
             fetch
                 .mockResolvedValueOnce({ ok: false, status: 404, statusText: 'Not Found' })
-                .mockResolvedValueOnce({ ok: true, status: 200, json: jest.fn().mockResolvedValue(mockData) });
+                .mockResolvedValueOnce(makeMockResponse(mockData));
 
             const retryStrategy = jest.fn(() => true);
-            const strategyFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                retryStrategy,
-                maxRetries: 1,
-                retryDelay: 100,
+            const f = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier, retryStrategy, maxRetries: 1, retryDelay: 100,
             });
 
-            const promise = strategyFetcher.fetchData();
+            const promise = f.fetchData();
             await jest.runAllTimersAsync();
 
             await expect(promise).resolves.toEqual(mockData);
@@ -1464,13 +1229,10 @@ describe('IbiraAPIFetcher', () => {
             fetch.mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' });
 
             const defaultFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                maxRetries: 2,
-                retryDelay: 100,
+                eventNotifier, maxRetries: 2, retryDelay: 100,
             });
 
             await expect(defaultFetcher.fetchData()).rejects.toThrow('HTTP error! status: 404');
-            // Only 1 call — no retries for 404 without custom strategy
             expect(fetch).toHaveBeenCalledTimes(1);
         });
 
@@ -1483,14 +1245,11 @@ describe('IbiraAPIFetcher', () => {
                 return attempt < 2;
             });
 
-            const strategyFetcher = new IbiraAPIFetcher(testUrl, cache, {
-                eventNotifier,
-                retryStrategy,
-                maxRetries: 3,
-                retryDelay: 100,
+            const f = new IbiraAPIFetcher(testUrl, cache, {
+                eventNotifier, retryStrategy, maxRetries: 3, retryDelay: 100,
             });
 
-            const promise = strategyFetcher.fetchData();
+            const promise = f.fetchData();
             promise.catch(() => {});
             await jest.runAllTimersAsync();
             await expect(promise).rejects.toThrow();

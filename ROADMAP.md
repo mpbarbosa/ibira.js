@@ -45,7 +45,7 @@ Low-priority housekeeping items that improve contributor experience without chan
   AI workflow automation directory and explaining that its contents are tooling artifacts (not
   library code) so contributors know to leave it alone
 - [x] **Version consistency automation** — `scripts/sync-version.js` reads `package.json` and regenerates `src/config/version.ts` atomically; `npm run version:sync` and `npm run version:check` scripts added; `version:check` wired into `test:all` to catch drift in CI
-- [ ] **Test suite refactoring** — extract repeated setup (cache factories, URL constants, mock
+- [x] **Test suite refactoring** — extract repeated setup (cache factories, URL constants, mock
   observers) to shared helpers; convert parallel edge-case tests to `it.each` parameterised tables;
   rename any remaining implementation-focused test names to behaviour-focused names (e.g.
   "should store and retrieve null values" rather than "should handle null values"); prefer specific
