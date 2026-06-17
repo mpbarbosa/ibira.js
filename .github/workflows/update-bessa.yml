@@ -245,7 +245,7 @@ jobs:
       # ── 12. Open pull request ─────────────────────────────────────────────────
       - name: Create pull request
         if: steps.current.outputs.up_to_date != 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: chore/update-bessa-patterns-${{ steps.resolve.outputs.version }}
