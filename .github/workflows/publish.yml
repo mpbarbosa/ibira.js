@@ -36,6 +36,9 @@ jobs:
       - name: Run tests (Node.js)
         run: npm run test:node
 
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
   publish:
     name: Publish to npm
     needs: test

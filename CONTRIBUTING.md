@@ -36,13 +36,20 @@ npm run test:coverage  # coverage report
 
 See [`__tests__/README.md`](./__tests__/README.md) for full testing conventions.
 
+## Dependency management
+
+- **`package-lock.json` must be committed.** Always run `npm install` (not `yarn` or `pnpm`) and commit the updated `package-lock.json` together with any `package.json` change. CI runs `npm ci`, which requires the lock file to be present and consistent.
+- **Critical tooling is version-pinned.** `typescript`, `jest`, and `ts-jest` are pinned to exact versions in `package.json` (no `^`) so all contributors get identical builds. If you need to upgrade one of these, update the exact version and run `npm install` to regenerate the lock file.
+- **`npm audit` runs in CI.** High-severity vulnerabilities will fail the build. If a dependency introduces a vulnerability, address it before merging.
+
 ## Submitting Changes
 
 1. Fork the repository and create a feature branch.
 2. Make your changes, add tests, and confirm all tests pass.
 3. Run `npm run lint` — fix any reported errors before submitting.
 4. Run `npm run build` to verify TypeScript and dual CJS/ESM outputs.
-5. Open a pull request against `main` with a clear description of what changed and why.
+5. Run `npm audit` — resolve any high-severity findings before opening a PR.
+6. Open a pull request against `main` with a clear description of what changed and why.
 
 ## Architecture Overview
 

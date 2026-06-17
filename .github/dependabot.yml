@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      typescript-toolchain:
+        patterns:
+          - "typescript"
+          - "ts-jest"
+          - "@typescript-eslint/*"
+      jest:
+        patterns:
+          - "jest"
+          - "jest-*"
+          - "babel-jest"
+          - "@types/jest"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

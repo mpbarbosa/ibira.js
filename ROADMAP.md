@@ -68,7 +68,7 @@ Low-priority housekeeping items that improve contributor experience without chan
   `if (isNaN(major) || isNaN(minor) || isNaN(patch)) throw new Error(...)` so a malformed
   `package.json` version (e.g. `"x.y.z"`) produces a clear error instead of silently writing
   `NaN.NaN.NaN-alpha` to `version.ts`; main block wrapped in `try/catch` for clean stderr output
-- [ ] **Automated dependency management** _(step_09)_ — enable Dependabot or Renovate for automated
+- [x] **Automated dependency management** _(step_09)_ — enable Dependabot or Renovate for automated
   PR-based dependency updates; add `npm audit` as a CI step; document in `CONTRIBUTING.md` that
   `package-lock.json` must be committed; pin critical tooling versions (`typescript`, `jest`,
   `ts-jest`) for reproducible builds across contributors
