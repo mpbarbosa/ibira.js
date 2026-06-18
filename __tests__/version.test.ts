@@ -64,8 +64,7 @@ describe('VERSION semantic version object', () => {
 	});
 
 	it('should handle negative or large version numbers in toString()', () => {
-		expect(makeVersion({ major: -1, minor: 999, patch: 0 }).toString()).toBe(
-			`-1.999.0-${VERSION.prerelease}`,
-		);
+		const expected = expectedPrerelease ? `-1.999.0-${expectedPrerelease}` : '-1.999.0';
+		expect(makeVersion({ major: -1, minor: 999, patch: 0 }).toString()).toBe(expected);
 	});
 });
