@@ -1513,4 +1513,92 @@ describe('IbiraAPIFetcher', () => {
 			expect(data).toEqual(raw);
 		});
 	});
+
+	// ─── Coverage: no-op event interface (withEventCallback / withoutEvents) ────
+
+	describe('factory no-op event interfaces', () => {
+		test('withEventCallback subscribe and unsubscribe are safe no-ops', () => {
+			const observer = { update: jest.fn() };
+			const cb = jest.fn();
+			const f = IbiraAPIFetcher.withEventCallback(testUrl, cb);
+			expect(() => f.subscribe(observer)).not.toThrow();
+			expect(() => f.unsubscribe(observer)).not.toThrow();
+			// The callback itself should not have been invoked by subscribe/unsubscribe
+			expect(cb).not.toHaveBeenCalled();
+		});
+
+		test('withoutEvents subscribe, unsubscribe, and notifyObservers are safe no-ops', () => {
+			const observer = { update: jest.fn() };
+			const f = IbiraAPIFetcher.withoutEvents(testUrl);
+			expect(() => f.subscribe(observer)).not.toThrow();
+			expect(() => f.unsubscribe(observer)).not.toThrow();
+			expect(() => f.notifyObservers('test-event', {})).not.toThrow();
+			// No-op notify must not call the observer
+			expect(observer.update).not.toHaveBeenCalled();
+		});
+
+		test('pure() subscribe, unsubscribe, and notifyObservers are safe no-ops', () => {
+			const observer = { update: jest.fn() };
+			const f = IbiraAPIFetcher.pure(testUrl);
+			expect(() => f.subscribe(observer)).not.toThrow();
+			expect(() => f.unsubscribe(observer)).not.toThrow();
+			expect(() => f.notifyObservers('test-event', {})).not.toThrow();
+			expect(observer.update).not.toHaveBeenCalled();
+		});
+	});
+
+	// ─── Coverage: in-flight abort and timeout callbacks ─────────────────────────
+
+	describe('fetchDataPure — in-flight abort and timeout', () => {
+		const hangingFetch = (_url, opts) =>
+			new Promise((_, reject) => {
+				opts.signal?.addEventListener('abort', () =>
+					reject(new DOMException('Aborted', 'AbortError')),
+				);
+				// never resolves on its own
+			});
+
+		beforeEach(() => {
+			jest.useFakeTimers();
+		});
+
+		afterEach(() => {
+			jest.useRealTimers();
+		});
+
+		test('abort listener (non-pre-aborted signal) fires when signal aborted mid-flight', async () => {
+			global.fetch = jest.fn().mockImplementation(hangingFetch);
+			const controller = new AbortController();
+			const f = new IbiraAPIFetcher(testUrl, makeCache(), {
+				eventNotifier: new MockEventNotifier(),
+				maxRetries: 0,
+				timeout: 30_000,
+			});
+
+			const promise = f.fetchData(null, controller.signal);
+
+			// abort AFTER fetch has started — exercises the addEventListener path at
+			// line 634 in IbiraAPIFetcher.ts (not the pre-aborted branch)
+			controller.abort();
+			jest.runAllTimers();
+
+			await expect(promise).rejects.toThrow();
+		});
+
+		test('timeout callback fires when fetch hangs past configured timeout', async () => {
+			global.fetch = jest.fn().mockImplementation(hangingFetch);
+			const f = new IbiraAPIFetcher(testUrl, makeCache(), {
+				eventNotifier: new MockEventNotifier(),
+				maxRetries: 0,
+				timeout: 100,
+			});
+
+			const promise = f.fetchData();
+
+			// advance past the 100 ms timeout — fires the setTimeout callback at line 668
+			jest.advanceTimersByTime(200);
+
+			await expect(promise).rejects.toThrow();
+		});
+	});
 });

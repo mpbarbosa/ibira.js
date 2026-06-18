@@ -1,7 +1,7 @@
 # ibira.js Roadmap
 
-> **Current version:** 0.4.22-alpha — v0.4.x Beta Preparation in progress
-> **Status:** Active development — retry loop wired, `throttle`/`debounce` utilities shipped; several v0.4.x items remain
+> **Current version:** 0.4.45-alpha — v0.4.x Beta Preparation complete; v1.0.0 Stable Release in progress
+> **Status:** Active development — all v0.x features shipped and documented; circuit breaker, Result/Either, parseResponse, fetchSafe all live; 400 tests, 95%+ coverage on 3/4 metrics
 
 This roadmap evolves alongside the project. Priorities may shift based on feedback and usage patterns.
 
@@ -120,7 +120,7 @@ Low-priority housekeeping items that improve contributor experience without chan
 
 ---
 
-## 🔜 v0.4.x — Beta Preparation
+## ✅ v0.4.x — Beta Preparation (complete)
 
 Goal: make ibira.js usable beyond CDN delivery, including as an npm dependency for TypeScript projects.
 
@@ -274,9 +274,9 @@ CLOSED ──(N consecutive failures)──> OPEN
 
 Goal: production-ready, semantically stable public API.
 
-- [ ] All `v0.x` features finalised and documented
+- [x] All `v0.x` features finalised and documented
 - [x] Full TypeScript strict-mode compatibility
-- [ ] 95%+ test coverage across all metrics
+- [x] 95%+ test coverage across all metrics
 - [ ] Performance benchmarks published in `docs/`
 - [ ] **Performance monitoring hooks** — add optional hooks for observability metrics (fetch timing, cache hit/miss rate, retry counts) to support profiling and future scalability analysis
 - [ ] `MIGRATION.md` updated for any breaking changes from alpha
