@@ -157,7 +157,7 @@ scanning each file individually (see Step 3).
 For each file in the canonical list, determine whether it contains
 `PKG_VERSION` where expected. Collect mismatches into a report table:
 
-```
+```text
 File                         | Expected           | Found              | Status
 src/config/version.ts        | patch: 4           | patch: 1           | ✗ MISMATCH
 README.md                    | @0.4.20-alpha       | @0.4.3-alpha       | ✗ MISMATCH
@@ -281,7 +281,7 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 
 Print a structured summary after execution:
 
-```
+```text
 sync-version — ibira.js
 ════════════════════════════════════════════
 Canonical version: 0.4.20-alpha
@@ -305,7 +305,7 @@ Result: 1 fixed  |  8 already correct
 
 If no mismatches are found, print:
 
-```
+```text
 ✅  sync-version: all version strings already agree with package.json (0.4.20-alpha)
     No files were modified.
 ```

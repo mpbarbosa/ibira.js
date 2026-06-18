@@ -24,8 +24,8 @@ repository state.
 | ----------------------------------------------------- | ------------------ | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | [Update bessa_patterns.ts](#update-bessayml)          | `update-bessa.yml` | Weekly (Tue) / manual                  | Bump bessa_patterns.ts GitHub reference                                                         |
 | [Sync version strings](#sync-versionyml)              | `sync-version.yml` | Push to main (`package.json`) / manual | Propagate version from package.json to all files                                                |
-| [CDN Update](#cdn-updateyml)                          | `cdn-update.yml`   | Manual                                 | Update CDN delivery URLs                                                                        |
-| [Publish](#publishyml)                                | `publish.yml`      | Release / manual                       | Publish package                                                                                 |
+| [CDN Update](#cdn-update)                             | `cdn-update.yml`   | Manual                                 | Update CDN delivery URLs                                                                        |
+| [Publish](#publish)                                   | `publish.yml`      | Release / manual                       | Publish package                                                                                 |
 | [Verify workflow efficacy](#verify-workflow-efficacy) | _(Copilot skill)_  | Manual                                 | Assess the most recent ai_workflow.js run; produce an efficacy score (0–100)                    |
 | [Validate logs](#validate-logs)                       | _(Copilot skill)_  | Manual                                 | Validate `.ai_workflow/logs` against codebase; write `plan.md`                                  |
 | [Fix log issues](#fix-log-issues)                     | _(Copilot skill)_  | Manual (after validate-logs)           | Consume `plan.md`, apply fixes, update roadmap                                                  |
@@ -116,6 +116,8 @@ gh workflow run sync-version.yml
 ```
 
 ---
+
+## CDN Update
 
 **File:** `.github/workflows/cdn-update.yml`
 **Trigger:** Manual (`workflow_dispatch`)

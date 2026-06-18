@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint Markdown
+        run: npm run lint:md
+
       - name: Validate TypeScript
         run: npm run validate
 

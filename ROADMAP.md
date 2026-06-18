@@ -75,7 +75,7 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [x] **Prettier integration** — add `.prettierrc` config file and ensure ESLint and Prettier configs
       do not conflict (install `eslint-config-prettier`); document formatting step in `CONTRIBUTING.md`
       (`npm run format` script and `prettier` devDependency already added in v0.4.x)
-- [ ] **Markdown quality hardening** — 2786 linting violations remain across 43 docs after bulk-fixing
+- [x] **Markdown quality hardening** — 2786 linting violations remain across 43 docs after bulk-fixing
       trailing spaces (MD009) and final newlines (MD047); manually review and fix nested list indentation
       (MD007) and headers ending with punctuation (MD026); integrate `markdownlint-cli` as a pre-commit
       hook (Husky) and CI step to prevent regressions; add `docs/MARKDOWN_LINTING_GUIDE.md` for
@@ -201,7 +201,7 @@ The cleanest implementation is a thin wrapper that satisfies the same `fetch(url
 interface, keeps circuit state per URL in an internal `Map`, and delegates all actual fetching to
 an inner `IbiraAPIFetchManager` instance. Zero changes to existing classes; fully composable.
 
-```
+```text
 CircuitBreakerManager
   ├─> breakers: Map<url, CircuitBreaker>   // per-URL state machines
   └─> inner: IbiraAPIFetchManager          // existing fetch + cache + dedup layer
@@ -209,7 +209,7 @@ CircuitBreakerManager
 
 State machine (standard three-state model):
 
-```
+```text
 CLOSED ──(N consecutive failures)──> OPEN
   ^                                    |
   |                                 (timeout)

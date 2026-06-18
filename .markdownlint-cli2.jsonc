@@ -15,6 +15,12 @@
 		//   siblings; needed for API docs (each class has "Constructor"/"Methods")
 		//   and changelogs (each version has "New Features"/"Bug Fixes").
 		"MD024": { "siblings_only": true },
+		// MD010: no-hard-tabs — skip code blocks; shell scripts inside fenced
+		//   blocks intentionally use tabs for heredocs and indentation.
+		"MD010": { "code_blocks": false },
+		// MD041: first-line-h1 — skill files in .github/skills/ and .claude/skills/
+		//   follow a fixed template starting with "## Overview"; allow this pattern.
+		"MD041": false,
 	},
 	"ignores": ["node_modules", "coverage", "dist", ".ai_workflow"],
 }

@@ -31,6 +31,9 @@ jobs:
       - name: Audit dependencies
         run: npm audit --audit-level=high
 
+      - name: Lint Markdown
+        run: npm run lint:md
+
       - name: Lint
         run: npm run lint
 

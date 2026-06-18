@@ -167,7 +167,7 @@ For each `open` issue in `plan.md` (in the order they appear):
 Commit after every individual fix so that each change is atomic and
 reversible:
 
-```
+```text
 fix(<type>): <short title from plan.md ID>
 
 Resolves RI-NNN identified by validate-logs.
@@ -196,7 +196,7 @@ the results to `$project_root/ROADMAP.md` under a
 - Set `Status` to `done` or `skipped` as recorded in `plan.md`.
 - Commit the roadmap update separately:
 
-  ```
+  ```text
   docs: update roadmap with resolved minor issues (fix-log-issues)
 
   Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
@@ -206,7 +206,7 @@ the results to `$project_root/ROADMAP.md` under a
 
 Print a console summary when all issues have been processed:
 
-```
+```text
 ✓ fix-log-issues complete
   Fixed:   N
   Skipped: N

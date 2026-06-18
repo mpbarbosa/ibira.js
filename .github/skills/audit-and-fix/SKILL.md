@@ -48,7 +48,7 @@ conditions that apply when running them together.
 - `$project_root/.ai_workflow/logs/` must exist and contain at least one workflow run
   directory. If it is empty or absent, abort with:
 
-  ```
+  ```text
   ✗ audit-and-fix aborted — no workflow run directories found under
     $project_root/.ai_workflow/logs/. Run a workflow first, then retry.
   ```
@@ -69,7 +69,7 @@ run is classified as **High**, **Medium**, or **Low**.
 (classified **Low**), pause and ask the user to confirm before continuing.
 If the user does not confirm, abort with:
 
-```
+```text
 ✗ audit-and-fix aborted — workflow efficacy too low to proceed safely.
   Re-run ai_workflow.js or invoke audit-and-fix again to override.
 ```
@@ -77,7 +77,7 @@ If the user does not confirm, abort with:
 **Continue condition (Medium or High):** Proceed automatically to Phase 1.
 For Medium efficacy, print a caution notice:
 
-```
+```text
 ⚠️ Proceeding with Medium efficacy — review validate-logs output carefully.
 ```
 
@@ -95,7 +95,7 @@ issue blocks.
 issues (all candidates were already fixed or all were Critical/High), print
 a success notice and stop — there is nothing for Phase 2 to do:
 
-```
+```text
 ✓ audit-and-fix complete (no issues to fix)
   validate-logs found 0 confirmed minor issues.
   plan.md is empty — fix-log-issues skipped.
@@ -143,7 +143,7 @@ If execution is interrupted mid-phase (e.g., a fix fails verification):
 
 Print a consolidated summary after all four phases complete:
 
-```
+```text
 ✓ audit-and-fix complete
   Phase 0 — verify-workflow-efficacy: score N/100 (<classification>)
   Phase 1 — validate-logs:            N issue(s) written to plan.md

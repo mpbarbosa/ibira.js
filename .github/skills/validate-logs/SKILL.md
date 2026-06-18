@@ -172,7 +172,7 @@ The file is the handoff contract between this skill and `fix-log-issues`.
 
 1. Print a summary to the console:
 
-   ```
+   ```text
    ✓ plan.md written — N issue(s) ready for fix-log-issues
    ```
 

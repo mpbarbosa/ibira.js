@@ -49,7 +49,7 @@ Assign the result to `<RUN_ID>` (e.g., `workflow_20260325_215945`).
 
 If `.ai_workflow/logs/` is empty or absent, print:
 
-```
+```text
 ✗ verify-workflow-efficacy: no workflow runs found under .ai_workflow/logs/
   Run ai_workflow.js first, then retry.
 ```
@@ -112,7 +112,7 @@ Assign to `ANOMALY_COUNT`.
 
 Apply the following formula (integer 0–100):
 
-```
+```text
 COMPLETION_SCORE  = min(STEPS_EXECUTED / STEPS_PLANNED, 1.0) × 40
 SUCCESS_SCORE     = (STEPS_OK / max(STEPS_EXECUTED, 1))       × 30
 INVOCATION_SCORE  = min(PROMPTS_TOTAL / max(STEPS_EXECUTED, 1) / 2, 1.0) × 20
@@ -130,7 +130,7 @@ EFFICACY_SCORE    = round(COMPLETION_SCORE + SUCCESS_SCORE + INVOCATION_SCORE - 
 
 Output the following to the console (exact format):
 
-```
+```text
 ══════════════════════════════════════════════════════
   Workflow Efficacy Report
   Run: <RUN_ID>
@@ -153,13 +153,13 @@ Output the following to the console (exact format):
 
 **High (80–100):**
 
-```
+```text
 ✅ Workflow output is reliable. Proceeding to log audit is recommended.
 ```
 
 **Medium (50–79):**
 
-```
+```text
 ⚠️ Workflow output is partially reliable.
    Anomalies or incomplete steps may affect audit quality.
    Review flagged items carefully in validate-logs.
@@ -167,7 +167,7 @@ Output the following to the console (exact format):
 
 **Low (0–49):**
 
-```
+```text
 ❌ Workflow efficacy is LOW. The run produced limited useful output.
    Continuing the audit pipeline may surface false issues.
    Consider re-running ai_workflow.js before proceeding.
@@ -178,7 +178,7 @@ For **Low** classification when invoked as Phase 0 of `audit-and-fix`, the
 pipeline **pauses and asks for confirmation** before proceeding to
 `validate-logs`. If the user does not confirm, abort with:
 
-```
+```text
 ✗ audit-and-fix aborted — workflow efficacy too low to proceed safely.
   Re-run ai_workflow.js or invoke audit-and-fix again to override.
 ```
@@ -189,7 +189,7 @@ If `DURATION` is `0s` **and** `STEPS_EXECUTED` is 0, the run is considered
 **stale** (the summary was written but the workflow did not run meaningful
 steps). Print an additional warning:
 
-```
+```text
 ⚠️ Stale run detected: summary reports 0 steps and 0s duration.
    This run may have been aborted or produced no output.
 ```

@@ -99,7 +99,7 @@ as part of this skill.
 
 ## Expected output
 
-```
+```text
 ✓ purge-workflow-logs complete
   Removed: $project_root/.ai_workflow/logs/       (N run directories)
   Removed: $project_root/.ai_workflow/backlog/    (N run directories)
@@ -110,7 +110,7 @@ as part of this skill.
 
 If a directory was absent, replace its line with:
 
-```
+```text
   Skipped: $project_root/.ai_workflow/<dir>/  (already absent)
 ```
 
