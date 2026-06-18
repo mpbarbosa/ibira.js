@@ -115,7 +115,7 @@ Low-priority housekeeping items that improve contributor experience without chan
       `docs/reports/bugfixes`, `docs/testing`, `docs/workflow-automation`); add a minimal
       `README.md` to each so contributors understand what belongs where
 - [x] **`@typescript-eslint` rule review** — `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` added; `eslint.config.mjs` now covers `src/**/*.ts` and `test/**/*.ts`; `no-explicit-any: 'error'` and `no-unused-vars` TypeScript variant are active
-- [ ] **`cdn-delivery.sh` helper functions** — extract ANSI color codes and repeated `echo`/log
+- [x] **`cdn-delivery.sh` helper functions** — extract ANSI color codes and repeated `echo`/log
       patterns into small named helper functions for easier maintenance as the script grows
 
 ---
