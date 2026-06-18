@@ -79,6 +79,24 @@ export interface FetcherOptions {
 	onRequest?: (options: RequestInit) => RequestInit | Promise<RequestInit>;
 	onResponse?: (response: Response) => Response | Promise<Response>;
 	retryStrategy?: (attempt: number, error: Error) => boolean;
+	/**
+	 * Optional runtime validation / parsing function applied to the raw JSON response
+	 * before the data is cached or returned to the caller.
+	 *
+	 * Throw inside this function to reject the response as invalid — the thrown error
+	 * propagates through the retry loop just like a network error. Use any schema
+	 * library (Zod, io-ts, Valibot, etc.) or write your own guard:
+	 *
+	 * ```typescript
+	 * import { z } from 'zod';
+	 * const UserSchema = z.object({ id: z.number(), name: z.string() });
+	 *
+	 * const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
+	 *   parseResponse: (data) => UserSchema.parse(data), // throws ZodError if invalid
+	 * });
+	 * ```
+	 */
+	parseResponse?: (data: unknown) => unknown;
 }
 
 /**
@@ -209,6 +227,7 @@ export class IbiraAPIFetcher {
 	readonly onRequest: ((options: RequestInit) => RequestInit | Promise<RequestInit>) | null;
 	readonly onResponse: ((response: Response) => Response | Promise<Response>) | null;
 	readonly retryStrategy: ((attempt: number, error: Error) => boolean) | null;
+	readonly parseResponse: ((data: unknown) => unknown) | null;
 
 	/**
 	 * Creates an IbiraAPIFetcher with a purely functional cache approach
@@ -461,6 +480,7 @@ export class IbiraAPIFetcher {
 		this.onRequest = options.onRequest ?? null;
 		this.onResponse = options.onResponse ?? null;
 		this.retryStrategy = options.retryStrategy ?? null;
+		this.parseResponse = options.parseResponse ?? null;
 
 		// ✅ IMMUTABLE: Deep freeze the entire instance for maximum referential transparency
 		// This prevents any external code from modifying the fetcher's properties
@@ -804,7 +824,11 @@ export class IbiraAPIFetcher {
 			// Use injected network provider for purity, or real fetch for practical use
 			const networkFn =
 				networkProvider || (() => this._performSingleRequest(new AbortController(), signal));
-			const data = await networkFn();
+			const rawData = await networkFn();
+
+			// Apply optional runtime validation / parsing. Throwing here propagates
+			// through the retry loop exactly like a network error.
+			const data = this.parseResponse ? this.parseResponse(rawData) : rawData;
 
 			// Create new cache entry (pure)
 			const cacheEntry = this._createCacheEntry(data, currentTime, this.cache);

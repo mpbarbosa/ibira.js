@@ -1425,4 +1425,92 @@ describe('IbiraAPIFetcher', () => {
 			expect(events).toContain('error');
 		});
 	});
+
+	describe('parseResponse — runtime validation hook', () => {
+		test('should pass raw response data to parseResponse and return its result', async () => {
+			const raw = { id: 1, name: 'Alice', extra: true };
+			fetch.mockResolvedValue(makeMockResponse(raw));
+
+			const parseResponse = jest.fn((data) => ({ id: data.id, name: data.name }));
+			const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, parseResponse });
+
+			const data = await f.fetchData();
+
+			expect(parseResponse).toHaveBeenCalledWith(raw);
+			expect(data).toEqual({ id: 1, name: 'Alice' });
+		});
+
+		test('should cache the parsed value, not the raw response', async () => {
+			const raw = { id: 1, _internal: 'drop-me' };
+			fetch.mockResolvedValue(makeMockResponse(raw));
+
+			const parseResponse = (data) => ({ id: data.id });
+			const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, parseResponse });
+
+			await f.fetchData();
+
+			const cacheKey = `GET:${testUrl}`;
+			expect(cache.get(cacheKey).data).toEqual({ id: 1 });
+		});
+
+		test('should propagate a thrown validation error as a fetch error', async () => {
+			fetch.mockResolvedValue(makeMockResponse({ unexpected: true }));
+
+			const parseResponse = () => {
+				throw new Error('Validation failed: missing required field "id"');
+			};
+			const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, parseResponse, maxRetries: 0 });
+
+			await expect(f.fetchData()).rejects.toThrow('Validation failed: missing required field "id"');
+		});
+
+		test('should trigger retries when parseResponse throws and error is retryable', async () => {
+			fetch.mockResolvedValue(makeMockResponse({}));
+
+			let callCount = 0;
+			const parseResponse = () => {
+				callCount += 1;
+				if (callCount < 3) throw new Error('Validation failed');
+				return { id: 42 };
+			};
+
+			const f = new IbiraAPIFetcher(testUrl, cache, {
+				eventNotifier,
+				parseResponse,
+				maxRetries: 3,
+				retryDelay: 10,
+				retryStrategy: () => true, // treat all errors as retryable
+			});
+
+			const promise = f.fetchData();
+			await jest.runAllTimersAsync();
+			const data = await promise;
+
+			expect(data).toEqual({ id: 42 });
+			expect(callCount).toBe(3);
+		});
+
+		test('fetchSafe should return { ok: false } when parseResponse throws', async () => {
+			fetch.mockResolvedValue(makeMockResponse({ bad: 'shape' }));
+
+			const parseResponse = () => {
+				throw new Error('Schema mismatch');
+			};
+			const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, parseResponse, maxRetries: 0 });
+
+			const result = await f.fetchSafe();
+
+			expect(result.ok).toBe(false);
+			expect(result.error.message).toBe('Schema mismatch');
+		});
+
+		test('should be skipped when not provided — raw data returned unchanged', async () => {
+			const raw = { id: 99 };
+			fetch.mockResolvedValue(makeMockResponse(raw));
+
+			const data = await fetcher.fetchData();
+
+			expect(data).toEqual(raw);
+		});
+	});
 });
