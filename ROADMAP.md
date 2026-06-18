@@ -277,7 +277,7 @@ Goal: production-ready, semantically stable public API.
 - [x] All `v0.x` features finalised and documented
 - [x] Full TypeScript strict-mode compatibility
 - [x] 95%+ test coverage across all metrics
-- [ ] Performance benchmarks published in `docs/`
+- [x] Performance benchmarks published in `docs/`
 - [ ] **Performance monitoring hooks** — add optional hooks for observability metrics (fetch timing, cache hit/miss rate, retry counts) to support profiling and future scalability analysis
 - [ ] `MIGRATION.md` updated for any breaking changes from alpha
 - [ ] `SECURITY.md` and responsible-disclosure process
