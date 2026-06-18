@@ -692,3 +692,14 @@ The ibira.js project demonstrates referential transparency in several areas:
 ---
 
 **Remember**: Referential transparency is not about dogma—it's about making code more predictable, testable, and maintainable. Use these principles as tools to write better software.
+
+---
+
+## Related Documents
+
+| Document | Description |
+| -------- | ----------- |
+| [Hub](../docs/REFERENTIAL_TRANSPARENCY.md) | Entry point — document map and reading order |
+| [Achievement](../docs/referential_transparency/REFERENTIAL_TRANSPARENCY.md) | How ibira.js achieved perfect RT (10/10) |
+| [Pure Solution](../docs/referential_transparency/PURE_SOLUTION.md) | The `fetchDataPure` / `fetchData` dual-layer solution |
+| [Verification Report](../docs/referential_transparency/VERIFICATION_REPORT.md) | Formal test results and production-ready approval |

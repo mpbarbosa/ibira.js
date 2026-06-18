@@ -223,3 +223,14 @@ const data = await fetcher.fetchData(); // Uses pure core internally
 8. **🛡️ Error Safety** - Errors don't corrupt state
 
 This solution provides the best of both worlds: **pure functional core** for perfect referential transparency and **practical wrappers** for everyday usage!
+
+---
+
+## Related Documents
+
+| Document | Description |
+| -------- | ----------- |
+| [Hub](../REFERENTIAL_TRANSPARENCY.md) | Entry point — document map and reading order |
+| [Concept Guide](../../.github/REFERENTIAL_TRANSPARENCY.md) | What referential transparency is and best practices |
+| [Achievement](./REFERENTIAL_TRANSPARENCY.md) | How ibira.js was transformed to achieve perfect RT |
+| [Verification Report](./VERIFICATION_REPORT.md) | Formal test results and production-ready approval |

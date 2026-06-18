@@ -294,3 +294,14 @@ This transformation maintains backward compatibility while enabling functional p
 _Generated on October 13, 2025_
 _IbiraAPIFetcher v0.1.0-alpha_
 _Test Coverage: 40/40 passing, 1 skipped_
+
+---
+
+## Related Documents
+
+| Document | Description |
+| -------- | ----------- |
+| [Hub](../REFERENTIAL_TRANSPARENCY.md) | Entry point — document map and reading order |
+| [Concept Guide](../../.github/REFERENTIAL_TRANSPARENCY.md) | What referential transparency is and best practices |
+| [Pure Solution](./PURE_SOLUTION.md) | The `fetchDataPure` / `fetchData` dual-layer solution |
+| [Verification Report](./VERIFICATION_REPORT.md) | Formal test results and production-ready approval |

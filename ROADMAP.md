@@ -98,7 +98,7 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [x] **`__tests__/README.md` dual-environment expansion** — expand to document dual-environment
       testing requirements (Node.js ≥18 + jsdom), new test modules (`DefaultCache`, `DefaultEventNotifier`),
       and the `npm run test:node` script
-- [ ] **Referential transparency docs cross-linking** — add explicit cross-links between the five
+- [x] **Referential transparency docs cross-linking** — add explicit cross-links between the five
       related referential transparency documents (`docs/REFERENTIAL_TRANSPARENCY.md`,
       `.github/REFERENTIAL_TRANSPARENCY.md`, `docs/referential_transparency/REFERENTIAL_TRANSPARENCY.md`,
       `docs/referential_transparency/PURE_SOLUTION.md`,

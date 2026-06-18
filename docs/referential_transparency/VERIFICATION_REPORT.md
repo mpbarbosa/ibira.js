@@ -389,3 +389,14 @@ This implementation provides:
 _Verification completed by automated test suite and manual review_
 _Report generated: October 13, 2025_
 _IbiraAPIFetcher v0.1.0-alpha_
+
+---
+
+## Related Documents
+
+| Document | Description |
+| -------- | ----------- |
+| [Hub](../REFERENTIAL_TRANSPARENCY.md) | Entry point — document map and reading order |
+| [Concept Guide](../../.github/REFERENTIAL_TRANSPARENCY.md) | What referential transparency is and best practices |
+| [Achievement](./REFERENTIAL_TRANSPARENCY.md) | How ibira.js was transformed to achieve perfect RT |
+| [Pure Solution](./PURE_SOLUTION.md) | The `fetchDataPure` / `fetchData` dual-layer solution |
