@@ -90,7 +90,7 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [x] **`docs/INDEX.md` CDN & versioning refresh** — update CDN URLs and version references in
       `docs/INDEX.md` to point to npm-based delivery (`cdn.jsdelivr.net/npm/ibira.js@…/dist/index.mjs`)
       now that the package is published; verify all cross-links remain valid
-- [ ] **`docs/FUNCTIONAL_REQUIREMENTS.md` API alignment** — review and update to reflect current
+- [x] **`docs/FUNCTIONAL_REQUIREMENTS.md` API alignment** — review and update to reflect current
       API surface (HTTP methods beyond GET, `validateStatus`, `AbortController` signal) and CDN usage
       patterns introduced in v0.4.x
 - [ ] **`docs/ARCHITECTURE.md` TypeScript update** — update to reflect TypeScript source migration,

@@ -1,10 +1,10 @@
 # Functional Requirements Specification
 
 **Project**: ibira.js
-**Version**: 0.4.20-alpha
-**Date**: December 15, 2025
+**Version**: 0.4.29-alpha
+**Date**: June 17, 2026
 **Status**: Active Development
-**Document Version**: 1.0.0
+**Document Version**: 1.1.0
 
 ---
 
@@ -100,11 +100,9 @@ The following are explicitly excluded from this release:
 - GraphQL support (future consideration)
 - WebSocket connections (future consideration)
 - Built-in authentication mechanisms
-- Request transformation/middleware pipeline
 - Offline mode/service worker integration
 - Built-in UI components
 - Server-side rendering optimizations
-- TypeScript definitions (planned for v1.0)
 
 ---
 
@@ -154,11 +152,11 @@ ibira.js is a client-side JavaScript library that operates in browser environmen
 
 ### 3.3 Technology Stack
 
-- **Language**: JavaScript (ES6+)
-- **Runtime**: Browser (ES6+ compatible), Node.js (with Fetch API)
-- **Testing**: Jest
-- **Build**: Babel (transpilation)
-- **Minimum Browser**: Chrome 55+, Firefox 52+, Safari 10.1+, Edge 15+
+- **Language**: TypeScript (compiled to ES2020 JavaScript)
+- **Runtime**: Node.js ≥18 (native Fetch API), browsers (ES2020+)
+- **Testing**: Jest 29 (jsdom environment + Node.js runtime)
+- **Build**: tsup — outputs CJS (`dist/index.js`), ESM (`dist/index.mjs`), TypeScript declarations (`dist/index.d.ts`)
+- **Minimum Browser**: Chrome 80+, Firefox 74+, Safari 13.1+, Edge 80+
 
 ---
 
@@ -166,33 +164,42 @@ ibira.js is a client-side JavaScript library that operates in browser environmen
 
 ### 4.1 API Data Fetching
 
-#### FR-1.1: Basic HTTP GET Requests
+#### FR-1.1: HTTP Requests (All Methods)
 
 **Priority**: Critical
 **Status**: ✅ Implemented
 
-**Description**: The system shall fetch data from HTTP endpoints using the Fetch API.
+**Description**: The system shall fetch data from HTTP endpoints using the Fetch API,
+supporting all standard HTTP methods.
 
 **Requirements**:
 
 - FR-1.1.1: Support HTTPS and HTTP protocols
 - FR-1.1.2: Parse JSON response automatically
-- FR-1.1.3: Handle response status codes (200-299 success, others error)
+- FR-1.1.3: Handle response status codes (200-299 success by default, configurable)
 - FR-1.1.4: Support configurable request timeout
 - FR-1.1.5: Return parsed JSON data to caller
+- FR-1.1.6: Support HTTP methods: GET, POST, PUT, PATCH, DELETE, HEAD
+- FR-1.1.7: Accept request body for POST/PUT/PATCH (plain objects JSON-serialised automatically; strings/FormData/Blob/ArrayBuffer passed as-is)
+- FR-1.1.8: Accept additional request headers per instance
+- FR-1.1.9: Cache key includes method so `POST /url` and `GET /url` are independent entries
 
 **Acceptance Criteria**:
 
 ```javascript
-// Given a valid URL
+// GET (default)
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');
-
-// When data is fetched
 const users = await fetcher.fetchData();
-
-// Then users should contain parsed JSON
-expect(users).toBeDefined();
 expect(Array.isArray(users)).toBe(true);
+
+// POST with JSON body
+const poster = IbiraAPIFetcher.withoutCache('https://api.example.com/users', {
+  method: 'POST',
+  body: { name: 'Alice' },
+  headers: { 'X-Request-Id': '123' },
+});
+const created = await poster.fetchData();
+expect(created.id).toBeDefined();
 ```
 
 ---
@@ -220,6 +227,94 @@ const fetcher = IbiraAPIFetcher.withDefaultCache(url, { timeout: 5000 });
 // When request takes longer than 5 seconds
 // Then an error should be thrown
 await expect(fetcher.fetchData()).rejects.toThrow();
+```
+
+---
+
+#### FR-1.3: External Cancellation via AbortController
+
+**Priority**: High
+**Status**: ✅ Implemented
+
+**Description**: The system shall accept an external `AbortSignal` so callers can cancel
+an in-flight request at any time. An aborted request is never retried.
+
+**Requirements**:
+
+- FR-1.3.1: `fetchData(cacheOverride?, signal?)` accepts an optional `AbortSignal`
+- FR-1.3.2: `fetchDataPure(cache, timestamp, networkProvider?, signal?)` accepts an optional `AbortSignal`
+- FR-1.3.3: The signal is combined with the internal timeout signal (whichever fires first wins)
+- FR-1.3.4: Requests aborted via the external signal are not retried
+- FR-1.3.5: An already-aborted signal causes immediate rejection before any network call
+
+**Acceptance Criteria**:
+
+```javascript
+const controller = new AbortController();
+
+const promise = fetcher.fetchData(undefined, controller.signal);
+controller.abort(); // cancel immediately
+
+await expect(promise).rejects.toThrow(/abort/i);
+```
+
+---
+
+#### FR-1.4: Custom Status Validation (`validateStatus`)
+
+**Priority**: Medium
+**Status**: ✅ Implemented
+
+**Description**: The system shall allow callers to override which HTTP status codes are
+treated as success vs error.
+
+**Requirements**:
+
+- FR-1.4.1: Default behaviour: `status >= 200 && status < 300` → success
+- FR-1.4.2: Callers may supply `validateStatus: (status: number) => boolean`
+- FR-1.4.3: Statuses for which `validateStatus` returns `false` throw an error and trigger retry (if retryable)
+- FR-1.4.4: Statuses for which `validateStatus` returns `true` are treated as success regardless of code
+
+**Acceptance Criteria**:
+
+```javascript
+// Accept 404 as success (resource not found is a valid state)
+const fetcher = IbiraAPIFetcher.withoutCache(url, {
+  validateStatus: (status) => status < 500,
+});
+const data = await fetcher.fetchData(); // 404 no longer throws
+```
+
+---
+
+#### FR-1.5: Request and Response Interceptors
+
+**Priority**: Medium
+**Status**: ✅ Implemented
+
+**Description**: The system shall allow callers to intercept and transform requests and
+responses before they are processed.
+
+**Requirements**:
+
+- FR-1.5.1: `onRequest: (options: RequestInit) => RequestInit | Promise<RequestInit>` — called before each fetch attempt; return value replaces request options
+- FR-1.5.2: `onResponse: (response: Response) => Response | Promise<Response>` — called after each fetch attempt, before status validation
+- FR-1.5.3: Both interceptors are called on every attempt including retries
+- FR-1.5.4: Interceptors may be async
+
+**Acceptance Criteria**:
+
+```javascript
+const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
+  onRequest: (opts) => ({
+    ...opts,
+    headers: { ...opts.headers, Authorization: `Bearer ${getToken()}` },
+  }),
+  onResponse: async (res) => {
+    if (res.status === 401) await refreshToken();
+    return res;
+  },
+});
 ```
 
 ---
@@ -766,16 +861,23 @@ expect(cacheState.size).toBe(0);
 
 **Configuration Options**:
 
-| Option                 | Type     | Default                        | Description              |
-| ---------------------- | -------- | ------------------------------ | ------------------------ |
-| `timeout`              | number   | 10000                          | Request timeout (ms)     |
-| `maxRetries`           | number   | 3                              | Maximum retry attempts   |
-| `retryDelay`           | number   | 1000                           | Initial retry delay (ms) |
-| `retryMultiplier`      | number   | 2                              | Backoff multiplier       |
-| `retryableStatusCodes` | number[] | [408, 429, 500, 502, 503, 504] | Codes to retry           |
-| `maxCacheSize`         | number   | 100                            | Max cache entries        |
-| `cacheExpiration`      | number   | 300000                         | Cache TTL (ms)           |
-| `eventNotifier`        | Object   | DefaultEventNotifier           | Custom notifier          |
+| Option                 | Type                                    | Default                        | Description                                                     |
+| ---------------------- | --------------------------------------- | ------------------------------ | --------------------------------------------------------------- |
+| `timeout`              | number                                  | 10000                          | Request timeout (ms)                                            |
+| `maxRetries`           | number                                  | 3                              | Maximum retry attempts                                          |
+| `retryDelay`           | number                                  | 1000                           | Initial retry delay (ms)                                        |
+| `retryMultiplier`      | number                                  | 2                              | Backoff multiplier                                              |
+| `retryableStatusCodes` | number[]                                | [408, 429, 500, 502, 503, 504] | HTTP status codes that trigger retries                          |
+| `maxCacheSize`         | number                                  | 100                            | Max cache entries                                               |
+| `cacheExpiration`      | number                                  | 300000                         | Cache TTL (ms)                                                  |
+| `eventNotifier`        | EventNotifierInterface                  | DefaultEventNotifier           | Custom notifier                                                 |
+| `method`               | HttpMethod                              | `'GET'`                        | HTTP method (GET, POST, PUT, PATCH, DELETE, HEAD)               |
+| `body`                 | object \| string \| FormData \| Blob \| ArrayBuffer \| null | null  | Request body; plain objects are JSON-serialised automatically   |
+| `headers`              | Record\<string, string\>                | `{}`                           | Additional HTTP headers; `Content-Type: application/json` added automatically when body is a plain object |
+| `validateStatus`       | (status: number) => boolean             | `status >= 200 && status < 300` | Custom success predicate                                       |
+| `onRequest`            | (opts: RequestInit) => RequestInit      | —                              | Request interceptor; called before each attempt (including retries) |
+| `onResponse`           | (res: Response) => Response             | —                              | Response interceptor; called after each attempt before status validation |
+| `retryStrategy`        | (attempt: number, error: Error) => boolean | —                           | Custom retry predicate; replaces built-in retryable-status check |
 
 ---
 
@@ -788,15 +890,16 @@ expect(cacheState.size).toBe(0);
 
 **Configuration Options**:
 
-| Option                 | Type     | Default                        | Description        |
-| ---------------------- | -------- | ------------------------------ | ------------------ |
-| `maxCacheSize`         | number   | 100                            | Global cache size  |
-| `cacheExpiration`      | number   | 300000                         | Global cache TTL   |
-| `cleanupInterval`      | number   | 60000                          | Cleanup interval   |
-| `maxRetries`           | number   | 3                              | Default retries    |
-| `retryDelay`           | number   | 1000                           | Default delay      |
-| `retryMultiplier`      | number   | 2                              | Default multiplier |
-| `retryableStatusCodes` | number[] | [408, 429, 500, 502, 503, 504] | Default codes      |
+| Option                 | Type                        | Default                        | Description                                                |
+| ---------------------- | --------------------------- | ------------------------------ | ---------------------------------------------------------- |
+| `maxCacheSize`         | number                      | 100                            | Global cache size                                          |
+| `cacheExpiration`      | number                      | 300000                         | Global cache TTL (ms)                                      |
+| `cleanupInterval`      | number                      | 60000                          | Cleanup interval (ms); `0` disables cleanup                |
+| `cleanupStrategy`      | `'interval'` \| `'lazy'`    | `'interval'`                   | `'lazy'` skips setInterval and cleans up inside `fetch()` — recommended for serverless/edge environments |
+| `maxRetries`           | number                      | 3                              | Default retry attempts                                     |
+| `retryDelay`           | number                      | 1000                           | Default initial retry delay (ms)                           |
+| `retryMultiplier`      | number                      | 2                              | Default backoff multiplier                                 |
+| `retryableStatusCodes` | number[]                    | [408, 429, 500, 502, 503, 504] | Default retryable status codes                             |
 
 ---
 
@@ -1553,9 +1656,34 @@ test('fetchDataPure returns correct result', async () => {
 
 ### 9.3 Module System
 
-- **Format**: ES6 Modules
-- **Import**: `import { ... } from 'ibira.js'`
-- **Export**: Named exports only
+The package ships three output formats from `dist/`:
+
+| Format     | File              | Import style                                    |
+| ---------- | ----------------- | ----------------------------------------------- |
+| ESM        | `dist/index.mjs`  | `import { IbiraAPIFetcher } from 'ibira.js'`    |
+| CJS        | `dist/index.js`   | `const { IbiraAPIFetcher } = require('ibira.js')` |
+| TypeScript | `dist/index.d.ts` | automatic when `moduleResolution: bundler/node16` |
+
+### 9.4 CDN Delivery
+
+ibira.js is published to npm and available via jsDelivr CDN for direct browser use:
+
+```html
+<!-- Pin to exact version (recommended for production) -->
+<script type="module">
+  import { IbiraAPIFetcher } from
+    'https://cdn.jsdelivr.net/npm/ibira.js@0.4.29-alpha/dist/index.mjs';
+</script>
+
+<!-- Float to latest patch (development convenience) -->
+<script type="module">
+  import { IbiraAPIFetcher } from
+    'https://cdn.jsdelivr.net/npm/ibira.js@~0.4/dist/index.mjs';
+</script>
+```
+
+CJS and TypeScript declarations are also available at the same base URL with
+`dist/index.js` and `dist/index.d.ts` respectively.
 
 ---
 
@@ -1563,11 +1691,11 @@ test('fetchDataPure returns correct result', async () => {
 
 ### 10.1 Technical Constraints
 
-1. **Browser Support**: Requires ES6+ features
-2. **Network**: Requires Fetch API (polyfill available for older browsers)
+1. **Browser Support**: Requires ES2020+ features (Chrome 80+, Firefox 74+, Safari 13.1+)
+2. **Node.js**: Requires Node.js ≥18 (native Fetch API — no polyfill needed)
 3. **Protocol**: Only HTTP/HTTPS supported
-4. **Data Format**: Only JSON responses supported
-5. **Request Method**: Only GET requests (POST/PUT/DELETE future)
+4. **Data Format**: JSON responses (other content types require a custom `onResponse` interceptor to parse)
+5. **Request Methods**: GET, POST, PUT, PATCH, DELETE, HEAD supported
 
 ### 10.2 Business Constraints
 
@@ -1597,23 +1725,24 @@ For version 1.0.0 release, the following must be met:
 - ✅ Complete documentation
 - ✅ No known critical bugs
 - ✅ Performance benchmarks met
-- ⏳ TypeScript definitions (planned)
-- ⏳ Published to NPM (planned)
+- ✅ TypeScript source (shipped in v0.4.x)
+- ✅ Published to npm (shipped in v0.4.x)
 
-### 11.2 Current Status (v0.4.20-alpha)
+### 11.2 Current Status (v0.4.29-alpha)
 
-| Category             | Status      | Notes                     |
-| -------------------- | ----------- | ------------------------- |
-| **Core Features**    | ✅ Complete | All implemented           |
-| **Caching**          | ✅ Complete | LRU with expiration       |
-| **Retry Logic**      | ✅ Complete | Exponential backoff       |
-| **Observer Pattern** | ✅ Complete | Full implementation       |
-| **Manager**          | ✅ Complete | Coordination working      |
-| **Pure Functions**   | ✅ Complete | Referentially transparent |
-| **Error Handling**   | ✅ Complete | Comprehensive             |
-| **Documentation**    | ✅ Complete | 212KB, 100% coverage      |
-| **Testing**          | ✅ Complete | 75%+ coverage             |
-| **TypeScript**       | ⏳ Planned  | Future enhancement        |
+| Category               | Status      | Notes                                               |
+| ---------------------- | ----------- | --------------------------------------------------- |
+| **Core Features**      | ✅ Complete | GET + POST/PUT/PATCH/DELETE/HEAD supported           |
+| **Caching**            | ✅ Complete | LRU with expiration; lazy cleanup strategy added    |
+| **Retry Logic**        | ✅ Complete | Exponential backoff + custom `retryStrategy`        |
+| **Observer Pattern**   | ✅ Complete | Full implementation; per-observer error isolation   |
+| **Manager**            | ✅ Complete | Deduplication, shared cache, `cleanupStrategy`      |
+| **Pure Functions**     | ✅ Complete | Referentially transparent; `fetchDataPure` stable   |
+| **Error Handling**     | ✅ Complete | `validateStatus`, `AbortController`, interceptors   |
+| **Documentation**      | ✅ Complete | API reference, architecture, edge-cases guide       |
+| **Testing**            | ✅ Complete | Unit + integration + e2e; 75%+ coverage             |
+| **TypeScript**         | ✅ Complete | Full TypeScript source; ships `.d.ts` declarations  |
+| **npm / CDN delivery** | ✅ Complete | jsDelivr CDN; ESM + CJS + `.d.ts`                  |
 
 ---
 
@@ -1621,24 +1750,19 @@ For version 1.0.0 release, the following must be met:
 
 ### 12.1 Planned Features (v1.0)
 
-1. **TypeScript Definitions**
-   - Priority: High
-   - Benefit: Better IDE support
+1. **GraphQL query support**
+   - Priority: Low
+   - Benefit: Single endpoint, typed queries
+   - Effort: High
+
+2. **Stale-while-revalidate cache strategy**
+   - Priority: Medium
+   - Benefit: Instant responses with background refresh
    - Effort: Medium
 
-2. **NPM Publication**
-   - Priority: High
-   - Benefit: Easy installation
-   - Effort: Low
-
-3. **HTTP Method Support**
+3. **React hooks package (`ibira.js/react`)**
    - Priority: Medium
-   - Methods: POST, PUT, DELETE, PATCH
-   - Effort: Medium
-
-4. **Request Interceptors**
-   - Priority: Medium
-   - Benefit: Custom headers, auth
+   - Benefit: `useFetch`, `useResource` ergonomics
    - Effort: Medium
 
 ### 12.2 Future Considerations (v2.0+)
@@ -1683,9 +1807,10 @@ For version 1.0.0 release, the following must be met:
 
 ## Appendix B: Change History
 
-| Version | Date       | Changes          | Author             |
-| ------- | ---------- | ---------------- | ------------------ |
-| 1.0.0   | 2025-12-15 | Initial document | GitHub Copilot CLI |
+| Version | Date       | Changes                                                                             | Author             |
+| ------- | ---------- | ----------------------------------------------------------------------------------- | ------------------ |
+| 1.1.0   | 2026-06-17 | Add FR-1.3–FR-1.5 (AbortController, validateStatus, interceptors); update technology stack, config tables, CDN section, status table; align planned features | ibira.js team |
+| 1.0.0   | 2025-12-15 | Initial document                                                                    | GitHub Copilot CLI |
 
 ---
 
@@ -1699,12 +1824,9 @@ For version 1.0.0 release, the following must be met:
 
 ---
 
-**Document Prepared By**: GitHub Copilot CLI
-**Review Status**: Draft
-**Approval Status**: Pending
-**Last Updated**: December 15, 2025
-
-**Next Review Date**: January 15, 2026
+**Document Prepared By**: ibira.js team
+**Review Status**: Updated
+**Last Updated**: June 17, 2026
 
 ---
 
