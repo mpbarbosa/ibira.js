@@ -252,7 +252,7 @@ CLOSED ──(N consecutive failures)──> OPEN
 - [x] **Public exports** — re-export `CircuitBreaker`, `CircuitBreakerManager`, `CircuitOpenError`,
       `CircuitBreakerConfig` from `src/index.ts`; no changes to existing exports
 
-- [ ] **Tests** (`__tests__/CircuitBreaker.test.ts`, ~200 lines; `__tests__/CircuitBreakerManager.test.ts`,
+- [x] **Tests** (`__tests__/CircuitBreaker.test.js`, 35 tests; `__tests__/CircuitBreakerManager.test.js`,
       ~150 lines) — cover:
   - All state transitions (closed → open → half-open → closed and closed → open → half-open → open)
   - Threshold counts: exact boundary (N-1 failures keep closed, N opens)
