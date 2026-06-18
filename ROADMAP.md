@@ -108,7 +108,7 @@ Low-priority housekeeping items that improve contributor experience without chan
       presence, required environment variables, and expected exit codes for `cdn-delivery.sh` and
       `scripts/deploy.sh`; also note each script's expected stdout output and return values
 
-- [ ] **Undocumented docs subdirectories** — 12 subdirectories under `docs/` and `.github/` lack a
+- [x] **Undocumented docs subdirectories** — 12 subdirectories under `docs/` and `.github/` lack a
       `README.md` or `index.md` explaining their purpose (`.github/ISSUE_TEMPLATE`,
       `.github/workflows`, `docs/architecture`, `docs/misc`, `docs/prompts`, `docs/reference`,
       `docs/referential_transparency`, `docs/reports`, `docs/reports/analysis`,
