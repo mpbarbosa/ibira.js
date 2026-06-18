@@ -49,3 +49,8 @@ export { DefaultEventNotifier } from './utils/DefaultEventNotifier.js';
 export { throttle } from './utils/throttle.js';
 export { debounce } from './utils/debounce.js';
 export { VERSION } from './config/version.js';
+export { CircuitBreaker } from './resilience/CircuitBreaker.js';
+export type { CircuitBreakerConfig, CircuitState } from './resilience/CircuitBreaker.js';
+export { CircuitBreakerManager } from './resilience/CircuitBreakerManager.js';
+export type { BreakerEventPayload } from './resilience/CircuitBreakerManager.js';
+export { CircuitOpenError } from './resilience/CircuitOpenError.js';

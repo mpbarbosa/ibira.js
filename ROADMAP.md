@@ -249,7 +249,7 @@ CLOSED ──(N consecutive failures)──> OPEN
       carries `url: string` and `retryAfter: number` (timestamp); lets consumers distinguish a
       breaker-blocked call from a network error at the type level
 
-- [ ] **Public exports** — re-export `CircuitBreaker`, `CircuitBreakerManager`, `CircuitOpenError`,
+- [x] **Public exports** — re-export `CircuitBreaker`, `CircuitBreakerManager`, `CircuitOpenError`,
       `CircuitBreakerConfig` from `src/index.ts`; no changes to existing exports
 
 - [ ] **Tests** (`__tests__/CircuitBreaker.test.ts`, ~200 lines; `__tests__/CircuitBreakerManager.test.ts`,
