@@ -1,6 +1,7 @@
 // __tests__/sync-version.test.js
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 const SCRIPT_PATH = path.resolve(__dirname, '../../scripts/sync-version.js');
@@ -93,7 +94,7 @@ describe('generateVersionTs', () => {
 });
 
 describe('sync-version script integration', () => {
-	const tempDir = path.join(__dirname, 'tmp-sync-version');
+	const tempDir = path.join(os.tmpdir(), 'ibira-sync-version-test');
 	const pkgPath = path.join(tempDir, 'package.json');
 	const versionTsPath = path.join(tempDir, 'src', 'config', 'version.ts');
 	// Place script in tempDir/scripts/ so __dirname/.. resolves to tempDir (matching project layout)
