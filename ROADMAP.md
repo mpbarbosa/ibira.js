@@ -230,7 +230,7 @@ CLOSED ──(N consecutive failures)──> OPEN
   - `onStateChange?: (from: CircuitState, to: CircuitState, url: string) => void` — optional
     callback for monitoring / logging / metrics
 
-- [ ] **`CircuitBreakerManager` wrapper** (`src/resilience/CircuitBreakerManager.ts`, ~100 lines)
+- [x] **`CircuitBreakerManager` wrapper** (`src/resilience/CircuitBreakerManager.ts`, ~100 lines)
       — wraps `IbiraAPIFetchManager`; on each `fetch(url, options)` call:
   1. Looks up (or creates) the `CircuitBreaker` for that URL
   2. If `!breaker.canAttempt()`, calls the optional `fallback(url)` callback or throws
@@ -245,7 +245,7 @@ CLOSED ──(N consecutive failures)──> OPEN
       `'breaker-open'`, `'breaker-half-open'`, and `'breaker-closed'` events carrying
       `{ url, failureCount, retryAfter? }` payload; wired via the `onStateChange` callback
 
-- [ ] **`CircuitOpenError`** (`src/resilience/CircuitOpenError.ts`) — typed `Error` subclass;
+- [x] **`CircuitOpenError`** (`src/resilience/CircuitOpenError.ts`) — typed `Error` subclass;
       carries `url: string` and `retryAfter: number` (timestamp); lets consumers distinguish a
       breaker-blocked call from a network error at the type level
 
