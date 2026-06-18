@@ -42,12 +42,12 @@ pattern that must match, and how to fix it if it does not.
 
 ### 1. `src/config/version.ts` — VERSION object fields
 
-| Field | Expected value | Fix |
-|-------|---------------|-----|
-| `major:` | `MAJOR` (number) | Replace the integer literal on that line |
-| `minor:` | `MINOR` (number) | Replace the integer literal on that line |
-| `patch:` | `PATCH` (number) | Replace the integer literal on that line |
-| `prerelease:` | `"PRERELEASE"` (string) | Replace the quoted string on that line |
+| Field         | Expected value          | Fix                                      |
+| ------------- | ----------------------- | ---------------------------------------- |
+| `major:`      | `MAJOR` (number)        | Replace the integer literal on that line |
+| `minor:`      | `MINOR` (number)        | Replace the integer literal on that line |
+| `patch:`      | `PATCH` (number)        | Replace the integer literal on that line |
+| `prerelease:` | `"PRERELEASE"` (string) | Replace the quoted string on that line   |
 
 Also update the `@example` JSDoc comment in the same file:
 `VERSION.toString(); // "X.Y.Z-PRERELEASE"`
@@ -104,12 +104,12 @@ roadmap table body (those are historical records of past releases).
 
 ## Files explicitly excluded from auto-fix
 
-| File | Reason |
-|------|--------|
-| `CHANGELOG.md` | All version entries are historical; never overwrite past entries |
-| `package-lock.json` | Managed by npm; updated by `npm install` / `npm ci` |
-| `node_modules/` | Never modified directly |
-| `.ai_workflow/` | AI-generated log files; not project source |
+| File                     | Reason                                                                                                                                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CHANGELOG.md`           | All version entries are historical; never overwrite past entries                                                                                                                                             |
+| `package-lock.json`      | Managed by npm; updated by `npm install` / `npm ci`                                                                                                                                                          |
+| `node_modules/`          | Never modified directly                                                                                                                                                                                      |
+| `.ai_workflow/`          | AI-generated log files; not project source                                                                                                                                                                   |
 | `test/` and `__tests__/` | Version strings in tests are assertions against the live VERSION object — they must always reflect the actual value read at runtime; any mismatch here means `src/config/version.ts` was wrong, not the test |
 
 ---

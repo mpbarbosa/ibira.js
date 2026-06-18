@@ -1,12 +1,12 @@
 // __tests__/index.test.js
 // Unit tests for main entry point exports
 
-import { 
-	IbiraAPIFetcher, 
-	IbiraAPIFetchManager, 
-	DefaultCache, 
-	DefaultEventNotifier, 
-	VERSION 
+import {
+	IbiraAPIFetcher,
+	IbiraAPIFetchManager,
+	DefaultCache,
+	DefaultEventNotifier,
+	VERSION,
 } from '../src/index.js';
 import { IbiraAPIFetcher as CoreFetcher } from '../src/core/IbiraAPIFetcher.js';
 import { IbiraAPIFetchManager as CoreManager } from '../src/core/IbiraAPIFetchManager.js';
@@ -54,7 +54,7 @@ describe('index.js exports', () => {
 
 		const notifier = new DefaultEventNotifier();
 		expect(notifier).toBeInstanceOf(UtilNotifier);
-		
+
 		manager.destroy();
 	});
 });

@@ -1,8 +1,8 @@
-# __tests__ — Test Suite
+# **tests** — Test Suite
 
 This directory contains the Jest test suite for the JavaScript source modules of ibira.js.
 
-> __Two test directories exist intentionally:__
+> **Two test directories exist intentionally:**
 >
 > - `__tests__/` — JavaScript (`.js`) tests for the main library modules; runs with jsdom
 > - `test/` — TypeScript (`.ts`) and JavaScript (`.js`) tests for TypeScript-specific source files and utility scripts; uses ts-jest/babel-jest
@@ -46,29 +46,29 @@ npx jest --testNamePattern="Pure.*Referential"
 
 ## Conventions
 
-| Convention | Rule |
-|------------|------|
-| File naming | `<SourceModule>.test.js` — mirrors `src/` structure |
-| Suite grouping | `describe` blocks group by behaviour (e.g. `"Constructor and Immutability"`) |
-| Test naming | Names start with `"should"` |
-| Mocking | `global.fetch` is mocked via `jest.fn()` at suite level; `DefaultEventNotifier` is replaced with a local `MockEventNotifier` class |
-| State reset | `beforeEach` clears all mocks with `jest.clearAllMocks()` |
-| Timers | `jest.useFakeTimers()` in `beforeEach`, `jest.useRealTimers()` in `afterEach` |
+| Convention     | Rule                                                                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| File naming    | `<SourceModule>.test.js` — mirrors `src/` structure                                                                                |
+| Suite grouping | `describe` blocks group by behaviour (e.g. `"Constructor and Immutability"`)                                                       |
+| Test naming    | Names start with `"should"`                                                                                                        |
+| Mocking        | `global.fetch` is mocked via `jest.fn()` at suite level; `DefaultEventNotifier` is replaced with a local `MockEventNotifier` class |
+| State reset    | `beforeEach` clears all mocks with `jest.clearAllMocks()`                                                                          |
+| Timers         | `jest.useFakeTimers()` in `beforeEach`, `jest.useRealTimers()` in `afterEach`                                                      |
 
 ## Coverage Targets
 
-| Metric | Threshold | Current |
-|--------|-----------|---------|
-| Statements | ≥ 75% | ~98% |
-| Branches | ≥ 75% | ~90% |
-| Functions | ≥ 75% | ~91% |
-| Lines | ≥ 75% | ~99% |
+| Metric     | Threshold | Current |
+| ---------- | --------- | ------- |
+| Statements | ≥ 75%     | ~98%    |
+| Branches   | ≥ 75%     | ~90%    |
+| Functions  | ≥ 75%     | ~91%    |
+| Lines      | ≥ 75%     | ~99%    |
 
 Coverage thresholds are enforced in `package.json → jest.coverageThreshold`. The build fails if any metric drops below 75%.
 
 ## Environment
 
-Tests run in __jsdom__ (configured in `package.json → jest.testEnvironment`). Babel (`@babel/preset-env` targeting current Node) transpiles ESM for Jest.
+Tests run in **jsdom** (configured in `package.json → jest.testEnvironment`). Babel (`@babel/preset-env` targeting current Node) transpiles ESM for Jest.
 
 ## Mocking Patterns
 

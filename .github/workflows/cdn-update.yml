@@ -24,7 +24,7 @@ on:
         default: ''
 
 permissions:
-  contents: write   # needed to push commits and force-update tags
+  contents: write # needed to push commits and force-update tags
 
 jobs:
   cdn-update:
@@ -36,7 +36,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0        # full history so tag operations work correctly
+          fetch-depth: 0 # full history so tag operations work correctly
           token: ${{ secrets.GITHUB_TOKEN }}
           # Always check out the default branch to avoid detached HEAD when
           # the workflow is triggered by a tag push (mirrors bessa_patterns pattern)

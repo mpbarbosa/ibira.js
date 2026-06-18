@@ -42,11 +42,11 @@ Yes! You can use it via CDN:
 
 ```html
 <script type="module">
-  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/src/index.js';
+	import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/src/index.js';
 
-  const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
-  const data = await fetcher.fetchData();
-  console.log(data);
+	const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
+	const data = await fetcher.fetchData();
+	console.log(data);
 </script>
 ```
 
@@ -86,11 +86,11 @@ const users = await fetcher.fetchData();
 import { IbiraAPIFetcher } from 'ibira.js';
 
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ name: 'John', email: 'john@example.com' })
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+	},
+	body: JSON.stringify({ name: 'John', email: 'john@example.com' }),
 });
 
 const newUser = await fetcher.fetchData();
@@ -102,10 +102,10 @@ const newUser = await fetcher.fetchData();
 import { IbiraAPIFetcher } from 'ibira.js';
 
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/protected', {
-    headers: {
-        'Authorization': 'Bearer YOUR_ACCESS_TOKEN',
-        'Content-Type': 'application/json'
-    }
+	headers: {
+		Authorization: 'Bearer YOUR_ACCESS_TOKEN',
+		'Content-Type': 'application/json',
+	},
 });
 
 const data = await fetcher.fetchData();
@@ -116,14 +116,11 @@ const data = await fetcher.fetchData();
 ```javascript
 import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 
-const fetcher = new IbiraAPIFetcher(
-    'https://api.example.com/realtime',
-    {
-        cache: new DefaultCache(),
-        eventNotifier: new DefaultEventNotifier(),
-        enableCache: false  // Disable caching
-    }
-);
+const fetcher = new IbiraAPIFetcher('https://api.example.com/realtime', {
+	cache: new DefaultCache(),
+	eventNotifier: new DefaultEventNotifier(),
+	enableCache: false, // Disable caching
+});
 
 const data = await fetcher.fetchData();
 ```
@@ -153,18 +150,18 @@ import { IbiraAPIFetcher } from 'ibira.js';
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');
 
 try {
-    const data = await fetcher.fetchData();
-    console.log('Success:', data);
+	const data = await fetcher.fetchData();
+	console.log('Success:', data);
 } catch (error) {
-    if (error.name === 'TypeError') {
-        console.error('Network error:', error.message);
-    } else if (error.message.includes('HTTP error')) {
-        console.error('API error:', error.message);
-    } else if (error.name === 'AbortError') {
-        console.error('Request timeout:', error.message);
-    } else {
-        console.error('Unknown error:', error);
-    }
+	if (error.name === 'TypeError') {
+		console.error('Network error:', error.message);
+	} else if (error.message.includes('HTTP error')) {
+		console.error('API error:', error.message);
+	} else if (error.name === 'AbortError') {
+		console.error('Request timeout:', error.message);
+	} else {
+		console.error('Unknown error:', error);
+	}
 }
 ```
 
@@ -181,15 +178,12 @@ Yes:
 ```javascript
 import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 
-const fetcher = new IbiraAPIFetcher(
-    'https://api.example.com/data',
-    {
-        cache: new DefaultCache({
-            expiration: 600000  // 10 minutes
-        }),
-        eventNotifier: new DefaultEventNotifier()
-    }
-);
+const fetcher = new IbiraAPIFetcher('https://api.example.com/data', {
+	cache: new DefaultCache({
+		expiration: 600000, // 10 minutes
+	}),
+	eventNotifier: new DefaultEventNotifier(),
+});
 ```
 
 ### What is the maximum cache size
@@ -203,15 +197,12 @@ Yes:
 ```javascript
 import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 
-const fetcher = new IbiraAPIFetcher(
-    'https://api.example.com/data',
-    {
-        cache: new DefaultCache({
-            maxSize: 100  // Store up to 100 entries
-        }),
-        eventNotifier: new DefaultEventNotifier()
-    }
-);
+const fetcher = new IbiraAPIFetcher('https://api.example.com/data', {
+	cache: new DefaultCache({
+		maxSize: 100, // Store up to 100 entries
+	}),
+	eventNotifier: new DefaultEventNotifier(),
+});
 ```
 
 ### Can I use a custom cache implementation
@@ -220,26 +211,37 @@ Yes! Implement the cache interface:
 
 ```javascript
 class MyCustomCache {
-    constructor() {
-        this.storage = new Map();
-    }
+	constructor() {
+		this.storage = new Map();
+	}
 
-    has(key) { return this.storage.has(key); }
-    get(key) { return this.storage.get(key); }
-    set(key, value) { this.storage.set(key, value); }
-    delete(key) { return this.storage.delete(key); }
-    clear() { this.storage.clear(); }
-    get size() { return this.storage.size; }
-    entries() { return this.storage.entries(); }
+	has(key) {
+		return this.storage.has(key);
+	}
+	get(key) {
+		return this.storage.get(key);
+	}
+	set(key, value) {
+		this.storage.set(key, value);
+	}
+	delete(key) {
+		return this.storage.delete(key);
+	}
+	clear() {
+		this.storage.clear();
+	}
+	get size() {
+		return this.storage.size;
+	}
+	entries() {
+		return this.storage.entries();
+	}
 }
 
-const fetcher = new IbiraAPIFetcher(
-    'https://api.example.com/data',
-    {
-        cache: new MyCustomCache(),
-        eventNotifier: new DefaultEventNotifier()
-    }
-);
+const fetcher = new IbiraAPIFetcher('https://api.example.com/data', {
+	cache: new MyCustomCache(),
+	eventNotifier: new DefaultEventNotifier(),
+});
 ```
 
 ## Retry & Timeout Questions
@@ -255,15 +257,12 @@ Yes:
 ```javascript
 import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 
-const fetcher = new IbiraAPIFetcher(
-    'https://api.example.com/data',
-    {
-        cache: new DefaultCache(),
-        eventNotifier: new DefaultEventNotifier(),
-        maxRetries: 5,      // Retry up to 5 times
-        retryDelay: 2000    // Wait 2 seconds between retries
-    }
-);
+const fetcher = new IbiraAPIFetcher('https://api.example.com/data', {
+	cache: new DefaultCache(),
+	eventNotifier: new DefaultEventNotifier(),
+	maxRetries: 5, // Retry up to 5 times
+	retryDelay: 2000, // Wait 2 seconds between retries
+});
 ```
 
 ### What is the default timeout
@@ -277,14 +276,11 @@ Yes:
 ```javascript
 import { IbiraAPIFetcher, DefaultCache, DefaultEventNotifier } from 'ibira.js';
 
-const fetcher = new IbiraAPIFetcher(
-    'https://api.example.com/data',
-    {
-        cache: new DefaultCache(),
-        eventNotifier: new DefaultEventNotifier(),
-        timeout: 10000  // 10 second timeout
-    }
-);
+const fetcher = new IbiraAPIFetcher('https://api.example.com/data', {
+	cache: new DefaultCache(),
+	eventNotifier: new DefaultEventNotifier(),
+	timeout: 10000, // 10 second timeout
+});
 ```
 
 ### Which errors trigger retries
@@ -321,18 +317,15 @@ const eventNotifier = new DefaultEventNotifier();
 
 // Create observer
 const observer = {
-    update(event, data) {
-        console.log(`Event: ${event}`, data);
-    }
+	update(event, data) {
+		console.log(`Event: ${event}`, data);
+	},
 };
 
 // Subscribe
 eventNotifier.subscribe(observer);
 
-const fetcher = IbiraAPIFetcher.withDefaultCache(
-    'https://api.example.com/data',
-    { eventNotifier }
-);
+const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data', { eventNotifier });
 
 await fetcher.fetchData();
 ```
@@ -384,7 +377,7 @@ For managing multiple API endpoints:
 import { IbiraAPIFetchManager, DefaultCache } from 'ibira.js';
 
 const manager = new IbiraAPIFetchManager({
-    cache: new DefaultCache()
+	cache: new DefaultCache(),
 });
 
 manager.addFetcher('users', 'https://api.example.com/users');
@@ -405,34 +398,35 @@ import { useState, useEffect } from 'react';
 import { IbiraAPIFetcher } from 'ibira.js';
 
 function UserList() {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+	const [users, setUsers] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetcher = IbiraAPIFetcher.withDefaultCache(
-            'https://api.example.com/users'
-        );
+	useEffect(() => {
+		const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');
 
-        fetcher.fetchData()
-            .then(data => {
-                setUsers(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                setError(err.message);
-                setLoading(false);
-            });
-    }, []);
+		fetcher
+			.fetchData()
+			.then((data) => {
+				setUsers(data);
+				setLoading(false);
+			})
+			.catch((err) => {
+				setError(err.message);
+				setLoading(false);
+			});
+	}, []);
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
+	if (loading) return <div>Loading...</div>;
+	if (error) return <div>Error: {error}</div>;
 
-    return (
-        <ul>
-            {users.map(user => <li key={user.id}>{user.name}</li>)}
-        </ul>
-    );
+	return (
+		<ul>
+			{users.map((user) => (
+				<li key={user.id}>{user.name}</li>
+			))}
+		</ul>
+	);
 }
 ```
 
@@ -444,9 +438,9 @@ Yes! Type definitions are included:
 import { IbiraAPIFetcher } from 'ibira.js';
 
 interface User {
-    id: number;
-    name: string;
-    email: string;
+	id: number;
+	name: string;
+	email: string;
 }
 
 const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');

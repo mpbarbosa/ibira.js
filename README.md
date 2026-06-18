@@ -34,7 +34,7 @@ yarn add ibira.js
 
 ```html
 <script type="module">
-  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js/dist/index.mjs';
+	import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js/dist/index.mjs';
 </script>
 ```
 
@@ -71,7 +71,7 @@ const result = await manager.fetch('https://api.example.com/data');
 
 // Observer pattern example
 fetcher.subscribe((newData) => {
-  console.log('Data updated:', newData);
+	console.log('Data updated:', newData);
 });
 ```
 
@@ -86,16 +86,18 @@ Load **ibira.js** directly from jsDelivr CDN without installation:
 <script src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/dist/index.mjs"></script>
 
 <!-- Load with SRI (Subresource Integrity) for security -->
-<script src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/dist/index.mjs"
-        integrity="sha384-HASH_HERE"
-        crossorigin="anonymous"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/dist/index.mjs"
+	integrity="sha384-HASH_HERE"
+	crossorigin="anonymous"
+></script>
 ```
 
 ### ES Module Import
 
 ```html
 <script type="module">
-  import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/dist/index.mjs';
+	import { IbiraAPIFetcher } from 'https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/dist/index.mjs';
 </script>
 ```
 
@@ -147,10 +149,10 @@ npm run test:all
 
 ibira.js is isomorphic — it runs in both browser and Node.js ≥18 environments without modification. All tests pass in both runtimes:
 
-| Environment | Command | Status |
-|-------------|---------|--------|
-| Browser (jsdom) | `npm test` | ✅ |
-| Node.js ≥18 | `npm run test:node` | ✅ |
+| Environment     | Command             | Status |
+| --------------- | ------------------- | ------ |
+| Browser (jsdom) | `npm test`          | ✅     |
+| Node.js ≥18     | `npm run test:node` | ✅     |
 
 The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `AbortController`) available in both environments.
 
@@ -253,13 +255,13 @@ The library uses only platform-neutral APIs (`fetch`, `Map`, `setTimeout`, `Abor
 
 **Exit codes:**
 
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `1` | Working tree is dirty |
-| `2` | Tests failed |
-| `3` | Tag already exists |
-| `4` | Push to remote failed |
+| Code | Meaning               |
+| ---- | --------------------- |
+| `0`  | Success               |
+| `1`  | Working tree is dirty |
+| `2`  | Tests failed          |
+| `3`  | Tag already exists    |
+| `4`  | Push to remote failed |
 
 ```bash
 # Deploy current package.json version

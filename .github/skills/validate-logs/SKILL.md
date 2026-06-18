@@ -68,12 +68,12 @@ For each workflow run directory found under `$project_root/.ai_workflow/logs/`:
 
 ## Severity triage
 
-| Log classification | plan.md action |
-|--------------------|----------------|
+| Log classification | plan.md action                          |
+| ------------------ | --------------------------------------- |
 | Critical / High    | Out of scope — skip, do not add to plan |
-| Medium             | Add to plan if still reproducible |
-| Low / Minor        | Add to plan if still reproducible |
-| Already fixed      | Skip — do not add noise |
+| Medium             | Add to plan if still reproducible       |
+| Low / Minor        | Add to plan if still reproducible       |
+| Already fixed      | Skip — do not add noise                 |
 
 ## Verifying issues against the codebase
 
@@ -125,15 +125,15 @@ The file is the handoff contract between this skill and `fix-log-issues`.
 
 ### Issue types
 
-| Type | Meaning |
-|------|---------|
-| `undocumented-directory` | A directory exists but is not referenced in any doc |
-| `markdown-lint` | One or more markdown formatting rules violated |
-| `dependency-warning` | `npm install --dry-run` or audit produced a warning |
-| `javascript-issue` | `npm run validate` reported a problem |
-| `architecture-mismatch` | Directory tree diverges from `docs/ARCHITECTURE.md` |
-| `missing-test-coverage` | A module or function has no corresponding test |
-| `docs-outdated` | Documentation references a file, export, or behaviour that no longer exists |
+| Type                     | Meaning                                                                     |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `undocumented-directory` | A directory exists but is not referenced in any doc                         |
+| `markdown-lint`          | One or more markdown formatting rules violated                              |
+| `dependency-warning`     | `npm install --dry-run` or audit produced a warning                         |
+| `javascript-issue`       | `npm run validate` reported a problem                                       |
+| `architecture-mismatch`  | Directory tree diverges from `docs/ARCHITECTURE.md`                         |
+| `missing-test-coverage`  | A module or function has no corresponding test                              |
+| `docs-outdated`          | Documentation references a file, export, or behaviour that no longer exists |
 
 ### ID assignment
 
@@ -144,12 +144,12 @@ The file is the handoff contract between this skill and `fix-log-issues`.
 
 ### Status values
 
-| Value | Meaning |
-|-------|---------|
-| `open` | Written by `validate-logs`; not yet fixed |
-| `in-progress` | Being processed by `fix-log-issues` |
-| `done` | Fix applied and verified by `fix-log-issues` |
-| `skipped` | Decided not to fix (add a `**Skip reason:**` line) |
+| Value         | Meaning                                            |
+| ------------- | -------------------------------------------------- |
+| `open`        | Written by `validate-logs`; not yet fixed          |
+| `in-progress` | Being processed by `fix-log-issues`                |
+| `done`        | Fix applied and verified by `fix-log-issues`       |
+| `skipped`     | Decided not to fix (add a `**Skip reason:**` line) |
 
 ## Step-by-step execution
 

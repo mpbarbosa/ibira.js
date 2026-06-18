@@ -15,7 +15,7 @@
 
 ## What is Test Driven Development?
 
-**Test Driven Development (TDD)** is a software development approach where tests are written *before* the actual code. The process follows a short, repeatable cycle:
+**Test Driven Development (TDD)** is a software development approach where tests are written _before_ the actual code. The process follows a short, repeatable cycle:
 
 1. **Write a failing test** (Red) - Define what you want to build
 2. **Make the test pass** (Green) - Implement the simplest solution
@@ -92,25 +92,25 @@ TDD naturally encourages:
 ```javascript
 // __tests__/ApiResponseParser.test.js
 describe('ApiResponseParser', () => {
-    test('should parse API response with all data fields', () => {
-        const response = {
-            status: 'success',
-            data: {
-                id: '123',
-                name: 'Test Item',
-                value: 42
-            },
-            timestamp: '2025-01-08T10:00:00Z'
-        };
+	test('should parse API response with all data fields', () => {
+		const response = {
+			status: 'success',
+			data: {
+				id: '123',
+				name: 'Test Item',
+				value: 42,
+			},
+			timestamp: '2025-01-08T10:00:00Z',
+		};
 
-        const parsed = parseApiResponse(response);
+		const parsed = parseApiResponse(response);
 
-        expect(parsed).toEqual({
-            id: '123',
-            name: 'Test Item',
-            value: 42
-        });
-    });
+		expect(parsed).toEqual({
+			id: '123',
+			name: 'Test Item',
+			value: 42,
+		});
+	});
 });
 ```
 
@@ -133,11 +133,11 @@ describe('ApiResponseParser', () => {
 ```javascript
 // src/ApiResponseParser.js
 function parseApiResponse(response) {
-    return {
-        id: response.data.id,
-        name: response.data.name,
-        value: response.data.value
-    };
+	return {
+		id: response.data.id,
+		name: response.data.name,
+		value: response.data.value,
+	};
 }
 
 module.exports = { parseApiResponse };
@@ -163,14 +163,14 @@ module.exports = { parseApiResponse };
 ```javascript
 // src/ApiResponseParser.js
 function parseApiResponse(response) {
-    // Refactored: handle missing fields safely
-    if (!response || !response.data) return null;
+	// Refactored: handle missing fields safely
+	if (!response || !response.data) return null;
 
-    return {
-        id: response.data.id || '',
-        name: response.data.name || '',
-        value: response.data.value ?? 0
-    };
+	return {
+		id: response.data.id || '',
+		name: response.data.name || '',
+		value: response.data.value ?? 0,
+	};
 }
 
 module.exports = { parseApiResponse };
@@ -322,36 +322,39 @@ TDD and referential transparency work together perfectly. Pure functions are eas
 ```javascript
 // src/utils.js - Pure function
 function calculateDistance(coord1, coord2) {
-    const R = 6371; // Earth's radius in km
-    const dLat = toRadians(coord2.lat - coord1.lat);
-    const dLon = toRadians(coord2.lon - coord1.lon);
+	const R = 6371; // Earth's radius in km
+	const dLat = toRadians(coord2.lat - coord1.lat);
+	const dLon = toRadians(coord2.lon - coord1.lon);
 
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(toRadians(coord1.lat)) * Math.cos(toRadians(coord2.lat)) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
+	const a =
+		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+		Math.cos(toRadians(coord1.lat)) *
+			Math.cos(toRadians(coord2.lat)) *
+			Math.sin(dLon / 2) *
+			Math.sin(dLon / 2);
 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+	return R * c;
 }
 
 // __tests__/utils.test.js - Easy to test!
 describe('calculateDistance', () => {
-    test('should calculate distance between two coordinates', () => {
-        const coord1 = { lat: -23.550520, lon: -46.633308 }; // São Paulo
-        const coord2 = { lat: -22.906847, lon: -43.172896 }; // Rio de Janeiro
+	test('should calculate distance between two coordinates', () => {
+		const coord1 = { lat: -23.55052, lon: -46.633308 }; // São Paulo
+		const coord2 = { lat: -22.906847, lon: -43.172896 }; // Rio de Janeiro
 
-        const distance = calculateDistance(coord1, coord2);
+		const distance = calculateDistance(coord1, coord2);
 
-        expect(distance).toBeCloseTo(357.4, 1);
-    });
+		expect(distance).toBeCloseTo(357.4, 1);
+	});
 
-    test('should return 0 for same coordinates', () => {
-        const coord = { lat: -23.550520, lon: -46.633308 };
+	test('should return 0 for same coordinates', () => {
+		const coord = { lat: -23.55052, lon: -46.633308 };
 
-        const distance = calculateDistance(coord, coord);
+		const distance = calculateDistance(coord, coord);
 
-        expect(distance).toBe(0);
-    });
+		expect(distance).toBe(0);
+	});
 });
 ```
 
@@ -371,48 +374,48 @@ describe('calculateDistance', () => {
 
 // Pure function - easy to test
 function buildGeocodingUrl(address) {
-    const baseUrl = 'https://nominatim.openstreetmap.org/search';
-    const params = new URLSearchParams({
-        q: address,
-        format: 'json',
-        addressdetails: 1,
-        limit: 1
-    });
-    return `${baseUrl}?${params.toString()}`;
+	const baseUrl = 'https://nominatim.openstreetmap.org/search';
+	const params = new URLSearchParams({
+		q: address,
+		format: 'json',
+		addressdetails: 1,
+		limit: 1,
+	});
+	return `${baseUrl}?${params.toString()}`;
 }
 
 // Impure function - side effect at boundary
 async function fetchGeocodingData(address) {
-    const url = buildGeocodingUrl(address);
-    const response = await fetch(url);
-    return response.json();
+	const url = buildGeocodingUrl(address);
+	const response = await fetch(url);
+	return response.json();
 }
 
 // __tests__/geocoding.test.js
 describe('buildGeocodingUrl', () => {
-    test('should build correct URL for Brazilian address', () => {
-        const url = buildGeocodingUrl('Avenida Paulista, São Paulo');
+	test('should build correct URL for Brazilian address', () => {
+		const url = buildGeocodingUrl('Avenida Paulista, São Paulo');
 
-        expect(url).toContain('nominatim.openstreetmap.org');
-        expect(url).toContain('q=Avenida+Paulista');
-        expect(url).toContain('format=json');
-    });
+		expect(url).toContain('nominatim.openstreetmap.org');
+		expect(url).toContain('q=Avenida+Paulista');
+		expect(url).toContain('format=json');
+	});
 });
 
 describe('fetchGeocodingData', () => {
-    test('should fetch geocoding data', async () => {
-        // Mock the fetch at the boundary
-        global.fetch = jest.fn(() =>
-            Promise.resolve({
-                json: () => Promise.resolve([{ lat: '-23.5', lon: '-46.6' }])
-            })
-        );
+	test('should fetch geocoding data', async () => {
+		// Mock the fetch at the boundary
+		global.fetch = jest.fn(() =>
+			Promise.resolve({
+				json: () => Promise.resolve([{ lat: '-23.5', lon: '-46.6' }]),
+			}),
+		);
 
-        const data = await fetchGeocodingData('São Paulo');
+		const data = await fetchGeocodingData('São Paulo');
 
-        expect(data).toHaveLength(1);
-        expect(data[0].lat).toBe('-23.5');
-    });
+		expect(data).toHaveLength(1);
+		expect(data[0].lat).toBe('-23.5');
+	});
 });
 ```
 
@@ -431,12 +434,12 @@ describe('fetchGeocodingData', () => {
 ```javascript
 // Writing code first
 function processAddress(address) {
-    // Implementation
+	// Implementation
 }
 
 // Then writing test
 test('should process address', () => {
-    // Test
+	// Test
 });
 ```
 
@@ -445,14 +448,14 @@ test('should process address', () => {
 ```javascript
 // Write test first
 test('should process address', () => {
-    const address = { street: 'Av. Paulista' };
-    const result = processAddress(address);
-    expect(result).toBeDefined();
+	const address = { street: 'Av. Paulista' };
+	const result = processAddress(address);
+	expect(result).toBeDefined();
 });
 
 // Then implement
 function processAddress(address) {
-    // Implementation
+	// Implementation
 }
 ```
 
@@ -464,13 +467,13 @@ Focus on one behavior per test:
 
 ```javascript
 test('should format street address', () => {
-    const address = { street: 'Av. Paulista', number: '1000' };
-    expect(formatStreet(address)).toBe('Av. Paulista, 1000');
+	const address = { street: 'Av. Paulista', number: '1000' };
+	expect(formatStreet(address)).toBe('Av. Paulista, 1000');
 });
 
 test('should handle missing street number', () => {
-    const address = { street: 'Av. Paulista' };
-    expect(formatStreet(address)).toBe('Av. Paulista, s/n');
+	const address = { street: 'Av. Paulista' };
+	expect(formatStreet(address)).toBe('Av. Paulista, s/n');
 });
 ```
 
@@ -478,10 +481,10 @@ test('should handle missing street number', () => {
 
 ```javascript
 test('should format address in all cases', () => {
-    // Testing multiple behaviors in one test
-    expect(formatStreet({ street: 'Av. Paulista', number: '1000' })).toBe('Av. Paulista, 1000');
-    expect(formatStreet({ street: 'Av. Paulista' })).toBe('Av. Paulista, s/n');
-    expect(formatStreet(null)).toBeNull();
+	// Testing multiple behaviors in one test
+	expect(formatStreet({ street: 'Av. Paulista', number: '1000' })).toBe('Av. Paulista, 1000');
+	expect(formatStreet({ street: 'Av. Paulista' })).toBe('Av. Paulista, s/n');
+	expect(formatStreet(null)).toBeNull();
 });
 ```
 
@@ -491,11 +494,11 @@ test('should format address in all cases', () => {
 
 ```javascript
 test('should return sorted cities by name', () => {
-    const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
-    const sorted = sortCities(cities);
+	const cities = ['São Paulo', 'Brasília', 'Rio de Janeiro'];
+	const sorted = sortCities(cities);
 
-    expect(sorted[0]).toBe('Brasília');
-    expect(sorted[2]).toBe('São Paulo');
+	expect(sorted[0]).toBe('Brasília');
+	expect(sorted[2]).toBe('São Paulo');
 });
 ```
 
@@ -503,10 +506,10 @@ test('should return sorted cities by name', () => {
 
 ```javascript
 test('should call Array.sort', () => {
-    const sortSpy = jest.spyOn(Array.prototype, 'sort');
-    sortCities(['São Paulo', 'Rio']);
+	const sortSpy = jest.spyOn(Array.prototype, 'sort');
+	sortCities(['São Paulo', 'Rio']);
 
-    expect(sortSpy).toHaveBeenCalled(); // Implementation detail
+	expect(sortSpy).toHaveBeenCalled(); // Implementation detail
 });
 ```
 
@@ -520,11 +523,11 @@ test('should call Array.sort', () => {
 ```javascript
 // Fast: Pure function
 test('calculateDistance is fast', () => {
-    const start = Date.now();
-    calculateDistance({lat: 0, lon: 0}, {lat: 1, lon: 1});
-    const duration = Date.now() - start;
+	const start = Date.now();
+	calculateDistance({ lat: 0, lon: 0 }, { lat: 1, lon: 1 });
+	const duration = Date.now() - start;
 
-    expect(duration).toBeLessThan(10); // milliseconds
+	expect(duration).toBeLessThan(10); // milliseconds
 });
 ```
 
@@ -540,17 +543,17 @@ Always test:
 
 ```javascript
 describe('formatAddress edge cases', () => {
-    test('should handle null address', () => {
-        expect(formatAddress(null)).toBe('');
-    });
+	test('should handle null address', () => {
+		expect(formatAddress(null)).toBe('');
+	});
 
-    test('should handle empty object', () => {
-        expect(formatAddress({})).toBe('');
-    });
+	test('should handle empty object', () => {
+		expect(formatAddress({})).toBe('');
+	});
 
-    test('should handle missing required fields', () => {
-        expect(formatAddress({ city: 'São Paulo' })).toContain('São Paulo');
-    });
+	test('should handle missing required fields', () => {
+		expect(formatAddress({ city: 'São Paulo' })).toContain('São Paulo');
+	});
 });
 ```
 
@@ -559,17 +562,17 @@ describe('formatAddress edge cases', () => {
 ✅ **Good:**
 
 ```javascript
-test('should return empty string when address is null', () => { });
-test('should format complete Brazilian address with all components', () => { });
-test('should preserve Portuguese special characters in city names', () => { });
+test('should return empty string when address is null', () => {});
+test('should format complete Brazilian address with all components', () => {});
+test('should preserve Portuguese special characters in city names', () => {});
 ```
 
 ❌ **Avoid:**
 
 ```javascript
-test('test 1', () => { });
-test('address formatting', () => { });
-test('works', () => { });
+test('test 1', () => {});
+test('address formatting', () => {});
+test('works', () => {});
 ```
 
 ### 7. Follow the AAA Pattern
@@ -578,15 +581,15 @@ Structure tests as **Arrange-Act-Assert**:
 
 ```javascript
 test('should calculate distance between cities', () => {
-    // Arrange - Set up test data
-    const saoPaulo = { lat: -23.550520, lon: -46.633308 };
-    const rio = { lat: -22.906847, lon: -43.172896 };
+	// Arrange - Set up test data
+	const saoPaulo = { lat: -23.55052, lon: -46.633308 };
+	const rio = { lat: -22.906847, lon: -43.172896 };
 
-    // Act - Execute the function
-    const distance = calculateDistance(saoPaulo, rio);
+	// Act - Execute the function
+	const distance = calculateDistance(saoPaulo, rio);
 
-    // Assert - Verify the result
-    expect(distance).toBeCloseTo(357.4, 1);
+	// Assert - Verify the result
+	expect(distance).toBeCloseTo(357.4, 1);
 });
 ```
 
@@ -598,20 +601,20 @@ Each test should be able to run in isolation:
 
 ```javascript
 describe('AddressCache', () => {
-    let cache;
+	let cache;
 
-    beforeEach(() => {
-        cache = new AddressCache(); // Fresh instance each test
-    });
+	beforeEach(() => {
+		cache = new AddressCache(); // Fresh instance each test
+	});
 
-    test('should add address to cache', () => {
-        cache.add('key1', { city: 'São Paulo' });
-        expect(cache.get('key1')).toBeDefined();
-    });
+	test('should add address to cache', () => {
+		cache.add('key1', { city: 'São Paulo' });
+		expect(cache.get('key1')).toBeDefined();
+	});
 
-    test('should return null for missing key', () => {
-        expect(cache.get('nonexistent')).toBeNull();
-    });
+	test('should return null for missing key', () => {
+		expect(cache.get('nonexistent')).toBeNull();
+	});
 });
 ```
 
@@ -622,24 +625,24 @@ describe('AddressCache', () => {
 ```javascript
 // src/utils.js
 function formatCEP(cep) {
-    const digits = cep.replace(/\D/g, '');
-    if (digits.length !== 8) return null;
-    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+	const digits = cep.replace(/\D/g, '');
+	if (digits.length !== 8) return null;
+	return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
 
 // __tests__/utils.test.js
 describe('formatCEP', () => {
-    test('should format valid CEP', () => {
-        expect(formatCEP('01310200')).toBe('01310-200');
-    });
+	test('should format valid CEP', () => {
+		expect(formatCEP('01310200')).toBe('01310-200');
+	});
 
-    test('should handle CEP with formatting', () => {
-        expect(formatCEP('01310-200')).toBe('01310-200');
-    });
+	test('should handle CEP with formatting', () => {
+		expect(formatCEP('01310-200')).toBe('01310-200');
+	});
 
-    test('should return null for invalid CEP', () => {
-        expect(formatCEP('123')).toBeNull();
-    });
+	test('should return null for invalid CEP', () => {
+		expect(formatCEP('123')).toBeNull();
+	});
 });
 ```
 
@@ -648,21 +651,21 @@ describe('formatCEP', () => {
 ```javascript
 // __tests__/geocoding.test.js
 describe('geocoding with mocks', () => {
-    beforeEach(() => {
-        global.fetch = jest.fn();
-    });
+	beforeEach(() => {
+		global.fetch = jest.fn();
+	});
 
-    afterEach(() => {
-        jest.restoreAllMocks();
-    });
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
 
-    test('should handle API errors gracefully', async () => {
-        global.fetch.mockRejectedValue(new Error('Network error'));
+	test('should handle API errors gracefully', async () => {
+		global.fetch.mockRejectedValue(new Error('Network error'));
 
-        const result = await safeGeocode('São Paulo');
+		const result = await safeGeocode('São Paulo');
 
-        expect(result).toBeNull();
-    });
+		expect(result).toBeNull();
+	});
 });
 ```
 
@@ -671,18 +674,16 @@ describe('geocoding with mocks', () => {
 ```javascript
 // __tests__/async.test.js
 describe('async operations', () => {
-    test('should resolve with address data', async () => {
-        const data = await fetchAddress('01310-200');
+	test('should resolve with address data', async () => {
+		const data = await fetchAddress('01310-200');
 
-        expect(data).toBeDefined();
-        expect(data.city).toBe('São Paulo');
-    });
+		expect(data).toBeDefined();
+		expect(data.city).toBe('São Paulo');
+	});
 
-    test('should reject with error for invalid CEP', async () => {
-        await expect(fetchAddress('invalid'))
-            .rejects
-            .toThrow('Invalid CEP');
-    });
+	test('should reject with error for invalid CEP', async () => {
+		await expect(fetchAddress('invalid')).rejects.toThrow('Invalid CEP');
+	});
 });
 ```
 
@@ -691,15 +692,15 @@ describe('async operations', () => {
 ```javascript
 // __tests__/immutability.test.js
 describe('immutability', () => {
-    test('should not mutate original array when sorting', () => {
-        const original = ['c', 'a', 'b'];
-        const originalCopy = [...original];
+	test('should not mutate original array when sorting', () => {
+		const original = ['c', 'a', 'b'];
+		const originalCopy = [...original];
 
-        const sorted = sortArray(original);
+		const sorted = sortArray(original);
 
-        expect(original).toEqual(originalCopy); // Original unchanged
-        expect(sorted).toEqual(['a', 'b', 'c']);
-    });
+		expect(original).toEqual(originalCopy); // Original unchanged
+		expect(sorted).toEqual(['a', 'b', 'c']);
+	});
 });
 ```
 
@@ -716,13 +717,13 @@ describe('immutability', () => {
 const { isValidBrazilianPhone } = require('../src/PhoneValidator');
 
 describe('Brazilian Phone Validator', () => {
-    test('should validate mobile phone with area code', () => {
-        expect(isValidBrazilianPhone('(11) 98765-4321')).toBe(true);
-    });
+	test('should validate mobile phone with area code', () => {
+		expect(isValidBrazilianPhone('(11) 98765-4321')).toBe(true);
+	});
 
-    test('should reject invalid phone', () => {
-        expect(isValidBrazilianPhone('123')).toBe(false);
-    });
+	test('should reject invalid phone', () => {
+		expect(isValidBrazilianPhone('123')).toBe(false);
+	});
 });
 
 // Run: npm test
@@ -734,8 +735,8 @@ describe('Brazilian Phone Validator', () => {
 ```javascript
 // src/PhoneValidator.js
 function isValidBrazilianPhone(phone) {
-    const digits = phone.replace(/\D/g, '');
-    return digits.length === 11 && digits.startsWith('11');
+	const digits = phone.replace(/\D/g, '');
+	return digits.length === 11 && digits.startsWith('11');
 }
 
 module.exports = { isValidBrazilianPhone };
@@ -749,11 +750,11 @@ module.exports = { isValidBrazilianPhone };
 ```javascript
 // src/PhoneValidator.js
 function isValidBrazilianPhone(phone) {
-    const digits = phone.replace(/\D/g, '');
-    const hasCorrectLength = digits.length === 10 || digits.length === 11;
-    const hasValidAreaCode = /^[1-9]{2}/.test(digits);
+	const digits = phone.replace(/\D/g, '');
+	const hasCorrectLength = digits.length === 10 || digits.length === 11;
+	const hasValidAreaCode = /^[1-9]{2}/.test(digits);
 
-    return hasCorrectLength && hasValidAreaCode;
+	return hasCorrectLength && hasValidAreaCode;
 }
 
 // Run: npm test
@@ -764,11 +765,11 @@ function isValidBrazilianPhone(phone) {
 
 ```javascript
 test('should validate landline with 10 digits', () => {
-    expect(isValidBrazilianPhone('(11) 3456-7890')).toBe(true);
+	expect(isValidBrazilianPhone('(11) 3456-7890')).toBe(true);
 });
 
 test('should reject phone with invalid area code', () => {
-    expect(isValidBrazilianPhone('(00) 98765-4321')).toBe(false);
+	expect(isValidBrazilianPhone('(00) 98765-4321')).toBe(false);
 });
 ```
 
@@ -781,9 +782,9 @@ test('should reject phone with invalid area code', () => {
 ```javascript
 // Hard to test - depends on Date
 function greetUser(name) {
-    const hour = new Date().getHours();
-    const greeting = hour < 12 ? 'Bom dia' : 'Boa tarde';
-    return `${greeting}, ${name}!`;
+	const hour = new Date().getHours();
+	const greeting = hour < 12 ? 'Bom dia' : 'Boa tarde';
+	return `${greeting}, ${name}!`;
 }
 ```
 
@@ -792,13 +793,13 @@ function greetUser(name) {
 ```javascript
 // __tests__/greeting.test.js
 describe('generateGreeting (pure)', () => {
-    test('should generate morning greeting', () => {
-        expect(generateGreeting('João', 8)).toBe('Bom dia, João!');
-    });
+	test('should generate morning greeting', () => {
+		expect(generateGreeting('João', 8)).toBe('Bom dia, João!');
+	});
 
-    test('should generate afternoon greeting', () => {
-        expect(generateGreeting('Maria', 14)).toBe('Boa tarde, Maria!');
-    });
+	test('should generate afternoon greeting', () => {
+		expect(generateGreeting('Maria', 14)).toBe('Boa tarde, Maria!');
+	});
 });
 ```
 
@@ -807,12 +808,12 @@ describe('generateGreeting (pure)', () => {
 ```javascript
 // src/greeting.js
 function generateGreeting(name, hour) {
-    const greeting = hour < 12 ? 'Bom dia' : 'Boa tarde';
-    return `${greeting}, ${name}!`;
+	const greeting = hour < 12 ? 'Bom dia' : 'Boa tarde';
+	return `${greeting}, ${name}!`;
 }
 
 function greetUser(name) {
-    return generateGreeting(name, new Date().getHours());
+	return generateGreeting(name, new Date().getHours());
 }
 
 module.exports = { generateGreeting, greetUser };

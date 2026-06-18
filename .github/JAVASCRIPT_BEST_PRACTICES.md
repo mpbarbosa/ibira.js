@@ -58,12 +58,12 @@ JavaScript has 8 data types:
 
 ```javascript
 // Primitive types (immutable)
-const num = 42;              // Number
-const str = 'hello';         // String
-const bool = true;           // Boolean
-const nothing = null;        // Null
-const undef = undefined;     // Undefined
-const sym = Symbol('id');    // Symbol
+const num = 42; // Number
+const str = 'hello'; // String
+const bool = true; // Boolean
+const nothing = null; // Null
+const undef = undefined; // Undefined
+const sym = Symbol('id'); // Symbol
 const bigNum = 9007199254740991n; // BigInt
 
 // Reference type (mutable by default)
@@ -79,10 +79,10 @@ The value of `this` depends on how a function is called:
 ```javascript
 // ❌ Avoid: 'this' can be confusing
 const obj = {
-    name: 'ibira',
-    greet: function() {
-        return `Hello from ${this.name}`;
-    }
+	name: 'ibira',
+	greet: function () {
+		return `Hello from ${this.name}`;
+	},
 };
 
 const greet = obj.greet;
@@ -90,8 +90,8 @@ greet(); // undefined - 'this' is lost!
 
 // ✅ Prefer: Arrow functions or explicit binding
 const obj = {
-    name: 'ibira',
-    greet: () => `Hello from ibira`  // Lexical this
+	name: 'ibira',
+	greet: () => `Hello from ibira`, // Lexical this
 };
 
 // Or use pure functions that don't rely on 'this'
@@ -128,14 +128,14 @@ Use built-in array methods for declarative code:
 ```javascript
 // ✅ Good: Declarative, functional style
 const numbers = [1, 2, 3, 4, 5];
-const doubled = numbers.map(n => n * 2);
-const evens = numbers.filter(n => n % 2 === 0);
+const doubled = numbers.map((n) => n * 2);
+const evens = numbers.filter((n) => n % 2 === 0);
 const sum = numbers.reduce((acc, n) => acc + n, 0);
 
 // ❌ Avoid: Imperative loops (when functional alternatives exist)
 const doubled = [];
 for (let i = 0; i < numbers.length; i++) {
-    doubled.push(numbers[i] * 2);
+	doubled.push(numbers[i] * 2);
 }
 ```
 
@@ -147,9 +147,9 @@ Build complex logic from simple functions:
 
 ```javascript
 // Small, focused functions
-const trim = str => str.trim();
-const lowercase = str => str.toLowerCase();
-const removeSpaces = str => str.replace(/\s+/g, '');
+const trim = (str) => str.trim();
+const lowercase = (str) => str.toLowerCase();
+const removeSpaces = (str) => str.replace(/\s+/g, '');
 
 // Compose them together
 const normalizeInput = (str) => removeSpaces(lowercase(trim(str)));
@@ -157,7 +157,10 @@ const normalizeInput = (str) => removeSpaces(lowercase(trim(str)));
 normalizeInput('  Hello World  '); // 'helloworld'
 
 // Or use a compose utility
-const compose = (...fns) => x => fns.reduceRight((acc, fn) => fn(acc), x);
+const compose =
+	(...fns) =>
+	(x) =>
+		fns.reduceRight((acc, fn) => fn(acc), x);
 const normalizeInput = compose(removeSpaces, lowercase, trim);
 ```
 
@@ -173,23 +176,24 @@ A pure function must:
 ```javascript
 // ✅ Pure function
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3;
-    const φ1 = (lat1 * Math.PI) / 180;
-    const φ2 = (lat2 * Math.PI) / 180;
-    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+	const R = 6371e3;
+	const φ1 = (lat1 * Math.PI) / 180;
+	const φ2 = (lat2 * Math.PI) / 180;
+	const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+	const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+	const a =
+		Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+		Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c;
+	return R * c;
 };
 
 // ❌ Impure function - accesses external state
 let counter = 0;
 const getNextId = () => {
-    return counter++; // Side effect!
+	return counter++; // Side effect!
 };
 
 // ✅ Pure alternative - state is a parameter
@@ -201,7 +205,7 @@ const getNextId = (currentCounter) => currentCounter + 1;
 ```javascript
 // Easy to test
 test('calculateDistance returns 0 for same coordinates', () => {
-    expect(calculateDistance(0, 0, 0, 0)).toBe(0);
+	expect(calculateDistance(0, 0, 0, 0)).toBe(0);
 });
 
 // Easy to reason about
@@ -211,14 +215,14 @@ const distance2 = calculateDistance(lat1, lon1, lat2, lon2);
 
 // Can be memoized for performance
 const memoize = (fn) => {
-    const cache = new Map();
-    return (...args) => {
-        const key = JSON.stringify(args);
-        if (cache.has(key)) return cache.get(key);
-        const result = fn(...args);
-        cache.set(key, result);
-        return result;
-    };
+	const cache = new Map();
+	return (...args) => {
+		const key = JSON.stringify(args);
+		if (cache.has(key)) return cache.get(key);
+		const result = fn(...args);
+		cache.set(key, result);
+		return result;
+	};
 };
 
 const cachedDistance = memoize(calculateDistance);
@@ -231,20 +235,20 @@ When side effects are necessary, isolate them:
 ```javascript
 // ✅ Good: Pure logic separated from I/O
 const extractResponseData = (rawData) => {
-    // Pure transformation
-    return {
-        id: rawData.id || '',
-        name: rawData.name || '',
-        value: rawData.value || ''
-    };
+	// Pure transformation
+	return {
+		id: rawData.id || '',
+		name: rawData.name || '',
+		value: rawData.value || '',
+	};
 };
 
 const fetchAndExtractData = async (url) => {
-    // Impure: I/O operation isolated to single function
-    const rawData = await fetch(url).then(r => r.json());
+	// Impure: I/O operation isolated to single function
+	const rawData = await fetch(url).then((r) => r.json());
 
-    // Call pure function for data transformation
-    return extractResponseData(rawData);
+	// Call pure function for data transformation
+	return extractResponseData(rawData);
 };
 ```
 
@@ -257,18 +261,18 @@ const fetchAndExtractData = async (url) => {
 ```javascript
 // ❌ Bad: Mutation
 const updateData = (data, value) => {
-    data.value = value; // Mutates original!
-    return data;
+	data.value = value; // Mutates original!
+	return data;
 };
 
 // ✅ Good: Create new object
 const updateData = (data, value) => {
-    return { ...data, value }; // New object with updated value
+	return { ...data, value }; // New object with updated value
 };
 
 // ✅ Also good: Explicit object creation
 const updateData = (data, value) => {
-    return Object.assign({}, data, { value });
+	return Object.assign({}, data, { value });
 };
 ```
 
@@ -277,29 +281,26 @@ const updateData = (data, value) => {
 ```javascript
 // ❌ Bad: Mutation
 const addItem = (items, newItem) => {
-    items.push(newItem); // Mutates original!
-    return items;
+	items.push(newItem); // Mutates original!
+	return items;
 };
 
 // ✅ Good: Create new array
 const addItem = (items, newItem) => {
-    return [...items, newItem];
+	return [...items, newItem];
 };
 
 // More examples
-const removeItem = (items, index) => [
-    ...items.slice(0, index),
-    ...items.slice(index + 1)
-];
+const removeItem = (items, index) => [...items.slice(0, index), ...items.slice(index + 1)];
 
 const updateItem = (items, index, newValue) => [
-    ...items.slice(0, index),
-    newValue,
-    ...items.slice(index + 1)
+	...items.slice(0, index),
+	newValue,
+	...items.slice(index + 1),
 ];
 
 const updateItem = (items, index, newValue) =>
-    items.map((item, i) => i === index ? newValue : item);
+	items.map((item, i) => (i === index ? newValue : item));
 ```
 
 ### 3. Deep Immutability
@@ -309,20 +310,20 @@ For nested structures, ensure deep immutability:
 ```javascript
 // ❌ Shallow copy doesn't protect nested objects
 const updateNestedData = (response, value) => {
-    const newResponse = { ...response };
-    newResponse.data.value = value; // Still mutates!
-    return newResponse;
+	const newResponse = { ...response };
+	newResponse.data.value = value; // Still mutates!
+	return newResponse;
 };
 
 // ✅ Deep immutability with spread operator
 const updateNestedData = (response, value) => {
-    return {
-        ...response,
-        data: {
-            ...response.data,
-            value
-        }
-    };
+	return {
+		...response,
+		data: {
+			...response.data,
+			value,
+		},
+	};
 };
 
 // ✅ For complex structures, consider using libraries like Immer or Immutable.js
@@ -335,17 +336,17 @@ Protect against external mutations in constructors:
 ```javascript
 // From IbiraAPIFetcher class example
 class IbiraAPIFetcher {
-    constructor(url) {
-        // ✅ Defensive copy - don't share reference
-        this.url = url;
-        this.data = null;
-        this.error = null;
-        this.loading = false;
-        this.cache = new Map();
-        // ... copy all properties individually
+	constructor(url) {
+		// ✅ Defensive copy - don't share reference
+		this.url = url;
+		this.data = null;
+		this.error = null;
+		this.loading = false;
+		this.cache = new Map();
+		// ... copy all properties individually
 
-        // ❌ Would be bad: this.config = config; (shares reference if config is an object)
-    }
+		// ❌ Would be bad: this.config = config; (shares reference if config is an object)
+	}
 }
 ```
 
@@ -385,7 +386,9 @@ const name = 'ibira';
 
 ```javascript
 // ❌ Avoid: Multiple declarations on one line
-const x = 1, y = 2, z = 3;
+const x = 1,
+	y = 2,
+	z = 3;
 
 // ✅ Good: One per line
 const x = 1;
@@ -399,7 +402,7 @@ const z = 3;
 // ❌ Avoid: Uninitialized variables
 let result;
 if (condition) {
-    result = calculate();
+	result = calculate();
 }
 
 // ✅ Good: Initialize at declaration
@@ -413,12 +416,12 @@ const result = condition ? calculate() : defaultValue;
 ```javascript
 // ✅ Arrow functions for simple operations
 const add = (a, b) => a + b;
-const square = x => x * x; // Single param, no parens needed
+const square = (x) => x * x; // Single param, no parens needed
 const greet = () => 'Hello'; // No params, need parens
 
 // Arrow functions in callbacks
 const numbers = [1, 2, 3];
-const doubled = numbers.map(n => n * 2);
+const doubled = numbers.map((n) => n * 2);
 ```
 
 ### 2. Use Function Expressions for Named Functions
@@ -426,11 +429,11 @@ const doubled = numbers.map(n => n * 2);
 ```javascript
 // ✅ For functions that need a name (useful for debugging/recursion)
 const factorial = function factorial(n) {
-    return n <= 1 ? 1 : n * factorial(n - 1);
+	return n <= 1 ? 1 : n * factorial(n - 1);
 };
 
 // ✅ Arrow function version (but can't reference itself by name)
-const factorial = n => n <= 1 ? 1 : n * factorial(n - 1);
+const factorial = (n) => (n <= 1 ? 1 : n * factorial(n - 1));
 ```
 
 ### 3. Avoid Function Declarations (in most cases)
@@ -438,12 +441,12 @@ const factorial = n => n <= 1 ? 1 : n * factorial(n - 1);
 ```javascript
 // ❌ Avoid: Function declarations are hoisted
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    // ...
+	// ...
 }
 
 // ✅ Prefer: const with arrow function
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    // ...
+	// ...
 };
 ```
 
@@ -454,36 +457,35 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 ```javascript
 // ❌ Bad: Function does too much
 const processApiResponse = (rawData) => {
-    const id = rawData.id || '';
-    const name = rawData.name || '';
-    const value = rawData.value || '';
-    const formatted = `${id}: ${name} = ${value}`;
-    console.log('Response processed:', formatted);
-    saveToCache(formatted);
-    return formatted;
+	const id = rawData.id || '';
+	const name = rawData.name || '';
+	const value = rawData.value || '';
+	const formatted = `${id}: ${name} = ${value}`;
+	console.log('Response processed:', formatted);
+	saveToCache(formatted);
+	return formatted;
 };
 
 // ✅ Good: Separate concerns
 const extractData = (rawData) => ({
-    id: rawData.id || '',
-    name: rawData.name || '',
-    value: rawData.value || ''
+	id: rawData.id || '',
+	name: rawData.name || '',
+	value: rawData.value || '',
 });
 
-const formatData = (data) =>
-    `${data.id}: ${data.name} = ${data.value}`;
+const formatData = (data) => `${data.id}: ${data.name} = ${data.value}`;
 
 const processApiResponse = (rawData) => {
-    const data = extractData(rawData);
-    return formatData(data);
+	const data = extractData(rawData);
+	return formatData(data);
 };
 
 // Side effects isolated
 const processAndCacheResponse = async (rawData) => {
-    const formatted = processApiResponse(rawData);
-    console.log('Response processed:', formatted);
-    await saveToCache(formatted);
-    return formatted;
+	const formatted = processApiResponse(rawData);
+	console.log('Response processed:', formatted);
+	await saveToCache(formatted);
+	return formatted;
 };
 ```
 
@@ -494,14 +496,14 @@ const processAndCacheResponse = async (rawData) => {
 const greet = (name = 'Guest') => `Hello, ${name}!`;
 
 const fetchData = (url, options = {}) => {
-    const finalOptions = { timeout: 5000, ...options };
-    return fetch(url, finalOptions);
+	const finalOptions = { timeout: 5000, ...options };
+	return fetch(url, finalOptions);
 };
 
 // ❌ Avoid: Manual default assignment
 const greet = (name) => {
-    name = name || 'Guest'; // Fails for falsy values like 0, ''
-    return `Hello, ${name}!`;
+	name = name || 'Guest'; // Fails for falsy values like 0, ''
+	return `Hello, ${name}!`;
 };
 ```
 
@@ -515,8 +517,8 @@ sum(1, 2, 3, 4, 5); // 15
 
 // ❌ Avoid: arguments object
 function sum() {
-    // arguments is array-like but not an array
-    return Array.from(arguments).reduce((acc, n) => acc + n, 0);
+	// arguments is array-like but not an array
+	return Array.from(arguments).reduce((acc, n) => acc + n, 0);
 }
 ```
 
@@ -535,7 +537,9 @@ const { latitude: lat, longitude: lon } = position.coords;
 const { city = 'Unknown', country = 'Brazil' } = address;
 
 // Nested destructuring
-const { coords: { latitude, longitude } } = position;
+const {
+	coords: { latitude, longitude },
+} = position;
 ```
 
 ### 2. Array Destructuring
@@ -580,9 +584,9 @@ const obj = { name, version };
 
 // ✅ Method shorthand
 const obj = {
-    calculate(x, y) {
-        return x + y;
-    }
+	calculate(x, y) {
+		return x + y;
+	},
 };
 // Same as: calculate: function(x, y) { return x + y; }
 ```
@@ -593,8 +597,8 @@ const obj = {
 // ✅ Dynamic property names
 const propName = 'latitude';
 const obj = {
-    [propName]: -23.5505,
-    [`computed_${propName}`]: -23.5505
+	[propName]: -23.5505,
+	[`computed_${propName}`]: -23.5505,
 };
 // { latitude: -23.5505, computed_latitude: -23.5505 }
 ```
@@ -628,16 +632,16 @@ const timeout = config.timeout || 5000; // If timeout is 0, uses 5000!
 ```javascript
 // ✅ Good: Handle errors explicitly
 const fetchAddress = async (lat, lon) => {
-    try {
-        const response = await fetch(getOpenStreetMapUrl(lat, lon));
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Failed to fetch address:', error);
-        throw error; // Re-throw or return default
-    }
+	try {
+		const response = await fetch(getOpenStreetMapUrl(lat, lon));
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		return await response.json();
+	} catch (error) {
+		console.error('Failed to fetch address:', error);
+		throw error; // Re-throw or return default
+	}
 };
 ```
 
@@ -648,31 +652,31 @@ For pure functions, consider returning error objects:
 ```javascript
 // ✅ Pure error handling
 const parseCoordinates = (input) => {
-    if (typeof input !== 'string') {
-        return { error: 'Input must be a string' };
-    }
+	if (typeof input !== 'string') {
+		return { error: 'Input must be a string' };
+	}
 
-    const parts = input.split(',');
-    if (parts.length !== 2) {
-        return { error: 'Invalid format' };
-    }
+	const parts = input.split(',');
+	if (parts.length !== 2) {
+		return { error: 'Invalid format' };
+	}
 
-    const lat = parseFloat(parts[0]);
-    const lon = parseFloat(parts[1]);
+	const lat = parseFloat(parts[0]);
+	const lon = parseFloat(parts[1]);
 
-    if (isNaN(lat) || isNaN(lon)) {
-        return { error: 'Invalid numbers' };
-    }
+	if (isNaN(lat) || isNaN(lon)) {
+		return { error: 'Invalid numbers' };
+	}
 
-    return { latitude: lat, longitude: lon };
+	return { latitude: lat, longitude: lon };
 };
 
 // Usage
 const result = parseCoordinates(input);
 if (result.error) {
-    // Handle error
+	// Handle error
 } else {
-    // Use result.latitude and result.longitude
+	// Use result.latitude and result.longitude
 }
 ```
 
@@ -681,21 +685,25 @@ if (result.error) {
 ```javascript
 // ✅ Guard clauses at the start
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    if (typeof lat1 !== 'number' || typeof lon1 !== 'number' ||
-        typeof lat2 !== 'number' || typeof lon2 !== 'number') {
-        throw new TypeError('All coordinates must be numbers');
-    }
+	if (
+		typeof lat1 !== 'number' ||
+		typeof lon1 !== 'number' ||
+		typeof lat2 !== 'number' ||
+		typeof lon2 !== 'number'
+	) {
+		throw new TypeError('All coordinates must be numbers');
+	}
 
-    if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90) {
-        throw new RangeError('Latitude must be between -90 and 90');
-    }
+	if (lat1 < -90 || lat1 > 90 || lat2 < -90 || lat2 > 90) {
+		throw new RangeError('Latitude must be between -90 and 90');
+	}
 
-    if (lon1 < -180 || lon1 > 180 || lon2 < -180 || lon2 > 180) {
-        throw new RangeError('Longitude must be between -180 and 180');
-    }
+	if (lon1 < -180 || lon1 > 180 || lon2 < -180 || lon2 > 180) {
+		throw new RangeError('Longitude must be between -180 and 180');
+	}
 
-    // Main logic here
-    // ...
+	// Main logic here
+	// ...
 };
 ```
 
@@ -704,19 +712,19 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 ```javascript
 // ✅ Custom errors for specific cases
 class ValidationError extends Error {
-    constructor(message, field) {
-        super(message);
-        this.name = 'ValidationError';
-        this.field = field;
-    }
+	constructor(message, field) {
+		super(message);
+		this.name = 'ValidationError';
+		this.field = field;
+	}
 }
 
 class NetworkError extends Error {
-    constructor(message, statusCode) {
-        super(message);
-        this.name = 'NetworkError';
-        this.statusCode = statusCode;
-    }
+	constructor(message, statusCode) {
+		super(message);
+		this.name = 'NetworkError';
+		this.statusCode = statusCode;
+	}
 }
 
 // Usage
@@ -730,16 +738,16 @@ throw new ValidationError('Invalid coordinates', 'latitude');
 ```javascript
 // ✅ Good: async/await is more readable
 const fetchAddressData = async (lat, lon) => {
-    const response = await fetch(getUrl(lat, lon));
-    const data = await response.json();
-    return extractAddress(data);
+	const response = await fetch(getUrl(lat, lon));
+	const data = await response.json();
+	return extractAddress(data);
 };
 
 // ❌ Avoid: Promise chains (when async/await works)
 const fetchAddressData = (lat, lon) => {
-    return fetch(getUrl(lat, lon))
-        .then(response => response.json())
-        .then(data => extractAddress(data));
+	return fetch(getUrl(lat, lon))
+		.then((response) => response.json())
+		.then((data) => extractAddress(data));
 };
 ```
 
@@ -748,13 +756,13 @@ const fetchAddressData = (lat, lon) => {
 ```javascript
 // ✅ Always use try-catch with async/await
 const fetchData = async () => {
-    try {
-        const data = await fetch(url);
-        return data;
-    } catch (error) {
-        console.error('Fetch failed:', error);
-        return null;
-    }
+	try {
+		const data = await fetch(url);
+		return data;
+	} catch (error) {
+		console.error('Fetch failed:', error);
+		return null;
+	}
 };
 ```
 
@@ -763,17 +771,17 @@ const fetchData = async () => {
 ```javascript
 // ✅ Parallel execution
 const fetchMultipleAddresses = async (locations) => {
-    const promises = locations.map(loc => fetchAddress(loc.lat, loc.lon));
-    return await Promise.all(promises);
+	const promises = locations.map((loc) => fetchAddress(loc.lat, loc.lon));
+	return await Promise.all(promises);
 };
 
 // ❌ Avoid: Sequential when parallel is possible
 const fetchMultipleAddresses = async (locations) => {
-    const results = [];
-    for (const loc of locations) {
-        results.push(await fetchAddress(loc.lat, loc.lon)); // Waits for each!
-    }
-    return results;
+	const results = [];
+	for (const loc of locations) {
+		results.push(await fetchAddress(loc.lat, loc.lon)); // Waits for each!
+	}
+	return results;
 };
 ```
 
@@ -781,7 +789,7 @@ const fetchMultipleAddresses = async (locations) => {
 
 ```javascript
 // ✅ Promise-based delay utility
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Usage
 await delay(1000); // Wait 1 second
@@ -799,19 +807,19 @@ const API_BASE_URL = 'https://api.example.com';
 
 // 2. Pure utility functions
 const formatDate = (date) => {
-    // ...
+	// ...
 };
 
 // 3. Classes and complex logic
 class GeoPosition {
-    // ...
+	// ...
 }
 
 // 4. Exports at the end
 module.exports = {
-    GeoPosition,
-    formatDate,
-    DEFAULT_TIMEOUT
+	GeoPosition,
+	formatDate,
+	DEFAULT_TIMEOUT,
 };
 ```
 
@@ -826,7 +834,7 @@ const extractNeighborhood = (data) => data.address?.suburb || '';
 
 // --- Address Formatting ---
 const formatBrazilianAddress = (address) => {
-    // ...
+	// ...
 };
 
 // --- Address Validation ---
@@ -838,29 +846,29 @@ const isValidCEP = (cep) => /^\d{5}-?\d{3}$/.test(cep);
 ```javascript
 // ❌ Bad: Deep nesting (pyramid of doom)
 const processAddress = (data) => {
-    if (data) {
-        if (data.address) {
-            if (data.address.city) {
-                return formatAddress(data.address);
-            }
-        }
-    }
-    return null;
+	if (data) {
+		if (data.address) {
+			if (data.address.city) {
+				return formatAddress(data.address);
+			}
+		}
+	}
+	return null;
 };
 
 // ✅ Good: Early returns
 const processAddress = (data) => {
-    if (!data) return null;
-    if (!data.address) return null;
-    if (!data.address.city) return null;
+	if (!data) return null;
+	if (!data.address) return null;
+	if (!data.address.city) return null;
 
-    return formatAddress(data.address);
+	return formatAddress(data.address);
 };
 
 // ✅ Even better: Optional chaining
 const processAddress = (data) => {
-    if (!data?.address?.city) return null;
-    return formatAddress(data.address);
+	if (!data?.address?.city) return null;
+	return formatAddress(data.address);
 };
 ```
 
@@ -876,7 +884,7 @@ const calc = (a, b) => a + b;
 // ✅ Good: Clear, descriptive names
 const currentDate = new Date();
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    // ...
+	// ...
 };
 ```
 
@@ -897,8 +905,8 @@ class AddressExtractor {}
 
 // Private properties/methods: prefix with underscore
 class MyClass {
-    _privateMethod() {}
-    publicMethod() {}
+	_privateMethod() {}
+	publicMethod() {}
 }
 
 // Boolean variables: use is/has/can prefix
@@ -933,10 +941,7 @@ const addressStreet = data.address.road;
 const addressNumber = data.address.house_number;
 
 // ✅ Even better: Destructuring provides context
-const {
-    road: street,
-    house_number: number
-} = data.address;
+const { road: street, house_number: number } = data.address;
 ```
 
 ## Comments and Documentation
@@ -972,7 +977,7 @@ const totalDistance = previousDistance + newDistance;
  * @since 0.7.1-alpha
  */
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    // Implementation
+	// Implementation
 };
 ```
 
@@ -982,7 +987,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 // ❌ Bad: Explains what (obvious from code)
 // Loop through array
 for (const item of items) {
-    // ...
+	// ...
 }
 
 // ✅ Good: Explains why (non-obvious reasoning)
@@ -1022,13 +1027,13 @@ const timeout = options.timeout ?? 5000;
 ```javascript
 // ❌ Methods that mutate arrays
 const items = [1, 2, 3];
-items.push(4);        // Mutates
-items.pop();          // Mutates
-items.shift();        // Mutates
-items.unshift(0);     // Mutates
-items.splice(1, 1);   // Mutates
-items.reverse();      // Mutates
-items.sort();         // Mutates
+items.push(4); // Mutates
+items.pop(); // Mutates
+items.shift(); // Mutates
+items.unshift(0); // Mutates
+items.splice(1, 1); // Mutates
+items.reverse(); // Mutates
+items.sort(); // Mutates
 
 // ✅ Immutable alternatives
 const withAdded = [...items, 4];
@@ -1037,7 +1042,7 @@ const withoutFirst = items.slice(1);
 const withFirst = [0, ...items];
 const withoutIndex = [...items.slice(0, 1), ...items.slice(2)];
 const reversed = [...items].reverse(); // Copy first!
-const sorted = [...items].sort();      // Copy first!
+const sorted = [...items].sort(); // Copy first!
 ```
 
 ### 3. Object Reference Issues
@@ -1063,7 +1068,7 @@ JSON.stringify(obj1) === JSON.stringify(obj2); // true
 
 // ✅ Solution: Use epsilon comparison
 const EPSILON = 0.0001;
-Math.abs((0.1 + 0.2) - 0.3) < EPSILON; // true
+Math.abs(0.1 + 0.2 - 0.3) < EPSILON; // true
 
 // Or use toBeCloseTo in tests
 expect(0.1 + 0.2).toBeCloseTo(0.3, 10);
@@ -1074,12 +1079,12 @@ expect(0.1 + 0.2).toBeCloseTo(0.3, 10);
 ```javascript
 // ❌ Pitfall: Missing const/let creates global
 function bad() {
-    counter = 0; // Global variable created!
+	counter = 0; // Global variable created!
 }
 
 // ✅ Solution: Always use const/let
 function good() {
-    const counter = 0; // Local variable
+	const counter = 0; // Local variable
 }
 ```
 
@@ -1088,19 +1093,19 @@ function good() {
 ```javascript
 // ❌ Callback pyramid of doom
 fetchUser(userId, (user) => {
-    fetchPosts(user.id, (posts) => {
-        fetchComments(posts[0].id, (comments) => {
-            // Nested callbacks are hard to read
-        });
-    });
+	fetchPosts(user.id, (posts) => {
+		fetchComments(posts[0].id, (comments) => {
+			// Nested callbacks are hard to read
+		});
+	});
 });
 
 // ✅ Use async/await
 const processUserContent = async (userId) => {
-    const user = await fetchUser(userId);
-    const posts = await fetchPosts(user.id);
-    const comments = await fetchComments(posts[0].id);
-    return { user, posts, comments };
+	const user = await fetchUser(userId);
+	const posts = await fetchPosts(user.id);
+	const comments = await fetchComments(posts[0].id);
+	return { user, posts, comments };
 };
 ```
 
@@ -1111,16 +1116,16 @@ const processUserContent = async (userId) => {
 fetchData(); // If it rejects, unhandled!
 
 // ✅ Always handle rejections
-fetchData().catch(error => console.error(error));
+fetchData().catch((error) => console.error(error));
 
 // Or with async/await
 const getData = async () => {
-    try {
-        return await fetchData();
-    } catch (error) {
-        console.error(error);
-        return null;
-    }
+	try {
+		return await fetchData();
+	} catch (error) {
+		console.error(error);
+		return null;
+	}
 };
 ```
 
@@ -1133,17 +1138,17 @@ const getData = async () => {
 const items = [1, 2, 3];
 const len = items.length; // "Optimization" that adds no value
 for (let i = 0; i < len; i++) {
-    // ...
+	// ...
 }
 
 // ✅ Good: Readable code first
 for (const item of items) {
-    // ...
+	// ...
 }
 
 // ✅ Even better: Functional style
-items.forEach(item => {
-    // ...
+items.forEach((item) => {
+	// ...
 });
 ```
 
@@ -1152,19 +1157,19 @@ items.forEach(item => {
 ```javascript
 // ✅ Memoize pure functions with expensive calculations
 const memoize = (fn) => {
-    const cache = new Map();
-    return (...args) => {
-        const key = JSON.stringify(args);
-        if (cache.has(key)) return cache.get(key);
-        const result = fn(...args);
-        cache.set(key, result);
-        return result;
-    };
+	const cache = new Map();
+	return (...args) => {
+		const key = JSON.stringify(args);
+		if (cache.has(key)) return cache.get(key);
+		const result = fn(...args);
+		cache.set(key, result);
+		return result;
+	};
 };
 
 const expensiveCalculation = memoize((a, b) => {
-    // Expensive operation
-    return a * b;
+	// Expensive operation
+	return a * b;
 });
 ```
 
@@ -1173,16 +1178,16 @@ const expensiveCalculation = memoize((a, b) => {
 ```javascript
 // ✅ Debounce for events that fire frequently
 const debounce = (fn, delay) => {
-    let timeoutId;
-    return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn(...args), delay);
-    };
+	let timeoutId;
+	return (...args) => {
+		clearTimeout(timeoutId);
+		timeoutId = setTimeout(() => fn(...args), delay);
+	};
 };
 
 // Usage: Wait 300ms after last keystroke
 const handleSearch = debounce((query) => {
-    fetchSearchResults(query);
+	fetchSearchResults(query);
 }, 300);
 ```
 
@@ -1191,8 +1196,8 @@ const handleSearch = debounce((query) => {
 ```javascript
 // ✅ Use Map for key-value lookups
 const userMap = new Map([
-    ['id1', { name: 'Alice' }],
-    ['id2', { name: 'Bob' }]
+	['id1', { name: 'Alice' }],
+	['id2', { name: 'Bob' }],
 ]);
 userMap.get('id1'); // O(1) lookup
 
@@ -1209,23 +1214,23 @@ uniqueIds.has(2); // O(1) lookup
 ```javascript
 // ❌ Hard to test: Side effects mixed with logic
 const processAndSave = (data) => {
-    const processed = transform(data);
-    database.save(processed); // Side effect!
-    return processed;
+	const processed = transform(data);
+	database.save(processed); // Side effect!
+	return processed;
 };
 
 // ✅ Easy to test: Pure logic separated
 const processData = (data) => {
-    return transform(data);
+	return transform(data);
 };
 
 const saveData = (data) => {
-    database.save(data);
+	database.save(data);
 };
 
 // Test only the pure part
 test('processData transforms correctly', () => {
-    expect(processData(input)).toEqual(expected);
+	expect(processData(input)).toEqual(expected);
 });
 ```
 
@@ -1234,21 +1239,23 @@ test('processData transforms correctly', () => {
 ```javascript
 // ❌ Hard to test: Hard-coded dependencies
 const fetchAddress = async (lat, lon) => {
-    const data = await fetch(url); // Can't mock!
-    return data;
+	const data = await fetch(url); // Can't mock!
+	return data;
 };
 
 // ✅ Easy to test: Injected dependencies
 const fetchAddress = async (lat, lon, fetcher = fetch) => {
-    const data = await fetcher(url);
-    return data;
+	const data = await fetcher(url);
+	return data;
 };
 
 // Test with mock
 test('fetchAddress works', async () => {
-    const mockFetch = jest.fn().mockResolvedValue({ /* ... */ });
-    await fetchAddress(0, 0, mockFetch);
-    expect(mockFetch).toHaveBeenCalled();
+	const mockFetch = jest.fn().mockResolvedValue({
+		/* ... */
+	});
+	await fetchAddress(0, 0, mockFetch);
+	expect(mockFetch).toHaveBeenCalled();
 });
 ```
 
@@ -1257,18 +1264,18 @@ test('fetchAddress works', async () => {
 ```javascript
 // ✅ One assertion per test
 test('calculateDistance returns 0 for same coordinates', () => {
-    expect(calculateDistance(0, 0, 0, 0)).toBe(0);
+	expect(calculateDistance(0, 0, 0, 0)).toBe(0);
 });
 
 test('calculateDistance returns positive for different coordinates', () => {
-    expect(calculateDistance(0, 0, 1, 1)).toBeGreaterThan(0);
+	expect(calculateDistance(0, 0, 1, 1)).toBeGreaterThan(0);
 });
 
 // ❌ Avoid: Multiple unrelated assertions
 test('calculateDistance works', () => {
-    expect(calculateDistance(0, 0, 0, 0)).toBe(0);
-    expect(calculateDistance(0, 0, 1, 1)).toBeGreaterThan(0);
-    expect(calculateDistance(-90, 0, 90, 0)).toBeCloseTo(20000000, -3);
+	expect(calculateDistance(0, 0, 0, 0)).toBe(0);
+	expect(calculateDistance(0, 0, 1, 1)).toBeGreaterThan(0);
+	expect(calculateDistance(-90, 0, 90, 0)).toBeCloseTo(20000000, -3);
 });
 ```
 
@@ -1319,4 +1326,4 @@ test('calculateDistance works', () => {
 
 ---
 
-*This guide is part of the ibira.js project documentation. For questions or suggestions, please open an issue.*
+_This guide is part of the ibira.js project documentation. For questions or suggestions, please open an issue._

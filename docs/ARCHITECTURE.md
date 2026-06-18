@@ -114,19 +114,19 @@ Factory methods provide different configurations for various use cases:
 
 ```javascript
 // For shared caching scenarios
-IbiraAPIFetcher.withExternalCache(url, sharedCache)
+IbiraAPIFetcher.withExternalCache(url, sharedCache);
 
 // For standard usage with reasonable defaults
-IbiraAPIFetcher.withDefaultCache(url, {maxSize: 100})
+IbiraAPIFetcher.withDefaultCache(url, { maxSize: 100 });
 
 // For testing or simple scenarios
-IbiraAPIFetcher.withoutCache(url)
+IbiraAPIFetcher.withoutCache(url);
 
 // For functional programming patterns
-IbiraAPIFetcher.pure(url)
+IbiraAPIFetcher.pure(url);
 
 // For event-driven architectures
-IbiraAPIFetcher.withEventCallback(url, eventHandler)
+IbiraAPIFetcher.withEventCallback(url, eventHandler);
 ```
 
 ## Performance Characteristics
@@ -152,9 +152,9 @@ IbiraAPIFetcher.withEventCallback(url, eventHandler)
 ```javascript
 // Errors returned as data (no exceptions in pure core)
 return {
-    success: false,
-    error: new Error('HTTP error! status: 404'),
-    // ... other properties
+	success: false,
+	error: new Error('HTTP error! status: 404'),
+	// ... other properties
 };
 ```
 
@@ -163,7 +163,7 @@ return {
 ```javascript
 // Traditional exception throwing for backward compatibility
 if (!result.success) {
-    throw result.error;
+	throw result.error;
 }
 return result.data;
 ```
@@ -218,9 +218,13 @@ const result = await fetcher.fetchDataPure(cacheState, Date.now());
 
 ```javascript
 class RedisCache {
-    async get(key) { /* Redis get */ }
-    async set(key, value) { /* Redis set */ }
-    // ... implement Map-like interface
+	async get(key) {
+		/* Redis get */
+	}
+	async set(key, value) {
+		/* Redis set */
+	}
+	// ... implement Map-like interface
 }
 
 const fetcher = IbiraAPIFetcher.withExternalCache(url, new RedisCache());
@@ -230,11 +234,17 @@ const fetcher = IbiraAPIFetcher.withExternalCache(url, new RedisCache());
 
 ```javascript
 const customEventHandler = (event, data) => {
-    switch(event) {
-        case 'loading-start': showSpinner(); break;
-        case 'success': hideSpinner(); break;
-        case 'error': showError(data.error); break;
-    }
+	switch (event) {
+		case 'loading-start':
+			showSpinner();
+			break;
+		case 'success':
+			hideSpinner();
+			break;
+		case 'error':
+			showError(data.error);
+			break;
+	}
 };
 
 const fetcher = IbiraAPIFetcher.withEventCallback(url, customEventHandler);
@@ -284,5 +294,5 @@ Not intended to be executed directly.
 
 ---
 
-*Architecture designed for referential transparency, testability, and maintainability*
-*IbiraAPIFetcher v0.3.0-alpha*
+_Architecture designed for referential transparency, testability, and maintainability_
+_IbiraAPIFetcher v0.3.0-alpha_

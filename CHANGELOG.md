@@ -233,7 +233,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ Production-ready test coverage (90%+)
 - ✅ Maintained referential transparency (10/10 score)
 - ✅ Zero regressions
-- ⚠️  Still in alpha - API may evolve
+- ⚠️ Still in alpha - API may evolve
 
 ### ⚠️ Breaking Changes
 
@@ -272,13 +272,13 @@ For contributors wanting to understand the new structure, see [MIGRATION_GUIDE.m
 
 ## Version History
 
-| Version | Release Date | Status | Key Features |
-|---------|--------------|--------|--------------|
-| 0.3.6-alpha | 2026-03-12 | Latest | AbortController, validateStatus, ESLint, 90%+ branch coverage |
-| 0.2.2-alpha | 2026-01-10 | Current | Workflow config fixes, copilot instructions |
-| 0.2.1-alpha | 2025-12-15 | Superseded | CDN delivery, production URLs |
-| 0.2.0-alpha | 2025-12-15 | Superseded | Modular architecture, 152 tests (90%+ coverage) |
-| 0.1.0-alpha | 2025-12-14 | Superseded | Initial release, 40 tests, referential transparency |
+| Version     | Release Date | Status     | Key Features                                                  |
+| ----------- | ------------ | ---------- | ------------------------------------------------------------- |
+| 0.3.6-alpha | 2026-03-12   | Latest     | AbortController, validateStatus, ESLint, 90%+ branch coverage |
+| 0.2.2-alpha | 2026-01-10   | Current    | Workflow config fixes, copilot instructions                   |
+| 0.2.1-alpha | 2025-12-15   | Superseded | CDN delivery, production URLs                                 |
+| 0.2.0-alpha | 2025-12-15   | Superseded | Modular architecture, 152 tests (90%+ coverage)               |
+| 0.1.0-alpha | 2025-12-14   | Superseded | Initial release, 40 tests, referential transparency           |
 
 ---
 

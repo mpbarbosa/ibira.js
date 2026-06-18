@@ -179,11 +179,11 @@ Add to `package.json`:
 
 ```json
 {
-  "scripts": {
-    "cleanup": "bash scripts/cleanup-artifacts.sh",
-    "cleanup:dry-run": "DRY_RUN=true bash scripts/cleanup-artifacts.sh",
-    "cleanup:verbose": "VERBOSE=true bash scripts/cleanup-artifacts.sh"
-  }
+	"scripts": {
+		"cleanup": "bash scripts/cleanup-artifacts.sh",
+		"cleanup:dry-run": "DRY_RUN=true bash scripts/cleanup-artifacts.sh",
+		"cleanup:verbose": "VERBOSE=true bash scripts/cleanup-artifacts.sh"
+	}
 }
 ```
 
@@ -479,30 +479,30 @@ import { performance } from 'perf_hooks';
 import { IbiraAPIFetcher } from './src/index.js';
 
 async function measurePerformance() {
-    const iterations = 1000;
-    const url = 'https://jsonplaceholder.typicode.com/posts/1';
+	const iterations = 1000;
+	const url = 'https://jsonplaceholder.typicode.com/posts/1';
 
-    // Warm up
-    const fetcher = IbiraAPIFetcher.withDefaultCache(url);
-    await fetcher.fetchData();
+	// Warm up
+	const fetcher = IbiraAPIFetcher.withDefaultCache(url);
+	await fetcher.fetchData();
 
-    // Measure cache hits
-    const start = performance.now();
-    for (let i = 0; i < iterations; i++) {
-        await fetcher.fetchData();
-    }
-    const end = performance.now();
+	// Measure cache hits
+	const start = performance.now();
+	for (let i = 0; i < iterations; i++) {
+		await fetcher.fetchData();
+	}
+	const end = performance.now();
 
-    const avgTime = (end - start) / iterations;
-    console.log(`Average cache hit time: ${avgTime.toFixed(3)}ms`);
+	const avgTime = (end - start) / iterations;
+	console.log(`Average cache hit time: ${avgTime.toFixed(3)}ms`);
 
-    // Set benchmark threshold
-    if (avgTime > 1) {
-        console.error('❌ Performance regression detected');
-        process.exit(1);
-    }
+	// Set benchmark threshold
+	if (avgTime > 1) {
+		console.error('❌ Performance regression detected');
+		process.exit(1);
+	}
 
-    console.log('✅ Performance within acceptable range');
+	console.log('✅ Performance within acceptable range');
 }
 
 measurePerformance();
@@ -584,18 +584,18 @@ Add these to `package.json`:
 
 ```json
 {
-  "scripts": {
-    "cleanup": "bash scripts/cleanup-artifacts.sh",
-    "cleanup:dry-run": "DRY_RUN=true bash scripts/cleanup-artifacts.sh",
-    "cleanup:verbose": "VERBOSE=true bash scripts/cleanup-artifacts.sh",
-    "dev-setup": "bash scripts/dev-setup.sh",
-    "check-coverage": "bash scripts/check-coverage.sh",
-    "validate-docs": "bash scripts/validate-docs.sh",
-    "update-changelog": "bash scripts/update-changelog.sh",
-    "check-updates": "bash scripts/check-updates.sh",
-    "prepare-ci": "bash scripts/prepare-ci.sh",
-    "perf-test": "node scripts/perf-test.js"
-  }
+	"scripts": {
+		"cleanup": "bash scripts/cleanup-artifacts.sh",
+		"cleanup:dry-run": "DRY_RUN=true bash scripts/cleanup-artifacts.sh",
+		"cleanup:verbose": "VERBOSE=true bash scripts/cleanup-artifacts.sh",
+		"dev-setup": "bash scripts/dev-setup.sh",
+		"check-coverage": "bash scripts/check-coverage.sh",
+		"validate-docs": "bash scripts/validate-docs.sh",
+		"update-changelog": "bash scripts/update-changelog.sh",
+		"check-updates": "bash scripts/check-updates.sh",
+		"prepare-ci": "bash scripts/prepare-ci.sh",
+		"perf-test": "node scripts/perf-test.js"
+	}
 }
 ```
 

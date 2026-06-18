@@ -20,15 +20,15 @@ The ibira.js codebase has been comprehensively documented using JSDoc 3 format w
 
 ## 📊 Documentation Coverage
 
-| File | Lines | Functions | Coverage | Type Defs |
-|------|-------|-----------|----------|-----------|
-| index.js | 39 | 0 | ✅ 100% | 0 |
-| IbiraAPIFetcher.js | 825 | 24 | ✅ 100% | 6 |
-| IbiraAPIFetchManager.js | 659 | 22 | ✅ 100% | 3 |
-| DefaultCache.js | 168 | 10 | ✅ 100% | 1 |
-| DefaultEventNotifier.js | 131 | 6 | ✅ 100% | 1 |
-| version.js | 40 | 1 | ✅ 100% | 0 |
-| **TOTAL** | **1,862** | **63** | **✅ 100%** | **11** |
+| File                    | Lines     | Functions | Coverage    | Type Defs |
+| ----------------------- | --------- | --------- | ----------- | --------- |
+| index.js                | 39        | 0         | ✅ 100%     | 0         |
+| IbiraAPIFetcher.js      | 825       | 24        | ✅ 100%     | 6         |
+| IbiraAPIFetchManager.js | 659       | 22        | ✅ 100%     | 3         |
+| DefaultCache.js         | 168       | 10        | ✅ 100%     | 1         |
+| DefaultEventNotifier.js | 131       | 6         | ✅ 100%     | 1         |
+| version.js              | 40        | 1         | ✅ 100%     | 0         |
+| **TOTAL**               | **1,862** | **63**    | **✅ 100%** | **11**    |
 
 ## 🎯 Quality Metrics
 

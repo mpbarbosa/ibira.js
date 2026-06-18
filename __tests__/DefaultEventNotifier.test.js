@@ -81,13 +81,13 @@ describe('DefaultEventNotifier', () => {
 			const observer1 = { update: jest.fn() };
 			const observer2 = { update: jest.fn() };
 			const observer3 = { update: jest.fn() };
-			
+
 			notifier.subscribe(observer1);
 			notifier.subscribe(observer2);
 			notifier.subscribe(observer3);
-			
+
 			notifier.unsubscribe(observer2);
-			
+
 			expect(notifier.subscriberCount).toBe(2);
 			expect(notifier.observers).toContain(observer1);
 			expect(notifier.observers).not.toContain(observer2);
@@ -108,12 +108,12 @@ describe('DefaultEventNotifier', () => {
 		it('should call update method on all observers', () => {
 			const observer1 = { update: jest.fn() };
 			const observer2 = { update: jest.fn() };
-			
+
 			notifier.subscribe(observer1);
 			notifier.subscribe(observer2);
-			
+
 			notifier.notify('test-event', { data: 'test' });
-			
+
 			expect(observer1.update).toHaveBeenCalledWith('test-event', { data: 'test' });
 			expect(observer2.update).toHaveBeenCalledWith('test-event', { data: 'test' });
 		});
@@ -121,16 +121,16 @@ describe('DefaultEventNotifier', () => {
 		it('should pass multiple arguments to observers', () => {
 			const observer = { update: jest.fn() };
 			notifier.subscribe(observer);
-			
+
 			notifier.notify('event1', 'arg2', 'arg3', { key: 'value' });
-			
+
 			expect(observer.update).toHaveBeenCalledWith('event1', 'arg2', 'arg3', { key: 'value' });
 		});
 
 		it('should handle observers without update method', () => {
 			const invalidObserver = { notUpdate: jest.fn() };
 			notifier.subscribe(invalidObserver);
-			
+
 			expect(() => notifier.notify('test')).not.toThrow();
 			expect(invalidObserver.notUpdate).not.toHaveBeenCalled();
 		});
@@ -141,7 +141,7 @@ describe('DefaultEventNotifier', () => {
 			const badObserver = {
 				update: jest.fn(() => {
 					throw new Error('Observer error');
-				})
+				}),
 			};
 
 			// bad before good — without isolation, goodObserver would never be called
@@ -159,7 +159,7 @@ describe('DefaultEventNotifier', () => {
 			const badObserver = {
 				update: jest.fn(() => {
 					throw new Error('Observer error');
-				})
+				}),
 			};
 
 			notifier.subscribe(badObserver);
@@ -167,7 +167,7 @@ describe('DefaultEventNotifier', () => {
 
 			expect(consoleSpy).toHaveBeenCalledWith(
 				expect.stringContaining('DualObserverSubject:'),
-				expect.any(Error)
+				expect.any(Error),
 			);
 			consoleSpy.mockRestore();
 		});
@@ -175,9 +175,9 @@ describe('DefaultEventNotifier', () => {
 		it('should handle notify with no arguments', () => {
 			const observer = { update: jest.fn() };
 			notifier.subscribe(observer);
-			
+
 			notifier.notify();
-			
+
 			expect(observer.update).toHaveBeenCalledWith();
 		});
 
@@ -190,11 +190,11 @@ describe('DefaultEventNotifier', () => {
 		it('should remove all observers', () => {
 			const observer1 = { update: jest.fn() };
 			const observer2 = { update: jest.fn() };
-			
+
 			notifier.subscribe(observer1);
 			notifier.subscribe(observer2);
 			expect(notifier.subscriberCount).toBe(2);
-			
+
 			notifier.clear();
 			expect(notifier.subscriberCount).toBe(0);
 			expect(notifier.observers).toEqual([]);
@@ -203,11 +203,11 @@ describe('DefaultEventNotifier', () => {
 		it('should allow new subscriptions after clear', () => {
 			const observer1 = { update: jest.fn() };
 			const observer2 = { update: jest.fn() };
-			
+
 			notifier.subscribe(observer1);
 			notifier.clear();
 			notifier.subscribe(observer2);
-			
+
 			expect(notifier.subscriberCount).toBe(1);
 			expect(notifier.observers).toContain(observer2);
 		});
@@ -216,13 +216,13 @@ describe('DefaultEventNotifier', () => {
 	describe('SubscriberCount Property', () => {
 		it('should return correct count', () => {
 			expect(notifier.subscriberCount).toBe(0);
-			
+
 			notifier.subscribe({ update: jest.fn() });
 			expect(notifier.subscriberCount).toBe(1);
-			
+
 			notifier.subscribe({ update: jest.fn() });
 			expect(notifier.subscriberCount).toBe(2);
-			
+
 			notifier.clear();
 			expect(notifier.subscriberCount).toBe(0);
 		});
@@ -230,24 +230,24 @@ describe('DefaultEventNotifier', () => {
 
 	describe('Integration Scenarios', () => {
 		it('should support typical observer pattern workflow', () => {
-			const observer1 = { 
+			const observer1 = {
 				name: 'observer1',
-				update: jest.fn() 
+				update: jest.fn(),
 			};
-			const observer2 = { 
+			const observer2 = {
 				name: 'observer2',
-				update: jest.fn() 
+				update: jest.fn(),
 			};
-			
+
 			notifier.subscribe(observer1);
 			notifier.subscribe(observer2);
-			
+
 			notifier.notify('loading', { status: 'started' });
 			expect(observer1.update).toHaveBeenCalledTimes(1);
 			expect(observer2.update).toHaveBeenCalledTimes(1);
-			
+
 			notifier.unsubscribe(observer1);
-			
+
 			notifier.notify('loading', { status: 'finished' });
 			expect(observer1.update).toHaveBeenCalledTimes(1);
 			expect(observer2.update).toHaveBeenCalledTimes(2);
@@ -256,10 +256,10 @@ describe('DefaultEventNotifier', () => {
 		it('should maintain immutability pattern', () => {
 			const observer = { update: jest.fn() };
 			const oldObservers = notifier.observers;
-			
+
 			notifier.subscribe(observer);
 			expect(notifier.observers).not.toBe(oldObservers);
-			
+
 			const currentObservers = notifier.observers;
 			notifier.unsubscribe(observer);
 			expect(notifier.observers).not.toBe(currentObservers);

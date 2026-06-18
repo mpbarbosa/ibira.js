@@ -84,7 +84,7 @@ async fetchData(cacheOverride = null)
 
 ### 5. Side Effect Isolation (2/2)
 
-- ✅ **_applySideEffects method**: Isolated mutation logic
+- ✅ **\_applySideEffects method**: Isolated mutation logic
 - ✅ **Event handling**: Side effects applied based on pure computation
 - ✅ **Cache mutations**: Applied only after pure computation completes
 
@@ -100,11 +100,9 @@ this.cache.set(key, value);
 
 // ✅ New (pure)
 return {
-    cacheOperations: [
-        { type: 'set', key, value }
-    ],
-    newCacheState: new Map(cleanedCache).set(key, value)
-}
+	cacheOperations: [{ type: 'set', key, value }],
+	newCacheState: new Map(cleanedCache).set(key, value),
+};
 ```
 
 ### Event Handling
@@ -117,10 +115,8 @@ this.notifyObservers('loading-start', data);
 
 // ✅ New (pure)
 return {
-    events: [
-        { type: 'loading-start', payload: data }
-    ]
-}
+	events: [{ type: 'loading-start', payload: data }],
+};
 ```
 
 ### Error Handling
@@ -133,9 +129,9 @@ throw new Error('HTTP error');
 
 // ✅ New (pure)
 return {
-    success: false,
-    error: new Error('HTTP error')
-}
+	success: false,
+	error: new Error('HTTP error'),
+};
 ```
 
 ## Static Factory Methods
@@ -144,22 +140,22 @@ For convenience and different use cases:
 
 ```javascript
 // Default cache with reasonable settings
-IbiraAPIFetcher.withDefaultCache(url, options)
+IbiraAPIFetcher.withDefaultCache(url, options);
 
 // External cache for shared caching
-IbiraAPIFetcher.withExternalCache(url, cache, options)
+IbiraAPIFetcher.withExternalCache(url, cache, options);
 
 // No caching for testing or simple use cases
-IbiraAPIFetcher.withoutCache(url, options)
+IbiraAPIFetcher.withoutCache(url, options);
 
 // Event notifications via callbacks
-IbiraAPIFetcher.withEventCallback(url, eventCallback, options)
+IbiraAPIFetcher.withEventCallback(url, eventCallback, options);
 
 // No events for maximum simplicity
-IbiraAPIFetcher.withoutEvents(url, options)
+IbiraAPIFetcher.withoutEvents(url, options);
 
 // Pure usage for functional programming
-IbiraAPIFetcher.pure(url, options)
+IbiraAPIFetcher.pure(url, options);
 ```
 
 ## Testing Verification
@@ -168,30 +164,30 @@ IbiraAPIFetcher.pure(url, options)
 
 ```javascript
 describe('Pure fetchDataPure method (Referential Transparency)', () => {
-    test('should return pure operation description without side effects', () => {
-        const result = fetcher.fetchDataPure(testCache);
+	test('should return pure operation description without side effects', () => {
+		const result = fetcher.fetchDataPure(testCache);
 
-        // Verify no side effects occurred
-        expect(eventNotifier.notifications).toHaveLength(0);
-        expect(cache.has(testUrl)).toBe(false);
-        expect(fetch).not.toHaveBeenCalled();
-    });
+		// Verify no side effects occurred
+		expect(eventNotifier.notifications).toHaveLength(0);
+		expect(cache.has(testUrl)).toBe(false);
+		expect(fetch).not.toHaveBeenCalled();
+	});
 
-    test('should be deterministic with same inputs', () => {
-        const result1 = fetcher.fetchDataPure(testCache);
-        const result2 = fetcher.fetchDataPure(testCache);
+	test('should be deterministic with same inputs', () => {
+		const result1 = fetcher.fetchDataPure(testCache);
+		const result2 = fetcher.fetchDataPure(testCache);
 
-        expect(result1.type).toBe(result2.type);
-        expect(result1.url).toBe(result2.url);
-    });
+		expect(result1.type).toBe(result2.type);
+		expect(result1.url).toBe(result2.url);
+	});
 
-    test('should return immutable result', () => {
-        const result = fetcher.fetchDataPure(testCache);
+	test('should return immutable result', () => {
+		const result = fetcher.fetchDataPure(testCache);
 
-        expect(Object.isFrozen(result)).toBe(true);
-        expect(Object.isFrozen(result.events)).toBe(true);
-        expect(Object.isFrozen(result.cacheOperations)).toBe(true);
-    });
+		expect(Object.isFrozen(result)).toBe(true);
+		expect(Object.isFrozen(result.events)).toBe(true);
+		expect(Object.isFrozen(result.cacheOperations)).toBe(true);
+	});
 });
 ```
 
@@ -249,14 +245,14 @@ const cacheState = new Map();
 const result = await fetcher.fetchDataPure(cacheState, Date.now());
 
 if (result.success) {
-    console.log('Data:', result.data);
-    console.log('Cache operations to apply:', result.cacheOperations);
-    console.log('Events to fire:', result.events);
+	console.log('Data:', result.data);
+	console.log('Cache operations to apply:', result.cacheOperations);
+	console.log('Events to fire:', result.events);
 
-    // Apply side effects manually if needed
-    result.cacheOperations.forEach(op => {
-        if (op.type === 'set') cacheState.set(op.key, op.value);
-    });
+	// Apply side effects manually if needed
+	result.cacheOperations.forEach((op) => {
+		if (op.type === 'set') cacheState.set(op.key, op.value);
+	});
 }
 ```
 
@@ -295,6 +291,6 @@ This transformation maintains backward compatibility while enabling functional p
 
 ---
 
-*Generated on October 13, 2025*
-*IbiraAPIFetcher v0.1.0-alpha*
-*Test Coverage: 40/40 passing, 1 skipped*
+_Generated on October 13, 2025_
+_IbiraAPIFetcher v0.1.0-alpha_
+_Test Coverage: 40/40 passing, 1 skipped_

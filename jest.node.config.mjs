@@ -20,11 +20,7 @@ export default {
 	moduleNameMapper: {
 		'^(.*)\\.js$': '$1',
 	},
-	collectCoverageFrom: [
-		'src/**/*.ts',
-		'!src/index.ts',
-		'!**/node_modules/**',
-	],
+	collectCoverageFrom: ['src/**/*.ts', '!src/index.ts', '!**/node_modules/**'],
 	coverageReporters: ['text', 'lcov', 'html'],
 	coverageThreshold: {
 		global: {

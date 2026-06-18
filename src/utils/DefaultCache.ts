@@ -28,23 +28,23 @@ export interface CacheOptions {
 
 /**
  * DefaultCache - Map-based cache implementation with expiration and LRU eviction
- * 
+ *
  * Provides a simple but effective caching mechanism for IbiraAPIFetcher with:
  * - Automatic expiration of old entries
  * - LRU (Least Recently Used) eviction when size limit is reached
  * - Map-compatible interface for easy integration
- * 
+ *
  * @class DefaultCache
  * @template T - The type of the cached data. Defaults to `unknown` for backward compatibility.
  *   Use a specific type (e.g. `DefaultCache<User>`) to get typed cache entries.
  * @implements {Map}
  * @since 0.1.0-alpha
  * @author Marcelo Pereira Barbosa
- * 
+ *
  * @example
  * // Untyped (backward-compatible)
  * const cache = new DefaultCache({ maxSize: 100, expiration: 5 * 60 * 1000 });
- * 
+ *
  * @example
  * // Typed for end-to-end type inference
  * interface User { id: number; name: string; }
@@ -59,9 +59,9 @@ export class DefaultCache<T = unknown> {
 
 	/**
 	 * Creates a new DefaultCache instance
-	 * 
+	 *
 	 * @param {CacheOptions} [options={}] - Cache configuration options
-	 * 
+	 *
 	 * @example
 	 * const cache = new DefaultCache({ maxSize: 200, expiration: 600000 });
 	 */
@@ -73,10 +73,10 @@ export class DefaultCache<T = unknown> {
 
 	/**
 	 * Checks if a key exists in the cache
-	 * 
+	 *
 	 * @param {string} key - The cache key to check
 	 * @returns {boolean} True if the key exists, false otherwise
-	 * 
+	 *
 	 * @example
 	 * if (cache.has('myKey')) {
 	 *   console.log('Key exists');
@@ -88,10 +88,10 @@ export class DefaultCache<T = unknown> {
 
 	/**
 	 * Retrieves a value from the cache
-	 * 
+	 *
 	 * @param {string} key - The cache key to retrieve
 	 * @returns {CacheEntry | undefined} The cached value or undefined if not found
-	 * 
+	 *
 	 * @example
 	 * const data = cache.get('myKey');
 	 * if (data) console.log('Found:', data);
@@ -103,10 +103,10 @@ export class DefaultCache<T = unknown> {
 	/**
 	 * Stores a value in the cache
 	 * Automatically enforces size limits using LRU eviction
-	 * 
+	 *
 	 * @param {string} key - The cache key
 	 * @param {CacheEntry} value - The value to cache
-	 * 
+	 *
 	 * @example
 	 * cache.set('user:123', { data: { name: 'John' }, timestamp: Date.now(), expiresAt: Date.now() + 300000 });
 	 */
@@ -117,10 +117,10 @@ export class DefaultCache<T = unknown> {
 
 	/**
 	 * Removes a value from the cache
-	 * 
+	 *
 	 * @param {string} key - The cache key to delete
 	 * @returns {boolean} True if the entry was deleted, false otherwise
-	 * 
+	 *
 	 * @example
 	 * const deleted = cache.delete('myKey');
 	 * console.log(deleted ? 'Deleted' : 'Not found');
@@ -131,7 +131,7 @@ export class DefaultCache<T = unknown> {
 
 	/**
 	 * Clears all entries from the cache
-	 * 
+	 *
 	 * @example
 	 * cache.clear();
 	 * console.log('Cache cleared, size:', cache.size);
@@ -142,9 +142,9 @@ export class DefaultCache<T = unknown> {
 
 	/**
 	 * Gets the current number of entries in the cache
-	 * 
+	 *
 	 * @returns {number} The number of cached entries
-	 * 
+	 *
 	 * @example
 	 * console.log(`Cache has ${cache.size} entries`);
 	 */
@@ -154,9 +154,9 @@ export class DefaultCache<T = unknown> {
 
 	/**
 	 * Returns an iterator over all cache entries
-	 * 
+	 *
 	 * @returns {IterableIterator<[string, CacheEntry]>} Iterator over [key, value] pairs
-	 * 
+	 *
 	 * @example
 	 * for (const [key, value] of cache.entries()) {
 	 *   console.log(key, value);
@@ -169,7 +169,7 @@ export class DefaultCache<T = unknown> {
 	/**
 	 * Enforces the maximum cache size by removing oldest entries
 	 * Uses LRU (Least Recently Used) eviction strategy
-	 * 
+	 *
 	 * @private
 	 */
 	private _enforceSizeLimit(): void {
@@ -179,7 +179,7 @@ export class DefaultCache<T = unknown> {
 
 		const entries: Array<[string, CacheEntry<T>]> = Array.from(this.storage.entries());
 		entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
-		
+
 		const entriesToRemove = this.storage.size - this.maxSize;
 		for (let i = 0; i < entriesToRemove; i++) {
 			this.storage.delete(entries[i][0]);

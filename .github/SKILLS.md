@@ -20,17 +20,17 @@ repository state.
 
 ## Skills Index
 
-| Skill | File | Trigger | Purpose |
-|-------|------|---------|---------|
-| [Update bessa_patterns.ts](#update-bessayml) | `update-bessa.yml` | Weekly (Tue) / manual | Bump bessa_patterns.ts GitHub reference |
-| [Sync version strings](#sync-versionyml) | `sync-version.yml` | Push to main (`package.json`) / manual | Propagate version from package.json to all files |
-| [CDN Update](#cdn-updateyml) | `cdn-update.yml` | Manual | Update CDN delivery URLs |
-| [Publish](#publishyml) | `publish.yml` | Release / manual | Publish package |
-| [Verify workflow efficacy](#verify-workflow-efficacy) | _(Copilot skill)_ | Manual | Assess the most recent ai_workflow.js run; produce an efficacy score (0–100) |
-| [Validate logs](#validate-logs) | _(Copilot skill)_ | Manual | Validate `.ai_workflow/logs` against codebase; write `plan.md` |
-| [Fix log issues](#fix-log-issues) | _(Copilot skill)_ | Manual (after validate-logs) | Consume `plan.md`, apply fixes, update roadmap |
-| [Audit and fix](#audit-and-fix) | _(Copilot skill)_ | Manual | Run verify-workflow-efficacy → validate-logs → fix-log-issues → purge-workflow-logs in one pass |
-| [Purge workflow logs](#purge-workflow-logs) | _(Copilot skill)_ | Manual | Delete transient `.ai_workflow/` artefacts (logs/, backlog/, summaries/) |
+| Skill                                                 | File               | Trigger                                | Purpose                                                                                         |
+| ----------------------------------------------------- | ------------------ | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [Update bessa_patterns.ts](#update-bessayml)          | `update-bessa.yml` | Weekly (Tue) / manual                  | Bump bessa_patterns.ts GitHub reference                                                         |
+| [Sync version strings](#sync-versionyml)              | `sync-version.yml` | Push to main (`package.json`) / manual | Propagate version from package.json to all files                                                |
+| [CDN Update](#cdn-updateyml)                          | `cdn-update.yml`   | Manual                                 | Update CDN delivery URLs                                                                        |
+| [Publish](#publishyml)                                | `publish.yml`      | Release / manual                       | Publish package                                                                                 |
+| [Verify workflow efficacy](#verify-workflow-efficacy) | _(Copilot skill)_  | Manual                                 | Assess the most recent ai_workflow.js run; produce an efficacy score (0–100)                    |
+| [Validate logs](#validate-logs)                       | _(Copilot skill)_  | Manual                                 | Validate `.ai_workflow/logs` against codebase; write `plan.md`                                  |
+| [Fix log issues](#fix-log-issues)                     | _(Copilot skill)_  | Manual (after validate-logs)           | Consume `plan.md`, apply fixes, update roadmap                                                  |
+| [Audit and fix](#audit-and-fix)                       | _(Copilot skill)_  | Manual                                 | Run verify-workflow-efficacy → validate-logs → fix-log-issues → purge-workflow-logs in one pass |
+| [Purge workflow logs](#purge-workflow-logs)           | _(Copilot skill)_  | Manual                                 | Delete transient `.ai_workflow/` artefacts (logs/, backlog/, summaries/)                        |
 
 ---
 
@@ -46,20 +46,20 @@ test suite, adjusts version strings in `src/` and docs, and opens a PR.
 
 ### Steps
 
-| # | Step | Notes |
-|---|------|-------|
-| 1 | Checkout repository | `actions/checkout@v4` |
-| 2 | Set up Node.js 20 | npm cache enabled |
-| 3 | Resolve target version | GitHub API or `workflow_dispatch` input |
-| 4 | Check current version | Early-exit if already up to date |
-| 5 | Update `package.json` | Replace `#OLD_TAG` with `#NEW_TAG` |
-| 6 | Install dependencies | `npm ci` |
-| 7 | Validate TypeScript | `npm run validate` (`tsc --noEmit`) |
-| 8 | Run tests | `npm test` |
-| 9 | Adjust related code | Replace version strings in `src/` |
-| 10 | Update documentation | Replace version tags in `*.md` files |
-| 11 | Adjust related tests | Replace version strings in `test/` + `__tests__/` |
-| 12 | Open pull request | `peter-evans/create-pull-request@v7` |
+| #   | Step                   | Notes                                             |
+| --- | ---------------------- | ------------------------------------------------- |
+| 1   | Checkout repository    | `actions/checkout@v4`                             |
+| 2   | Set up Node.js 20      | npm cache enabled                                 |
+| 3   | Resolve target version | GitHub API or `workflow_dispatch` input           |
+| 4   | Check current version  | Early-exit if already up to date                  |
+| 5   | Update `package.json`  | Replace `#OLD_TAG` with `#NEW_TAG`                |
+| 6   | Install dependencies   | `npm ci`                                          |
+| 7   | Validate TypeScript    | `npm run validate` (`tsc --noEmit`)               |
+| 8   | Run tests              | `npm test`                                        |
+| 9   | Adjust related code    | Replace version strings in `src/`                 |
+| 10  | Update documentation   | Replace version tags in `*.md` files              |
+| 11  | Adjust related tests   | Replace version strings in `test/` + `__tests__/` |
+| 12  | Open pull request      | `peter-evans/create-pull-request@v7`              |
 
 ### Trigger manually
 
@@ -82,32 +82,32 @@ agree, no commit is made.
 
 ### Files checked
 
-| File | What is checked |
-|------|----------------|
+| File                    | What is checked                                                     |
+| ----------------------- | ------------------------------------------------------------------- |
 | `src/config/version.ts` | `major`, `minor`, `patch`, `prerelease` fields + `@example` comment |
-| `src/index.ts` | `@version` JSDoc tag |
-| `src/utils/debounce.ts` | `@since` JSDoc tag |
-| `src/utils/throttle.ts` | `@since` JSDoc tag |
-| `README.md` | Version badge, CDN `<script>` and `import` URLs |
-| `docs/API.md` | Version badge, example output comment |
-| `docs/INDEX.md` | CDN production URL |
-| `.workflow-config.yaml` | `version:` field |
-| `ROADMAP.md` | `> **Current version:**` header line only |
+| `src/index.ts`          | `@version` JSDoc tag                                                |
+| `src/utils/debounce.ts` | `@since` JSDoc tag                                                  |
+| `src/utils/throttle.ts` | `@since` JSDoc tag                                                  |
+| `README.md`             | Version badge, CDN `<script>` and `import` URLs                     |
+| `docs/API.md`           | Version badge, example output comment                               |
+| `docs/INDEX.md`         | CDN production URL                                                  |
+| `.workflow-config.yaml` | `version:` field                                                    |
+| `ROADMAP.md`            | `> **Current version:**` header line only                           |
 
 ### Steps
 
-| # | Step | Notes |
-|---|------|-------|
-| 1 | Checkout | `fetch-depth: 2` to detect previous version via `git diff` |
-| 2 | Set up Node.js 20 | npm cache enabled |
-| 3 | Resolve canonical version | `package.json` or `workflow_dispatch` input |
-| 4 | Detect previous version | `git diff HEAD~1` or file scan fallback |
-| 5 | Install dependencies | `npm ci` |
-| 6 | Fix `src/config/version.ts` | Node script — field-level precision |
-| 7 | Fix all other files | `sed` — global replacement of old → new version |
-| 8 | Validate TypeScript | `npm run validate` |
-| 9 | Run tests | `npm test` — catches `version.test.ts` regressions |
-| 10 | Commit | Staged diff; skips commit if nothing changed |
+| #   | Step                        | Notes                                                      |
+| --- | --------------------------- | ---------------------------------------------------------- |
+| 1   | Checkout                    | `fetch-depth: 2` to detect previous version via `git diff` |
+| 2   | Set up Node.js 20           | npm cache enabled                                          |
+| 3   | Resolve canonical version   | `package.json` or `workflow_dispatch` input                |
+| 4   | Detect previous version     | `git diff HEAD~1` or file scan fallback                    |
+| 5   | Install dependencies        | `npm ci`                                                   |
+| 6   | Fix `src/config/version.ts` | Node script — field-level precision                        |
+| 7   | Fix all other files         | `sed` — global replacement of old → new version            |
+| 8   | Validate TypeScript         | `npm run validate`                                         |
+| 9   | Run tests                   | `npm test` — catches `version.test.ts` regressions         |
+| 10  | Commit                      | Staged diff; skips commit if nothing changed               |
 
 ### Trigger manually
 
@@ -116,8 +116,6 @@ gh workflow run sync-version.yml
 ```
 
 ---
-
-
 
 **File:** `.github/workflows/cdn-update.yml`
 **Trigger:** Manual (`workflow_dispatch`)

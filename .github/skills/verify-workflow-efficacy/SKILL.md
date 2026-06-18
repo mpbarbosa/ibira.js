@@ -15,12 +15,12 @@ description: >
 
 `ai_workflow.js` writes four categories of artefact for every run:
 
-| Path | Content |
-|------|---------|
-| `.ai_workflow/backlog/<run>/step_*.md` | Step definitions — what was *planned* |
-| `.ai_workflow/logs/<run>/prompts/**/*.md` | AI prompt+response pairs — what was *executed* |
-| `.ai_workflow/summaries/<run>/workflow_summary.md` | Machine-generated summary with metrics |
-| `.ai_workflow/commit_history.json` | Record of commits produced by the workflow |
+| Path                                               | Content                                        |
+| -------------------------------------------------- | ---------------------------------------------- |
+| `.ai_workflow/backlog/<run>/step_*.md`             | Step definitions — what was _planned_          |
+| `.ai_workflow/logs/<run>/prompts/**/*.md`          | AI prompt+response pairs — what was _executed_ |
+| `.ai_workflow/summaries/<run>/workflow_summary.md` | Machine-generated summary with metrics         |
+| `.ai_workflow/commit_history.json`                 | Record of commits produced by the workflow     |
 
 This skill reads all four sources for the **most recent run** (highest
 `workflow_<YYYYMMDD_HHmmss>` directory name) and produces an efficacy score
@@ -28,14 +28,14 @@ and report.
 
 ## Efficacy dimensions
 
-| Dimension | What it measures | Source |
-|-----------|-----------------|--------|
-| **Step completion** | Steps executed ÷ steps planned | backlog vs prompts |
-| **Step success rate** | Steps with `✅` status ÷ total executed | backlog `**Status:**` |
-| **AI invocation depth** | Prompt files per step (coverage of multi-persona steps) | `prompts/**/*.md` count |
-| **Cache hit rate** | Reported in the workflow summary | `workflow_summary.md` |
-| **Anomaly density** | Lines containing `⚠`, `WARNING`, `error`, `failed` across all prompt responses | prompt `## Response` sections |
-| **Duration reasonableness** | Total runtime vs step count (flags extremely short or stale runs) | `workflow_summary.md` |
+| Dimension                   | What it measures                                                               | Source                        |
+| --------------------------- | ------------------------------------------------------------------------------ | ----------------------------- |
+| **Step completion**         | Steps executed ÷ steps planned                                                 | backlog vs prompts            |
+| **Step success rate**       | Steps with `✅` status ÷ total executed                                        | backlog `**Status:**`         |
+| **AI invocation depth**     | Prompt files per step (coverage of multi-persona steps)                        | `prompts/**/*.md` count       |
+| **Cache hit rate**          | Reported in the workflow summary                                               | `workflow_summary.md`         |
+| **Anomaly density**         | Lines containing `⚠`, `WARNING`, `error`, `failed` across all prompt responses | prompt `## Response` sections |
+| **Duration reasonableness** | Total runtime vs step count (flags extremely short or stale runs)              | `workflow_summary.md`         |
 
 ## Step-by-step execution
 
@@ -92,6 +92,7 @@ Assign to `PROMPTS_TOTAL`.
 
 Read `.ai_workflow/summaries/<RUN_ID>/workflow_summary.md`.
 Extract from the **Performance Metrics** table:
+
 - `Total Duration` → `DURATION`
 - `Success Rate` → `SUMMARY_SUCCESS_RATE`
 - `Cache hit rate` from the Recommendations section (if present) → `CACHE_HIT_RATE`
@@ -119,11 +120,11 @@ ANOMALY_PENALTY   = min(ANOMALY_COUNT × 2, 10)
 EFFICACY_SCORE    = round(COMPLETION_SCORE + SUCCESS_SCORE + INVOCATION_SCORE - ANOMALY_PENALTY)
 ```
 
-| Score range | Classification |
-|-------------|---------------|
-| 80–100 | ✅ **High** — run produced solid, actionable output |
-| 50–79  | ⚠️ **Medium** — run completed but with gaps or anomalies |
-| 0–49   | ❌ **Low** — run was largely ineffective; output should be treated with caution |
+| Score range | Classification                                                                  |
+| ----------- | ------------------------------------------------------------------------------- |
+| 80–100      | ✅ **High** — run produced solid, actionable output                             |
+| 50–79       | ⚠️ **Medium** — run completed but with gaps or anomalies                        |
+| 0–49        | ❌ **Low** — run was largely ineffective; output should be treated with caution |
 
 ### 9. Print the efficacy report
 
@@ -151,11 +152,13 @@ Output the following to the console (exact format):
 ### 10. Emit classification-specific guidance
 
 **High (80–100):**
+
 ```
 ✅ Workflow output is reliable. Proceeding to log audit is recommended.
 ```
 
 **Medium (50–79):**
+
 ```
 ⚠️ Workflow output is partially reliable.
    Anomalies or incomplete steps may affect audit quality.
@@ -163,6 +166,7 @@ Output the following to the console (exact format):
 ```
 
 **Low (0–49):**
+
 ```
 ❌ Workflow efficacy is LOW. The run produced limited useful output.
    Continuing the audit pipeline may surface false issues.

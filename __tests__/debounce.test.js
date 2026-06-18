@@ -103,7 +103,9 @@ describe('debounce', () => {
 		});
 
 		test('should reject all pending Promises when fn throws', async () => {
-			const fn = jest.fn(() => { throw new Error('oops'); });
+			const fn = jest.fn(() => {
+				throw new Error('oops');
+			});
 			const debounced = debounce(fn, 300);
 
 			const p1 = debounced();

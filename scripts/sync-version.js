@@ -32,7 +32,7 @@ function parseVersion(versionString) {
 	const [major, minor, patch] = core.split('.').map(Number);
 	if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
 		throw new Error(
-			`Malformed version string: "${versionString}". Expected MAJOR.MINOR.PATCH[-PRERELEASE] format with numeric components.`
+			`Malformed version string: "${versionString}". Expected MAJOR.MINOR.PATCH[-PRERELEASE] format with numeric components.`,
 		);
 	}
 	return { major, minor, patch, prerelease };

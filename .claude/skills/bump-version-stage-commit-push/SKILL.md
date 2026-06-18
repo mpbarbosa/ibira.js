@@ -30,9 +30,9 @@ version.
 
 Update these files through npm versioning instead of manual editing:
 
-| File | Rule |
-|------|------|
-| `package.json` | Canonical project version |
+| File                | Rule                                         |
+| ------------------- | -------------------------------------------- |
+| `package.json`      | Canonical project version                    |
 | `package-lock.json` | Must match `package.json` after version bump |
 
 Preferred command:

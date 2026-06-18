@@ -32,9 +32,9 @@ Creates a fetcher with a built-in LRU cache.
 IbiraAPIFetcher.withDefaultCache(url: string, options?: FetcherOptions): IbiraAPIFetcher
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `url` | `string` | The endpoint URL to fetch |
+| Parameter | Type             | Description                                                    |
+| --------- | ---------------- | -------------------------------------------------------------- |
+| `url`     | `string`         | The endpoint URL to fetch                                      |
 | `options` | `FetcherOptions` | Optional configuration (see [FetcherOptions](#fetcheroptions)) |
 
 ```js
@@ -77,8 +77,8 @@ Returns a [`FetchResult`](#fetchresult) object.
 ```js
 const result = await fetcher.fetchData();
 if (result.success) {
-  console.log(result.data);
-  console.log(result.fromCache); // true if served from cache
+	console.log(result.data);
+	console.log(result.fromCache); // true if served from cache
 }
 ```
 
@@ -106,15 +106,15 @@ Manages multiple concurrent API fetch operations with shared caching and request
 new IbiraAPIFetchManager(options?: ManagerOptions)
 ```
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `maxCacheSize` | `number` | `100` | Maximum number of cache entries |
-| `cacheExpiration` | `number` | `300000` | Cache TTL in milliseconds |
-| `cleanupInterval` | `number` | `60000` | Periodic cleanup interval in milliseconds |
-| `maxRetries` | `number` | `3` | Default max retry attempts |
-| `retryDelay` | `number` | `1000` | Initial retry delay in milliseconds |
-| `retryMultiplier` | `number` | `2` | Exponential backoff multiplier |
-| `retryableStatusCodes` | `number[]` | `[408,429,500,502,503,504]` | Status codes that trigger retries |
+| Option                 | Type       | Default                     | Description                               |
+| ---------------------- | ---------- | --------------------------- | ----------------------------------------- |
+| `maxCacheSize`         | `number`   | `100`                       | Maximum number of cache entries           |
+| `cacheExpiration`      | `number`   | `300000`                    | Cache TTL in milliseconds                 |
+| `cleanupInterval`      | `number`   | `60000`                     | Periodic cleanup interval in milliseconds |
+| `maxRetries`           | `number`   | `3`                         | Default max retry attempts                |
+| `retryDelay`           | `number`   | `1000`                      | Initial retry delay in milliseconds       |
+| `retryMultiplier`      | `number`   | `2`                         | Exponential backoff multiplier            |
+| `retryableStatusCodes` | `number[]` | `[408,429,500,502,503,504]` | Status codes that trigger retries         |
 
 ### Methods
 
@@ -140,8 +140,8 @@ fetchAll(urls: string[], options?: FetcherOptions): Promise<unknown[]>
 
 ```js
 const [users, posts] = await manager.fetchAll([
-  'https://api.example.com/users',
-  'https://api.example.com/posts',
+	'https://api.example.com/users',
+	'https://api.example.com/posts',
 ]);
 ```
 
@@ -189,9 +189,9 @@ Map-based LRU cache with TTL expiration.
 new DefaultCache(options?: CacheOptions)
 ```
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `maxSize` | `number` | `50` | Maximum number of entries |
+| Option       | Type     | Default  | Description               |
+| ------------ | -------- | -------- | ------------------------- |
+| `maxSize`    | `number` | `50`     | Maximum number of entries |
 | `expiration` | `number` | `300000` | Entry TTL in milliseconds |
 
 ### Methods
@@ -213,7 +213,7 @@ Observer pattern implementation for fetch lifecycle events.
 ### Constructor
 
 ```ts
-new DefaultEventNotifier()
+new DefaultEventNotifier();
 ```
 
 ### Methods
@@ -244,7 +244,7 @@ Removes all subscribers.
 clear(): void
 ```
 
-#### `notifier.subscriberCount` *(readonly)*
+#### `notifier.subscriberCount` _(readonly)_
 
 ```ts
 readonly subscriberCount: number
@@ -291,7 +291,13 @@ input.addEventListener('input', (e) => debouncedSearch(e.target.value));
 Semantic version object for the library.
 
 ```ts
-const VERSION: { major: number; minor: number; patch: number; prerelease: string; toString(): string }
+const VERSION: {
+	major: number;
+	minor: number;
+	patch: number;
+	prerelease: string;
+	toString(): string;
+};
 ```
 
 ```js
@@ -305,40 +311,40 @@ console.log(VERSION.toString()); // "0.4.20-alpha"
 
 ### FetcherOptions
 
-| Property | Type | Default | Description |
-|----------|------|---------|-------------|
-| `timeout` | `number` | `10000` | Request timeout in milliseconds |
-| `eventNotifier` | `EventNotifierInterface` | — | Observer for fetch events |
-| `maxRetries` | `number` | `3` | Max retry attempts |
-| `retryDelay` | `number` | `1000` | Initial retry delay (ms) |
-| `retryMultiplier` | `number` | `2` | Exponential backoff multiplier |
-| `retryableStatusCodes` | `number[]` | `[408,429,500,502,503,504]` | Status codes triggering retries |
-| `maxCacheSize` | `number` | `100` | Max cache entries |
-| `cacheExpiration` | `number` | `300000` | Cache TTL in milliseconds |
-| `cache` | `CacheInterface` | — | Custom cache object |
-| `validateStatus` | `(status: number) => boolean` | `status >= 200 && status < 300` | Custom success validator |
-| `method` | `HttpMethod` | `'GET'` | HTTP method |
-| `body` | `object \| string \| FormData \| Blob \| null` | `null` | Request body |
-| `headers` | `Record<string, string>` | `{}` | Additional headers |
+| Property               | Type                                           | Default                         | Description                     |
+| ---------------------- | ---------------------------------------------- | ------------------------------- | ------------------------------- |
+| `timeout`              | `number`                                       | `10000`                         | Request timeout in milliseconds |
+| `eventNotifier`        | `EventNotifierInterface`                       | —                               | Observer for fetch events       |
+| `maxRetries`           | `number`                                       | `3`                             | Max retry attempts              |
+| `retryDelay`           | `number`                                       | `1000`                          | Initial retry delay (ms)        |
+| `retryMultiplier`      | `number`                                       | `2`                             | Exponential backoff multiplier  |
+| `retryableStatusCodes` | `number[]`                                     | `[408,429,500,502,503,504]`     | Status codes triggering retries |
+| `maxCacheSize`         | `number`                                       | `100`                           | Max cache entries               |
+| `cacheExpiration`      | `number`                                       | `300000`                        | Cache TTL in milliseconds       |
+| `cache`                | `CacheInterface`                               | —                               | Custom cache object             |
+| `validateStatus`       | `(status: number) => boolean`                  | `status >= 200 && status < 300` | Custom success validator        |
+| `method`               | `HttpMethod`                                   | `'GET'`                         | HTTP method                     |
+| `body`                 | `object \| string \| FormData \| Blob \| null` | `null`                          | Request body                    |
+| `headers`              | `Record<string, string>`                       | `{}`                            | Additional headers              |
 
 ### FetchResult
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `success` | `boolean` | Whether the operation succeeded |
-| `data` | `unknown` | Fetched data (when `success` is `true`) |
-| `error` | `Error` | Error that occurred (when `success` is `false`) |
-| `fromCache` | `boolean` | Whether data was served from cache |
-| `cacheOperations` | `readonly CacheOperation[]` | Cache operations performed |
-| `events` | `readonly FetchEvent[]` | Events that fired during the operation |
-| `newCacheState` | `Map<string, CacheEntry>` | Full cache state after the operation |
-| `meta` | `FetchMeta` | Request metadata (key, timestamp, attempt, etc.) |
+| Property          | Type                        | Description                                      |
+| ----------------- | --------------------------- | ------------------------------------------------ |
+| `success`         | `boolean`                   | Whether the operation succeeded                  |
+| `data`            | `unknown`                   | Fetched data (when `success` is `true`)          |
+| `error`           | `Error`                     | Error that occurred (when `success` is `false`)  |
+| `fromCache`       | `boolean`                   | Whether data was served from cache               |
+| `cacheOperations` | `readonly CacheOperation[]` | Cache operations performed                       |
+| `events`          | `readonly FetchEvent[]`     | Events that fired during the operation           |
+| `newCacheState`   | `Map<string, CacheEntry>`   | Full cache state after the operation             |
+| `meta`            | `FetchMeta`                 | Request metadata (key, timestamp, attempt, etc.) |
 
 ### Observer
 
 ```ts
 interface Observer {
-  update: (...args: unknown[]) => void;
+	update: (...args: unknown[]) => void;
 }
 ```
 

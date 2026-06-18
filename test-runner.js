@@ -2,21 +2,21 @@
 
 /**
  * test-runner.js - Interactive Test Suite Guide
- * 
+ *
  * This script provides a user-friendly guide to running tests in ibira.js.
  * It displays available test commands and provides helpful information about
  * the test structure and coverage reporting.
- * 
+ *
  * Usage:
  *   node test-runner.js        # Display test guide
  *   ./test-runner.js           # Same as above (if executable)
- * 
+ *
  * Purpose:
  *   - Show available test commands
  *   - Display test structure
  *   - Provide coverage report information
  *   - Help new contributors get started with testing
- * 
+ *
  * @version 0.2.1-alpha
  * @license MIT
  */

@@ -61,13 +61,13 @@ npm run test:watch
 
 ### Test Suite Overview
 
-| Test File | Tests | Coverage | Purpose |
-|-----------|-------|----------|---------|
-| `IbiraAPIFetcher.test.js` | 60+ | Core functionality | Main fetcher class tests |
-| `IbiraAPIFetchManager.test.js` | 40+ | Manager coordination | Multi-endpoint management |
-| `DefaultCache.test.js` | 30+ | Cache implementation | LRU cache with expiration |
-| `DefaultEventNotifier.test.js` | 35+ | Event system | Observer pattern tests |
-| `index.test.js` | ~5 | Export validation | API surface tests |
+| Test File                      | Tests | Coverage             | Purpose                   |
+| ------------------------------ | ----- | -------------------- | ------------------------- |
+| `IbiraAPIFetcher.test.js`      | 60+   | Core functionality   | Main fetcher class tests  |
+| `IbiraAPIFetchManager.test.js` | 40+   | Manager coordination | Multi-endpoint management |
+| `DefaultCache.test.js`         | 30+   | Cache implementation | LRU cache with expiration |
+| `DefaultEventNotifier.test.js` | 35+   | Event system         | Observer pattern tests    |
+| `index.test.js`                | ~5    | Export validation    | API surface tests         |
 
 **Total:** 152 tests (151 passing, 1 skipped)
 
@@ -471,9 +471,9 @@ name: Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test:
@@ -484,47 +484,47 @@ jobs:
         node-version: [16.x, 18.x, 20.x]
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Validate syntax
-      run: npm run validate
+      - name: Validate syntax
+        run: npm run validate
 
-    - name: Run tests
-      run: npm test
+      - name: Run tests
+        run: npm test
 
-    - name: Generate coverage
-      run: npm run test:coverage
+      - name: Generate coverage
+        run: npm run test:coverage
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage/lcov.info
-        fail_ci_if_error: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          fail_ci_if_error: true
 
-    - name: Coverage threshold check
-      run: |
-        node -e "
-        const coverage = require('./coverage/coverage-summary.json');
-        const totals = coverage.total;
-        const failed = [];
-        if (totals.statements.pct < 75) failed.push('statements');
-        if (totals.branches.pct < 75) failed.push('branches');
-        if (totals.functions.pct < 75) failed.push('functions');
-        if (totals.lines.pct < 75) failed.push('lines');
-        if (failed.length > 0) {
-          console.error('Coverage below 75% for: ' + failed.join(', '));
-          process.exit(1);
-        }
-        console.log('✅ Coverage thresholds met');
-        "
+      - name: Coverage threshold check
+        run: |
+          node -e "
+          const coverage = require('./coverage/coverage-summary.json');
+          const totals = coverage.total;
+          const failed = [];
+          if (totals.statements.pct < 75) failed.push('statements');
+          if (totals.branches.pct < 75) failed.push('branches');
+          if (totals.functions.pct < 75) failed.push('functions');
+          if (totals.lines.pct < 75) failed.push('lines');
+          if (failed.length > 0) {
+            console.error('Coverage below 75% for: ' + failed.join(', '));
+            process.exit(1);
+          }
+          console.log('✅ Coverage thresholds met');
+          "
 ```
 
 ### GitLab CI Example
@@ -613,27 +613,27 @@ Configured in `package.json`:
 
 ```json
 {
-  "jest": {
-    "coverageThreshold": {
-      "global": {
-        "branches": 75,
-        "functions": 75,
-        "lines": 75,
-        "statements": 75
-      }
-    }
-  }
+	"jest": {
+		"coverageThreshold": {
+			"global": {
+				"branches": 75,
+				"functions": 75,
+				"lines": 75,
+				"statements": 75
+			}
+		}
+	}
 }
 ```
 
 ### Current Coverage Status
 
-| Metric | Threshold | Current | Status |
-|--------|-----------|---------|--------|
-| Statements | 75% | 90.45% | ✅ Pass |
-| Branches | 75% | 82.14% | ✅ Pass |
-| Functions | 75% | 75.7% | ✅ Pass |
-| Lines | 75% | 91.72% | ✅ Pass |
+| Metric     | Threshold | Current | Status  |
+| ---------- | --------- | ------- | ------- |
+| Statements | 75%       | 90.45%  | ✅ Pass |
+| Branches   | 75%       | 82.14%  | ✅ Pass |
+| Functions  | 75%       | 75.7%   | ✅ Pass |
+| Lines      | 75%       | 91.72%  | ✅ Pass |
 
 ### Maintaining Coverage
 
@@ -816,13 +816,13 @@ npm run test:watch
 ```javascript
 // ✅ Good - explains why
 test('should retry on 503 status (temporary server error)', async () => {
-  // 503 indicates temporary failure, should retry
-  mockFetch.mockRejectedValueOnce(new Error('HTTP error! status: 503'));
-  mockFetch.mockResolvedValueOnce({ data: 'success' });
+	// 503 indicates temporary failure, should retry
+	mockFetch.mockRejectedValueOnce(new Error('HTTP error! status: 503'));
+	mockFetch.mockResolvedValueOnce({ data: 'success' });
 
-  const result = await fetcher.fetchData();
-  expect(result).toEqual({ data: 'success' });
-  expect(mockFetch).toHaveBeenCalledTimes(2);
+	const result = await fetcher.fetchData();
+	expect(result).toEqual({ data: 'success' });
+	expect(mockFetch).toHaveBeenCalledTimes(2);
 });
 ```
 

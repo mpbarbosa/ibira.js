@@ -6,6 +6,7 @@
 import globals from 'globals';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -27,11 +28,11 @@ export default [
 			'no-debugger': 'error',
 
 			// Style — match existing code conventions
-			'semi': ['error', 'always'],
+			semi: ['error', 'always'],
 			'no-var': 'error',
 			'prefer-const': 'error',
-			'eqeqeq': ['error', 'always'],
-			'curly': ['error', 'all'],
+			eqeqeq: ['error', 'always'],
+			curly: ['error', 'all'],
 		},
 	},
 	{
@@ -51,17 +52,20 @@ export default [
 			'no-undef': 'off',
 			// Replaced by the TypeScript-aware version below
 			'no-unused-vars': 'off',
-			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+			],
 			'@typescript-eslint/no-explicit-any': 'error',
 			'no-console': 'warn',
 			'no-debugger': 'error',
 
 			// Style — match existing code conventions
-			'semi': ['error', 'always'],
+			semi: ['error', 'always'],
 			'no-var': 'error',
 			'prefer-const': 'error',
-			'eqeqeq': ['error', 'always'],
-			'curly': ['error', 'all'],
+			eqeqeq: ['error', 'always'],
+			curly: ['error', 'all'],
 		},
 	},
 	{
@@ -81,4 +85,6 @@ export default [
 			'no-console': 'off',
 		},
 	},
+	// Must be last: disables ESLint formatting rules that conflict with Prettier
+	eslintConfigPrettier,
 ];

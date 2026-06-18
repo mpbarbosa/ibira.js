@@ -130,14 +130,14 @@ ibira.js/
 
 ### Purpose of Each Directory
 
-| Directory | Purpose | File Types | Examples |
-|-----------|---------|------------|----------|
-| `src/` | All source code | `.js` modules | Core classes, utilities |
-| `src/core/` | Business logic | Class files | `IbiraAPIFetcher.js` |
-| `src/utils/` | Reusable helpers | Utility classes | `DefaultCache.js` |
-| `src/config/` | Configuration | Constants, config | `version.js` |
-| `__tests__/` | Test files | `.test.js` | Unit, integration tests |
-| `docs/` | Documentation | `.md` files | Architecture, guides |
+| Directory     | Purpose          | File Types        | Examples                |
+| ------------- | ---------------- | ----------------- | ----------------------- |
+| `src/`        | All source code  | `.js` modules     | Core classes, utilities |
+| `src/core/`   | Business logic   | Class files       | `IbiraAPIFetcher.js`    |
+| `src/utils/`  | Reusable helpers | Utility classes   | `DefaultCache.js`       |
+| `src/config/` | Configuration    | Constants, config | `version.js`            |
+| `__tests__/`  | Test files       | `.test.js`        | Unit, integration tests |
+| `docs/`       | Documentation    | `.md` files       | Architecture, guides    |
 
 ---
 
@@ -192,16 +192,16 @@ import { IbiraAPIFetcher, VERSION } from 'ibira.js';
 
 ```javascript
 // Static factory methods for different use cases
-IbiraAPIFetcher.withDefaultCache(url, options)
-IbiraAPIFetcher.withExternalCache(url, cache, options)
-IbiraAPIFetcher.withoutCache(url, options)
-IbiraAPIFetcher.pure(url, options)
+IbiraAPIFetcher.withDefaultCache(url, options);
+IbiraAPIFetcher.withExternalCache(url, cache, options);
+IbiraAPIFetcher.withoutCache(url, options);
+IbiraAPIFetcher.pure(url, options);
 
 // Pure functional core
-await fetcher.fetchDataPure(cacheState, timestamp, networkProvider)
+await fetcher.fetchDataPure(cacheState, timestamp, networkProvider);
 
 // Practical wrapper with side effects
-await fetcher.fetchData()
+await fetcher.fetchData();
 ```
 
 **Class Structure**:
@@ -365,8 +365,8 @@ export class DefaultCache {
 import { DefaultCache } from 'ibira.js';
 
 const cache = new DefaultCache({
-  maxSize: 100,
-  expiration: 600000  // 10 minutes
+	maxSize: 100,
+	expiration: 600000, // 10 minutes
 });
 
 cache.set('key', { data: 'value', timestamp: Date.now() });
@@ -407,9 +407,9 @@ import { DefaultEventNotifier } from 'ibira.js';
 const notifier = new DefaultEventNotifier();
 
 const observer = {
-  update(event, data) {
-    console.log(`Event: ${event}`, data);
-  }
+	update(event, data) {
+		console.log(`Event: ${event}`, data);
+	},
 };
 
 notifier.subscribe(observer);
@@ -431,13 +431,13 @@ notifier.notify('data-received', { payload: 'test' });
 
 ```javascript
 export const VERSION = {
-  major: 0,
-  minor: 2,
-  patch: 0,
-  prerelease: "alpha",
-  toString: function() {
-    return `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;
-  }
+	major: 0,
+	minor: 2,
+	patch: 0,
+	prerelease: 'alpha',
+	toString: function () {
+		return `${this.major}.${this.minor}.${this.patch}-${this.prerelease}`;
+	},
 };
 ```
 
@@ -523,15 +523,15 @@ static pure(url, options = {}) {
 ```javascript
 // DefaultEventNotifier implements observer pattern
 class DefaultEventNotifier {
-  subscribe(observer) {
-    this.observers = [...this.observers, observer];
-  }
+	subscribe(observer) {
+		this.observers = [...this.observers, observer];
+	}
 
-  notify(...args) {
-    this.observers.forEach(observer => {
-      observer.update(...args);
-    });
-  }
+	notify(...args) {
+		this.observers.forEach((observer) => {
+			observer.update(...args);
+		});
+	}
 }
 
 // Usage in IbiraAPIFetcher
@@ -621,12 +621,12 @@ async fetchData() {
 ```javascript
 // Private implementation details
 class PrivateHelper {
-  // Internal use only
+	// Internal use only
 }
 
 // Public API
 export class PublicAPI {
-  // Exposed to users
+	// Exposed to users
 }
 
 // Only PublicAPI is accessible from outside
@@ -649,59 +649,59 @@ export class PublicAPI {
 **Constructor**:
 
 ```javascript
-new IbiraAPIFetcher(url, cache, options)
+new IbiraAPIFetcher(url, cache, options);
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `url` | `string` | API endpoint URL |
-| `cache` | `Object` | Cache instance (Map-like interface) |
-| `options` | `Object` | Configuration options |
-| `options.timeout` | `number` | Request timeout (default: 10000ms) |
-| `options.maxRetries` | `number` | Max retry attempts (default: 3) |
-| `options.retryDelay` | `number` | Initial retry delay (default: 1000ms) |
-| `options.retryMultiplier` | `number` | Backoff multiplier (default: 2) |
-| `options.retryableStatusCodes` | `number[]` | Retryable HTTP codes |
-| `options.eventNotifier` | `Object` | Custom event notifier |
+| Parameter                      | Type       | Description                           |
+| ------------------------------ | ---------- | ------------------------------------- |
+| `url`                          | `string`   | API endpoint URL                      |
+| `cache`                        | `Object`   | Cache instance (Map-like interface)   |
+| `options`                      | `Object`   | Configuration options                 |
+| `options.timeout`              | `number`   | Request timeout (default: 10000ms)    |
+| `options.maxRetries`           | `number`   | Max retry attempts (default: 3)       |
+| `options.retryDelay`           | `number`   | Initial retry delay (default: 1000ms) |
+| `options.retryMultiplier`      | `number`   | Backoff multiplier (default: 2)       |
+| `options.retryableStatusCodes` | `number[]` | Retryable HTTP codes                  |
+| `options.eventNotifier`        | `Object`   | Custom event notifier                 |
 
 **Static Factory Methods**:
 
 ```javascript
 // Create with default cache
-IbiraAPIFetcher.withDefaultCache(url, options)
+IbiraAPIFetcher.withDefaultCache(url, options);
 
 // Create with external cache
-IbiraAPIFetcher.withExternalCache(url, cache, options)
+IbiraAPIFetcher.withExternalCache(url, cache, options);
 
 // Create without cache
-IbiraAPIFetcher.withoutCache(url, options)
+IbiraAPIFetcher.withoutCache(url, options);
 
 // Create with event callback
-IbiraAPIFetcher.withEventCallback(url, callback, options)
+IbiraAPIFetcher.withEventCallback(url, callback, options);
 
 // Create without events
-IbiraAPIFetcher.withoutEvents(url, options)
+IbiraAPIFetcher.withoutEvents(url, options);
 
 // Create pure functional instance
-IbiraAPIFetcher.pure(url, options)
+IbiraAPIFetcher.pure(url, options);
 ```
 
 **Instance Methods**:
 
 ```javascript
 // Fetch data (with side effects)
-await fetcher.fetchData(cacheOverride)
+await fetcher.fetchData(cacheOverride);
 
 // Pure fetch (no side effects)
-await fetcher.fetchDataPure(cacheState, currentTime, networkProvider)
+await fetcher.fetchDataPure(cacheState, currentTime, networkProvider);
 
 // Observer pattern
-fetcher.subscribe(observer)
-fetcher.unsubscribe(observer)
-fetcher.notifyObservers(event, data)
+fetcher.subscribe(observer);
+fetcher.unsubscribe(observer);
+fetcher.notifyObservers(event, data);
 
 // Cache management
-const key = fetcher.getCacheKey()
+const key = fetcher.getCacheKey();
 ```
 
 ---
@@ -711,52 +711,52 @@ const key = fetcher.getCacheKey()
 **Constructor**:
 
 ```javascript
-new IbiraAPIFetchManager(options)
+new IbiraAPIFetchManager(options);
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `options` | `Object` | Configuration options |
-| `options.maxCacheSize` | `number` | Max cache entries (default: 100) |
-| `options.cacheExpiration` | `number` | Cache TTL (default: 300000ms) |
-| `options.cleanupInterval` | `number` | Cleanup interval (default: 60000ms) |
-| `options.maxRetries` | `number` | Default max retries (default: 3) |
-| `options.retryDelay` | `number` | Default retry delay (default: 1000ms) |
-| `options.retryMultiplier` | `number` | Default backoff (default: 2) |
-| `options.retryableStatusCodes` | `number[]` | Default retryable codes |
+| Parameter                      | Type       | Description                           |
+| ------------------------------ | ---------- | ------------------------------------- |
+| `options`                      | `Object`   | Configuration options                 |
+| `options.maxCacheSize`         | `number`   | Max cache entries (default: 100)      |
+| `options.cacheExpiration`      | `number`   | Cache TTL (default: 300000ms)         |
+| `options.cleanupInterval`      | `number`   | Cleanup interval (default: 60000ms)   |
+| `options.maxRetries`           | `number`   | Default max retries (default: 3)      |
+| `options.retryDelay`           | `number`   | Default retry delay (default: 1000ms) |
+| `options.retryMultiplier`      | `number`   | Default backoff (default: 2)          |
+| `options.retryableStatusCodes` | `number[]` | Default retryable codes               |
 
 **Instance Methods**:
 
 ```javascript
 // Fetcher management
-const fetcher = manager.getFetcher(url, options)
+const fetcher = manager.getFetcher(url, options);
 
 // Fetch operations
-const data = await manager.fetch(url, options)
-const results = await manager.fetchMultiple(urls, options)
+const data = await manager.fetch(url, options);
+const results = await manager.fetchMultiple(urls, options);
 
 // Cache operations
-const cached = manager.getCachedData(url)
-manager.clearCache(url)  // or clearCache() for all
-manager.triggerCleanup()
+const cached = manager.getCachedData(url);
+manager.clearCache(url); // or clearCache() for all
+manager.triggerCleanup();
 
 // Configuration
-manager.setCacheExpiration(milliseconds)
-manager.setMaxCacheSize(size)
-manager.setRetryConfig(config)
-manager.setRetryConfigForUrl(url, config)
+manager.setCacheExpiration(milliseconds);
+manager.setMaxCacheSize(size);
+manager.setRetryConfig(config);
+manager.setRetryConfigForUrl(url, config);
 
 // Monitoring
-const loading = manager.isLoading(url)
-const stats = manager.getStats()
-const config = manager.getRetryConfig()
+const loading = manager.isLoading(url);
+const stats = manager.getStats();
+const config = manager.getRetryConfig();
 
 // Observer pattern
-manager.subscribe(url, observer)
-manager.unsubscribe(url, observer)
+manager.subscribe(url, observer);
+manager.unsubscribe(url, observer);
 
 // Cleanup
-manager.destroy()
+manager.destroy();
 ```
 
 ---
@@ -766,35 +766,35 @@ manager.destroy()
 #### DefaultCache
 
 ```javascript
-const cache = new DefaultCache(options)
+const cache = new DefaultCache(options);
 
 // Map-like interface
-cache.has(key)         // boolean
-cache.get(key)         // value | undefined
-cache.set(key, value)  // void
-cache.delete(key)      // boolean
-cache.clear()          // void
+cache.has(key); // boolean
+cache.get(key); // value | undefined
+cache.set(key, value); // void
+cache.delete(key); // boolean
+cache.clear(); // void
 
 // Properties
-cache.size             // number
-cache.entries()        // Iterator
-cache.maxSize          // number
-cache.expiration       // number
+cache.size; // number
+cache.entries(); // Iterator
+cache.maxSize; // number
+cache.expiration; // number
 ```
 
 #### DefaultEventNotifier
 
 ```javascript
-const notifier = new DefaultEventNotifier()
+const notifier = new DefaultEventNotifier();
 
 // Observer management
-notifier.subscribe(observer)    // void
-notifier.unsubscribe(observer)  // void
-notifier.notify(...args)        // void
-notifier.clear()                // void
+notifier.subscribe(observer); // void
+notifier.unsubscribe(observer); // void
+notifier.notify(...args); // void
+notifier.clear(); // void
 
 // Properties
-notifier.subscriberCount        // number
+notifier.subscriberCount; // number
 ```
 
 ---
@@ -807,15 +807,13 @@ notifier.subscriberCount        // number
 import { IbiraAPIFetcher } from 'ibira.js';
 
 // Simple fetch with default cache
-const fetcher = IbiraAPIFetcher.withDefaultCache(
-  'https://api.example.com/users'
-);
+const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');
 
 try {
-  const users = await fetcher.fetchData();
-  console.log('Users:', users);
+	const users = await fetcher.fetchData();
+	console.log('Users:', users);
 } catch (error) {
-  console.error('Fetch failed:', error);
+	console.error('Fetch failed:', error);
 }
 ```
 
@@ -826,16 +824,14 @@ import { IbiraAPIFetcher, DefaultCache } from 'ibira.js';
 
 // Create custom cache
 const cache = new DefaultCache({
-  maxSize: 200,
-  expiration: 600000  // 10 minutes
+	maxSize: 200,
+	expiration: 600000, // 10 minutes
 });
 
 // Use custom cache
-const fetcher = IbiraAPIFetcher.withExternalCache(
-  'https://api.example.com/data',
-  cache,
-  { timeout: 5000 }
-);
+const fetcher = IbiraAPIFetcher.withExternalCache('https://api.example.com/data', cache, {
+	timeout: 5000,
+});
 
 const data = await fetcher.fetchData();
 ```
@@ -847,19 +843,19 @@ import { IbiraAPIFetcher } from 'ibira.js';
 
 // Create observer
 const loadingObserver = {
-  update(event, payload) {
-    switch(event) {
-      case 'loading-start':
-        console.log('Loading started:', payload.url);
-        break;
-      case 'success':
-        console.log('Data received:', payload);
-        break;
-      case 'error':
-        console.error('Error occurred:', payload.error);
-        break;
-    }
-  }
+	update(event, payload) {
+		switch (event) {
+			case 'loading-start':
+				console.log('Loading started:', payload.url);
+				break;
+			case 'success':
+				console.log('Data received:', payload);
+				break;
+			case 'error':
+				console.error('Error occurred:', payload.error);
+				break;
+		}
+	},
 };
 
 // Subscribe to events
@@ -877,16 +873,16 @@ import { IbiraAPIFetchManager } from 'ibira.js';
 
 // Create manager
 const manager = new IbiraAPIFetchManager({
-  maxCacheSize: 200,
-  cacheExpiration: 300000,
-  maxRetries: 5
+	maxCacheSize: 200,
+	cacheExpiration: 300000,
+	maxRetries: 5,
 });
 
 // Fetch multiple endpoints
 const [users, posts, comments] = await manager.fetchMultiple([
-  'https://api.example.com/users',
-  'https://api.example.com/posts',
-  'https://api.example.com/comments'
+	'https://api.example.com/users',
+	'https://api.example.com/posts',
+	'https://api.example.com/comments',
 ]);
 
 // Check stats
@@ -910,18 +906,14 @@ let cacheState = new Map();
 // Pure fetch with mock network
 const mockNetwork = () => Promise.resolve({ test: 'data' });
 
-const result = await fetcher.fetchDataPure(
-  cacheState,
-  Date.now(),
-  mockNetwork
-);
+const result = await fetcher.fetchDataPure(cacheState, Date.now(), mockNetwork);
 
 if (result.success) {
-  // Update cache externally
-  cacheState = result.newCacheState;
-  console.log('Data:', result.data);
-  console.log('Cache operations:', result.cacheOperations);
-  console.log('Events:', result.events);
+	// Update cache externally
+	cacheState = result.newCacheState;
+	console.log('Data:', result.data);
+	console.log('Cache operations:', result.cacheOperations);
+	console.log('Events:', result.events);
 }
 ```
 
@@ -932,39 +924,39 @@ import { useState, useEffect } from 'react';
 import { IbiraAPIFetcher } from 'ibira.js';
 
 function UserList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+	const [users, setUsers] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetcher = IbiraAPIFetcher.withEventCallback(
-      'https://api.example.com/users',
-      (event, payload) => {
-        if (event === 'loading-start') setLoading(true);
-        if (event === 'success') {
-          setUsers(payload);
-          setLoading(false);
-        }
-        if (event === 'error') {
-          setError(payload.error);
-          setLoading(false);
-        }
-      }
-    );
+	useEffect(() => {
+		const fetcher = IbiraAPIFetcher.withEventCallback(
+			'https://api.example.com/users',
+			(event, payload) => {
+				if (event === 'loading-start') setLoading(true);
+				if (event === 'success') {
+					setUsers(payload);
+					setLoading(false);
+				}
+				if (event === 'error') {
+					setError(payload.error);
+					setLoading(false);
+				}
+			},
+		);
 
-    fetcher.fetchData();
-  }, []);
+		fetcher.fetchData();
+	}, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+	if (loading) return <div>Loading...</div>;
+	if (error) return <div>Error: {error.message}</div>;
 
-  return (
-    <ul>
-      {users.map(user => (
-        <li key={user.id}>{user.name}</li>
-      ))}
-    </ul>
-  );
+	return (
+		<ul>
+			{users.map((user) => (
+				<li key={user.id}>{user.name}</li>
+			))}
+		</ul>
+	);
 }
 ```
 
@@ -977,23 +969,23 @@ const manager = new IbiraAPIFetchManager();
 
 // Set global retry config
 manager.setRetryConfig({
-  maxRetries: 5,
-  retryDelay: 2000,
-  retryMultiplier: 2,
-  retryableStatusCodes: [408, 429, 500, 502, 503, 504]
+	maxRetries: 5,
+	retryDelay: 2000,
+	retryMultiplier: 2,
+	retryableStatusCodes: [408, 429, 500, 502, 503, 504],
 });
 
 // Override for specific URL
 manager.setRetryConfigForUrl('https://api.critical.com/data', {
-  maxRetries: 10,
-  retryDelay: 1000
+	maxRetries: 10,
+	retryDelay: 1000,
 });
 
 // Fetch with retry
 try {
-  const data = await manager.fetch('https://api.critical.com/data');
+	const data = await manager.fetch('https://api.critical.com/data');
 } catch (error) {
-  console.error('Failed after retries:', error);
+	console.error('Failed after retries:', error);
 }
 ```
 
@@ -1004,24 +996,18 @@ import { IbiraAPIFetcher, DefaultCache } from 'ibira.js';
 
 // Single shared cache
 const sharedCache = new DefaultCache({
-  maxSize: 500,
-  expiration: 600000
+	maxSize: 500,
+	expiration: 600000,
 });
 
 // Multiple fetchers sharing the cache
-const userFetcher = IbiraAPIFetcher.withExternalCache(
-  'https://api.example.com/users',
-  sharedCache
-);
+const userFetcher = IbiraAPIFetcher.withExternalCache('https://api.example.com/users', sharedCache);
 
-const postFetcher = IbiraAPIFetcher.withExternalCache(
-  'https://api.example.com/posts',
-  sharedCache
-);
+const postFetcher = IbiraAPIFetcher.withExternalCache('https://api.example.com/posts', sharedCache);
 
 // Both use the same cache
-await userFetcher.fetchData();  // Adds to shared cache
-await postFetcher.fetchData();  // Adds to shared cache
+await userFetcher.fetchData(); // Adds to shared cache
+await postFetcher.fetchData(); // Adds to shared cache
 
 console.log('Total cached items:', sharedCache.size);
 ```
@@ -1105,12 +1091,12 @@ constructor(url) {
 ```javascript
 // ✅ Good
 try {
-  const data = await fetcher.fetchData();
-  return processData(data);
+	const data = await fetcher.fetchData();
+	return processData(data);
 } catch (error) {
-  console.error('Failed to fetch data:', error.message);
-  notifyUser('Data fetch failed');
-  throw error;  // Re-throw if caller should handle
+	console.error('Failed to fetch data:', error.message);
+	notifyUser('Data fetch failed');
+	throw error; // Re-throw if caller should handle
 }
 ```
 
@@ -1123,9 +1109,9 @@ try {
 ```javascript
 // ❌ Bad
 try {
-  await fetcher.fetchData();
+	await fetcher.fetchData();
 } catch (error) {
-  // Silent failure - bad!
+	// Silent failure - bad!
 }
 ```
 
@@ -1143,9 +1129,9 @@ try {
 ```javascript
 // ✅ Good - testable with mocks
 const mockCache = {
-  has: jest.fn(() => false),
-  get: jest.fn(),
-  set: jest.fn()
+	has: jest.fn(() => false),
+	get: jest.fn(),
+	set: jest.fn(),
 };
 
 const fetcher = new IbiraAPIFetcher(url, mockCache);
@@ -1171,7 +1157,7 @@ const fetcher = new IbiraAPIFetcher(url, mockCache);
 ```javascript
 // ✅ Good - deduplication
 if (this.pendingRequests.has(key)) {
-  return await this.pendingRequests.get(key);
+	return await this.pendingRequests.get(key);
 }
 ```
 
@@ -1187,12 +1173,12 @@ if (this.pendingRequests.has(key)) {
 
 #### File Naming Conventions
 
-| Type | Convention | Example |
-|------|-----------|---------|
-| Classes | PascalCase | `IbiraAPIFetcher.js` |
-| Utilities | camelCase | `cacheHelper.js` |
-| Constants | camelCase | `version.js` |
-| Tests | `*.test.js` | `IbiraAPIFetcher.test.js` |
+| Type      | Convention  | Example                   |
+| --------- | ----------- | ------------------------- |
+| Classes   | PascalCase  | `IbiraAPIFetcher.js`      |
+| Utilities | camelCase   | `cacheHelper.js`          |
+| Constants | camelCase   | `version.js`              |
+| Tests     | `*.test.js` | `IbiraAPIFetcher.test.js` |
 
 #### Import Order
 
@@ -1236,11 +1222,11 @@ New configuration?       → src/config/
  * @since 0.3.0
  */
 export class NewFeature {
-  constructor(options = {}) {
-    // Implementation
-  }
+	constructor(options = {}) {
+		// Implementation
+	}
 
-  // Methods...
+	// Methods...
 }
 ```
 
@@ -1258,9 +1244,9 @@ export { NewFeature } from './core/NewFeature.js';
 import { NewFeature } from '../src/index.js';
 
 describe('NewFeature', () => {
-  test('should work correctly', () => {
-    // Test implementation
-  });
+	test('should work correctly', () => {
+		// Test implementation
+	});
 });
 ```
 
@@ -1335,29 +1321,29 @@ __tests__/
 import { IbiraAPIFetcher } from '../src/index.js';
 
 describe('IbiraAPIFetcher', () => {
-  describe('Static Factory Methods', () => {
-    test('withDefaultCache creates instance with cache', () => {
-      const fetcher = IbiraAPIFetcher.withDefaultCache(url);
-      expect(fetcher).toBeInstanceOf(IbiraAPIFetcher);
-      expect(fetcher.cache).toBeDefined();
-    });
-  });
+	describe('Static Factory Methods', () => {
+		test('withDefaultCache creates instance with cache', () => {
+			const fetcher = IbiraAPIFetcher.withDefaultCache(url);
+			expect(fetcher).toBeInstanceOf(IbiraAPIFetcher);
+			expect(fetcher.cache).toBeDefined();
+		});
+	});
 
-  describe('fetchData', () => {
-    test('returns data from API', async () => {
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ data: 'test' })
-        })
-      );
+	describe('fetchData', () => {
+		test('returns data from API', async () => {
+			global.fetch = jest.fn(() =>
+				Promise.resolve({
+					ok: true,
+					json: () => Promise.resolve({ data: 'test' }),
+				}),
+			);
 
-      const fetcher = IbiraAPIFetcher.withDefaultCache(url);
-      const data = await fetcher.fetchData();
+			const fetcher = IbiraAPIFetcher.withDefaultCache(url);
+			const data = await fetcher.fetchData();
 
-      expect(data).toEqual({ data: 'test' });
-    });
-  });
+			expect(data).toEqual({ data: 'test' });
+		});
+	});
 });
 ```
 
@@ -1365,17 +1351,17 @@ describe('IbiraAPIFetcher', () => {
 
 ```javascript
 describe('Integration Tests', () => {
-  test('manager coordinates multiple fetchers', async () => {
-    const manager = new IbiraAPIFetchManager();
+	test('manager coordinates multiple fetchers', async () => {
+		const manager = new IbiraAPIFetchManager();
 
-    const results = await manager.fetchMultiple([
-      'https://api.example.com/users',
-      'https://api.example.com/posts'
-    ]);
+		const results = await manager.fetchMultiple([
+			'https://api.example.com/users',
+			'https://api.example.com/posts',
+		]);
 
-    expect(results).toHaveLength(2);
-    expect(manager.getStats().activeFetchers).toBe(2);
-  });
+		expect(results).toHaveLength(2);
+		expect(manager.getStats().activeFetchers).toBe(2);
+	});
 });
 ```
 
@@ -1383,19 +1369,19 @@ describe('Integration Tests', () => {
 
 ```javascript
 describe('Pure Functions', () => {
-  test('fetchDataPure is deterministic', async () => {
-    const fetcher = IbiraAPIFetcher.pure(url);
-    const cache = new Map();
-    const timestamp = 1000000;
-    const mockNetwork = () => Promise.resolve({ data: 'test' });
+	test('fetchDataPure is deterministic', async () => {
+		const fetcher = IbiraAPIFetcher.pure(url);
+		const cache = new Map();
+		const timestamp = 1000000;
+		const mockNetwork = () => Promise.resolve({ data: 'test' });
 
-    // Call twice with same inputs
-    const result1 = await fetcher.fetchDataPure(cache, timestamp, mockNetwork);
-    const result2 = await fetcher.fetchDataPure(cache, timestamp, mockNetwork);
+		// Call twice with same inputs
+		const result1 = await fetcher.fetchDataPure(cache, timestamp, mockNetwork);
+		const result2 = await fetcher.fetchDataPure(cache, timestamp, mockNetwork);
 
-    // Should produce same structure
-    expect(result1.meta.timestamp).toBe(result2.meta.timestamp);
-  });
+		// Should produce same structure
+		expect(result1.meta.timestamp).toBe(result2.meta.timestamp);
+	});
 });
 ```
 
@@ -1420,10 +1406,10 @@ Target coverage:
 
 ```javascript
 global.fetch = jest.fn(() =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ data: 'test' })
-  })
+	Promise.resolve({
+		ok: true,
+		json: () => Promise.resolve({ data: 'test' }),
+	}),
 );
 ```
 
@@ -1431,13 +1417,13 @@ global.fetch = jest.fn(() =>
 
 ```javascript
 const mockCache = {
-  has: jest.fn(() => false),
-  get: jest.fn(),
-  set: jest.fn(),
-  delete: jest.fn(),
-  clear: jest.fn(),
-  size: 0,
-  entries: jest.fn(() => [])
+	has: jest.fn(() => false),
+	get: jest.fn(),
+	set: jest.fn(),
+	delete: jest.fn(),
+	clear: jest.fn(),
+	size: 0,
+	entries: jest.fn(() => []),
 };
 ```
 
@@ -1445,7 +1431,7 @@ const mockCache = {
 
 ```javascript
 const mockObserver = {
-  update: jest.fn()
+	update: jest.fn(),
 };
 
 fetcher.subscribe(mockObserver);

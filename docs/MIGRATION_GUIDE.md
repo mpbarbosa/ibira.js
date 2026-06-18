@@ -12,15 +12,15 @@ This guide documents the transformation of IbiraAPIFetcher from a traditional ob
 
 ```javascript
 class IbiraAPIFetcher {
-    constructor(url) {
-        this.url = url;
-        this.data = null;           // Mutable state
-        this.error = null;          // Mutable state
-        this.loading = false;       // Mutable state
-        this.fetching = false;      // Mutable state
-        this.cache = new Map();     // Internal mutable state
-        this.observers = [];        // Internal mutable state
-    }
+	constructor(url) {
+		this.url = url;
+		this.data = null; // Mutable state
+		this.error = null; // Mutable state
+		this.loading = false; // Mutable state
+		this.fetching = false; // Mutable state
+		this.cache = new Map(); // Internal mutable state
+		this.observers = []; // Internal mutable state
+	}
 }
 ```
 
@@ -28,18 +28,18 @@ class IbiraAPIFetcher {
 
 ```javascript
 class IbiraAPIFetcher {
-    constructor(url, cache, options = {}) {
-        this.url = url;
-        this.cache = cache;                    // Injected dependency
-        this.eventNotifier = options.eventNotifier; // Injected dependency
-        this.timeout = options.timeout || 10000;
-        this.maxRetries = options.maxRetries || 3;
-        this.retryDelay = options.retryDelay || 1000;
-        this.retryMultiplier = options.retryMultiplier || 2;
-        this.retryableStatusCodes = Object.freeze([408, 429, 500, 502, 503, 504]);
+	constructor(url, cache, options = {}) {
+		this.url = url;
+		this.cache = cache; // Injected dependency
+		this.eventNotifier = options.eventNotifier; // Injected dependency
+		this.timeout = options.timeout || 10000;
+		this.maxRetries = options.maxRetries || 3;
+		this.retryDelay = options.retryDelay || 1000;
+		this.retryMultiplier = options.retryMultiplier || 2;
+		this.retryableStatusCodes = Object.freeze([408, 429, 500, 502, 503, 504]);
 
-        return Object.freeze(this); // Immutable instance
-    }
+		return Object.freeze(this); // Immutable instance
+	}
 }
 ```
 
@@ -316,19 +316,19 @@ static withoutCache(url, options = {}) {
 
 ```javascript
 describe('IbiraAPIFetcher', () => {
-    test('should set loading state', async () => {
-        const fetcher = new IbiraAPIFetcher(testUrl);
+	test('should set loading state', async () => {
+		const fetcher = new IbiraAPIFetcher(testUrl);
 
-        let loadingDuringFetch;
-        fetch.mockImplementation(() => {
-            loadingDuringFetch = fetcher.loading; // Testing mutable state
-            return Promise.resolve(mockResponse);
-        });
+		let loadingDuringFetch;
+		fetch.mockImplementation(() => {
+			loadingDuringFetch = fetcher.loading; // Testing mutable state
+			return Promise.resolve(mockResponse);
+		});
 
-        await fetcher.fetchData();
-        expect(loadingDuringFetch).toBe(true);
-        expect(fetcher.loading).toBe(false);
-    });
+		await fetcher.fetchData();
+		expect(loadingDuringFetch).toBe(true);
+		expect(fetcher.loading).toBe(false);
+	});
 });
 ```
 
@@ -336,25 +336,25 @@ describe('IbiraAPIFetcher', () => {
 
 ```javascript
 describe('IbiraAPIFetcher', () => {
-    test('should return pure operation description', async () => {
-        const result = await fetcher.fetchDataPure(testCache);
+	test('should return pure operation description', async () => {
+		const result = await fetcher.fetchDataPure(testCache);
 
-        // Test pure computation
-        expect(result.success).toBe(true);
-        expect(result.data).toEqual(mockData);
-        expect(Object.isFrozen(result)).toBe(true);
+		// Test pure computation
+		expect(result.success).toBe(true);
+		expect(result.data).toEqual(mockData);
+		expect(Object.isFrozen(result)).toBe(true);
 
-        // Verify no side effects
-        expect(eventNotifier.notifications).toHaveLength(0);
-        expect(cache.has(testUrl)).toBe(false);
-    });
+		// Verify no side effects
+		expect(eventNotifier.notifications).toHaveLength(0);
+		expect(cache.has(testUrl)).toBe(false);
+	});
 
-    test('should be deterministic', async () => {
-        const result1 = await fetcher.fetchDataPure(testCache);
-        const result2 = await fetcher.fetchDataPure(testCache);
+	test('should be deterministic', async () => {
+		const result1 = await fetcher.fetchDataPure(testCache);
+		const result2 = await fetcher.fetchDataPure(testCache);
 
-        expect(result1).toEqual(result2);
-    });
+		expect(result1).toEqual(result2);
+	});
 });
 ```
 
@@ -394,9 +394,9 @@ const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
 const result = await fetcher.fetchDataPure(new Map(), Date.now());
 
 if (result.success) {
-    console.log('Data:', result.data);
-    console.log('Cache operations:', result.cacheOperations);
-    console.log('Events:', result.events);
+	console.log('Data:', result.data);
+	console.log('Cache operations:', result.cacheOperations);
+	console.log('Events:', result.events);
 }
 ```
 
@@ -415,6 +415,6 @@ This transformation demonstrates how legacy object-oriented code can be evolved 
 
 ---
 
-*Migration completed: October 13, 2025*
-*Referential Transparency Score: 10/10*
-*Test Coverage: 40/40 passing tests*
+_Migration completed: October 13, 2025_
+_Referential Transparency Score: 10/10_
+_Test Coverage: 40/40 passing tests_

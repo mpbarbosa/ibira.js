@@ -35,16 +35,16 @@ let cacheState = new Map();
 const result = await fetcher.fetchDataPure(cacheState, Date.now());
 
 if (result.success) {
-    // Update external state based on pure result
-    cacheState = result.newCacheState;
-    console.log('Data:', result.data);
+	// Update external state based on pure result
+	cacheState = result.newCacheState;
+	console.log('Data:', result.data);
 
-    // Handle events externally
-    result.events.forEach(event => {
-        console.log('Event:', event.type, event.payload);
-    });
+	// Handle events externally
+	result.events.forEach((event) => {
+		console.log('Event:', event.type, event.payload);
+	});
 } else {
-    console.error('Error:', result.error);
+	console.error('Error:', result.error);
 }
 ```
 
@@ -65,9 +65,9 @@ const mockNetwork = () => Promise.resolve({ id: 1, name: 'Test' });
 const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
 
 const result = await fetcher.fetchDataPure(
-    new Map(),           // Cache state
-    1697203200000,       // Fixed timestamp
-    mockNetwork          // Mocked network
+	new Map(), // Cache state
+	1697203200000, // Fixed timestamp
+	mockNetwork, // Mocked network
 );
 
 // Test result without any side effects
@@ -85,14 +85,14 @@ const cacheState = new Map();
 
 // Simulate different timestamps
 const timestamps = [
-    1697203200000,  // Now
-    1697203500000,  // 5 minutes later
-    1697203800000   // 10 minutes later
+	1697203200000, // Now
+	1697203500000, // 5 minutes later
+	1697203800000, // 10 minutes later
 ];
 
 for (const timestamp of timestamps) {
-    const result = await fetcher.fetchDataPure(cacheState, timestamp, mockNetwork);
-    console.log(`At ${timestamp}: fromCache=${result.fromCache}`);
+	const result = await fetcher.fetchDataPure(cacheState, timestamp, mockNetwork);
+	console.log(`At ${timestamp}: fromCache=${result.fromCache}`);
 }
 ```
 
@@ -141,9 +141,8 @@ const customCache = new Map();
 const customFetcher = IbiraAPIFetcher.withExternalCache('https://api.example.com', customCache);
 
 // Event callbacks
-const eventFetcher = IbiraAPIFetcher.withEventCallback(
-    'https://api.example.com',
-    (event, data) => console.log(event, data)
+const eventFetcher = IbiraAPIFetcher.withEventCallback('https://api.example.com', (event, data) =>
+	console.log(event, data),
 );
 
 // No events
@@ -199,8 +198,8 @@ let cache = new Map();
 
 const result = await fetcher.fetchDataPure(cache);
 if (result.success) {
-    cache = result.newCacheState;
-    return result.data;
+	cache = result.newCacheState;
+	return result.data;
 }
 ```
 

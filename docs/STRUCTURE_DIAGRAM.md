@@ -263,11 +263,11 @@ Total Source: ~1,382 lines (vs 1,261 lines in monolithic version)
 ```javascript
 // Application Code
 import {
-  IbiraAPIFetcher,        // from core/IbiraAPIFetcher.js
-  IbiraAPIFetchManager,   // from core/IbiraAPIFetchManager.js
-  DefaultCache,           // from utils/DefaultCache.js
-  DefaultEventNotifier,   // from utils/DefaultEventNotifier.js
-  VERSION                 // from config/version.js
+	IbiraAPIFetcher, // from core/IbiraAPIFetcher.js
+	IbiraAPIFetchManager, // from core/IbiraAPIFetchManager.js
+	DefaultCache, // from utils/DefaultCache.js
+	DefaultEventNotifier, // from utils/DefaultEventNotifier.js
+	VERSION, // from config/version.js
 } from 'ibira.js';
 
 // Internal Module Imports

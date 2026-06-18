@@ -95,9 +95,9 @@ export function debounce<TArgs extends unknown[], TReturn>(
 		const callbacks = pending.splice(0);
 		try {
 			const result = await fn(...args);
-			callbacks.forEach(cb => cb.resolve(result as TReturn));
+			callbacks.forEach((cb) => cb.resolve(result as TReturn));
 		} catch (error) {
-			callbacks.forEach(cb => cb.reject(error));
+			callbacks.forEach((cb) => cb.reject(error));
 		}
 	};
 

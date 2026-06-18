@@ -31,7 +31,7 @@ ibira.js is an isomorphic JS/TS library (Node.js ≥18 + browser) with two publi
 
 The core class (`src/core/IbiraAPIFetcher.ts`) uses a deliberate **pure core / side-effects wrapper** split:
 
-- **`fetchDataPure(cacheState, currentTime, networkProvider?, signal?)`** — the pure functional core. It takes the current cache as an immutable snapshot and returns a frozen `FetchResult` describing what *should* happen (data, events list, cache operation list, new cache state). No mutations, no observer calls. Inject a `networkProvider` function to test without real HTTP.
+- **`fetchDataPure(cacheState, currentTime, networkProvider?, signal?)`** — the pure functional core. It takes the current cache as an immutable snapshot and returns a frozen `FetchResult` describing what _should_ happen (data, events list, cache operation list, new cache state). No mutations, no observer calls. Inject a `networkProvider` function to test without real HTTP.
 - **`fetchData(cacheOverride?, signal?)`** — the practical wrapper. Calls `fetchDataPure`, then applies side effects via `_applySideEffects()`: mutates the cache and fires observer events. Also handles the retry loop with exponential backoff.
 
 Instances are `Object.freeze`d on construction — all properties are readonly and immutable.
@@ -40,18 +40,19 @@ Instances are `Object.freeze`d on construction — all properties are readonly a
 
 Rather than using `new` directly, callers use static factories that configure cache and event notifier:
 
-| Factory | Cache | Events |
-|---|---|---|
-| `withDefaultCache(url, opts)` | Internal LRU Map | `DefaultEventNotifier` |
-| `withExternalCache(url, cache, opts)` | Caller-supplied | `DefaultEventNotifier` |
-| `withoutCache(url, opts)` | No-op | `DefaultEventNotifier` |
-| `withEventCallback(url, fn, opts)` | Internal LRU Map | Callback shim |
-| `withoutEvents(url, opts)` | Internal LRU Map | No-op |
-| `pure(url, opts)` | No-op | No-op |
+| Factory                               | Cache            | Events                 |
+| ------------------------------------- | ---------------- | ---------------------- |
+| `withDefaultCache(url, opts)`         | Internal LRU Map | `DefaultEventNotifier` |
+| `withExternalCache(url, cache, opts)` | Caller-supplied  | `DefaultEventNotifier` |
+| `withoutCache(url, opts)`             | No-op            | `DefaultEventNotifier` |
+| `withEventCallback(url, fn, opts)`    | Internal LRU Map | Callback shim          |
+| `withoutEvents(url, opts)`            | Internal LRU Map | No-op                  |
+| `pure(url, opts)`                     | No-op            | No-op                  |
 
 ### `IbiraAPIFetchManager` (`src/core/IbiraAPIFetchManager.ts`)
 
 Coordinates multiple fetchers sharing a single `globalCache`. Key behaviors:
+
 - **Request deduplication**: concurrent calls to the same URL/method reuse the in-flight `Promise` (tracked in `pendingRequests`).
 - **Periodic cleanup**: expired entries pruned via `setInterval`; call `manager.destroy()` to clear the timer.
 - **Per-URL retry override**: `setRetryConfigForUrl()` replaces the frozen fetcher instance rather than mutating it.

@@ -145,12 +145,12 @@ ibira.js is a client-side JavaScript library that operates in browser environmen
 
 ### 3.2 Key Components
 
-| Component | Purpose | Responsibility |
-|-----------|---------|----------------|
-| **IbiraAPIFetcher** | Core fetching logic | API calls, caching, retry, notifications |
-| **IbiraAPIFetchManager** | Multi-fetcher coordination | Deduplication, shared cache, lifecycle |
-| **DefaultCache** | Caching implementation | LRU cache with expiration |
-| **DefaultEventNotifier** | Observer pattern | Event subscription and notification |
+| Component                | Purpose                    | Responsibility                           |
+| ------------------------ | -------------------------- | ---------------------------------------- |
+| **IbiraAPIFetcher**      | Core fetching logic        | API calls, caching, retry, notifications |
+| **IbiraAPIFetchManager** | Multi-fetcher coordination | Deduplication, shared cache, lifecycle   |
+| **DefaultCache**         | Caching implementation     | LRU cache with expiration                |
+| **DefaultEventNotifier** | Observer pattern           | Event subscription and notification      |
 
 ### 3.3 Technology Stack
 
@@ -276,7 +276,7 @@ await fetcher.fetchData(); // From cache
 ```javascript
 // Given a fetcher with 1-second cache expiration
 const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
-  cacheExpiration: 1000
+	cacheExpiration: 1000,
 });
 
 // When data is fetched, then wait 2 seconds, then fetch again
@@ -377,7 +377,7 @@ const f3 = IbiraAPIFetcher.withoutCache(url);
 ```javascript
 // Given a fetcher with retry enabled
 const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
-  maxRetries: 3
+	maxRetries: 3,
 });
 
 // When request fails with 503 (retryable)
@@ -453,9 +453,9 @@ const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
 ```javascript
 // Given an observer
 const observer = {
-  update(event, payload) {
-    console.log(event, payload);
-  }
+	update(event, payload) {
+		console.log(event, payload);
+	},
 };
 
 // When subscribed to fetcher
@@ -485,11 +485,11 @@ await fetcher.fetchData();
 
 **Event Specifications**:
 
-| Event | Payload | When |
-|-------|---------|------|
-| `loading-start` | `{ url, cacheKey }` | Fetch operation begins |
-| `success` | `data` | Data successfully retrieved |
-| `error` | `{ error }` | Fetch operation fails |
+| Event           | Payload             | When                        |
+| --------------- | ------------------- | --------------------------- |
+| `loading-start` | `{ url, cacheKey }` | Fetch operation begins      |
+| `success`       | `data`              | Data successfully retrieved |
+| `error`         | `{ error }`         | Fetch operation fails       |
 
 ---
 
@@ -673,11 +673,7 @@ const fetcher = IbiraAPIFetcher.pure(url);
 const cacheState = new Map();
 const mockNetwork = () => Promise.resolve({ test: 'data' });
 
-const result = await fetcher.fetchDataPure(
-  cacheState,
-  Date.now(),
-  mockNetwork
-);
+const result = await fetcher.fetchDataPure(cacheState, Date.now(), mockNetwork);
 
 // Result describes what should happen
 expect(result.success).toBe(true);
@@ -770,16 +766,16 @@ expect(cacheState.size).toBe(0);
 
 **Configuration Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `timeout` | number | 10000 | Request timeout (ms) |
-| `maxRetries` | number | 3 | Maximum retry attempts |
-| `retryDelay` | number | 1000 | Initial retry delay (ms) |
-| `retryMultiplier` | number | 2 | Backoff multiplier |
-| `retryableStatusCodes` | number[] | [408, 429, 500, 502, 503, 504] | Codes to retry |
-| `maxCacheSize` | number | 100 | Max cache entries |
-| `cacheExpiration` | number | 300000 | Cache TTL (ms) |
-| `eventNotifier` | Object | DefaultEventNotifier | Custom notifier |
+| Option                 | Type     | Default                        | Description              |
+| ---------------------- | -------- | ------------------------------ | ------------------------ |
+| `timeout`              | number   | 10000                          | Request timeout (ms)     |
+| `maxRetries`           | number   | 3                              | Maximum retry attempts   |
+| `retryDelay`           | number   | 1000                           | Initial retry delay (ms) |
+| `retryMultiplier`      | number   | 2                              | Backoff multiplier       |
+| `retryableStatusCodes` | number[] | [408, 429, 500, 502, 503, 504] | Codes to retry           |
+| `maxCacheSize`         | number   | 100                            | Max cache entries        |
+| `cacheExpiration`      | number   | 300000                         | Cache TTL (ms)           |
+| `eventNotifier`        | Object   | DefaultEventNotifier           | Custom notifier          |
 
 ---
 
@@ -792,15 +788,15 @@ expect(cacheState.size).toBe(0);
 
 **Configuration Options**:
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `maxCacheSize` | number | 100 | Global cache size |
-| `cacheExpiration` | number | 300000 | Global cache TTL |
-| `cleanupInterval` | number | 60000 | Cleanup interval |
-| `maxRetries` | number | 3 | Default retries |
-| `retryDelay` | number | 1000 | Default delay |
-| `retryMultiplier` | number | 2 | Default multiplier |
-| `retryableStatusCodes` | number[] | [408, 429, 500, 502, 503, 504] | Default codes |
+| Option                 | Type     | Default                        | Description        |
+| ---------------------- | -------- | ------------------------------ | ------------------ |
+| `maxCacheSize`         | number   | 100                            | Global cache size  |
+| `cacheExpiration`      | number   | 300000                         | Global cache TTL   |
+| `cleanupInterval`      | number   | 60000                          | Cleanup interval   |
+| `maxRetries`           | number   | 3                              | Default retries    |
+| `retryDelay`           | number   | 1000                           | Default delay      |
+| `retryMultiplier`      | number   | 2                              | Default multiplier |
+| `retryableStatusCodes` | number[] | [408, 429, 500, 502, 503, 504] | Default codes      |
 
 ---
 
@@ -1098,9 +1094,7 @@ expect(cacheState.size).toBe(0);
 ```javascript
 import { IbiraAPIFetcher } from 'ibira.js';
 
-const fetcher = IbiraAPIFetcher.withDefaultCache(
-  'https://api.example.com/users'
-);
+const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/users');
 
 const users = await fetcher.fetchData();
 renderUsers(users);
@@ -1136,7 +1130,7 @@ renderUsers(users);
 
 ```javascript
 const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
-  cacheExpiration: 600000 // 10 minutes
+	cacheExpiration: 600000, // 10 minutes
 });
 
 await fetcher.fetchData(); // Network call
@@ -1176,11 +1170,11 @@ await fetcher.fetchData(); // From cache (instant)
 
 ```javascript
 const observer = {
-  update(event, payload) {
-    if (event === 'loading-start') showSpinner();
-    if (event === 'success') renderData(payload);
-    if (event === 'error') showError(payload.error);
-  }
+	update(event, payload) {
+		if (event === 'loading-start') showSpinner();
+		if (event === 'success') renderData(payload);
+		if (event === 'error') showError(payload.error);
+	},
 };
 
 fetcher.subscribe(observer);
@@ -1220,9 +1214,9 @@ await fetcher.fetchData();
 const manager = new IbiraAPIFetchManager();
 
 const results = await manager.fetchMultiple([
-  'https://api.example.com/users',
-  'https://api.example.com/posts',
-  'https://api.example.com/comments'
+	'https://api.example.com/users',
+	'https://api.example.com/posts',
+	'https://api.example.com/comments',
 ]);
 
 const [users, posts, comments] = results;
@@ -1268,15 +1262,15 @@ const [users, posts, comments] = results;
 
 ```javascript
 const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
-  maxRetries: 5,
-  retryDelay: 2000
+	maxRetries: 5,
+	retryDelay: 2000,
 });
 
 try {
-  const data = await fetcher.fetchData();
-  renderData(data);
+	const data = await fetcher.fetchData();
+	renderData(data);
 } catch (error) {
-  showErrorMessage('Unable to load data. Please try again.');
+	showErrorMessage('Unable to load data. Please try again.');
 }
 ```
 
@@ -1313,18 +1307,14 @@ try {
 
 ```javascript
 test('fetchDataPure returns correct result', async () => {
-  const fetcher = IbiraAPIFetcher.pure(url);
-  const mockNetwork = () => Promise.resolve({ test: 'data' });
+	const fetcher = IbiraAPIFetcher.pure(url);
+	const mockNetwork = () => Promise.resolve({ test: 'data' });
 
-  const result = await fetcher.fetchDataPure(
-    new Map(),
-    Date.now(),
-    mockNetwork
-  );
+	const result = await fetcher.fetchDataPure(new Map(), Date.now(), mockNetwork);
 
-  expect(result.success).toBe(true);
-  expect(result.data).toEqual({ test: 'data' });
-  expect(result.cacheOperations).toBeDefined();
+	expect(result.success).toBe(true);
+	expect(result.data).toEqual({ test: 'data' });
+	expect(result.cacheOperations).toBeDefined();
 });
 ```
 
@@ -1612,18 +1602,18 @@ For version 1.0.0 release, the following must be met:
 
 ### 11.2 Current Status (v0.4.20-alpha)
 
-| Category | Status | Notes |
-|----------|--------|-------|
-| **Core Features** | ✅ Complete | All implemented |
-| **Caching** | ✅ Complete | LRU with expiration |
-| **Retry Logic** | ✅ Complete | Exponential backoff |
-| **Observer Pattern** | ✅ Complete | Full implementation |
-| **Manager** | ✅ Complete | Coordination working |
-| **Pure Functions** | ✅ Complete | Referentially transparent |
-| **Error Handling** | ✅ Complete | Comprehensive |
-| **Documentation** | ✅ Complete | 212KB, 100% coverage |
-| **Testing** | ✅ Complete | 75%+ coverage |
-| **TypeScript** | ⏳ Planned | Future enhancement |
+| Category             | Status      | Notes                     |
+| -------------------- | ----------- | ------------------------- |
+| **Core Features**    | ✅ Complete | All implemented           |
+| **Caching**          | ✅ Complete | LRU with expiration       |
+| **Retry Logic**      | ✅ Complete | Exponential backoff       |
+| **Observer Pattern** | ✅ Complete | Full implementation       |
+| **Manager**          | ✅ Complete | Coordination working      |
+| **Pure Functions**   | ✅ Complete | Referentially transparent |
+| **Error Handling**   | ✅ Complete | Comprehensive             |
+| **Documentation**    | ✅ Complete | 212KB, 100% coverage      |
+| **Testing**          | ✅ Complete | 75%+ coverage             |
+| **TypeScript**       | ⏳ Planned  | Future enhancement        |
 
 ---
 
@@ -1677,25 +1667,25 @@ For version 1.0.0 release, the following must be met:
 
 ## Appendix A: Glossary
 
-| Term | Definition |
-|------|------------|
-| **Cache** | Temporary storage for API responses |
-| **LRU** | Least Recently Used - eviction strategy |
-| **Observer** | Object that subscribes to events |
-| **Fetcher** | Instance that manages API requests |
-| **Manager** | Coordinator for multiple fetchers |
-| **Pure Function** | Function without side effects |
-| **Referential Transparency** | Same inputs produce same outputs |
-| **Exponential Backoff** | Increasing delay between retries |
-| **Deduplication** | Preventing duplicate concurrent requests |
+| Term                         | Definition                               |
+| ---------------------------- | ---------------------------------------- |
+| **Cache**                    | Temporary storage for API responses      |
+| **LRU**                      | Least Recently Used - eviction strategy  |
+| **Observer**                 | Object that subscribes to events         |
+| **Fetcher**                  | Instance that manages API requests       |
+| **Manager**                  | Coordinator for multiple fetchers        |
+| **Pure Function**            | Function without side effects            |
+| **Referential Transparency** | Same inputs produce same outputs         |
+| **Exponential Backoff**      | Increasing delay between retries         |
+| **Deduplication**            | Preventing duplicate concurrent requests |
 
 ---
 
 ## Appendix B: Change History
 
-| Version | Date | Changes | Author |
-|---------|------|---------|--------|
-| 1.0.0 | 2025-12-15 | Initial document | GitHub Copilot CLI |
+| Version | Date       | Changes          | Author             |
+| ------- | ---------- | ---------------- | ------------------ |
+| 1.0.0   | 2025-12-15 | Initial document | GitHub Copilot CLI |
 
 ---
 
@@ -1723,10 +1713,10 @@ For version 1.0.0 release, the following must be met:
 > Populated by the `fix-log-issues` skill. Each item was verified against
 > the live codebase before being marked done.
 
-| ID | Source step | Description | File / Path | Priority | Status |
-|----|------------|-------------|-------------|----------|--------|
-| RI-001 | step_09 | js-yaml moderate vulnerability fixed via npm audit fix | package-lock.json | Medium | done |
-| RI-002 | step_13 | 2391 markdown lint violations (markdownlint-cli not available) | docs/ | Low | skipped |
-| RI-003 | step_19 | tsconfig missing noUnusedLocals/noUnusedParameters (exposed dead code) | tsconfig.json | Low | skipped |
-| RI-004 | step_09 | 4 low @tootallnate/once vulnerabilities (require --force breaking change) | package-lock.json | Low | skipped |
-| RI-005 | step_02 | 21 docs files referencing stale version 0.2.1-alpha (current: 0.4.20-alpha) | docs/ | Medium | done |
+| ID     | Source step | Description                                                                 | File / Path       | Priority | Status  |
+| ------ | ----------- | --------------------------------------------------------------------------- | ----------------- | -------- | ------- |
+| RI-001 | step_09     | js-yaml moderate vulnerability fixed via npm audit fix                      | package-lock.json | Medium   | done    |
+| RI-002 | step_13     | 2391 markdown lint violations (markdownlint-cli not available)              | docs/             | Low      | skipped |
+| RI-003 | step_19     | tsconfig missing noUnusedLocals/noUnusedParameters (exposed dead code)      | tsconfig.json     | Low      | skipped |
+| RI-004 | step_09     | 4 low @tootallnate/once vulnerabilities (require --force breaking change)   | package-lock.json | Low      | skipped |
+| RI-005 | step_02     | 21 docs files referencing stale version 0.2.1-alpha (current: 0.4.20-alpha) | docs/             | Medium   | done    |

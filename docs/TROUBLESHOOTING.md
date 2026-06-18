@@ -161,8 +161,8 @@ import { IbiraAPIFetcher } from 'ibira.js';
 ```javascript
 // Use dynamic import
 async function loadFetcher() {
-  const { IbiraAPIFetcher } = await import('ibira.js');
-  return IbiraAPIFetcher;
+	const { IbiraAPIFetcher } = await import('ibira.js');
+	return IbiraAPIFetcher;
 }
 ```
 
@@ -186,9 +186,9 @@ has been blocked by CORS policy
    ```javascript
    // Express.js example
    app.use((req, res, next) => {
-     res.header('Access-Control-Allow-Origin', '*');
-     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-     next();
+   	res.header('Access-Control-Allow-Origin', '*');
+   	res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+   	next();
    });
    ```
 
@@ -225,9 +225,9 @@ AbortError: The operation was aborted
 
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache(),
-     eventNotifier: new DefaultEventNotifier(),
-     timeout: 60000  // 60 seconds
+   	cache: new DefaultCache(),
+   	eventNotifier: new DefaultEventNotifier(),
+   	timeout: 60000, // 60 seconds
    });
    ```
 
@@ -247,10 +247,10 @@ AbortError: The operation was aborted
 
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache(),
-     eventNotifier: new DefaultEventNotifier(),
-     maxRetries: 5,
-     retryDelay: 2000
+   	cache: new DefaultCache(),
+   	eventNotifier: new DefaultEventNotifier(),
+   	maxRetries: 5,
+   	retryDelay: 2000,
    });
    ```
 
@@ -286,9 +286,9 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache(),
-     eventNotifier: new DefaultEventNotifier(),
-     enableCache: true  // ✅ Ensure this is true
+   	cache: new DefaultCache(),
+   	eventNotifier: new DefaultEventNotifier(),
+   	enableCache: true, // ✅ Ensure this is true
    });
    ```
 
@@ -296,10 +296,10 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache({
-       expiration: 600000  // 10 minutes
-     }),
-     eventNotifier: new DefaultEventNotifier()
+   	cache: new DefaultCache({
+   		expiration: 600000, // 10 minutes
+   	}),
+   	eventNotifier: new DefaultEventNotifier(),
    });
    ```
 
@@ -320,10 +320,10 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache({
-       maxSize: 100  // Increase if needed
-     }),
-     eventNotifier: new DefaultEventNotifier()
+   	cache: new DefaultCache({
+   		maxSize: 100, // Increase if needed
+   	}),
+   	eventNotifier: new DefaultEventNotifier(),
    });
    ```
 
@@ -343,10 +343,10 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache({
-       expiration: 60000  // 1 minute
-     }),
-     eventNotifier: new DefaultEventNotifier()
+   	cache: new DefaultCache({
+   		expiration: 60000, // 1 minute
+   	}),
+   	eventNotifier: new DefaultEventNotifier(),
    });
    ```
 
@@ -354,9 +354,9 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache(),
-     eventNotifier: new DefaultEventNotifier(),
-     enableCache: false
+   	cache: new DefaultCache(),
+   	eventNotifier: new DefaultEventNotifier(),
+   	enableCache: false,
    });
    ```
 
@@ -365,7 +365,7 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
    ```javascript
    // After POST/PUT/DELETE operations
    await fetcher.fetchData({ method: 'POST', body: data });
-   fetcher.clearCache();  // Invalidate cache
+   fetcher.clearCache(); // Invalidate cache
    ```
 
 #### Issue: POST/PUT requests being cached
@@ -376,12 +376,12 @@ cause: Error: connect ECONNREFUSED 127.0.0.1:3000
 
 ```javascript
 const writeFetcher = new IbiraAPIFetcher(url, {
-  cache: new DefaultCache(),
-  eventNotifier: new DefaultEventNotifier(),
-  enableCache: false,  // Disable for mutations
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(data)
+	cache: new DefaultCache(),
+	eventNotifier: new DefaultEventNotifier(),
+	enableCache: false, // Disable for mutations
+	method: 'POST',
+	headers: { 'Content-Type': 'application/json' },
+	body: JSON.stringify(data),
 });
 ```
 
@@ -396,10 +396,10 @@ const writeFetcher = new IbiraAPIFetcher(url, {
 ```javascript
 // ✅ Correct
 try {
-    const data = await fetcher.fetchData();
-    console.log(data);
+	const data = await fetcher.fetchData();
+	console.log(data);
 } catch (error) {
-    console.error('Error:', error.message);
+	console.error('Error:', error.message);
 }
 
 // ❌ Incorrect - unhandled rejection
@@ -412,36 +412,36 @@ const data = await fetcher.fetchData();
 
 ```javascript
 try {
-    const data = await fetcher.fetchData();
+	const data = await fetcher.fetchData();
 } catch (error) {
-    // Network errors
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        console.error('Network error - check connection');
-    }
+	// Network errors
+	if (error.name === 'TypeError' && error.message.includes('fetch')) {
+		console.error('Network error - check connection');
+	}
 
-    // HTTP errors
-    else if (error.message.includes('HTTP error! status:')) {
-        const match = error.message.match(/status: (\d+)/);
-        const status = match ? parseInt(match[1]) : 0;
+	// HTTP errors
+	else if (error.message.includes('HTTP error! status:')) {
+		const match = error.message.match(/status: (\d+)/);
+		const status = match ? parseInt(match[1]) : 0;
 
-        if (status === 401) {
-            console.error('Unauthorized - refresh token');
-        } else if (status === 404) {
-            console.error('Not found');
-        } else if (status >= 500) {
-            console.error('Server error - retry later');
-        }
-    }
+		if (status === 401) {
+			console.error('Unauthorized - refresh token');
+		} else if (status === 404) {
+			console.error('Not found');
+		} else if (status >= 500) {
+			console.error('Server error - retry later');
+		}
+	}
 
-    // Timeout errors
-    else if (error.name === 'AbortError') {
-        console.error('Request timeout - try increasing timeout');
-    }
+	// Timeout errors
+	else if (error.name === 'AbortError') {
+		console.error('Request timeout - try increasing timeout');
+	}
 
-    // Unknown errors
-    else {
-        console.error('Unknown error:', error);
-    }
+	// Unknown errors
+	else {
+		console.error('Unknown error:', error);
+	}
 }
 ```
 
@@ -457,9 +457,9 @@ try {
 
    ```javascript
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache(),
-     eventNotifier: new DefaultEventNotifier(),
-     timeout: 60000
+   	cache: new DefaultCache(),
+   	eventNotifier: new DefaultEventNotifier(),
+   	timeout: 60000,
    });
    ```
 
@@ -477,8 +477,8 @@ try {
 
    ```javascript
    const cache = new DefaultCache({
-     maxSize: 20,  // Lower limit
-     expiration: 180000  // 3 minutes
+   	maxSize: 20, // Lower limit
+   	expiration: 180000, // 3 minutes
    });
    ```
 
@@ -486,8 +486,8 @@ try {
 
    ```javascript
    setInterval(() => {
-     fetcher.clearCache();
-   }, 600000);  // Every 10 minutes
+   	fetcher.clearCache();
+   }, 600000); // Every 10 minutes
    ```
 
 3. **Use shared cache for multiple fetchers:**
@@ -525,12 +525,12 @@ const results = await manager.fetchAll();
 
    ```javascript
    const observer = {
-     update(event, data) {
-       console.log(event, data);
-     }
+   	update(event, data) {
+   		console.log(event, data);
+   	},
    };
 
-   eventNotifier.subscribe(observer);  // ✅ Don't forget this
+   eventNotifier.subscribe(observer); // ✅ Don't forget this
    ```
 
 2. **Check observer has update method:**
@@ -538,16 +538,16 @@ const results = await manager.fetchAll();
    ```javascript
    // ✅ Correct
    const observer = {
-     update(event, data) {
-       console.log(event, data);
-     }
+   	update(event, data) {
+   		console.log(event, data);
+   	},
    };
 
    // ❌ Incorrect - typo in method name
    const observer = {
-     updated(event, data) {
-       console.log(event, data);
-     }
+   	updated(event, data) {
+   		console.log(event, data);
+   	},
    };
    ```
 
@@ -559,8 +559,8 @@ const results = await manager.fetchAll();
 
    // ✅ Pass eventNotifier to fetcher
    const fetcher = new IbiraAPIFetcher(url, {
-     cache: new DefaultCache(),
-     eventNotifier: eventNotifier
+   	cache: new DefaultCache(),
+   	eventNotifier: eventNotifier,
    });
    ```
 
@@ -588,14 +588,14 @@ eventNotifier.clear();
 ```javascript
 // ❌ Incorrect - passing config to wrong method
 const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
-  maxRetries: 5  // This is ignored
+	maxRetries: 5, // This is ignored
 });
 
 // ✅ Correct - use full constructor
 const fetcher = new IbiraAPIFetcher(url, {
-  cache: new DefaultCache(),
-  eventNotifier: new DefaultEventNotifier(),
-  maxRetries: 5
+	cache: new DefaultCache(),
+	eventNotifier: new DefaultEventNotifier(),
+	maxRetries: 5,
 });
 ```
 
@@ -606,21 +606,21 @@ const fetcher = new IbiraAPIFetcher(url, {
 ```javascript
 // ✅ Correct
 const fetcher = new IbiraAPIFetcher(url, {
-  cache: new DefaultCache(),
-  eventNotifier: new DefaultEventNotifier(),
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer token123'
-  }
+	cache: new DefaultCache(),
+	eventNotifier: new DefaultEventNotifier(),
+	headers: {
+		'Content-Type': 'application/json',
+		Authorization: 'Bearer token123',
+	},
 });
 
 // ❌ Incorrect - headers should be object, not Headers instance
 const headers = new Headers();
 headers.append('Content-Type', 'application/json');
 const fetcher = new IbiraAPIFetcher(url, {
-  cache: new DefaultCache(),
-  eventNotifier: new DefaultEventNotifier(),
-  headers: headers  // May not work as expected
+	cache: new DefaultCache(),
+	eventNotifier: new DefaultEventNotifier(),
+	headers: headers, // May not work as expected
 });
 ```
 
@@ -637,17 +637,17 @@ const eventNotifier = new DefaultEventNotifier();
 
 // Debug observer
 const debugObserver = {
-  update(event, data) {
-    const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] EVENT:`, event, data);
-  }
+	update(event, data) {
+		const timestamp = new Date().toISOString();
+		console.log(`[${timestamp}] EVENT:`, event, data);
+	},
 };
 
 eventNotifier.subscribe(debugObserver);
 
 const fetcher = new IbiraAPIFetcher(url, {
-  cache: new DefaultCache(),
-  eventNotifier
+	cache: new DefaultCache(),
+	eventNotifier,
 });
 ```
 
@@ -656,8 +656,8 @@ const fetcher = new IbiraAPIFetcher(url, {
 ```javascript
 const cache = new DefaultCache();
 const fetcher = new IbiraAPIFetcher(url, {
-  cache,
-  eventNotifier: new DefaultEventNotifier()
+	cache,
+	eventNotifier: new DefaultEventNotifier(),
 });
 
 await fetcher.fetchData();
@@ -694,7 +694,7 @@ curl -X POST -H "Content-Type: application/json" \
 ```javascript
 // Add this at the top of your file
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+	console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 // Enable fetch debugging (with node-fetch)

@@ -584,15 +584,15 @@ jobs:
         node-version: [16.x, 18.x, 20.x]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run validate
-    - run: npm test
-    - run: npm run test:coverage
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run validate
+      - run: npm test
+      - run: npm run test:coverage
 ```
 
 #### GitLab CI
@@ -660,34 +660,34 @@ test:
 
 ### All Scripts Summary
 
-| Script | Type | Purpose | Executable | When to Use |
-|--------|------|---------|------------|-------------|
-| `npm test` | NPM | Run all tests | N/A | Pre-commit, CI/CD |
-| `npm run test:watch` | NPM | Watch mode | N/A | Development |
-| `npm run test:coverage` | NPM | Coverage report | N/A | Code review |
-| `npm run test:verbose` | NPM | Detailed output | N/A | Debugging |
-| `npm run validate` | NPM | Syntax check | N/A | Quick validation |
-| `npm run test:all` | NPM | Validate + test | N/A | Pre-commit |
-| `./test-runner.js` | Utility | Show test info | ✅ Yes | Information |
-| `./test_pure_fetcher.js` | Utility | RT demo | ✅ Yes | Verification |
-| `./cdn-delivery.sh` | Shell | CDN URLs | ✅ Yes | Release prep |
+| Script                   | Type    | Purpose         | Executable | When to Use       |
+| ------------------------ | ------- | --------------- | ---------- | ----------------- |
+| `npm test`               | NPM     | Run all tests   | N/A        | Pre-commit, CI/CD |
+| `npm run test:watch`     | NPM     | Watch mode      | N/A        | Development       |
+| `npm run test:coverage`  | NPM     | Coverage report | N/A        | Code review       |
+| `npm run test:verbose`   | NPM     | Detailed output | N/A        | Debugging         |
+| `npm run validate`       | NPM     | Syntax check    | N/A        | Quick validation  |
+| `npm run test:all`       | NPM     | Validate + test | N/A        | Pre-commit        |
+| `./test-runner.js`       | Utility | Show test info  | ✅ Yes     | Information       |
+| `./test_pure_fetcher.js` | Utility | RT demo         | ✅ Yes     | Verification      |
+| `./cdn-delivery.sh`      | Shell   | CDN URLs        | ✅ Yes     | Release prep      |
 
 ### Exit Codes
 
-| Exit Code | Meaning | Action |
-|-----------|---------|--------|
-| 0 | Success | Continue workflow |
-| 1 | Failure | Fix errors before proceeding |
+| Exit Code | Meaning | Action                       |
+| --------- | ------- | ---------------------------- |
+| 0         | Success | Continue workflow            |
+| 1         | Failure | Fix errors before proceeding |
 
 ### File Locations
 
-| File | Location | Purpose |
-|------|----------|---------|
-| NPM scripts | `package.json` | Script definitions |
-| Test files | `__tests__/` | Test suites |
-| Coverage | `coverage/` | Coverage reports |
-| Utility scripts | Repository root | Helper scripts |
-| CDN URLs | `cdn-urls.txt` | Generated CDN URLs |
+| File            | Location        | Purpose            |
+| --------------- | --------------- | ------------------ |
+| NPM scripts     | `package.json`  | Script definitions |
+| Test files      | `__tests__/`    | Test suites        |
+| Coverage        | `coverage/`     | Coverage reports   |
+| Utility scripts | Repository root | Helper scripts     |
+| CDN URLs        | `cdn-urls.txt`  | Generated CDN URLs |
 
 ---
 

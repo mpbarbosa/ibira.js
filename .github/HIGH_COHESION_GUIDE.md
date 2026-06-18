@@ -620,26 +620,26 @@ High cohesion makes testing easier:
 ```javascript
 // ✅ High cohesion = Easy to test
 describe('IbiraAPIFetcher', () => {
-  test('fetches data from API endpoint', async () => {
-    const fetcher = new IbiraAPIFetcher('https://api.example.com/data');
-    await fetcher.fetchData();
-    expect(fetcher.data).toBeDefined();
-  });
+	test('fetches data from API endpoint', async () => {
+		const fetcher = new IbiraAPIFetcher('https://api.example.com/data');
+		await fetcher.fetchData();
+		expect(fetcher.data).toBeDefined();
+	});
 
-  // All tests focus on fetching - one responsibility
+	// All tests focus on fetching - one responsibility
 });
 
 describe('IbiraAPIFetchManager', () => {
-  test('prevents duplicate concurrent requests', async () => {
-    const manager = new IbiraAPIFetchManager();
-    const url = 'https://api.example.com/data';
-    const promise1 = manager.fetch(url);
-    const promise2 = manager.fetch(url);
-    // Verify both resolve to same promise
-    expect(promise1).toBe(promise2);
-  });
+	test('prevents duplicate concurrent requests', async () => {
+		const manager = new IbiraAPIFetchManager();
+		const url = 'https://api.example.com/data';
+		const promise1 = manager.fetch(url);
+		const promise2 = manager.fetch(url);
+		// Verify both resolve to same promise
+		expect(promise1).toBe(promise2);
+	});
 
-  // All tests focus on coordination - different responsibility
+	// All tests focus on coordination - different responsibility
 });
 ```
 
@@ -662,7 +662,7 @@ describe('IbiraAPIFetchManager', () => {
 
 ### External Resources
 
-- [Cohesion (computer science) - Wikipedia](https://en.wikipedia.org/wiki/Cohesion_(computer_science))
+- [Cohesion (computer science) - Wikipedia](<https://en.wikipedia.org/wiki/Cohesion_(computer_science)>)
 - [Single Responsibility Principle](https://en.wikipedia.org/wiki/Single-responsibility_principle)
 - [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
 - [Separation of Concerns](https://en.wikipedia.org/wiki/Separation_of_concerns)

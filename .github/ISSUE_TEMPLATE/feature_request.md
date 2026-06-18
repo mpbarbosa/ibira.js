@@ -1,10 +1,9 @@
 ---
 name: Feature Request
 about: Propose a new feature or enhancement for this project
-title: "[Feature] "
+title: '[Feature] '
 labels: enhancement, triage
 assignees: ''
-
 ---
 
 ## Feature Summary

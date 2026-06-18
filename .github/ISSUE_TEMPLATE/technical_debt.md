@@ -1,10 +1,9 @@
 ---
 name: Technical Debt
 about: Report technical debt issues that need to be addressed to improve code quality, maintainability, or performance
-title: "[Tech Debt] "
+title: '[Tech Debt] '
 labels: technical-debt, maintenance, triage
 assignees: ''
-
 ---
 
 ## Technical Debt Summary

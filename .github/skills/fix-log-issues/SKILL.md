@@ -43,7 +43,7 @@ The file is written by `validate-logs`. Each issue block looks like:
 ### RI-NNN — <short title>
 
 - **ID:** RI-NNN
-- **Source step:** step_<id>
+- **Source step:** step\_<id>
 - **Type:** <issue type>
 - **Priority:** <Medium | Low>
 - **Path:** <file or directory path>
@@ -187,9 +187,9 @@ the results to `$project_root/ROADMAP.md` under a
 > Populated by the `fix-log-issues` skill. Each item was verified against
 > the live codebase before being marked done.
 
-| ID | Source step | Description | File / Path | Priority | Status |
-|----|------------|-------------|-------------|----------|--------|
-| RI-001 | step_05 | Undocumented dir docs/api/assets | docs/api/README.md | Medium | done |
+| ID     | Source step | Description                      | File / Path        | Priority | Status |
+| ------ | ----------- | -------------------------------- | ------------------ | -------- | ------ |
+| RI-001 | step_05     | Undocumented dir docs/api/assets | docs/api/README.md | Medium   | done   |
 ```
 
 - Continue the ID sequence from the highest existing ID in the table.

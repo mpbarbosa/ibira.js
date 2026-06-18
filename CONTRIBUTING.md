@@ -18,8 +18,7 @@ npm run test:coverage  # coverage report
 - **TypeScript strict mode** — all source files use `.ts` with strict typing and ES2022 target.
 - **ES Modules** — use `import`/`export` syntax.
 - **No var** — use `const` or `let`.
-- **Semicolons** — always.
-- **Tabs** — for indentation (not spaces).
+- **Formatting** — enforced by [Prettier](https://prettier.io/). Run `npm run format` to auto-format, or `npm run format:check` to verify without writing. Config is in `.prettierrc` (tabs, semicolons, single quotes, 100-char print width). ESLint and Prettier do not conflict — `eslint-config-prettier` disables any overlapping rules.
 - **Curly braces** — required on all `if`/`else`/`for` blocks (ESLint enforces this).
 - **Immutability** — all class instances are frozen with `Object.freeze(this)`. Never mutate instance state; return new values instead.
 - **Referential transparency** — core logic should be implemented as pure functions; avoid side effects in business logic. See [Referential Transparency Guide](.github/REFERENTIAL_TRANSPARENCY.md).
@@ -46,10 +45,11 @@ See [`__tests__/README.md`](./__tests__/README.md) for full testing conventions.
 
 1. Fork the repository and create a feature branch.
 2. Make your changes, add tests, and confirm all tests pass.
-3. Run `npm run lint` — fix any reported errors before submitting.
-4. Run `npm run build` to verify TypeScript and dual CJS/ESM outputs.
-5. Run `npm audit` — resolve any high-severity findings before opening a PR.
-6. Open a pull request against `main` with a clear description of what changed and why.
+3. Run `npm run format` — auto-format all files. Alternatively, `npm run format:check` will report unformatted files without changing them.
+4. Run `npm run lint` — fix any reported errors before submitting.
+5. Run `npm run build` to verify TypeScript and dual CJS/ESM outputs.
+6. Run `npm audit` — resolve any high-severity findings before opening a PR.
+7. Open a pull request against `main` with a clear description of what changed and why.
 
 ## Architecture Overview
 

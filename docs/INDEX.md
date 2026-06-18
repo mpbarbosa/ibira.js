@@ -73,13 +73,13 @@
 
 ### Quick Navigation
 
-| Priority | Document | Achievement Aspect |
-|----------|----------|-------------------|
-| 🥇 **Essential** | [referential_transparency/REFERENTIAL_TRANSPARENCY.md](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) | **10/10 Score breakdown** |
-| 🥈 **Architecture** | [ARCHITECTURE.md](./ARCHITECTURE.md) | Dual-layer design explanation |
-| 🥉 **Implementation** | [IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md) | Complete API with usage examples |
-| 🏅 **Verification** | [referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md) | Formal mathematical proof |
-| 📈 **Process** | [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) | Transformation journey |
+| Priority              | Document                                                                                                       | Achievement Aspect               |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 🥇 **Essential**      | [referential_transparency/REFERENTIAL_TRANSPARENCY.md](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) | **10/10 Score breakdown**        |
+| 🥈 **Architecture**   | [ARCHITECTURE.md](./ARCHITECTURE.md)                                                                           | Dual-layer design explanation    |
+| 🥉 **Implementation** | [IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md)                                                                 | Complete API with usage examples |
+| 🏅 **Verification**   | [referential_transparency/VERIFICATION_REPORT.md](./referential_transparency/VERIFICATION_REPORT.md)           | Formal mathematical proof        |
+| 📈 **Process**        | [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)                                                                     | Transformation journey           |
 
 ### Repository Structure
 
@@ -140,10 +140,10 @@ ibira.js/
 
 ### Source Files
 
-| File | Description | Status |
-|------|-------------|--------|
-| [`src/core/IbiraAPIFetcher.ts`](../src/core/IbiraAPIFetcher.ts) | **Referentially transparent** library with dual-layer architecture | 🏆 **Perfect (10/10)** |
-| [`__tests__/IbiraAPIFetcher.test.js`](../__tests__/IbiraAPIFetcher.test.js) | Comprehensive test suite | ✅ **172/172 Passing** |
+| File                                                                        | Description                                                        | Status                 |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------- |
+| [`src/core/IbiraAPIFetcher.ts`](../src/core/IbiraAPIFetcher.ts)             | **Referentially transparent** library with dual-layer architecture | 🏆 **Perfect (10/10)** |
+| [`__tests__/IbiraAPIFetcher.test.js`](../__tests__/IbiraAPIFetcher.test.js) | Comprehensive test suite                                           | ✅ **172/172 Passing** |
 
 ### Main Classes
 
@@ -190,23 +190,23 @@ The ibira.js project has achieved **perfect referential transparency (10/10)** t
 
 ### 🏆 Referential Transparency Documentation
 
-| Document | Purpose | Achievement |
-|----------|---------|-------------|
-| [**referential_transparency/**](./referential_transparency/) | 🏆 **Achievement documentation directory** | **Complete 10/10 achievement documentation** |
-| ├── [**REFERENTIAL_TRANSPARENCY.md**](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) | Main achievement documentation | **10/10 Perfect Score** - Complete breakdown |
-| ├── [**PURE_SOLUTION.md**](./referential_transparency/PURE_SOLUTION.md) | Pure functional solution details | Implementation and design patterns |
-| └── [**VERIFICATION_REPORT.md**](./referential_transparency/VERIFICATION_REPORT.md) | Formal verification results | Mathematical proof, test results (40/40) |
-| [**ARCHITECTURE.md**](./ARCHITECTURE.md) | Dual-layer system design | Pure functional core + practical wrapper |
-| [**MIGRATION_GUIDE.md**](./MIGRATION_GUIDE.md) | Transformation process | Before/after comparison, step-by-step process |
-| [**IBIRA_API_FETCHER.md**](./IBIRA_API_FETCHER.md) | Complete class documentation | All methods, properties, usage examples |
+| Document                                                                                      | Purpose                                    | Achievement                                   |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------- |
+| [**referential_transparency/**](./referential_transparency/)                                  | 🏆 **Achievement documentation directory** | **Complete 10/10 achievement documentation**  |
+| ├── [**REFERENTIAL_TRANSPARENCY.md**](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) | Main achievement documentation             | **10/10 Perfect Score** - Complete breakdown  |
+| ├── [**PURE_SOLUTION.md**](./referential_transparency/PURE_SOLUTION.md)                       | Pure functional solution details           | Implementation and design patterns            |
+| └── [**VERIFICATION_REPORT.md**](./referential_transparency/VERIFICATION_REPORT.md)           | Formal verification results                | Mathematical proof, test results (40/40)      |
+| [**ARCHITECTURE.md**](./ARCHITECTURE.md)                                                      | Dual-layer system design                   | Pure functional core + practical wrapper      |
+| [**MIGRATION_GUIDE.md**](./MIGRATION_GUIDE.md)                                                | Transformation process                     | Before/after comparison, step-by-step process |
+| [**IBIRA_API_FETCHER.md**](./IBIRA_API_FETCHER.md)                                            | Complete class documentation               | All methods, properties, usage examples       |
 
 ### 🎯 Historical Design Documents
 
-| Document | Purpose | Status |
-|----------|---------|---------|
-| [**High Cohesion Guide**](../.github/HIGH_COHESION_GUIDE.md) | Single-responsibility principles | ✅ Applied in transformation |
-| [**Low Coupling Guide**](../.github/LOW_COUPLING_GUIDE.md) | Dependency minimization | ✅ Achieved via injection |
-| [**JavaScript Best Practices**](../.github/JAVASCRIPT_BEST_PRACTICES.md) | Coding standards | ✅ Pure functional patterns |
+| Document                                                                 | Purpose                          | Status                       |
+| ------------------------------------------------------------------------ | -------------------------------- | ---------------------------- |
+| [**High Cohesion Guide**](../.github/HIGH_COHESION_GUIDE.md)             | Single-responsibility principles | ✅ Applied in transformation |
+| [**Low Coupling Guide**](../.github/LOW_COUPLING_GUIDE.md)               | Dependency minimization          | ✅ Achieved via injection    |
+| [**JavaScript Best Practices**](../.github/JAVASCRIPT_BEST_PRACTICES.md) | Coding standards                 | ✅ Pure functional patterns  |
 
 ### 🏆 Achievement Summary
 
@@ -235,10 +235,10 @@ Comprehensive guides for writing high-quality JavaScript code aligned with proje
 
 ### Best Practices
 
-| Guide | Description | When to Use |
-|-------|-------------|-------------|
-| [**JavaScript Best Practices**](../.github/JAVASCRIPT_BEST_PRACTICES.md) | Comprehensive JavaScript coding standards | All development work - reference for code style, patterns, and conventions |
-| [**Code Review Guide**](../.github/CODE_REVIEW_GUIDE.md) | Checklist for reviewing code contributions | When reviewing pull requests or performing code audits |
+| Guide                                                                    | Description                                | When to Use                                                                |
+| ------------------------------------------------------------------------ | ------------------------------------------ | -------------------------------------------------------------------------- |
+| [**JavaScript Best Practices**](../.github/JAVASCRIPT_BEST_PRACTICES.md) | Comprehensive JavaScript coding standards  | All development work - reference for code style, patterns, and conventions |
+| [**Code Review Guide**](../.github/CODE_REVIEW_GUIDE.md)                 | Checklist for reviewing code contributions | When reviewing pull requests or performing code audits                     |
 
 ### Key Topics Covered
 
@@ -269,17 +269,17 @@ The project emphasizes test-driven development and comprehensive unit testing wi
 
 ### Testing Documentation
 
-| Guide | Description | Coverage |
-|-------|-------------|----------|
-| [**TESTING_WORKFLOW.md**](./TESTING_WORKFLOW.md) | Complete testing workflow guide | Automated & manual testing, CI/CD, workflows |
-| [**SCRIPTS_REFERENCE.md**](./SCRIPTS_REFERENCE.md) | Centralized scripts reference | All NPM scripts, utility scripts, shell scripts |
-| [**TEST_RESULTS.md**](./TEST_RESULTS.md) | Current test results and statistics | 152 tests, 90%+ coverage across all metrics |
-| [**UTILITY_SCRIPTS.md**](./UTILITY_SCRIPTS.md) | Test utility scripts documentation | test-runner.js, test_pure_fetcher.js, troubleshooting |
-| [**TROUBLESHOOTING.md**](./TROUBLESHOOTING.md) | Common issues and solutions | Installation, network, caching, errors, performance |
-| [**FAQ.md**](./FAQ.md) | Frequently asked questions | 50+ Q&A covering all aspects of the library |
-| [**TDD Guide**](../.github/TDD_GUIDE.md) | Test-driven development methodology | Red-Green-Refactor cycle, TDD workflow, integration with CI/CD |
+| Guide                                                | Description                          | Coverage                                                          |
+| ---------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------- |
+| [**TESTING_WORKFLOW.md**](./TESTING_WORKFLOW.md)     | Complete testing workflow guide      | Automated & manual testing, CI/CD, workflows                      |
+| [**SCRIPTS_REFERENCE.md**](./SCRIPTS_REFERENCE.md)   | Centralized scripts reference        | All NPM scripts, utility scripts, shell scripts                   |
+| [**TEST_RESULTS.md**](./TEST_RESULTS.md)             | Current test results and statistics  | 152 tests, 90%+ coverage across all metrics                       |
+| [**UTILITY_SCRIPTS.md**](./UTILITY_SCRIPTS.md)       | Test utility scripts documentation   | test-runner.js, test_pure_fetcher.js, troubleshooting             |
+| [**TROUBLESHOOTING.md**](./TROUBLESHOOTING.md)       | Common issues and solutions          | Installation, network, caching, errors, performance               |
+| [**FAQ.md**](./FAQ.md)                               | Frequently asked questions           | 50+ Q&A covering all aspects of the library                       |
+| [**TDD Guide**](../.github/TDD_GUIDE.md)             | Test-driven development methodology  | Red-Green-Refactor cycle, TDD workflow, integration with CI/CD    |
 | [**Unit Test Guide**](../.github/UNIT_TEST_GUIDE.md) | Comprehensive unit testing practices | Writing effective tests, mocking, async testing, Jest integration |
-| [**QUICK_REFERENCE.md**](./QUICK_REFERENCE.md) | NPM scripts quick reference | Test commands table and workflow examples |
+| [**QUICK_REFERENCE.md**](./QUICK_REFERENCE.md)       | NPM scripts quick reference          | Test commands table and workflow examples                         |
 
 ### Test Suite Overview
 
@@ -301,21 +301,21 @@ The project emphasizes test-driven development and comprehensive unit testing wi
 
 ### NPM Test Commands
 
-| Command | Purpose | When to Use |
-|---------|---------|-------------|
-| `npm test` | Run all tests | Standard test execution, pre-commit |
-| `npm run test:watch` | Watch mode | During active development |
-| `npm run test:coverage` | Generate coverage | Pre-commit, code review |
-| `npm run test:verbose` | Detailed output | Debugging test failures |
-| `npm run validate` | Syntax check only | Quick validation without tests |
-| `npm run test:all` | Validate + test | Pre-commit workflow, CI/CD |
+| Command                 | Purpose           | When to Use                         |
+| ----------------------- | ----------------- | ----------------------------------- |
+| `npm test`              | Run all tests     | Standard test execution, pre-commit |
+| `npm run test:watch`    | Watch mode        | During active development           |
+| `npm run test:coverage` | Generate coverage | Pre-commit, code review             |
+| `npm run test:verbose`  | Detailed output   | Debugging test failures             |
+| `npm run validate`      | Syntax check only | Quick validation without tests      |
+| `npm run test:all`      | Validate + test   | Pre-commit workflow, CI/CD          |
 
 ### Utility Test Scripts
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `./test-runner.js` | Display test information | Show commands, structure, coverage info |
-| `./test_pure_fetcher.js` | RT demonstration | Prove 10/10 referential transparency |
+| Script                   | Purpose                  | Usage                                   |
+| ------------------------ | ------------------------ | --------------------------------------- |
+| `./test-runner.js`       | Display test information | Show commands, structure, coverage info |
+| `./test_pure_fetcher.js` | RT demonstration         | Prove 10/10 referential transparency    |
 
 See [TESTING_WORKFLOW.md](./TESTING_WORKFLOW.md) for complete workflows and [UTILITY_SCRIPTS.md](./UTILITY_SCRIPTS.md) for detailed script documentation.
 
@@ -339,10 +339,10 @@ See [TESTING_WORKFLOW.md](./TESTING_WORKFLOW.md) for complete workflows and [UTI
 
 ### CDN Generation Scripts
 
-| File | Purpose | Usage |
-|------|---------|-------|
-| `cdn-delivery.sh` | Generates jsDelivr CDN URLs for various delivery options | Run `./cdn-delivery.sh` to see all available CDN URLs |
-| `cdn-urls.txt` | Pre-generated CDN URLs for quick reference | Contains production, development, and version-range URLs |
+| File              | Purpose                                                  | Usage                                                    |
+| ----------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| `cdn-delivery.sh` | Generates jsDelivr CDN URLs for various delivery options | Run `./cdn-delivery.sh` to see all available CDN URLs    |
+| `cdn-urls.txt`    | Pre-generated CDN URLs for quick reference               | Contains production, development, and version-range URLs |
 
 **CDN Features:**
 
@@ -357,10 +357,10 @@ See [TESTING_WORKFLOW.md](./TESTING_WORKFLOW.md) for complete workflows and [UTI
 
 ### Repository Configuration
 
-| File | Purpose | Notes |
-|------|---------|-------|
-| `.gitignore` | Specifies files to exclude from Git | Currently ignores `.vscode/` directory |
-| `babel.config.mjs` | Babel transpilation configuration | ES module support for Jest tests |
+| File               | Purpose                             | Notes                                  |
+| ------------------ | ----------------------------------- | -------------------------------------- |
+| `.gitignore`       | Specifies files to exclude from Git | Currently ignores `.vscode/` directory |
+| `babel.config.mjs` | Babel transpilation configuration   | ES module support for Jest tests       |
 
 ### Future Configuration
 
@@ -455,19 +455,19 @@ Maintain high standards through code review and best practices. See [Code Review
 
 ### Quick Reference
 
-| Need | See |
-|------|-----|
+| Need                                 | See                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------ |
 | **Perfect referential transparency** | [**Main Achievement**](./referential_transparency/REFERENTIAL_TRANSPARENCY.md) |
-| **Complete class documentation** | [**IbiraAPIFetcher Class**](./IBIRA_API_FETCHER.md) |
-| **System architecture** | [**Architecture Guide**](./ARCHITECTURE.md) |
-| **Formal verification** | [**Verification Report**](./referential_transparency/VERIFICATION_REPORT.md) |
-| **Pure functional solution** | [**Pure Solution**](./referential_transparency/PURE_SOLUTION.md) |
-| How to structure modules | [High Cohesion Guide](../.github/HIGH_COHESION_GUIDE.md) |
-| How to reduce dependencies | [Low Coupling Guide](../.github/LOW_COUPLING_GUIDE.md) |
-| JavaScript coding standards | [JavaScript Best Practices](../.github/JAVASCRIPT_BEST_PRACTICES.md) |
-| How to review code | [Code Review Guide](../.github/CODE_REVIEW_GUIDE.md) |
-| Test-first development | [TDD Guide](../.github/TDD_GUIDE.md) |
-| Writing effective tests | [Unit Test Guide](../.github/UNIT_TEST_GUIDE.md) |
+| **Complete class documentation**     | [**IbiraAPIFetcher Class**](./IBIRA_API_FETCHER.md)                            |
+| **System architecture**              | [**Architecture Guide**](./ARCHITECTURE.md)                                    |
+| **Formal verification**              | [**Verification Report**](./referential_transparency/VERIFICATION_REPORT.md)   |
+| **Pure functional solution**         | [**Pure Solution**](./referential_transparency/PURE_SOLUTION.md)               |
+| How to structure modules             | [High Cohesion Guide](../.github/HIGH_COHESION_GUIDE.md)                       |
+| How to reduce dependencies           | [Low Coupling Guide](../.github/LOW_COUPLING_GUIDE.md)                         |
+| JavaScript coding standards          | [JavaScript Best Practices](../.github/JAVASCRIPT_BEST_PRACTICES.md)           |
+| How to review code                   | [Code Review Guide](../.github/CODE_REVIEW_GUIDE.md)                           |
+| Test-first development               | [TDD Guide](../.github/TDD_GUIDE.md)                                           |
+| Writing effective tests              | [Unit Test Guide](../.github/UNIT_TEST_GUIDE.md)                               |
 
 ### External Resources
 
@@ -496,11 +496,11 @@ The project is in active early development. Current focus areas:
 
 ### Version History
 
-| Version | Release Date | Status | Key Features |
-|---------|--------------|--------|--------------|
-| 0.2.1-alpha | 2025-12-15 | Latest | CDN delivery support, documentation updates |
-| 0.2.0-alpha | 2025-12-15 | Superseded | Modular architecture, 90%+ test coverage |
-| 0.1.0-alpha | 2025-12-14 | Superseded | Initial release, referential transparency |
+| Version     | Release Date | Status     | Key Features                                |
+| ----------- | ------------ | ---------- | ------------------------------------------- |
+| 0.2.1-alpha | 2025-12-15   | Latest     | CDN delivery support, documentation updates |
+| 0.2.0-alpha | 2025-12-15   | Superseded | Modular architecture, 90%+ test coverage    |
+| 0.1.0-alpha | 2025-12-14   | Superseded | Initial release, referential transparency   |
 
 ---
 
@@ -616,18 +616,18 @@ This index should be updated whenever:
 
 ## 🔍 Find by Topic
 
-| Topic | Documents |
-|-------|-----------|
-| Installation & Setup | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §7.1 |
-| API Usage | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md), [IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §6 |
-| Architecture | [ARCHITECTURE.md](./ARCHITECTURE.md), [STRUCTURE_DIAGRAM.md](./STRUCTURE_DIAGRAM.md), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §2 |
-| Design Patterns | [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §5, [ARCHITECTURE.md](./ARCHITECTURE.md) |
-| Testing | [TEST_RESULTS.md](./TEST_RESULTS.md), [TESTING_WORKFLOW.md](./TESTING_WORKFLOW.md), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §10 |
-| Contributing | [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §9, [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) |
-| Best Practices | [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §8, [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) |
-| Functional Programming | [referential_transparency/](./referential_transparency/), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §5.5 |
-| Troubleshooting | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md), [FAQ.md](./FAQ.md) |
-| Version Migration | [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) |
+| Topic                  | Documents                                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Installation & Setup   | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §7.1                                               |
+| API Usage              | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md), [IBIRA_API_FETCHER.md](./IBIRA_API_FETCHER.md), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §6 |
+| Architecture           | [ARCHITECTURE.md](./ARCHITECTURE.md), [STRUCTURE_DIAGRAM.md](./STRUCTURE_DIAGRAM.md), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §2       |
+| Design Patterns        | [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §5, [ARCHITECTURE.md](./ARCHITECTURE.md)                                                       |
+| Testing                | [TEST_RESULTS.md](./TEST_RESULTS.md), [TESTING_WORKFLOW.md](./TESTING_WORKFLOW.md), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §10        |
+| Contributing           | [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §9, [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)                                                 |
+| Best Practices         | [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §8, [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)                                                 |
+| Functional Programming | [referential_transparency/](./referential_transparency/), [NODE_API_PATTERN.md](./NODE_API_PATTERN.md) §5.5                                 |
+| Troubleshooting        | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md), [FAQ.md](./FAQ.md)                                                                              |
+| Version Migration      | [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)                                                                                                  |
 
 ---
 

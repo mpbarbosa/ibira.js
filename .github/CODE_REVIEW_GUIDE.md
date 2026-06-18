@@ -86,12 +86,12 @@ When reviewing functions, ask these questions:
 // ❌ NOT referentially transparent
 let counter = 0;
 function getNextId() {
-  return counter++;  // Side effect: modifies external state
+	return counter++; // Side effect: modifies external state
 }
 
 // ✅ Referentially transparent
 function getNextId(currentId) {
-  return currentId + 1;  // Pure: no side effects
+	return currentId + 1; // Pure: no side effects
 }
 ```
 
@@ -104,13 +104,13 @@ function getNextId(currentId) {
 ```javascript
 // ❌ Mutates state
 function addItem(list, item) {
-  list.push(item);  // Mutates input
-  return list;
+	list.push(item); // Mutates input
+	return list;
 }
 
 // ✅ Creates new state
 function addItem(list, item) {
-  return [...list, item];  // Returns new array
+	return [...list, item]; // Returns new array
 }
 ```
 
@@ -124,12 +124,12 @@ function addItem(list, item) {
 // ❌ Hidden dependency
 const API_URL = 'https://api.example.com';
 function fetchUser(id) {
-  return fetch(`${API_URL}/users/${id}`);  // Depends on global
+	return fetch(`${API_URL}/users/${id}`); // Depends on global
 }
 
 // ✅ Explicit dependency
 function fetchUser(apiUrl, id) {
-  return fetch(`${apiUrl}/users/${id}`);  // Dependency as parameter
+	return fetch(`${apiUrl}/users/${id}`); // Dependency as parameter
 }
 ```
 
@@ -143,20 +143,23 @@ function fetchUser(apiUrl, id) {
 
 ```javascript
 // ✅ Good separation
-function validateAddress(address) {  // Pure
-  return address.street && address.city;
+function validateAddress(address) {
+	// Pure
+	return address.street && address.city;
 }
 
-function formatAddress(address) {  // Pure
-  return `${address.street}, ${address.city}`;
+function formatAddress(address) {
+	// Pure
+	return `${address.street}, ${address.city}`;
 }
 
-async function saveAddress(address) {  // Impure (clear from name)
-  const isValid = validateAddress(address);  // Pure
-  if (!isValid) throw new Error('Invalid address');
+async function saveAddress(address) {
+	// Impure (clear from name)
+	const isValid = validateAddress(address); // Pure
+	if (!isValid) throw new Error('Invalid address');
 
-  const formatted = formatAddress(address);  // Pure
-  await database.save(formatted);  // Side effect
+	const formatted = formatAddress(address); // Pure
+	await database.save(formatted); // Side effect
 }
 ```
 
@@ -171,15 +174,19 @@ async function saveAddress(address) {  // Impure (clear from name)
 ```javascript
 // ❌ Temporal coupling
 class Service {
-  init() { this.config = loadConfig(); }
-  process(data) { return transform(data, this.config); }  // Needs init() first
+	init() {
+		this.config = loadConfig();
+	}
+	process(data) {
+		return transform(data, this.config);
+	} // Needs init() first
 }
 
 // ✅ No temporal coupling
 class Service {
-  process(data, config) {
-    return transform(data, config);  // Explicit dependency
-  }
+	process(data, config) {
+		return transform(data, config); // Explicit dependency
+	}
 }
 ```
 
@@ -220,8 +227,8 @@ user.address.city = 'New City';
 // ✅ Immutable operations
 user = { ...user, name: 'New Name' };
 user = {
-  ...user,
-  address: { ...user.address, city: 'New City' }
+	...user,
+	address: { ...user.address, city: 'New City' },
 };
 ```
 
@@ -306,15 +313,15 @@ unsubscribe(observer) {
 ```javascript
 // ✅ Good pure function test
 test('calculateDiscount returns correct value', () => {
-  expect(calculateDiscount(100, 10)).toBe(90);
-  expect(calculateDiscount(50, 20)).toBe(40);
-  expect(calculateDiscount(0, 10)).toBe(0);
+	expect(calculateDiscount(100, 10)).toBe(90);
+	expect(calculateDiscount(50, 20)).toBe(40);
+	expect(calculateDiscount(0, 10)).toBe(0);
 });
 
 test('calculateDiscount does not modify inputs', () => {
-  const price = { amount: 100 };
-  calculateDiscount(price.amount, 10);
-  expect(price.amount).toBe(100);  // Unchanged
+	const price = { amount: 100 };
+	calculateDiscount(price.amount, 10);
+	expect(price.amount).toBe(100); // Unchanged
 });
 ```
 
@@ -344,7 +351,7 @@ test('calculateDiscount does not modify inputs', () => {
 ```javascript
 const cache = {};
 function getCachedData(key) {
-  return cache[key];
+	return cache[key];
 }
 ```
 
@@ -352,11 +359,12 @@ function getCachedData(key) {
 
 ```javascript
 function getCachedData(cache, key) {
-  return cache.get(key);
+	return cache.get(key);
 }
 ```
 
 **Review Comment:**
+
 > This function depends on a global `cache` variable. Consider passing the cache as a parameter to make the dependency explicit and improve testability.
 
 ### Issue: Direct Array Mutation
@@ -365,8 +373,8 @@ function getCachedData(cache, key) {
 
 ```javascript
 function addToList(list, item) {
-  list.push(item);
-  return list;
+	list.push(item);
+	return list;
 }
 ```
 
@@ -374,11 +382,12 @@ function addToList(list, item) {
 
 ```javascript
 function addToList(list, item) {
-  return [...list, item];
+	return [...list, item];
 }
 ```
 
 **Review Comment:**
+
 > This function mutates the input array. Please use the spread operator to create a new array: `return [...list, item];`
 
 ### Issue: Side Effects in Pure Logic
@@ -387,8 +396,8 @@ function addToList(list, item) {
 
 ```javascript
 function processUser(user) {
-  console.log('Processing:', user.name);
-  return { ...user, processed: true };
+	console.log('Processing:', user.name);
+	return { ...user, processed: true };
 }
 ```
 
@@ -396,16 +405,17 @@ function processUser(user) {
 
 ```javascript
 function processUser(user) {
-  return { ...user, processed: true };
+	return { ...user, processed: true };
 }
 
 function processAndLogUser(user) {
-  console.log('Processing:', user.name);
-  return processUser(user);
+	console.log('Processing:', user.name);
+	return processUser(user);
 }
 ```
 
 **Review Comment:**
+
 > The `console.log` introduces a side effect. Consider separating the pure transformation from the logging. This makes the function easier to test and more reusable.
 
 ### Issue: Non-Deterministic Behavior
@@ -414,10 +424,10 @@ function processAndLogUser(user) {
 
 ```javascript
 function createSession() {
-  return {
-    id: Math.random().toString(36),
-    createdAt: new Date()
-  };
+	return {
+		id: Math.random().toString(36),
+		createdAt: new Date(),
+	};
 }
 ```
 
@@ -425,14 +435,15 @@ function createSession() {
 
 ```javascript
 function createSession(randomId, currentTime) {
-  return {
-    id: randomId,
-    createdAt: currentTime
-  };
+	return {
+		id: randomId,
+		createdAt: currentTime,
+	};
 }
 ```
 
 **Review Comment:**
+
 > This function is non-deterministic due to `Math.random()` and `new Date()`. Pass these as parameters to make the function pure and testable.
 
 ### Issue: Temporal Coupling
@@ -441,13 +452,13 @@ function createSession(randomId, currentTime) {
 
 ```javascript
 class DataLoader {
-  load(id) {
-    this.data = fetchData(id);
-  }
+	load(id) {
+		this.data = fetchData(id);
+	}
 
-  getData() {
-    return this.data;
-  }
+	getData() {
+		return this.data;
+	}
 }
 ```
 
@@ -455,17 +466,18 @@ class DataLoader {
 
 ```javascript
 class DataLoader {
-  async load(id) {
-    return await fetchData(id);
-  }
+	async load(id) {
+		return await fetchData(id);
+	}
 
-  transform(data) {
-    return processData(data);
-  }
+	transform(data) {
+		return processData(data);
+	}
 }
 ```
 
 **Review Comment:**
+
 > The `getData()` method depends on `load()` being called first. This temporal coupling makes the code harder to reason about. Consider making the data flow explicit by passing data between methods.
 
 ## Review Response Templates

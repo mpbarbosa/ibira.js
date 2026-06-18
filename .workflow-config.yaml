@@ -2,58 +2,58 @@
 # Project: ibira.js
 
 project:
-  name: "ibira.js"
-  type: "nodejs-library"
-  kind: "nodejs_library"  # domain classification: zero-dependency API fetching library
-  version: "0.4.20-alpha"  # keep in sync with package.json
-  description: "Zero-dependency JavaScript library for API data fetching with LRU caching and observer pattern"
+  name: 'ibira.js'
+  type: 'nodejs-library'
+  kind: 'nodejs_library' # domain classification: zero-dependency API fetching library
+  version: '0.4.20-alpha' # keep in sync with package.json
+  description: 'Zero-dependency JavaScript library for API data fetching with LRU caching and observer pattern'
 
 tech_stack:
-  primary_language: "javascript"
-  build_system: "npm"
-  bundler: "tsup"
-  test_framework: "jest"
-  test_runner: "babel-jest"  # Babel transpiles ESM for Jest
-  test_command: "npm test"
-  test_node_command: "npm run test:node"
-  validate_command: "npm run validate"
-  build_command: "npm run build"
-  lint_command: "npm run lint"
+  primary_language: 'javascript'
+  build_system: 'npm'
+  bundler: 'tsup'
+  test_framework: 'jest'
+  test_runner: 'babel-jest' # Babel transpiles ESM for Jest
+  test_command: 'npm test'
+  test_node_command: 'npm run test:node'
+  validate_command: 'npm run validate'
+  build_command: 'npm run build'
+  lint_command: 'npm run lint'
   lint_commands:
-    javascript: "npm run lint"   # ESLint (src/, __tests__/, test/)
-  node_version: ">=18.0.0"
+    javascript: 'npm run lint' # ESLint (src/, __tests__/, test/)
+  node_version: '>=18.0.0'
 
 structure:
   source_dirs:
     - src
-  source_extension: "js"
+  source_extension: 'js'
   test_dirs:
     - __tests__
     - test
   docs_dirs:
     - docs
-  build_output: "dist"
+  build_output: 'dist'
 
 ai_personas:
   enabled:
-    - async_performance_engineer  # API fetching, LRU cache, retry/backoff, deduplication, debounce/throttle — all async
-    - test_engineer               # Jest + Babel (jsdom + node), 75% coverage threshold enforced
-    - code_quality_analyst        # JavaScript code quality, anti-patterns, ESLint compliance
-    - documentation_expert        # 80% API doc coverage required; 14 docs/ files
-    - technical_writer            # Markdown docs (API.md, ARCHITECTURE.md, EXAMPLES.md, FAQ.md, etc.), CHANGELOG, README
-    - git_specialist              # Release workflow: deploy.sh, semver tagging, npm + jsDelivr CDN publish
-    - devops_engineer             # tsup.config.ts, babel.config.mjs, jest configs, .github/workflows/publish.yml
-    - dependency_analyst          # bessa_patterns.ts prod dep + full devDep suite audit
-    - architecture_reviewer       # IbiraAPIFetchManager, DefaultCache (LRU), DefaultEventNotifier, IbiraAPIFetcher architecture
+    - async_performance_engineer # API fetching, LRU cache, retry/backoff, deduplication, debounce/throttle — all async
+    - test_engineer # Jest + Babel (jsdom + node), 75% coverage threshold enforced
+    - code_quality_analyst # JavaScript code quality, anti-patterns, ESLint compliance
+    - documentation_expert # 80% API doc coverage required; 14 docs/ files
+    - technical_writer # Markdown docs (API.md, ARCHITECTURE.md, EXAMPLES.md, FAQ.md, etc.), CHANGELOG, README
+    - git_specialist # Release workflow: deploy.sh, semver tagging, npm + jsDelivr CDN publish
+    - devops_engineer # tsup.config.ts, babel.config.mjs, jest configs, .github/workflows/publish.yml
+    - dependency_analyst # bessa_patterns.ts prod dep + full devDep suite audit
+    - architecture_reviewer # IbiraAPIFetchManager, DefaultCache (LRU), DefaultEventNotifier, IbiraAPIFetcher architecture
   disabled:
-    - typescript_reviewer         # JS-primary project (index.ts is only entry shim; core source is .js)
-    - security_expert             # Client-side fetch library; no server, no auth endpoints, no credential storage
-    - prompt_engineer             # Not an AI project
-    - ux_analyst                  # No UI (jsdom used for test harness only, not for rendering)
-    - accessibility_expert        # No HTML or DOM output
-    - aws_serverless_engineer     # No AWS resources
-    - api_designer                # API client/fetcher library — not an HTTP API server
-    - performance_engineer        # No frontend performance concerns; async_performance_engineer covers this project's needs
+    - typescript_reviewer # JS-primary project (index.ts is only entry shim; core source is .js)
+    - security_expert # Client-side fetch library; no server, no auth endpoints, no credential storage
+    - prompt_engineer # Not an AI project
+    - ux_analyst # No UI (jsdom used for test harness only, not for rendering)
+    - accessibility_expert # No HTML or DOM output
+    - aws_serverless_engineer # No AWS resources
+    - api_designer # API client/fetcher library — not an HTTP API server
+    - performance_engineer # No frontend performance concerns; async_performance_engineer covers this project's needs
 
 workflow:
   settings:
@@ -66,9 +66,9 @@ workflow:
 
   steps:
     - id: step_00
-      name: "Pre-Analysis / Environment Scan"
-      file: "step_00.js"
-      description: "Scan project structure, detect project kind, validate environment"
+      name: 'Pre-Analysis / Environment Scan'
+      file: 'step_00.js'
+      description: 'Scan project structure, detect project kind, validate environment'
       phase: 1
       enabled: true
       can_parallelize: false
@@ -76,9 +76,9 @@ workflow:
       ai_persona: documentation_expert
 
     - id: step_01
-      name: "Documentation Analysis"
-      file: "step_01.js"
-      description: "Validate README, API.md, ARCHITECTURE.md, docs/ coverage against 80% threshold"
+      name: 'Documentation Analysis'
+      file: 'step_01.js'
+      description: 'Validate README, API.md, ARCHITECTURE.md, docs/ coverage against 80% threshold'
       phase: 1
       enabled: true
       can_parallelize: false
@@ -86,9 +86,9 @@ workflow:
       ai_persona: documentation_expert
 
     - id: step_02
-      name: "Consistency Analysis"
-      file: "step_02.js"
-      description: "Cross-check docs/code consistency; verify JSDoc matches implementation in src/"
+      name: 'Consistency Analysis'
+      file: 'step_02.js'
+      description: 'Cross-check docs/code consistency; verify JSDoc matches implementation in src/'
       phase: 1
       enabled: true
       can_parallelize: true
@@ -96,9 +96,9 @@ workflow:
       ai_persona: documentation_expert
 
     - id: step_03
-      name: "Script Reference Analysis"
-      file: "step_03.js"
-      description: "Validate package.json scripts, tsup.config.ts, babel.config.mjs references"
+      name: 'Script Reference Analysis'
+      file: 'step_03.js'
+      description: 'Validate package.json scripts, tsup.config.ts, babel.config.mjs references'
       phase: 1
       enabled: true
       can_parallelize: true
@@ -106,9 +106,9 @@ workflow:
       ai_persona: devops_engineer
 
     - id: step_04
-      name: "Config Validation"
-      file: "step_04.js"
-      description: "Validate jest.config, tsconfig.json, eslint.config.mjs, .workflow-config.yaml"
+      name: 'Config Validation'
+      file: 'step_04.js'
+      description: 'Validate jest.config, tsconfig.json, eslint.config.mjs, .workflow-config.yaml'
       phase: 1
       enabled: true
       can_parallelize: true
@@ -116,9 +116,9 @@ workflow:
       ai_persona: devops_engineer
 
     - id: step_05
-      name: "Directory Structure Validation"
-      file: "step_05.js"
-      description: "Validate src/, __tests__/, test/, dist/ structure and module boundaries"
+      name: 'Directory Structure Validation'
+      file: 'step_05.js'
+      description: 'Validate src/, __tests__/, test/, dist/ structure and module boundaries'
       phase: 1
       enabled: true
       can_parallelize: true
@@ -126,9 +126,9 @@ workflow:
       ai_persona: architecture_reviewer
 
     - id: step_06
-      name: "Integration Tests"
-      file: "step_06.js"
-      description: "Run Jest suite (jsdom + node environments); enforce 75% branch/line/function threshold"
+      name: 'Integration Tests'
+      file: 'step_06.js'
+      description: 'Run Jest suite (jsdom + node environments); enforce 75% branch/line/function threshold'
       phase: 2
       enabled: true
       can_parallelize: false
@@ -136,9 +136,9 @@ workflow:
       ai_persona: test_engineer
 
     - id: step_07
-      name: "Coverage Report Generation"
-      file: "step_07.js"
-      description: "Generate coverage report; verify 75% threshold across IbiraAPIFetcher, DefaultCache, DefaultEventNotifier"
+      name: 'Coverage Report Generation'
+      file: 'step_07.js'
+      description: 'Generate coverage report; verify 75% threshold across IbiraAPIFetcher, DefaultCache, DefaultEventNotifier'
       phase: 2
       enabled: true
       can_parallelize: false
@@ -146,9 +146,9 @@ workflow:
       ai_persona: test_engineer
 
     - id: step_08
-      name: "Release Readiness Check"
-      file: "step_08.js"
-      description: "Validate version sync across package.json, src/config/version.js, README.md, docs/; CDN URL verification"
+      name: 'Release Readiness Check'
+      file: 'step_08.js'
+      description: 'Validate version sync across package.json, src/config/version.js, README.md, docs/; CDN URL verification'
       phase: 2
       enabled: true
       can_parallelize: false
@@ -156,9 +156,9 @@ workflow:
       ai_persona: git_specialist
 
     - id: step_09
-      name: "Dependency Audit"
-      file: "step_09.js"
-      description: "Audit bessa_patterns.ts production dep and all devDeps for security issues and outdated versions"
+      name: 'Dependency Audit'
+      file: 'step_09.js'
+      description: 'Audit bessa_patterns.ts production dep and all devDeps for security issues and outdated versions'
       phase: 2
       enabled: true
       can_parallelize: true
@@ -166,9 +166,9 @@ workflow:
       ai_persona: dependency_analyst
 
     - id: step_10
-      name: "Code Quality Analysis"
-      file: "step_10.js"
-      description: "Run ESLint (eslint.config.mjs) against src/**/*.js; check for anti-patterns in fetcher/cache/notifier"
+      name: 'Code Quality Analysis'
+      file: 'step_10.js'
+      description: 'Run ESLint (eslint.config.mjs) against src/**/*.js; check for anti-patterns in fetcher/cache/notifier'
       phase: 2
       enabled: true
       can_parallelize: true
@@ -176,9 +176,9 @@ workflow:
       ai_persona: code_quality_analyst
 
     - id: step_11
-      name: "Context Optimization"
-      file: "step_11.js"
-      description: "Optimize AI context for subsequent steps using project analysis results"
+      name: 'Context Optimization'
+      file: 'step_11.js'
+      description: 'Optimize AI context for subsequent steps using project analysis results'
       phase: 2
       enabled: true
       can_parallelize: true
@@ -186,9 +186,9 @@ workflow:
       ai_persona: documentation_expert
 
     - id: step_12
-      name: "Git Status Analysis"
-      file: "step_12.js"
-      description: "Analyze git diff, stage changes, validate conventional commit message format"
+      name: 'Git Status Analysis'
+      file: 'step_12.js'
+      description: 'Analyze git diff, stage changes, validate conventional commit message format'
       phase: 3
       enabled: true
       can_parallelize: false
@@ -196,9 +196,9 @@ workflow:
       ai_persona: git_specialist
 
     - id: step_13
-      name: "Markdown Lint"
-      file: "step_13.js"
-      description: "Lint all 14 docs/ markdown files and README.md; enforce consistent style"
+      name: 'Markdown Lint'
+      file: 'step_13.js'
+      description: 'Lint all 14 docs/ markdown files and README.md; enforce consistent style'
       phase: 3
       enabled: true
       can_parallelize: true
@@ -206,31 +206,31 @@ workflow:
       ai_persona: technical_writer
 
     - id: step_14
-      name: "Prompt Engineering Review"
-      file: "step_14.js"
-      description: "Review AI prompt structure and optimization for workflow effectiveness"
+      name: 'Prompt Engineering Review'
+      file: 'step_14.js'
+      description: 'Review AI prompt structure and optimization for workflow effectiveness'
       phase: 3
       enabled: false
-      reason: "ibira.js is not an AI project; no AI prompt artifacts to review"
+      reason: 'ibira.js is not an AI project; no AI prompt artifacts to review'
       can_parallelize: true
       dependencies: [step_11]
       ai_persona: prompt_engineer
 
     - id: step_15
-      name: "UX Analysis"
-      file: "step_15.js"
-      description: "UX and accessibility analysis for interactive interfaces"
+      name: 'UX Analysis'
+      file: 'step_15.js'
+      description: 'UX and accessibility analysis for interactive interfaces'
       phase: 3
       enabled: false
-      reason: "Library with no UI; jsdom used only in test harness"
+      reason: 'Library with no UI; jsdom used only in test harness'
       can_parallelize: true
       dependencies: [step_10]
       ai_persona: ux_analyst
 
     - id: step_16
-      name: "Version Update"
-      file: "step_16.js"
-      description: "Bump semver version; sync across package.json, src/config/version.js, docs/, .workflow-config.yaml"
+      name: 'Version Update'
+      file: 'step_16.js'
+      description: 'Bump semver version; sync across package.json, src/config/version.js, docs/, .workflow-config.yaml'
       phase: 3
       enabled: true
       can_parallelize: false
@@ -238,9 +238,9 @@ workflow:
       ai_persona: git_specialist
 
     - id: step_17
-      name: "Summary Generation"
-      file: "step_17.js"
-      description: "Generate workflow execution summary and backlog report"
+      name: 'Summary Generation'
+      file: 'step_17.js'
+      description: 'Generate workflow execution summary and backlog report'
       phase: 3
       enabled: true
       can_parallelize: false
@@ -248,9 +248,9 @@ workflow:
       ai_persona: technical_writer
 
     - id: step_18
-      name: "Debugging Analysis"
-      file: "step_18.js"
-      description: "Analyze async bugs in IbiraAPIFetcher (retry/backoff), DefaultCache (LRU eviction), DefaultEventNotifier"
+      name: 'Debugging Analysis'
+      file: 'step_18.js'
+      description: 'Analyze async bugs in IbiraAPIFetcher (retry/backoff), DefaultCache (LRU eviction), DefaultEventNotifier'
       phase: 2
       enabled: true
       can_parallelize: true
@@ -258,20 +258,20 @@ workflow:
       ai_persona: async_performance_engineer
 
     - id: step_19
-      name: "TypeScript Review"
-      file: "step_19.js"
-      description: "Review index.ts entry shim and tsup.config.ts for type correctness"
+      name: 'TypeScript Review'
+      file: 'step_19.js'
+      description: 'Review index.ts entry shim and tsup.config.ts for type correctness'
       phase: 2
       enabled: false
-      reason: "JavaScript-primary project; TypeScript only used for build entry (index.ts) and bundler config (tsup)"
+      reason: 'JavaScript-primary project; TypeScript only used for build entry (index.ts) and bundler config (tsup)'
       can_parallelize: true
       dependencies: [step_10]
       ai_persona: typescript_reviewer
 
     - id: step_20
-      name: "Async Performance Review"
-      file: "step_20.js"
-      description: "Review async patterns: request deduplication, LRU eviction, observer notification chains, debounce/throttle, retry backoff — all performance-critical paths"
+      name: 'Async Performance Review'
+      file: 'step_20.js'
+      description: 'Review async patterns: request deduplication, LRU eviction, observer notification chains, debounce/throttle, retry backoff — all performance-critical paths'
       phase: 2
       enabled: true
       can_parallelize: true
@@ -279,9 +279,9 @@ workflow:
       ai_persona: async_performance_engineer
 
     - id: step_21
-      name: "Architecture Review"
-      file: "step_21.js"
-      description: "Review IbiraAPIFetchManager/Fetcher/Cache/Notifier composition; bessa_patterns.ts integration pattern"
+      name: 'Architecture Review'
+      file: 'step_21.js'
+      description: 'Review IbiraAPIFetchManager/Fetcher/Cache/Notifier composition; bessa_patterns.ts integration pattern'
       phase: 2
       enabled: true
       can_parallelize: true
@@ -289,31 +289,31 @@ workflow:
       ai_persona: architecture_reviewer
 
     - id: step_22
-      name: "Accessibility Review"
-      file: "step_22.js"
-      description: "HTML/CSS accessibility and WCAG compliance audit"
+      name: 'Accessibility Review'
+      file: 'step_22.js'
+      description: 'HTML/CSS accessibility and WCAG compliance audit'
       phase: 3
       enabled: false
-      reason: "Zero-dependency async fetching library with no HTML/CSS layer"
+      reason: 'Zero-dependency async fetching library with no HTML/CSS layer'
       can_parallelize: true
       dependencies: [step_10]
       ai_persona: accessibility_expert
 
     - id: step_23
-      name: "Performance Review"
-      file: "step_23.js"
-      description: "Frontend rendering and load performance review"
+      name: 'Performance Review'
+      file: 'step_23.js'
+      description: 'Frontend rendering and load performance review'
       phase: 3
       enabled: false
-      reason: "Covered by async_performance_engineer; LRU cache performance is event-loop focused"
+      reason: 'Covered by async_performance_engineer; LRU cache performance is event-loop focused'
       can_parallelize: true
       dependencies: [step_10]
       ai_persona: performance_engineer
 
     - id: step_0b
-      name: "Bootstrap Documentation"
-      file: "step_0b.js"
-      description: "Bootstrap missing docs for new modules; generate JSDoc stubs for undocumented exports"
+      name: 'Bootstrap Documentation'
+      file: 'step_0b.js'
+      description: 'Bootstrap missing docs for new modules; generate JSDoc stubs for undocumented exports'
       phase: 1
       enabled: true
       can_parallelize: false
@@ -321,9 +321,9 @@ workflow:
       ai_persona: documentation_expert
 
     - id: step_0f
-      name: "Artifact Commit"
-      file: "step_0f.js"
-      description: "Commit all workflow outputs (backlog, metrics, logs) to repo"
+      name: 'Artifact Commit'
+      file: 'step_0f.js'
+      description: 'Commit all workflow outputs (backlog, metrics, logs) to repo'
       phase: 3
       enabled: true
       can_parallelize: false
@@ -335,45 +335,45 @@ workflow:
     quick:
       enabled: true
       steps:
-        - step_00  # pre-analysis / environment scan
-        - step_01  # documentation analysis
-        - step_02  # consistency analysis
+        - step_00 # pre-analysis / environment scan
+        - step_01 # documentation analysis
+        - step_02 # consistency analysis
     medium:
       enabled: true
       steps:
-        - step_00  # pre-analysis / environment scan
-        - step_01  # documentation analysis
-        - step_02  # consistency analysis
-        - step_03  # script reference analysis
-        - step_04  # config validation
-        - step_05  # directory structure validation
+        - step_00 # pre-analysis / environment scan
+        - step_01 # documentation analysis
+        - step_02 # consistency analysis
+        - step_03 # script reference analysis
+        - step_04 # config validation
+        - step_05 # directory structure validation
     full:
       enabled: true
       steps:
-        - step_00  # pre-analysis / environment scan
-        - step_01  # documentation analysis
-        - step_02  # consistency analysis
-        - step_03  # script reference analysis
-        - step_04  # config validation
-        - step_05  # directory structure validation
-        - step_06  # integration tests
-        - step_07  # coverage report generation
-        - step_08  # release readiness check
-        - step_0f  # artifact commit: versions and commits all workflow outputs to the repo
+        - step_00 # pre-analysis / environment scan
+        - step_01 # documentation analysis
+        - step_02 # consistency analysis
+        - step_03 # script reference analysis
+        - step_04 # config validation
+        - step_05 # directory structure validation
+        - step_06 # integration tests
+        - step_07 # coverage report generation
+        - step_08 # release readiness check
+        - step_0f # artifact commit: versions and commits all workflow outputs to the repo
 
 validation:
   documentation:
     required: true
-    min_coverage: 80  # 80% of public API surface must be documented
+    min_coverage: 80 # 80% of public API surface must be documented
   testing:
     required: true
-    min_coverage: 75  # 75% branch/function/line/statement threshold; enforced by jest --coverage
+    min_coverage: 75 # 75% branch/function/line/statement threshold; enforced by jest --coverage
 
 # Linting Configuration
 linting:
-  js_linter: "eslint"
-  js_config: "eslint.config.mjs"
-  js_glob: "src/**/*.js"
+  js_linter: 'eslint'
+  js_config: 'eslint.config.mjs'
+  js_glob: 'src/**/*.js'
 
 git:
   # Tag creation and management is owned by the deploy flow (scripts/deploy.sh).
@@ -385,15 +385,15 @@ git:
   tag_on_run: false
 
 publish:
-  registry: "https://registry.npmjs.org"
-  workflow: ".github/workflows/publish.yml"
-  trigger: "v* tags"
+  registry: 'https://registry.npmjs.org'
+  workflow: '.github/workflows/publish.yml'
+  trigger: 'v* tags'
 
 deploy:
   enabled: true
-  script: "scripts/deploy.sh"  # Invoked by: ai-workflow deploy
-  description: "Build dist/, move/create version tag, push to GitHub, verify CDN"
-  cdn_check_url: "https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@v{version}/dist/index.mjs"
+  script: 'scripts/deploy.sh' # Invoked by: ai-workflow deploy
+  description: 'Build dist/, move/create version tag, push to GitHub, verify CDN'
+  cdn_check_url: 'https://cdn.jsdelivr.net/gh/mpbarbosa/ibira.js@v{version}/dist/index.mjs'
   # cdn_check_url is the canonical jsDelivr URL pattern for this project.
   # The {version} placeholder is replaced with project.version at deploy time.
 
@@ -404,141 +404,141 @@ conditionals:
       - no_code_changes: true
       - only_docs_changed: true
     run_if:
-      - "src/**/*.js": changed
-      - "__tests__/**/*.js": changed
-    description: "Skip release-readiness check if only documentation or non-code files changed"
+      - 'src/**/*.js': changed
+      - '__tests__/**/*.js': changed
+    description: 'Skip release-readiness check if only documentation or non-code files changed'
 
   step_05_directory_structure:
     skip_if:
       - no_new_files: true
     cache_duration: 24h
-    description: "Cache directory structure scan for 24 hours if no new files"
+    description: 'Cache directory structure scan for 24 hours if no new files'
 
   step_03_script_validation:
     skip_if:
       - no_js_changes: true
     run_if:
-      - "src/**/*.js": changed
-      - "scripts/**/*.sh": changed
-    description: "Skip script-reference validation if no JavaScript or shell files changed"
+      - 'src/**/*.js': changed
+      - 'scripts/**/*.sh': changed
+    description: 'Skip script-reference validation if no JavaScript or shell files changed'
 
   step_07_coverage_report:
     skip_if:
       - only_docs_changed: true
       - only_tests_changed: true
     run_if:
-      - "src/**/*.js": changed
-    description: "Skip coverage generation for docs-only or test-only changes"
+      - 'src/**/*.js': changed
+    description: 'Skip coverage generation for docs-only or test-only changes'
 
 # Change Detection Patterns
 change_patterns:
   code_files:
-    - "src/**/*.js"
+    - 'src/**/*.js'
   test_files:
-    - "__tests__/**/*.js"
-    - "test/**/*.js"
+    - '__tests__/**/*.js'
+    - 'test/**/*.js'
   documentation_files:
-    - "**/*.md"
-    - "docs/**/*"
+    - '**/*.md'
+    - 'docs/**/*'
   config_files:
-    - "package.json"
-    - "tsconfig.json"
-    - "tsup.config.ts"
-    - "babel.config.mjs"
-    - "eslint.config.mjs"
-    - ".github/**/*.yml"
-    - ".workflow-config.yaml"
+    - 'package.json'
+    - 'tsconfig.json'
+    - 'tsup.config.ts'
+    - 'babel.config.mjs'
+    - 'eslint.config.mjs'
+    - '.github/**/*.yml'
+    - '.workflow-config.yaml'
 
 # Version Configuration
 # The version field above must agree with package.json → "version" at all times.
 version:
-  source_of_truth: "package.json"
+  source_of_truth: 'package.json'
 
 # Change-Type Detection Configuration (Conventional Commits)
 change_detection:
   enabled: true
-  convention: "conventional_commits"
+  convention: 'conventional_commits'
 
   types:
     feat:
-      description: "New features"
-      impact: "high"
-      test_strategy: "all"
+      description: 'New features'
+      impact: 'high'
+      test_strategy: 'all'
       examples:
-        - "feat: add request deduplication to IbiraAPIFetchManager"
-        - "feat(cache): add TTL expiry support to DefaultCache"
+        - 'feat: add request deduplication to IbiraAPIFetchManager'
+        - 'feat(cache): add TTL expiry support to DefaultCache'
 
     fix:
-      description: "Bug fixes"
-      impact: "medium"
-      test_strategy: "related"
+      description: 'Bug fixes'
+      impact: 'medium'
+      test_strategy: 'related'
       examples:
-        - "fix: correct retry backoff calculation in IbiraAPIFetcher"
-        - "fix(cache): handle LRU eviction edge case on empty cache"
+        - 'fix: correct retry backoff calculation in IbiraAPIFetcher'
+        - 'fix(cache): handle LRU eviction edge case on empty cache'
 
     docs:
-      description: "Documentation only"
-      impact: "low"
-      test_strategy: "none"
+      description: 'Documentation only'
+      impact: 'low'
+      test_strategy: 'none'
       examples:
-        - "docs: update README CDN URLs"
-        - "docs(api): improve JSDoc for fetchData return type"
+        - 'docs: update README CDN URLs'
+        - 'docs(api): improve JSDoc for fetchData return type'
 
     refactor:
-      description: "Code refactoring"
-      impact: "medium"
-      test_strategy: "comprehensive"
+      description: 'Code refactoring'
+      impact: 'medium'
+      test_strategy: 'comprehensive'
       examples:
-        - "refactor: extract retry logic into private helper"
-        - "refactor(fetcher): simplify fetchDataPure dependency injection"
+        - 'refactor: extract retry logic into private helper'
+        - 'refactor(fetcher): simplify fetchDataPure dependency injection'
 
     test:
-      description: "Test changes only"
-      impact: "low"
-      test_strategy: "tests_only"
+      description: 'Test changes only'
+      impact: 'low'
+      test_strategy: 'tests_only'
       examples:
-        - "test: add edge cases for LRU eviction in DefaultCache"
-        - "test(fetcher): improve coverage for concurrent request deduplication"
+        - 'test: add edge cases for LRU eviction in DefaultCache'
+        - 'test(fetcher): improve coverage for concurrent request deduplication'
 
     style:
-      description: "Code style/formatting"
-      impact: "low"
-      test_strategy: "syntax_only"
+      description: 'Code style/formatting'
+      impact: 'low'
+      test_strategy: 'syntax_only'
       examples:
-        - "style: format with prettier"
-        - "style: fix eslint warnings in IbiraAPIFetcher"
+        - 'style: format with prettier'
+        - 'style: fix eslint warnings in IbiraAPIFetcher'
 
     perf:
-      description: "Performance improvements"
-      impact: "medium"
-      test_strategy: "all"
+      description: 'Performance improvements'
+      impact: 'medium'
+      test_strategy: 'all'
       examples:
-        - "perf: optimise LRU cache lookup in DefaultCache"
-        - "perf(notifier): reduce observer notification overhead"
+        - 'perf: optimise LRU cache lookup in DefaultCache'
+        - 'perf(notifier): reduce observer notification overhead'
 
     chore:
-      description: "Maintenance tasks"
-      impact: "low"
-      test_strategy: "minimal"
+      description: 'Maintenance tasks'
+      impact: 'low'
+      test_strategy: 'minimal'
       examples:
-        - "chore: update dependencies"
-        - "chore(build): configure tsup dual CJS+ESM output"
+        - 'chore: update dependencies'
+        - 'chore(build): configure tsup dual CJS+ESM output'
 
     ci:
-      description: "CI/CD changes"
-      impact: "low"
-      test_strategy: "minimal"
+      description: 'CI/CD changes'
+      impact: 'low'
+      test_strategy: 'minimal'
       examples:
-        - "ci: add GitHub Actions publish workflow"
-        - "ci: update test coverage threshold"
+        - 'ci: add GitHub Actions publish workflow'
+        - 'ci: update test coverage threshold'
 
     build:
-      description: "Build system changes"
-      impact: "low"
-      test_strategy: "minimal"
+      description: 'Build system changes'
+      impact: 'low'
+      test_strategy: 'minimal'
       examples:
-        - "build: update npm scripts"
-        - "build: switch bundler to tsup"
+        - 'build: update npm scripts'
+        - 'build: switch bundler to tsup'
 
   # Step routing based on change type
   routing:
@@ -551,7 +551,7 @@ change_detection:
         - quality_checks
         - doc_validation
         - git_finalization
-      description: "Run all validation steps for new features"
+      description: 'Run all validation steps for new features'
 
     fix:
       steps:
@@ -559,14 +559,14 @@ change_detection:
         - test_execution
         - quality_checks
         - git_finalization
-      description: "Focus on testing and quality for bug fixes"
+      description: 'Focus on testing and quality for bug fixes'
 
     docs:
       steps:
         - syntax_validation
         - doc_validation
         - git_finalization
-      description: "Minimal validation for documentation changes"
+      description: 'Minimal validation for documentation changes'
 
     refactor:
       steps:
@@ -575,21 +575,21 @@ change_detection:
         - coverage_report
         - quality_checks
         - git_finalization
-      description: "Comprehensive testing for refactoring"
+      description: 'Comprehensive testing for refactoring'
 
     test:
       steps:
         - syntax_validation
         - test_execution
         - git_finalization
-      description: "Run test suite for test changes"
+      description: 'Run test suite for test changes'
 
     style:
       steps:
         - syntax_validation
         - quality_checks
         - git_finalization
-      description: "Syntax and style validation only"
+      description: 'Syntax and style validation only'
 
     perf:
       steps:
@@ -597,26 +597,26 @@ change_detection:
         - test_execution
         - coverage_report
         - git_finalization
-      description: "Full testing for performance changes"
+      description: 'Full testing for performance changes'
 
     chore:
       steps:
         - syntax_validation
         - git_finalization
-      description: "Minimal validation for maintenance tasks"
+      description: 'Minimal validation for maintenance tasks'
 
     ci:
       steps:
         - syntax_validation
         - git_finalization
-      description: "Syntax check only for CI changes"
+      description: 'Syntax check only for CI changes'
 
     build:
       steps:
         - syntax_validation
         - test_execution
         - git_finalization
-      description: "Validate build system changes"
+      description: 'Validate build system changes'
 
   # Fallback configuration
   fallback:
@@ -625,35 +625,34 @@ change_detection:
       - test_execution
       - coverage_report
       - git_finalization
-    description: "Default steps when type cannot be determined"
+    description: 'Default steps when type cannot be determined'
 
   # Pattern detection (if commit message doesn't follow convention)
   pattern_detection:
     enabled: true
     patterns:
       - regex: "^(add|implement|create)\\s"
-        type: "feat"
+        type: 'feat'
       - regex: "^(fix|repair|correct|resolve)\\s"
-        type: "fix"
+        type: 'fix'
       - regex: "^(doc|document|readme)\\s"
-        type: "docs"
+        type: 'docs'
       - regex: "^(refactor|restructure|reorganize)\\s"
-        type: "refactor"
+        type: 'refactor'
       - regex: "^(test|spec)\\s"
-        type: "test"
+        type: 'test'
       - regex: "^(style|format|lint)\\s"
-        type: "style"
+        type: 'style'
       - regex: "^(perf|optimize|speed)\\s"
-        type: "perf"
+        type: 'perf'
 
 skills:
   version_sync:
-    skill_doc: ".github/skills/sync-version/SKILL.md"
+    skill_doc: '.github/skills/sync-version/SKILL.md'
     description: >
       Audits and fixes version strings in src/config/version.js,
       src/index.js, README.md, docs/API.md, docs/INDEX.md,
       .workflow-config.yaml, and ROADMAP.md so they match the
       canonical version in package.json.
-    check_command: "npm run version:check"
-    command: "npm run version:sync"
-
+    check_command: 'npm run version:check'
+    command: 'npm run version:sync'

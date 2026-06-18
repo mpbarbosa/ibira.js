@@ -335,13 +335,13 @@ ls -la cdn-delivery.sh
 
 ### Troubleshooting Guide
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
+| Issue             | Cause             | Solution                                |
+| ----------------- | ----------------- | --------------------------------------- |
 | Git command fails | Git not installed | Install git: `sudo apt-get install git` |
-| Version not found | Wrong directory | Run from repository root |
-| Permission denied | Not executable | `chmod +x cdn-delivery.sh` |
-| URLs incorrect | Old commits | Push latest commits to GitHub |
-| File not created | Write permissions | Check directory write permissions |
+| Version not found | Wrong directory   | Run from repository root                |
+| Permission denied | Not executable    | `chmod +x cdn-delivery.sh`              |
+| URLs incorrect    | Old commits       | Push latest commits to GitHub           |
+| File not created  | Write permissions | Check directory write permissions       |
 
 ### Advanced Usage
 
@@ -395,11 +395,11 @@ chmod +x test-runner.js test_pure_fetcher.js cdn-delivery.sh
 
 ## Quick Reference Table
 
-| Script | Purpose | Input | Output | Executable |
-|--------|---------|-------|--------|------------|
-| `test-runner.js` | Show test info | None | Terminal display | ✅ Yes |
-| `test_pure_fetcher.js` | RT demonstration | None | Test results + exit code | ✅ Yes |
-| `cdn-delivery.sh` | Generate CDN URLs | None | URLs + cdn-urls.txt | ✅ Yes |
+| Script                 | Purpose           | Input | Output                   | Executable |
+| ---------------------- | ----------------- | ----- | ------------------------ | ---------- |
+| `test-runner.js`       | Show test info    | None  | Terminal display         | ✅ Yes     |
+| `test_pure_fetcher.js` | RT demonstration  | None  | Test results + exit code | ✅ Yes     |
+| `cdn-delivery.sh`      | Generate CDN URLs | None  | URLs + cdn-urls.txt      | ✅ Yes     |
 
 ---
 

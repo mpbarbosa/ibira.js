@@ -197,17 +197,17 @@ The core fetcher class with perfect referential transparency
 
 ### 8. **Referential Transparency Tests** (10 tests)
 
-- **_createCacheEntry purity** (3 tests)
+- **\_createCacheEntry purity** (3 tests)
   - ✅ Deterministic behavior with same inputs
   - ✅ No mutation of input data
   - ✅ Different results with different currentTime
 
-- **_isCacheEntryValid purity** (3 tests)
+- **\_isCacheEntryValid purity** (3 tests)
   - ✅ Deterministic behavior with same inputs
   - ✅ No mutation of cache entry
   - ✅ Consistent results for boundary conditions
 
-- **_getExpiredCacheKeys purity** (4 tests)
+- **\_getExpiredCacheKeys purity** (4 tests)
   - ✅ Deterministic behavior with same inputs
   - ✅ No mutation of cache map
   - ✅ Empty array for no expired entries

@@ -84,17 +84,17 @@ describe('DefaultCache', () => {
 	describe('Size Limit Enforcement', () => {
 		it('should enforce size limit using LRU eviction', () => {
 			const smallCache = new DefaultCache({ maxSize: 3 });
-			
+
 			// Add entries with different timestamps
 			smallCache.set('key1', { data: 'test1', timestamp: 100 });
 			smallCache.set('key2', { data: 'test2', timestamp: 200 });
 			smallCache.set('key3', { data: 'test3', timestamp: 300 });
-			
+
 			expect(smallCache.size).toBe(3);
-			
+
 			// Adding 4th item should evict the oldest (key1)
 			smallCache.set('key4', { data: 'test4', timestamp: 400 });
-			
+
 			expect(smallCache.size).toBe(3);
 			expect(smallCache.has('key1')).toBe(false);
 			expect(smallCache.has('key2')).toBe(true);
@@ -104,11 +104,11 @@ describe('DefaultCache', () => {
 
 		it('should remove multiple entries when exceeding size limit', () => {
 			const smallCache = new DefaultCache({ maxSize: 2 });
-			
+
 			smallCache.set('key1', { data: 'test1', timestamp: 100 });
 			smallCache.set('key2', { data: 'test2', timestamp: 200 });
 			smallCache.set('key3', { data: 'test3', timestamp: 300 });
-			
+
 			expect(smallCache.size).toBe(2);
 			expect(smallCache.has('key1')).toBe(false);
 			expect(smallCache.has('key2')).toBe(true);
@@ -117,10 +117,10 @@ describe('DefaultCache', () => {
 
 		it('should not evict entries when under size limit', () => {
 			const smallCache = new DefaultCache({ maxSize: 5 });
-			
+
 			smallCache.set('key1', { data: 'test1', timestamp: 100 });
 			smallCache.set('key2', { data: 'test2', timestamp: 200 });
-			
+
 			expect(smallCache.size).toBe(2);
 			expect(smallCache.has('key1')).toBe(true);
 			expect(smallCache.has('key2')).toBe(true);
@@ -144,7 +144,7 @@ describe('DefaultCache', () => {
 			const complexValue = {
 				data: { nested: { deep: 'value' } },
 				timestamp: Date.now(),
-				metadata: { count: 42 }
+				metadata: { count: 42 },
 			};
 			cache.set('key1', complexValue);
 			expect(cache.get('key1')).toEqual(complexValue);
@@ -167,21 +167,21 @@ describe('DefaultCache', () => {
 	describe('Performance', () => {
 		it('should handle large number of entries efficiently', () => {
 			const largeCache = new DefaultCache({ maxSize: 1000 });
-			
+
 			for (let i = 0; i < 1000; i++) {
 				largeCache.set(`key${i}`, { data: `value${i}`, timestamp: i });
 			}
-			
+
 			expect(largeCache.size).toBe(1000);
 		});
 
 		it('should maintain size limit with continuous additions', () => {
 			const limitedCache = new DefaultCache({ maxSize: 10 });
-			
+
 			for (let i = 0; i < 100; i++) {
 				limitedCache.set(`key${i}`, { data: `value${i}`, timestamp: i });
 			}
-			
+
 			expect(limitedCache.size).toBe(10);
 		});
 	});

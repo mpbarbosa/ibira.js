@@ -6,21 +6,21 @@
  * via its CacheInterface duck type.
  */
 export function makeCache({ maxSize = 100, expiration = 5 * 60 * 1000 } = {}) {
-    const cache = new Map();
-    cache.maxSize = maxSize;
-    cache.expiration = expiration;
-    return cache;
+	const cache = new Map();
+	cache.maxSize = maxSize;
+	cache.expiration = expiration;
+	return cache;
 }
 
 /**
  * Creates a mock fetch Response object that resolves to `data` on `.json()`.
  */
 export function makeMockResponse(data, { status = 200, ok = true } = {}) {
-    return {
-        ok,
-        status,
-        json: jest.fn().mockResolvedValue(data),
-    };
+	return {
+		ok,
+		status,
+		json: jest.fn().mockResolvedValue(data),
+	};
 }
 
 /**
@@ -29,36 +29,36 @@ export function makeMockResponse(data, { status = 200, ok = true } = {}) {
  * to subscribe a real observer.
  */
 export class MockEventNotifier {
-    constructor() {
-        this.observers = [];
-        this.notifications = [];
-    }
+	constructor() {
+		this.observers = [];
+		this.notifications = [];
+	}
 
-    subscribe(observer) {
-        if (observer) {
-            this.observers = [...this.observers, observer];
-        }
-    }
+	subscribe(observer) {
+		if (observer) {
+			this.observers = [...this.observers, observer];
+		}
+	}
 
-    unsubscribe(observer) {
-        this.observers = this.observers.filter((o) => o !== observer);
-    }
+	unsubscribe(observer) {
+		this.observers = this.observers.filter((o) => o !== observer);
+	}
 
-    notify(...args) {
-        this.notifications.push(args);
-        this.observers.forEach((observer) => {
-            if (observer && typeof observer.update === 'function') {
-                observer.update(...args);
-            }
-        });
-    }
+	notify(...args) {
+		this.notifications.push(args);
+		this.observers.forEach((observer) => {
+			if (observer && typeof observer.update === 'function') {
+				observer.update(...args);
+			}
+		});
+	}
 
-    clear() {
-        this.observers = [];
-        this.notifications = [];
-    }
+	clear() {
+		this.observers = [];
+		this.notifications = [];
+	}
 
-    get subscriberCount() {
-        return this.observers.length;
-    }
+	get subscriberCount() {
+		return this.observers.length;
+	}
 }

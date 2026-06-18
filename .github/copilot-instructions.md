@@ -52,9 +52,9 @@ Every class instance is frozen with `Object.freeze(this)` in the constructor. Ne
 Prefer the static factory methods for instantiation:
 
 ```js
-IbiraAPIFetcher.withDefaultCache(url)       // default LRU cache
-IbiraAPIFetcher.withCustomCache(url, cache) // injected cache
-IbiraAPIFetcher.pure(url)                   // no cache
+IbiraAPIFetcher.withDefaultCache(url); // default LRU cache
+IbiraAPIFetcher.withCustomCache(url, cache); // injected cache
+IbiraAPIFetcher.pure(url); // no cache
 ```
 
 ### JSDoc is mandatory
