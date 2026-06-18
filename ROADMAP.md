@@ -219,7 +219,7 @@ CLOSED ──(N consecutive failures)──> OPEN
 
 **Deliverables:**
 
-- [ ] **`CircuitBreaker` state machine** (`src/resilience/CircuitBreaker.ts`, ~150 lines) —
+- [x] **`CircuitBreaker` state machine** (`src/resilience/CircuitBreaker.ts`, ~150 lines) —
       pure class with no I/O; tracks `state: 'closed' | 'open' | 'half-open'`, `failureCount`,
       `successCount`, `nextRetryTime`; exposes `canAttempt(): boolean`, `recordSuccess(): void`,
       `recordFailure(error: Error): void`, `getState()`, `reset()`; configurable via
