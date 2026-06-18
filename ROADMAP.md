@@ -278,7 +278,7 @@ Goal: production-ready, semantically stable public API.
 - [x] Full TypeScript strict-mode compatibility
 - [x] 95%+ test coverage across all metrics
 - [x] Performance benchmarks published in `docs/`
-- [ ] **Performance monitoring hooks** — add optional hooks for observability metrics (fetch timing, cache hit/miss rate, retry counts) to support profiling and future scalability analysis
+- [x] **Performance monitoring hooks** — `onMetric?: (event: MetricEvent) => void` added to `FetcherOptions`; fires `cache-hit`, `cache-miss`, `fetch-success`, `fetch-error`, `retry` events with url, durationMs, attempt, and error fields; `MetricEvent` discriminated union exported from `src/index.ts`; 7 new tests
 - [ ] `MIGRATION.md` updated for any breaking changes from alpha
 - [ ] `SECURITY.md` and responsible-disclosure process
 - [x] Automated npm publish via GitHub Actions on tagged releases

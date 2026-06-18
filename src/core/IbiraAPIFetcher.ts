@@ -97,6 +97,16 @@ export interface FetcherOptions {
 	 * ```
 	 */
 	parseResponse?: (data: unknown) => unknown;
+	/**
+	 * Optional callback for performance observability metrics.
+	 *
+	 * Called synchronously during `fetchData()` at each lifecycle event (cache hit/miss,
+	 * network success/failure, retry). Errors thrown inside `onMetric` propagate to the caller —
+	 * keep the callback lightweight and non-throwing.
+	 *
+	 * @see {@link MetricEvent} for the full discriminated union.
+	 */
+	onMetric?: (event: MetricEvent) => void;
 }
 
 /**
@@ -150,6 +160,33 @@ export interface FetchResult {
 	newCacheState: Map<string, CacheEntry>;
 	meta: FetchMeta;
 }
+
+/**
+ * A discriminated union of metric events fired by `IbiraAPIFetcher.fetchData()` via `onMetric`.
+ *
+ * Each variant corresponds to a distinct observable event in the fetch lifecycle:
+ * - `cache-hit`     — request served from cache; no network I/O
+ * - `cache-miss`    — cache did not have valid data; network request attempted
+ * - `fetch-success` — network request completed successfully
+ * - `fetch-error`   — all retry attempts exhausted; final error being thrown
+ * - `retry`         — a retry is about to be scheduled after a transient failure
+ *
+ * @example
+ * const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
+ *   onMetric: (m) => {
+ *     if (m.type === 'cache-hit')     metrics.cacheHits++;
+ *     if (m.type === 'cache-miss')    metrics.cacheMisses++;
+ *     if (m.type === 'fetch-success') histogram.record(m.durationMs);
+ *     if (m.type === 'retry')         metrics.retryCount++;
+ *   },
+ * });
+ */
+export type MetricEvent =
+	| { readonly type: 'cache-hit';     readonly url: string; readonly durationMs: number }
+	| { readonly type: 'cache-miss';    readonly url: string }
+	| { readonly type: 'fetch-success'; readonly url: string; readonly durationMs: number; readonly attempt: number }
+	| { readonly type: 'fetch-error';   readonly url: string; readonly durationMs: number; readonly attempt: number; readonly error: Error }
+	| { readonly type: 'retry';         readonly url: string; readonly attempt: number; readonly delayMs: number; readonly error: Error };
 
 /**
  * A discriminated union representing the outcome of a fetch operation.
@@ -228,6 +265,7 @@ export class IbiraAPIFetcher {
 	readonly onResponse: ((response: Response) => Response | Promise<Response>) | null;
 	readonly retryStrategy: ((attempt: number, error: Error) => boolean) | null;
 	readonly parseResponse: ((data: unknown) => unknown) | null;
+	readonly onMetric: ((event: MetricEvent) => void) | null;
 
 	/**
 	 * Creates an IbiraAPIFetcher with a purely functional cache approach
@@ -481,6 +519,7 @@ export class IbiraAPIFetcher {
 		this.onResponse = options.onResponse ?? null;
 		this.retryStrategy = options.retryStrategy ?? null;
 		this.parseResponse = options.parseResponse ?? null;
+		this.onMetric = options.onMetric ?? null;
 
 		// ✅ IMMUTABLE: Deep freeze the entire instance for maximum referential transparency
 		// This prevents any external code from modifying the fetcher's properties
@@ -991,12 +1030,27 @@ export class IbiraAPIFetcher {
 		const activeCache = cacheOverride || this.cache;
 
 		for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-			const result = await this.fetchDataPure(activeCache, Date.now(), null, signal);
+			const t0 = Date.now();
+			const result = await this.fetchDataPure(activeCache, t0, null, signal);
+			const durationMs = Date.now() - t0;
 
 			this._applySideEffects(result, activeCache);
 
 			if (result.success) {
+				if (this.onMetric) {
+					if (result.fromCache) {
+						this.onMetric({ type: 'cache-hit', url: this.url, durationMs });
+					} else {
+						this.onMetric({ type: 'cache-miss', url: this.url });
+						this.onMetric({ type: 'fetch-success', url: this.url, durationMs, attempt: attempt + 1 });
+					}
+				}
 				return result.data;
+			}
+
+			// Network was attempted but failed — cache did not serve the request
+			if (this.onMetric) {
+				this.onMetric({ type: 'cache-miss', url: this.url });
 			}
 
 			const isLastAttempt = attempt >= this.maxRetries;
@@ -1006,10 +1060,17 @@ export class IbiraAPIFetcher {
 				? this.retryStrategy(attempt, result.error!)
 				: this._isRetryableError(result.error!);
 			if (isLastAttempt || !shouldRetry || isExternallyAborted) {
+				if (this.onMetric) {
+					this.onMetric({ type: 'fetch-error', url: this.url, durationMs, attempt: attempt + 1, error: result.error! });
+				}
 				throw result.error;
 			}
 
-			await this._sleep(this._calculateRetryDelay(attempt));
+			const delayMs = this._calculateRetryDelay(attempt);
+			if (this.onMetric) {
+				this.onMetric({ type: 'retry', url: this.url, attempt: attempt + 1, delayMs, error: result.error! });
+			}
+			await this._sleep(delayMs);
 		}
 
 		// Unreachable — TypeScript exhaustiveness guard

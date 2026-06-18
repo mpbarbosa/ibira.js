@@ -1601,4 +1601,159 @@ describe('IbiraAPIFetcher', () => {
 			await expect(promise).rejects.toThrow();
 		});
 	});
+
+	// ─── Performance monitoring hooks (onMetric) ─────────────────────────────────
+
+	describe('performance monitoring hooks (onMetric)', () => {
+		const url = 'https://api.example.com/metric-test';
+		const responseData = { id: 42 };
+
+		function makeFetcher(onMetric, extraOpts = {}) {
+			return new IbiraAPIFetcher(url, makeCache(), {
+				eventNotifier: new MockEventNotifier(),
+				maxRetries: 0,
+				onMetric,
+				...extraOpts,
+			});
+		}
+
+		beforeEach(() => {
+			global.fetch = jest.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: async () => responseData,
+			});
+		});
+
+		test('fires cache-hit with url and non-negative durationMs when cache is warm', async () => {
+			const events = [];
+			const f = makeFetcher((e) => events.push(e));
+			// prime the cache
+			await f.fetchData();
+			events.length = 0;
+			// second call — served from cache
+			await f.fetchData();
+
+			expect(events).toHaveLength(1);
+			expect(events[0].type).toBe('cache-hit');
+			expect(events[0].url).toBe(url);
+			expect(typeof events[0].durationMs).toBe('number');
+			expect(events[0].durationMs).toBeGreaterThanOrEqual(0);
+		});
+
+		test('fires cache-miss then fetch-success on network hit', async () => {
+			const events = [];
+			const f = makeFetcher((e) => events.push(e));
+			const data = await f.fetchData();
+
+			expect(data).toEqual(responseData);
+			expect(events).toHaveLength(2);
+			expect(events[0].type).toBe('cache-miss');
+			expect(events[0].url).toBe(url);
+			expect(events[1].type).toBe('fetch-success');
+			expect(events[1].url).toBe(url);
+			expect(events[1].attempt).toBe(1);
+			expect(events[1].durationMs).toBeGreaterThanOrEqual(0);
+		});
+
+		test('fires cache-miss then fetch-error on final failure', async () => {
+			const networkError = new Error('Network failure');
+			global.fetch = jest.fn().mockRejectedValue(networkError);
+			const events = [];
+			const f = makeFetcher((e) => events.push(e));
+
+			await expect(f.fetchData()).rejects.toThrow('Network failure');
+
+			expect(events).toHaveLength(2);
+			expect(events[0].type).toBe('cache-miss');
+			expect(events[1].type).toBe('fetch-error');
+			expect(events[1].url).toBe(url);
+			expect(events[1].attempt).toBe(1);
+			expect(events[1].error).toBe(networkError);
+			expect(events[1].durationMs).toBeGreaterThanOrEqual(0);
+		});
+
+		test('fires retry events between cache-miss and fetch-error on retried failures', async () => {
+			const networkError = new TypeError('fetch failed');
+			global.fetch = jest.fn().mockRejectedValue(networkError);
+			const events = [];
+			const f = new IbiraAPIFetcher(url, makeCache(), {
+				eventNotifier: new MockEventNotifier(),
+				maxRetries: 2,
+				retryDelay: 100,
+				onMetric: (e) => events.push(e),
+			});
+
+			const promise = f.fetchData();
+			promise.catch(() => {});
+			await jest.runAllTimersAsync();
+
+			await expect(promise).rejects.toThrow();
+
+			const types = events.map((e) => e.type);
+			// 3 network attempts, 2 retries, 1 final error
+			expect(types).toEqual([
+				'cache-miss', 'retry',
+				'cache-miss', 'retry',
+				'cache-miss', 'fetch-error',
+			]);
+			expect(events[1].attempt).toBe(1);
+			expect(events[3].attempt).toBe(2);
+			expect(events[5].attempt).toBe(3);
+			expect(typeof events[1].delayMs).toBe('number');
+		});
+
+		test('retry event carries the error that triggered the retry', async () => {
+			const retryableError = new TypeError('fetch failed');
+			global.fetch = jest.fn().mockRejectedValue(retryableError);
+			const retryEvents = [];
+			const f = new IbiraAPIFetcher(url, makeCache(), {
+				eventNotifier: new MockEventNotifier(),
+				maxRetries: 1,
+				retryDelay: 100,
+				onMetric: (e) => { if (e.type === 'retry') retryEvents.push(e); },
+			});
+
+			const promise = f.fetchData();
+			promise.catch(() => {});
+			await jest.runAllTimersAsync();
+
+			await expect(promise).rejects.toThrow();
+
+			expect(retryEvents).toHaveLength(1);
+			expect(retryEvents[0].error).toBe(retryableError);
+			expect(retryEvents[0].delayMs).toBeGreaterThanOrEqual(0);
+		});
+
+		test('no metric calls when onMetric is not provided', async () => {
+			// should not throw even without onMetric
+			const f = new IbiraAPIFetcher(url, makeCache(), {
+				eventNotifier: new MockEventNotifier(),
+				maxRetries: 0,
+			});
+			await expect(f.fetchData()).resolves.toEqual(responseData);
+		});
+
+		test('fetch-success attempt reflects actual attempt number on mid-retry success', async () => {
+			const networkError = new TypeError('fetch failed');
+			global.fetch = jest
+				.fn()
+				.mockRejectedValueOnce(networkError)
+				.mockResolvedValueOnce({ ok: true, status: 200, json: async () => responseData });
+			const successEvents = [];
+			const f = new IbiraAPIFetcher(url, makeCache(), {
+				eventNotifier: new MockEventNotifier(),
+				maxRetries: 2,
+				retryDelay: 100,
+				onMetric: (e) => { if (e.type === 'fetch-success') successEvents.push(e); },
+			});
+
+			const promise = f.fetchData();
+			await jest.runAllTimersAsync();
+
+			await expect(promise).resolves.toEqual(responseData);
+			expect(successEvents).toHaveLength(1);
+			expect(successEvents[0].attempt).toBe(2);
+		});
+	});
 });
