@@ -87,7 +87,7 @@ Low-priority housekeeping items that improve contributor experience without chan
       behaviour (what happens when `maxSize` is reached mid-burst), retry exhaustion (what the caller
       receives after all retries fail), and observer error isolation (does one subscriber's throw
       prevent others from being notified)
-- [ ] **`docs/INDEX.md` CDN & versioning refresh** — update CDN URLs and version references in
+- [x] **`docs/INDEX.md` CDN & versioning refresh** — update CDN URLs and version references in
       `docs/INDEX.md` to point to npm-based delivery (`cdn.jsdelivr.net/npm/ibira.js@…/dist/index.mjs`)
       now that the package is published; verify all cross-links remain valid
 - [ ] **`docs/FUNCTIONAL_REQUIREMENTS.md` API alignment** — review and update to reflect current

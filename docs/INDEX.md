@@ -2,7 +2,7 @@
 
 > **Comprehensive guide to all documentation, guides, and configuration files in the ibira.js repository**
 
-**Version:** 0.4.20-alpha
+**Version:** 0.4.29-alpha
 **Status:** ✅ **REFERENTIALLY TRANSPARENT** - Perfect 10/10 Score Achieved
 **License:** MIT
 **Achievement:** 🏆 **Perfect Functional Purity**
@@ -67,7 +67,10 @@
 
 **ibira.js** is available via jsDelivr CDN for easy browser integration:
 
-- **Production URL:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.20-alpha/dist/index.mjs`
+- **Production URL:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.29-alpha/dist/index.mjs`
+- **ESM (latest patch):** `https://cdn.jsdelivr.net/npm/ibira.js@~0.4/dist/index.mjs`
+- **CJS:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.29-alpha/dist/index.js`
+- **Types:** `https://cdn.jsdelivr.net/npm/ibira.js@0.4.29-alpha/dist/index.d.ts`
 - **Documentation:** See README.md CDN section or run `./cdn-delivery.sh`
 - **Generated URLs:** Check `cdn-urls.txt` for all available CDN options
 
@@ -478,7 +481,7 @@ Maintain high standards through code review and best practices. See [Code Review
 
 ## 📊 Project Status
 
-**Current Version:** 0.4.20-alpha
+**Current Version:** 0.4.29-alpha
 **Status:** Early Development (Alpha)
 
 ### Development Roadmap
@@ -489,18 +492,23 @@ The project is in active early development. Current focus areas:
 - ✅ Observer pattern support
 - ✅ Caching mechanism
 - ✅ Error handling
-- 🚧 Comprehensive test suite
-- 🚧 Package configuration and publishing
-- 🚧 CI/CD pipeline
+- ✅ Comprehensive test suite (integration + e2e layers)
+- ✅ Package configuration and publishing
+- ✅ CI/CD pipeline (GitHub Actions with audit + markdown lint)
 - 🚧 Additional documentation and examples
 
 ### Version History
 
-| Version     | Release Date | Status     | Key Features                                |
-| ----------- | ------------ | ---------- | ------------------------------------------- |
-| 0.2.1-alpha | 2025-12-15   | Latest     | CDN delivery support, documentation updates |
-| 0.2.0-alpha | 2025-12-15   | Superseded | Modular architecture, 90%+ test coverage    |
-| 0.1.0-alpha | 2025-12-14   | Superseded | Initial release, referential transparency   |
+| Version      | Date       | Status     | Key Changes                                              |
+| ------------ | ---------- | ---------- | -------------------------------------------------------- |
+| 0.4.29-alpha | 2026-06-17 | Latest     | Edge-case documentation (JSDoc + docs/EDGE_CASES.md)     |
+| 0.4.28-alpha | 2026-06-17 | Superseded | Cache cleanup scalability; lazy cleanup strategy         |
+| 0.4.27-alpha | 2026-06-17 | Superseded | Markdown quality hardening (markdownlint-cli2 + Husky)   |
+| 0.4.26-alpha | 2026-06-17 | Superseded | Prettier integration; eslint-config-prettier             |
+| 0.4.25-alpha | 2026-06-17 | Superseded | Automated dependency management (Dependabot)             |
+| 0.4.24-alpha | 2026-06-17 | Superseded | Integration and e2e test layer                           |
+| 0.4.20-alpha | 2025-12-15 | Superseded | CDN delivery support, documentation updates              |
+| 0.1.0-alpha  | 2025-12-14 | Superseded | Initial release, referential transparency                |
 
 ---
 
