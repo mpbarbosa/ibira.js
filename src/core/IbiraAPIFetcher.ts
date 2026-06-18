@@ -898,6 +898,15 @@ export class IbiraAPIFetcher {
 	 *   - Errors thrown by `onRequest` or `onResponse` interceptors
 	 *   - `AbortError` when `signal` is aborted externally (not retried)
 	 *
+	 * **Retry exhaustion:** the fetcher makes up to `maxRetries + 1` total
+	 * attempts (1 initial + `maxRetries` retries). Only retryable errors
+	 * (matching `retryableStatusCodes` or the custom `retryStrategy`) trigger
+	 * a retry. After the last attempt the **original** error from that attempt
+	 * is re-thrown directly — it is never wrapped. Setting `maxRetries: 0`
+	 * disables retries entirely; any failure throws immediately after the
+	 * single attempt. Externally aborted requests (`signal.aborted`) are never
+	 * retried, regardless of `maxRetries`.
+	 *
 	 * @example
 	 * // Practical usage - handles side effects automatically
 	 * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
@@ -905,16 +914,29 @@ export class IbiraAPIFetcher {
 	 * console.log(data); // Retrieved data
 	 *
 	 * @example
+	 * // Retry exhaustion: catching the error thrown after all attempts fail
+	 * const fetcher = IbiraAPIFetcher.withDefaultCache(url); // maxRetries defaults to 3
+	 * try {
+	 *   const data = await fetcher.fetchData(); // up to 4 total attempts
+	 * } catch (error) {
+	 *   // error is the original Error from the final attempt — never wrapped
+	 *   console.error('All retries exhausted:', error.message);
+	 * }
+	 *
+	 * @example
+	 * // maxRetries: 0 — disable retries; throw immediately on first failure
+	 * const noRetry = IbiraAPIFetcher.withDefaultCache(url, { maxRetries: 0 });
+	 * try {
+	 *   await noRetry.fetchData();
+	 * } catch (error) {
+	 *   console.error('Failed (no retries):', error.message);
+	 * }
+	 *
+	 * @example
 	 * // Cancel an in-flight request
 	 * const controller = new AbortController();
 	 * setTimeout(() => controller.abort(), 1000);
 	 * const data = await fetcher.fetchData(null, controller.signal);
-	 *
-	 * @example
-	 * // Pure functional testing
-	 * const mockNetwork = () => Promise.resolve({ test: 'data' });
-	 * const result = await fetcher.fetchDataPure(new Map(), Date.now(), mockNetwork);
-	 * // Test result without side effects
 	 */
 	async fetchData(
 		cacheOverride: CacheInterface | null = null,

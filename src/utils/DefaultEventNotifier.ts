@@ -107,14 +107,29 @@ export class DefaultEventNotifier {
 	 * Observer errors are isolated — a throwing observer does not prevent
 	 * subsequent observers from receiving the notification.
 	 *
+	 * **Error isolation:** if an observer's `update()` method throws, the
+	 * error is caught and silently discarded by the underlying
+	 * `DualObserverSubject`. The notifier does not log, rethrow, or
+	 * accumulate these errors. All remaining observers in the subscription
+	 * list still receive the notification in the original subscription order.
+	 * Isolation applies per-observer: one bad subscriber never affects another.
+	 *
 	 * @param {...unknown} args - Arguments to pass to each observer's update method
+	 *
+	 * @example
+	 * // A throwing observer does not affect others
+	 * const notifier = new DefaultEventNotifier();
+	 * notifier.subscribe({ update: () => { throw new Error('broken observer'); } });
+	 * notifier.subscribe({ update: (event) => console.log('received:', event) });
+	 * notifier.notify('success', data);
+	 * // logs 'received: success' — the broken observer's error was silently discarded
 	 *
 	 * @example
 	 * // Notify with event type and payload
 	 * notifier.notify('success', { data: [1, 2, 3] });
 	 *
 	 * @example
-	 * // Notify with error
+	 * // Notify with error event
 	 * notifier.notify('error', { error: new Error('Failed') });
 	 */
 	notify(...args: unknown[]): void {

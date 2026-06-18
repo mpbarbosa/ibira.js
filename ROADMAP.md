@@ -83,7 +83,7 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [x] **Cache cleanup scalability review** — profile the periodic cleanup interval
       (`_startPeriodicCleanup`) under high-load scenarios (many concurrent URLs, large TTL spreads);
       consider a lazy / on-demand eviction strategy for environments where `setInterval` is costly
-- [ ] **Edge-case documentation** — expand JSDoc and `docs/` to explicitly cover: cache overflow
+- [x] **Edge-case documentation** — expand JSDoc and `docs/` to explicitly cover: cache overflow
       behaviour (what happens when `maxSize` is reached mid-burst), retry exhaustion (what the caller
       receives after all retries fail), and observer error isolation (does one subscriber's throw
       prevent others from being notified)

@@ -101,14 +101,26 @@ export class DefaultCache<T = unknown> {
 	}
 
 	/**
-	 * Stores a value in the cache
-	 * Automatically enforces size limits using LRU eviction
+	 * Stores a value in the cache.
+	 * Automatically enforces size limits via LRU eviction.
+	 *
+	 * **Cache overflow behaviour:** if adding this entry causes `storage.size`
+	 * to exceed `maxSize`, the entry with the lowest `timestamp` (least
+	 * recently used) is evicted synchronously before this method returns.
+	 * The cache never holds more than `maxSize` entries at any point.
+	 * During a burst where multiple entries share the same `timestamp`,
+	 * eviction order among them is stable but arbitrary (first-inserted wins).
 	 *
 	 * @param {string} key - The cache key
 	 * @param {CacheEntry} value - The value to cache
 	 *
 	 * @example
-	 * cache.set('user:123', { data: { name: 'John' }, timestamp: Date.now(), expiresAt: Date.now() + 300000 });
+	 * const cache = new DefaultCache({ maxSize: 2, expiration: 60_000 });
+	 * // entries helper: { data, timestamp: Date.now(), expiresAt: Date.now() + 60_000 }
+	 * cache.set('a', entryA);
+	 * cache.set('b', entryB);
+	 * cache.set('c', entryC); // 'a' is evicted — it has the oldest timestamp
+	 * console.log(cache.size); // 2
 	 */
 	set(key: string, value: CacheEntry<T>): void {
 		this.storage.set(key, value);
@@ -167,8 +179,10 @@ export class DefaultCache<T = unknown> {
 	}
 
 	/**
-	 * Enforces the maximum cache size by removing oldest entries
-	 * Uses LRU (Least Recently Used) eviction strategy
+	 * Synchronously evicts entries to bring the cache back within `maxSize`.
+	 * Sorts all current entries by `timestamp` ascending and removes the
+	 * oldest `(size - maxSize)` entries. Called on every `set()`, so the
+	 * cache is always within bounds when `set()` returns.
 	 *
 	 * @private
 	 */
