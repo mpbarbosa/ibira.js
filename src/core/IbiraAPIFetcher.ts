@@ -134,6 +134,28 @@ export interface FetchResult {
 }
 
 /**
+ * A discriminated union representing the outcome of a fetch operation.
+ *
+ * Use `fetchSafe()` to obtain a `Result` instead of wrapping `fetchData()` in a try/catch.
+ * Narrow the union with `result.ok`:
+ *
+ * ```typescript
+ * const result = await fetcher.fetchSafe<User[]>();
+ * if (result.ok) {
+ *   renderUsers(result.value); // typed as User[]
+ * } else {
+ *   console.error(result.error.message);
+ * }
+ * ```
+ *
+ * @template T - The type of the successful value. Defaults to `unknown`.
+ * @template E - The error type. Defaults to `Error`.
+ */
+export type Result<T = unknown, E extends Error = Error> =
+	| { readonly ok: true; readonly value: T }
+	| { readonly ok: false; readonly error: E };
+
+/**
  * IbiraAPIFetcher - Core class for fetching and caching API data
  *
  * Provides a flexible, functional approach to API data fetching with built-in caching,
@@ -968,6 +990,56 @@ export class IbiraAPIFetcher {
 
 		// Unreachable — TypeScript exhaustiveness guard
 		throw new Error('Unexpected retry loop exit');
+	}
+
+	/**
+	 * Fetch data and return a `Result<T>` instead of throwing.
+	 *
+	 * This is a type-safe alternative to `fetchData()` for callers who prefer explicit
+	 * error handling over try/catch. It accepts the same arguments, applies the same
+	 * retry logic, and emits the same observer events — the only difference is the
+	 * return shape.
+	 *
+	 * On success the resolved value is `{ ok: true, value: T }`.
+	 * On any failure (network error, HTTP error, retry exhaustion, abort) the resolved
+	 * value is `{ ok: false, error: Error }`. The method itself never rejects.
+	 *
+	 * @template T - Expected type of the fetched data. Defaults to `unknown`.
+	 * @param {CacheInterface | null} [cacheOverride] - Optional cache instance to use instead of the default
+	 * @param {AbortSignal | null} [signal] - Optional AbortSignal for consumer-level request cancellation
+	 * @returns {Promise<Result<T>>} Always resolves; never rejects.
+	 *
+	 * @example
+	 * // Basic usage — no try/catch needed
+	 * const result = await fetcher.fetchSafe<User[]>();
+	 * if (result.ok) {
+	 *   renderUsers(result.value);
+	 * } else {
+	 *   showError(result.error.message);
+	 * }
+	 *
+	 * @example
+	 * // With AbortController
+	 * const controller = new AbortController();
+	 * setTimeout(() => controller.abort(), 2000);
+	 * const result = await fetcher.fetchSafe(null, controller.signal);
+	 * if (!result.ok) {
+	 *   console.log('Cancelled or failed:', result.error.message);
+	 * }
+	 */
+	async fetchSafe<T = unknown>(
+		cacheOverride: CacheInterface | null = null,
+		signal: AbortSignal | null = null,
+	): Promise<Result<T>> {
+		try {
+			const data = await this.fetchData(cacheOverride, signal);
+			return { ok: true, value: data as T };
+		} catch (error) {
+			return {
+				ok: false,
+				error: error instanceof Error ? error : new Error(String(error)),
+			};
+		}
 	}
 
 	/**

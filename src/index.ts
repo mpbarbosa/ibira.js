@@ -40,6 +40,7 @@ export type {
 	FetchEvent,
 	FetchMeta,
 	HttpMethod,
+	Result,
 } from './core/IbiraAPIFetcher.js';
 export { IbiraAPIFetchManager } from './core/IbiraAPIFetchManager.js';
 export { DefaultCache } from './utils/DefaultCache.js';

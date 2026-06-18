@@ -1337,4 +1337,92 @@ describe('IbiraAPIFetcher', () => {
 			expect(attempts).toEqual([0, 1, 2]);
 		});
 	});
+
+	describe('fetchSafe — Result/Either pattern', () => {
+		test('should return { ok: true, value } on successful fetch', async () => {
+			fetch.mockResolvedValue(makeMockResponse(mockData));
+
+			const result = await fetcher.fetchSafe();
+
+			expect(result.ok).toBe(true);
+			expect(result.value).toEqual(mockData);
+		});
+
+		test('should return { ok: false, error } on network failure without throwing', async () => {
+			fetch.mockRejectedValue(new Error('Network error'));
+
+			const result = await fetcher.fetchSafe();
+
+			expect(result.ok).toBe(false);
+			expect(result.error).toBeInstanceOf(Error);
+			expect(result.error.message).toBe('Network error');
+		});
+
+		test('should return { ok: false, error } on HTTP error status', async () => {
+			fetch.mockResolvedValue({ ok: false, status: 503, statusText: 'Service Unavailable', json: async () => ({}) });
+
+			const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, maxRetries: 0 });
+			const result = await f.fetchSafe();
+
+			expect(result.ok).toBe(false);
+			expect(result.error).toBeInstanceOf(Error);
+			expect(result.error.message).toMatch(/503/);
+		});
+
+		test('should return { ok: false, error } after all retries are exhausted', async () => {
+			fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error', json: async () => ({}) });
+
+			const f = new IbiraAPIFetcher(testUrl, cache, { eventNotifier, maxRetries: 1, retryDelay: 10 });
+			const promise = f.fetchSafe();
+			await jest.runAllTimersAsync();
+			const result = await promise;
+
+			expect(result.ok).toBe(false);
+			expect(result.error).toBeInstanceOf(Error);
+			expect(fetch).toHaveBeenCalledTimes(2); // initial + 1 retry
+		});
+
+		test('should return { ok: false, error } when request is aborted', async () => {
+			const controller = new AbortController();
+			controller.abort();
+
+			fetch.mockImplementation((_url, opts) => {
+				if (opts.signal && opts.signal.aborted) {
+					return Promise.reject(new DOMException('Aborted', 'AbortError'));
+				}
+				return Promise.resolve(makeMockResponse(mockData));
+			});
+
+			const f = IbiraAPIFetcher.withoutCache(testUrl, { maxRetries: 0 });
+			const result = await f.fetchSafe(null, controller.signal);
+
+			expect(result.ok).toBe(false);
+			expect(result.error).toBeInstanceOf(Error);
+		});
+
+		test('should never reject — the promise always resolves', async () => {
+			fetch.mockRejectedValue(new Error('catastrophic failure'));
+
+			await expect(fetcher.fetchSafe()).resolves.toMatchObject({ ok: false });
+		});
+
+		test('should still emit observer events on success', async () => {
+			fetch.mockResolvedValue(makeMockResponse(mockData));
+
+			await fetcher.fetchSafe();
+
+			const events = eventNotifier.notifications.map((n) => n[0]);
+			expect(events).toContain('loading-start');
+			expect(events).toContain('success');
+		});
+
+		test('should still emit error observer event on failure', async () => {
+			fetch.mockRejectedValue(new Error('Network error'));
+
+			await fetcher.fetchSafe();
+
+			const events = eventNotifier.notifications.map((n) => n[0]);
+			expect(events).toContain('error');
+		});
+	});
 });
