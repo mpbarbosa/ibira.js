@@ -33,6 +33,78 @@ The IbiraAPIFetcher employs a **dual-layer architecture** that separates pure fu
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Source Layout and Build Pipeline
+
+### Source tree (`src/`)
+
+```text
+src/
+├── index.ts                    ← public re-exports (the package entry point)
+├── core/
+│   ├── IbiraAPIFetcher.ts      ← dual-layer fetcher (pure core + side-effects wrapper)
+│   └── IbiraAPIFetchManager.ts ← multi-fetcher coordinator
+├── utils/
+│   ├── DefaultCache.ts         ← Map-backed LRU cache
+│   ├── DefaultEventNotifier.ts ← observer pattern wrapper around DualObserverSubject
+│   ├── debounce.ts             ← standalone utility
+│   └── throttle.ts             ← standalone utility
+└── config/
+    └── version.ts              ← canonical version constant (synced with package.json)
+```
+
+### TypeScript configuration (`tsconfig.json`)
+
+| Option                  | Value          | Why                                                   |
+| ----------------------- | -------------- | ----------------------------------------------------- |
+| `target`                | `ES2022`       | Modern output; no down-levelling overhead             |
+| `lib`                   | `ES2022, DOM`  | Gives access to `fetch`, `AbortController`, `Map`     |
+| `module`                | `ESNext`       | Native ES modules                                     |
+| `moduleResolution`      | `bundler`      | Correct resolution for tsup; allows extensionless imports |
+| `strict`                | `true`         | Full strict mode (no `any` enforced by ESLint too)    |
+| `noUnusedLocals/Params` | `true`         | Prevents dead-code accumulation in source             |
+
+`tsc --noEmit` is used for type-checking only (`npm run validate`). Actual compilation is done by **tsup**.
+
+### Build pipeline (tsup)
+
+```text
+src/index.ts  ──tsup──►  dist/index.js      (CommonJS)
+                      ►  dist/index.mjs     (ESM)
+                      ►  dist/index.d.ts    (TypeScript declarations)
+                      ►  dist/index.js.map  (source maps)
+                      ►  dist/index.mjs.map (source maps)
+```
+
+Key tsup settings (`tsup.config.ts`):
+
+- `entry: ['src/index.ts']` — single entry, all exports via `src/index.ts`
+- `format: ['cjs', 'esm']` — dual output
+- `dts: true` — generates `.d.ts` declarations alongside JS
+- `noExternal: ['bessa_patterns.ts']` — bundles the only runtime dependency so the published package has **zero peer dependencies**
+- `target: 'es2022'` — matches `tsconfig.json`; no additional down-levelling
+
+### `dist/` output structure
+
+```text
+dist/
+├── index.js       ← CJS  (require('ibira.js'))
+├── index.mjs      ← ESM  (import from 'ibira.js')
+├── index.d.ts     ← TypeScript declarations (automatic with moduleResolution: bundler)
+├── index.js.map
+└── index.mjs.map
+```
+
+`package.json` exports map ensures the correct format is served by bundler/Node.js:
+
+```json
+"main":    "dist/index.js",
+"module":  "dist/index.mjs",
+"types":   "dist/index.d.ts",
+"exports": { ".": { "import": "./dist/index.mjs", "require": "./dist/index.js" } }
+```
+
+---
+
 ## Component Breakdown
 
 ### 1. Pure Functional Core
@@ -73,17 +145,23 @@ The IbiraAPIFetcher employs a **dual-layer architecture** that separates pure fu
 
 **Injected Dependencies**:
 
-```javascript
-// Cache dependency
-const cache = new Map();
-cache.maxSize = 100;
-cache.expiration = 300000;
+```typescript
+import {
+  IbiraAPIFetcher,
+  DefaultCache,
+  DefaultEventNotifier,
+} from 'ibira.js';
 
-// Event notifier dependency
-const eventNotifier = new DefaultEventNotifier();
+// Provide your own cache
+const cache = new DefaultCache<MyData>({ maxSize: 100, expiration: 300_000 });
 
-// Create instance with dependencies
-const fetcher = new IbiraAPIFetcher(url, cache, { eventNotifier });
+// Provide your own event notifier
+const notifier = new DefaultEventNotifier();
+
+// Inject via factory
+const fetcher = IbiraAPIFetcher.withExternalCache(url, cache, {
+  eventNotifier: notifier,
+});
 ```
 
 ## Data Flow
@@ -170,16 +248,36 @@ return result.data;
 
 ## Testing Strategy
 
+### Environments
+
+Tests run in two environments (both required to pass before publish):
+
+| Command              | Environment | Purpose                                              |
+| -------------------- | ----------- | ---------------------------------------------------- |
+| `npm test`           | jsdom       | Default; simulates browser globals (`fetch`, `URL`)  |
+| `npm run test:node`  | Node.js     | Verifies Node.js ≥18 native Fetch API compatibility  |
+
+### Test modules
+
+| File                                    | What it covers                                              |
+| --------------------------------------- | ----------------------------------------------------------- |
+| `__tests__/IbiraAPIFetcher.test.js`     | Unit: pure core + side-effects wrapper                      |
+| `__tests__/IbiraAPIFetchManager.test.js`| Unit: deduplication, cleanup, manager lifecycle             |
+| `__tests__/DefaultCache.test.js`        | Unit: LRU eviction, expiration, size limits                 |
+| `__tests__/DefaultEventNotifier.test.js`| Unit: subscribe/unsubscribe, error isolation                |
+| `__tests__/integration.test.js`         | Integration: real DefaultCache + real DefaultEventNotifier  |
+| `__tests__/e2e.test.js`                 | E2E: full pipeline (fetch → cache → notify) with mocked network |
+
 ### Pure Function Testing
 
 - **No mocking required** for core logic
 - **Deterministic inputs/outputs** enable reliable assertions
 - **Isolated testing** of computation vs side effects
-- **Property-based testing** possible due to purity
+- Inject `networkProvider` to test without real HTTP calls
 
 ### Integration Testing
 
-- **Mock dependencies** (cache, eventNotifier, networkProvider)
+- Mock only `global.fetch`; use real DefaultCache + real DefaultEventNotifier
 - **Side effects verification** through spy functions
 - **End-to-end workflows** with real integrations
 
@@ -295,4 +393,4 @@ Not intended to be executed directly.
 ---
 
 _Architecture designed for referential transparency, testability, and maintainability_
-_IbiraAPIFetcher v0.3.0-alpha_
+_ibira.js v0.4.31-alpha — TypeScript source, tsup build pipeline_

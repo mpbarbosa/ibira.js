@@ -93,7 +93,7 @@ Low-priority housekeeping items that improve contributor experience without chan
 - [x] **`docs/FUNCTIONAL_REQUIREMENTS.md` API alignment** — review and update to reflect current
       API surface (HTTP methods beyond GET, `validateStatus`, `AbortController` signal) and CDN usage
       patterns introduced in v0.4.x
-- [ ] **`docs/ARCHITECTURE.md` TypeScript update** — update to reflect TypeScript source migration,
+- [x] **`docs/ARCHITECTURE.md` TypeScript update** — update to reflect TypeScript source migration,
       new `tsconfig.json` / tsup build pipeline, and the `dist/` output structure (CJS + ESM + `.d.ts`)
 - [ ] **`__tests__/README.md` dual-environment expansion** — expand to document dual-environment
       testing requirements (Node.js ≥18 + jsdom), new test modules (`DefaultCache`, `DefaultEventNotifier`),
