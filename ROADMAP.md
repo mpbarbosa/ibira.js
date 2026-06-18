@@ -264,7 +264,7 @@ CLOSED ──(N consecutive failures)──> OPEN
   - Observer events emitted on each state transition
   - Integration: `CircuitBreakerManager` + real `IbiraAPIFetchManager` with mocked `fetch`
 
-- [ ] **`docs/CIRCUIT_BREAKER.md`** — usage guide with configuration reference, state diagram,
+- [x] **`docs/CIRCUIT_BREAKER.md`** — usage guide with configuration reference, state diagram,
       a worked example showing `fallback` serving stale cache, and guidance on tuning thresholds for
       fast vs. slow external APIs
 
