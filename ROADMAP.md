@@ -95,7 +95,7 @@ Low-priority housekeeping items that improve contributor experience without chan
       patterns introduced in v0.4.x
 - [x] **`docs/ARCHITECTURE.md` TypeScript update** — update to reflect TypeScript source migration,
       new `tsconfig.json` / tsup build pipeline, and the `dist/` output structure (CJS + ESM + `.d.ts`)
-- [ ] **`__tests__/README.md` dual-environment expansion** — expand to document dual-environment
+- [x] **`__tests__/README.md` dual-environment expansion** — expand to document dual-environment
       testing requirements (Node.js ≥18 + jsdom), new test modules (`DefaultCache`, `DefaultEventNotifier`),
       and the `npm run test:node` script
 - [ ] **Referential transparency docs cross-linking** — add explicit cross-links between the five
