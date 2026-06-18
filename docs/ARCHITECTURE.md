@@ -390,6 +390,67 @@ echo -e "${GREEN}OK${NC}"
 
 Not intended to be executed directly.
 
+### Script Best Practices
+
+#### Shebangs
+
+All scripts carry a shebang on line 1:
+
+| Script | Shebang | Why |
+| ------ | ------- | --- |
+| `cdn-delivery.sh` | `#!/bin/bash` | Uses bash-specific features (`[[ ]]`, `set -euo pipefail`) |
+| `scripts/deploy.sh` | `#!/usr/bin/env bash` | `env` lookup is portable across Linux and macOS |
+| `scripts/colors.sh` | `#!/bin/bash` | Sourced by other scripts; shebang is informational |
+
+#### Executable permissions
+
+Scripts that are invoked directly must carry the executable bit. Run once per clone if missing:
+
+```bash
+chmod +x cdn-delivery.sh scripts/deploy.sh
+```
+
+`scripts/colors.sh` is sourced (`source scripts/colors.sh`), not executed — it does not need `+x`.
+
+#### Required environment
+
+| Script | Prerequisites |
+| ------ | ------------- |
+| `cdn-delivery.sh` | `node` in `PATH` (reads `package.json`); `git` in `PATH` (reads HEAD and branch); must be run from the repo root |
+| `scripts/deploy.sh` | `node`/`npm` in `PATH`; `git` with a writable `origin` remote; clean working tree; must be run from the repo root |
+| `scripts/colors.sh` | None — defines ANSI constants only |
+
+#### Exit codes
+
+**`cdn-delivery.sh`**
+
+| Code | Meaning |
+| ---- | ------- |
+| `0` | Success — URLs printed and `cdn-urls.txt` written |
+| `1` | Setup failure — could not read version from `package.json`, or could not determine git commit/branch |
+
+The script uses `set -euo pipefail`, so any unexpected command failure also exits with a non-zero code.
+
+**`scripts/deploy.sh`**
+
+| Code | Meaning |
+| ---- | ------- |
+| `0` | Success — build, tests, commit, tag, and push all completed |
+| `1` | Dirty working tree or detached HEAD |
+| `2` | Test suite failed |
+| `4` | `git push` failed |
+
+#### Expected stdout
+
+**`cdn-delivery.sh`** — prints a colored URL table to the terminal, then writes the same content to `cdn-urls.txt` in the repo root. Example output (colors stripped):
+
+```text
+💾 Saving URLs to cdn-urls.txt...
+✅ URLs saved to cdn-urls.txt
+```
+
+**`scripts/deploy.sh`** — prints six numbered step banners with colored status (info / success / warn / error). On success, the final output is the jsDelivr CDN URL block from `cdn-urls.txt`.
+
 ---
 
 _Architecture designed for referential transparency, testability, and maintainability_

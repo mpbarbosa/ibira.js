@@ -103,7 +103,7 @@ Low-priority housekeeping items that improve contributor experience without chan
       `.github/REFERENTIAL_TRANSPARENCY.md`, `docs/referential_transparency/REFERENTIAL_TRANSPARENCY.md`,
       `docs/referential_transparency/PURE_SOLUTION.md`,
       `docs/referential_transparency/VERIFICATION_REPORT.md`) so readers can navigate between them
-- [ ] **Script best-practice documentation** — add a brief "Script Best Practices" note to
+- [x] **Script best-practice documentation** — add a brief "Script Best Practices" note to
       `docs/ARCHITECTURE.md` (or README.md) covering: executable permissions (`chmod +x`), shebang
       presence, required environment variables, and expected exit codes for `cdn-delivery.sh` and
       `scripts/deploy.sh`; also note each script's expected stdout output and return values
