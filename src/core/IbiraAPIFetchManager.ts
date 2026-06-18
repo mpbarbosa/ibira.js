@@ -22,7 +22,23 @@ import type { Observer } from '../utils/DefaultEventNotifier.js';
 export interface ManagerOptions {
 	maxCacheSize?: number;
 	cacheExpiration?: number;
+	/**
+	 * Milliseconds between automatic cache cleanups (default: 60 000).
+	 * Set to `0` to disable automatic cleanup entirely.
+	 * Ignored when `cleanupStrategy` is `'lazy'`.
+	 */
 	cleanupInterval?: number;
+	/**
+	 * Controls when expired-entry cleanup runs.
+	 *
+	 * - `'interval'` (default) — a `setInterval` fires every `cleanupInterval` ms.
+	 *   Works well in long-running Node.js processes and browsers.
+	 * - `'lazy'` — no timer is created; cleanup runs inside `fetch()` whenever
+	 *   `cleanupInterval` ms have elapsed since the last cleanup pass.
+	 *   Ideal for serverless / edge environments where `setInterval` is costly
+	 *   or unavailable.
+	 */
+	cleanupStrategy?: 'interval' | 'lazy';
 	maxRetries?: number;
 	retryDelay?: number;
 	retryMultiplier?: number;
@@ -127,6 +143,7 @@ export class IbiraAPIFetchManager {
 	defaultRetryMultiplier: number;
 	defaultRetryableStatusCodes: number[];
 	cleanupTimer: ReturnType<typeof setInterval> | null;
+	cleanupStrategy: 'interval' | 'lazy';
 
 	/**
 	 * Creates a new IbiraAPIFetchManager instance
@@ -148,9 +165,11 @@ export class IbiraAPIFetchManager {
 			maxSize: number;
 			expiration: number;
 		};
-		this.maxCacheSize = options.maxCacheSize || 100; // Prevent unbounded cache growth
-		this.cacheExpiration = options.cacheExpiration || 300000; // 5 minutes default cache expiration
-		this.cleanupInterval = options.cleanupInterval || 60000; // 1 minute cleanup interval
+		this.maxCacheSize = options.maxCacheSize || 100;
+		this.cacheExpiration = options.cacheExpiration || 300000;
+		// Use ?? so that 0 is honoured (disables automatic cleanup)
+		this.cleanupInterval = options.cleanupInterval ?? 60000;
+		this.cleanupStrategy = options.cleanupStrategy ?? 'interval';
 		this.lastCleanup = Date.now();
 
 		// Retry configuration for all fetchers
@@ -162,8 +181,10 @@ export class IbiraAPIFetchManager {
 		];
 		this.cleanupTimer = null;
 
-		// Start periodic cleanup
-		this._startPeriodicCleanup();
+		// Start periodic cleanup only for interval strategy with a positive interval
+		if (this.cleanupStrategy === 'interval' && this.cleanupInterval > 0) {
+			this._startPeriodicCleanup();
+		}
 	}
 
 	/**
@@ -257,6 +278,13 @@ export class IbiraAPIFetchManager {
 	 */
 	private _performPeriodicCleanup(): void {
 		const now = Date.now();
+
+		// Skip full scan when nothing is cached
+		if (this.globalCache.size === 0) {
+			this.lastCleanup = now;
+			return;
+		}
+
 		const expiredKeys = this._getExpiredCacheKeys(this.globalCache, now);
 
 		// Remove expired entries
@@ -336,6 +364,14 @@ export class IbiraAPIFetchManager {
 	 * }
 	 */
 	async fetch(url: string, options: FetcherOptions = {}): Promise<unknown> {
+		// Lazy strategy: run cleanup on-demand when cleanupInterval has elapsed
+		if (this.cleanupStrategy === 'lazy' && this.cleanupInterval > 0) {
+			const now = Date.now();
+			if (now - this.lastCleanup >= this.cleanupInterval) {
+				this._performPeriodicCleanup();
+			}
+		}
+
 		const fetcher = this.getFetcher(url, options);
 		const cacheKey = fetcher.getCacheKey();
 

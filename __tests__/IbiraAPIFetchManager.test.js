@@ -508,4 +508,72 @@ describe('IbiraAPIFetchManager', () => {
 			);
 		});
 	});
+
+	// ---------------------------------------------------------------------------
+	// Cache cleanup scalability
+	// ---------------------------------------------------------------------------
+
+	describe('cache cleanup scalability', () => {
+		const url = 'https://api.example.com/scalability';
+
+		it('lazy strategy does not create a setInterval timer', () => {
+			const lazy = new IbiraAPIFetchManager({ cleanupStrategy: 'lazy' });
+			expect(lazy.cleanupTimer).toBeNull();
+			lazy.destroy();
+		});
+
+		it('interval strategy with cleanupInterval: 0 does not create a timer', () => {
+			const noTimer = new IbiraAPIFetchManager({
+				cleanupStrategy: 'interval',
+				cleanupInterval: 0,
+			});
+			expect(noTimer.cleanupTimer).toBeNull();
+			noTimer.destroy();
+		});
+
+		it('lazy strategy runs cleanup inside fetch once cleanupInterval elapses', async () => {
+			const lazy = new IbiraAPIFetchManager({
+				cleanupStrategy: 'lazy',
+				cleanupInterval: 1000,
+				cacheExpiration: 500,
+			});
+			const initialCleanup = lazy.lastCleanup;
+
+			await lazy.fetch(url); // network fetch, cache populated
+			// Advance past both cacheExpiration and cleanupInterval
+			jest.advanceTimersByTime(1100);
+
+			await lazy.fetch(url); // lazy cleanup runs, then re-fetches (expired entry)
+
+			// lastCleanup must have been updated — proof that cleanup ran
+			expect(lazy.lastCleanup).toBeGreaterThan(initialCleanup);
+			// Two network calls: initial + post-expiry re-fetch
+			expect(global.fetch).toHaveBeenCalledTimes(2);
+			lazy.destroy();
+		});
+
+		it('lazy strategy does not run cleanup before cleanupInterval elapses', async () => {
+			const lazy = new IbiraAPIFetchManager({
+				cleanupStrategy: 'lazy',
+				cleanupInterval: 10_000,
+			});
+			const before = lazy.lastCleanup;
+			await lazy.fetch(url);
+			// Only 1 ms has passed — cleanup should not have run
+			jest.advanceTimersByTime(1);
+			await lazy.fetch(url);
+			expect(lazy.lastCleanup).toBe(before);
+			lazy.destroy();
+		});
+
+		it('_performPeriodicCleanup updates lastCleanup and exits early when cache is empty', () => {
+			const empty = new IbiraAPIFetchManager();
+			const before = empty.lastCleanup;
+			jest.advanceTimersByTime(1);
+			empty.triggerCleanup();
+			expect(empty.lastCleanup).toBeGreaterThan(before);
+			expect(empty.globalCache.size).toBe(0);
+			empty.destroy();
+		});
+	});
 });

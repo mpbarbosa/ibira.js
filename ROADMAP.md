@@ -80,7 +80,7 @@ Low-priority housekeeping items that improve contributor experience without chan
       (MD007) and headers ending with punctuation (MD026); integrate `markdownlint-cli` as a pre-commit
       hook (Husky) and CI step to prevent regressions; add `docs/MARKDOWN_LINTING_GUIDE.md` for
       contributors
-- [ ] **Cache cleanup scalability review** — profile the periodic cleanup interval
+- [x] **Cache cleanup scalability review** — profile the periodic cleanup interval
       (`_startPeriodicCleanup`) under high-load scenarios (many concurrent URLs, large TTL spreads);
       consider a lazy / on-demand eviction strategy for environments where `setInterval` is costly
 - [ ] **Edge-case documentation** — expand JSDoc and `docs/` to explicitly cover: cache overflow
