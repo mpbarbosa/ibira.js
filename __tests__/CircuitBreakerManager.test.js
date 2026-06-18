@@ -295,3 +295,199 @@ describe('CircuitBreakerManager — integration with IbiraAPIFetchManager', () =
 		inner.destroy();
 	});
 });
+
+// ─── CircuitBreakerManager — observer events ─────────────────────────────────
+
+describe('CircuitBreakerManager — observer events', () => {
+	function makeObserver() {
+		const calls = [];
+		return {
+			update: jest.fn((...args) => calls.push(args)),
+			calls,
+		};
+	}
+
+	function makeFailingManager(threshold = 3) {
+		const inner = makeMockInner(() => Promise.reject(new Error('fail')));
+		const manager = new CircuitBreakerManager(inner, { failureThreshold: threshold, timeout: 1000 });
+		return { inner, manager };
+	}
+
+	async function trip(manager, url = URL_A, threshold = 3) {
+		for (let i = 0; i < threshold; i++) {
+			try { await manager.fetch(url); } catch { /* expected */ }
+		}
+	}
+
+	test('subscribe() / unsubscribe() / subscriberCount work', () => {
+		const { manager } = makeFailingManager();
+		const obs = makeObserver();
+		expect(manager.subscriberCount).toBe(0);
+		manager.subscribe(obs);
+		expect(manager.subscriberCount).toBe(1);
+		manager.unsubscribe(obs);
+		expect(manager.subscriberCount).toBe(0);
+	});
+
+	test("emits 'breaker-open' when circuit trips", async () => {
+		const { manager } = makeFailingManager(3);
+		const obs = makeObserver();
+		manager.subscribe(obs);
+		await trip(manager, URL_A, 3);
+		expect(obs.update).toHaveBeenCalledWith(
+			'breaker-open',
+			expect.objectContaining({ url: URL_A }),
+		);
+	});
+
+	test("'breaker-open' payload has failureCount equal to threshold", async () => {
+		const { manager } = makeFailingManager(3);
+		const obs = makeObserver();
+		manager.subscribe(obs);
+		await trip(manager, URL_A, 3);
+		const [, payload] = obs.calls.find(([event]) => event === 'breaker-open');
+		expect(payload.failureCount).toBe(3);
+	});
+
+	test("'breaker-open' payload has a future retryAfter timestamp", async () => {
+		const before = Date.now();
+		const { manager } = makeFailingManager(2);
+		const obs = makeObserver();
+		manager.subscribe(obs);
+		await trip(manager, URL_A, 2);
+		const [, payload] = obs.calls.find(([event]) => event === 'breaker-open');
+		expect(payload.retryAfter).toBeGreaterThan(before);
+	});
+
+	test("emits 'breaker-half-open' after timeout elapses", async () => {
+		jest.useFakeTimers();
+		const { manager } = makeFailingManager(2);
+		const obs = makeObserver();
+		manager.subscribe(obs);
+		await trip(manager, URL_A, 2);
+		obs.update.mockClear();
+		obs.calls.length = 0;
+
+		jest.advanceTimersByTime(1001);
+		manager.getBreakerForUrl(URL_A).canAttempt(); // triggers open → half-open
+		expect(obs.update).toHaveBeenCalledWith(
+			'breaker-half-open',
+			expect.objectContaining({ url: URL_A }),
+		);
+		jest.useRealTimers();
+	});
+
+	test("'breaker-half-open' payload has no retryAfter", async () => {
+		jest.useFakeTimers();
+		const { manager } = makeFailingManager(2);
+		const obs = makeObserver();
+		manager.subscribe(obs);
+		await trip(manager, URL_A, 2);
+		jest.advanceTimersByTime(1001);
+		obs.calls.length = 0;
+		manager.getBreakerForUrl(URL_A).canAttempt();
+		const [, payload] = obs.calls.find(([event]) => event === 'breaker-half-open');
+		expect(payload.retryAfter).toBeUndefined();
+		jest.useRealTimers();
+	});
+
+	test("emits 'breaker-closed' when half-open probe succeeds", async () => {
+		jest.useFakeTimers();
+		const successData = { ok: true };
+		const inner = makeMockInner();
+		inner.fetch
+			.mockRejectedValueOnce(new Error('x'))
+			.mockRejectedValueOnce(new Error('x'))
+			.mockResolvedValue(successData);
+		const manager = new CircuitBreakerManager(inner, {
+			failureThreshold: 2,
+			successThreshold: 1,
+			timeout: 1000,
+		});
+		const obs = makeObserver();
+		manager.subscribe(obs);
+
+		// Open the circuit
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+
+		// Advance to half-open
+		jest.advanceTimersByTime(1001);
+		obs.calls.length = 0;
+
+		// Successful probe → closed
+		await manager.fetch(URL_A);
+		expect(obs.update).toHaveBeenCalledWith(
+			'breaker-closed',
+			expect.objectContaining({ url: URL_A }),
+		);
+		jest.useRealTimers();
+	});
+
+	test("'breaker-closed' payload has failureCount 0", async () => {
+		jest.useFakeTimers();
+		const inner = makeMockInner();
+		inner.fetch
+			.mockRejectedValueOnce(new Error('x'))
+			.mockRejectedValueOnce(new Error('x'))
+			.mockResolvedValue({ ok: true });
+		const manager = new CircuitBreakerManager(inner, {
+			failureThreshold: 2,
+			successThreshold: 1,
+			timeout: 1000,
+		});
+		const obs = makeObserver();
+		manager.subscribe(obs);
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+		jest.advanceTimersByTime(1001);
+		obs.calls.length = 0;
+		await manager.fetch(URL_A);
+		const [, payload] = obs.calls.find(([event]) => event === 'breaker-closed');
+		expect(payload.failureCount).toBe(0);
+		jest.useRealTimers();
+	});
+
+	test('observer added after first trip still receives future events', async () => {
+		jest.useFakeTimers();
+		const inner = makeMockInner();
+		inner.fetch.mockRejectedValue(new Error('x'));
+		const manager = new CircuitBreakerManager(inner, { failureThreshold: 2, timeout: 1000 });
+
+		// Trip before subscribing
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+
+		// Subscribe after trip
+		const obs = makeObserver();
+		manager.subscribe(obs);
+
+		// Half-open probe fails → re-opens
+		jest.advanceTimersByTime(1001);
+		manager.getBreakerForUrl(URL_A).canAttempt(); // → half-open
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+
+		expect(obs.update).toHaveBeenCalledWith(
+			'breaker-open',
+			expect.objectContaining({ url: URL_A }),
+		);
+		jest.useRealTimers();
+	});
+
+	test('user-provided onStateChange is still called alongside events', async () => {
+		const userCallback = jest.fn();
+		const inner = makeMockInner(() => Promise.reject(new Error('x')));
+		const manager = new CircuitBreakerManager(inner, {
+			failureThreshold: 2,
+			onStateChange: userCallback,
+		});
+		const obs = makeObserver();
+		manager.subscribe(obs);
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+		try { await manager.fetch(URL_A); } catch { /* expected */ }
+
+		// Both the notifier event and the user callback should have fired
+		expect(obs.update).toHaveBeenCalledWith('breaker-open', expect.any(Object));
+		expect(userCallback).toHaveBeenCalledWith('closed', 'open', URL_A);
+	});
+});

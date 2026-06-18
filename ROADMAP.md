@@ -241,7 +241,7 @@ CLOSED ──(N consecutive failures)──> OPEN
   - Constructor accepts `inner: IbiraAPIFetchManager`, `config: CircuitBreakerConfig`, and an
     optional `fallback?: (url: string) => unknown` for stale-cache or secondary-source strategies
 
-- [ ] **Observer events for state transitions** — reuse `DefaultEventNotifier` to emit
+- [x] **Observer events for state transitions** — reuse `DefaultEventNotifier` to emit
       `'breaker-open'`, `'breaker-half-open'`, and `'breaker-closed'` events carrying
       `{ url, failureCount, retryAfter? }` payload; wired via the `onStateChange` callback
 
