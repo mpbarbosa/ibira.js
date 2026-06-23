@@ -176,7 +176,7 @@ Goal: let consumers customise the request/response pipeline.
 - [x] **Async error propagation audit** — all `fetch` call sites in `IbiraAPIFetcher` and `IbiraAPIFetchManager` confirmed to have explicit `try/catch`; error surfaces to caller via `throw`; documented in JSDoc `@throws`
 - [x] **Result/Either pattern for fetch operations** — `Result<T, E>` discriminated union type added; `fetchSafe<T>()` method on `IbiraAPIFetcher` returns `Promise<Result<T>>` and never rejects; `Result` exported from `src/index.ts`; 8 new tests
 - [x] **Runtime API response validation** — `parseResponse?: (data: unknown) => unknown` hook added to `FetcherOptions`; called after JSON parse, before caching; throwing propagates through the retry loop; compatible with any schema library (Zod, io-ts, Valibot); 6 new tests
-- [x] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — `DefaultEventNotifier` now delegates to `DualObserverSubject` (v0.12.15-alpha) from the `bessa_patterns.ts` project via composition; bundled into the ibira.js dist (zero peer dependencies) via `noExternal` tsup config. CDN URL: `https://cdn.jsdelivr.net/gh/mpbarbosa/bessa_patterns.ts@v0.12.15-alpha/dist/index.mjs`
+- [x] **Import `ObserverSubject` pattern from `bessa_patterns.ts`** — `DefaultEventNotifier` now delegates to `DualObserverSubject` (v0.12.16-alpha) from the `bessa_patterns.ts` project via composition; bundled into the ibira.js dist (zero peer dependencies) via `noExternal` tsup config. CDN URL: `https://cdn.jsdelivr.net/gh/mpbarbosa/bessa_patterns.ts@v0.12.16-alpha/dist/index.mjs`
 
 ### Resilience patterns
 
