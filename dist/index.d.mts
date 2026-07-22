@@ -1557,7 +1557,7 @@ declare function debounce<TArgs extends unknown[], TReturn>(fn: (...args: TArgs)
  *
  * @example
  * import { VERSION } from 'ibira.js';
- * console.log(VERSION.toString()); // "0.4.48"
+ * console.log(VERSION.toString()); // "0.5.0"
  * console.log(`v${VERSION.major}.${VERSION.minor}.${VERSION.patch}`);
  */
 declare const VERSION: {

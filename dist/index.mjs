@@ -1755,8 +1755,8 @@ function debounce(fn, wait) {
 // src/config/version.ts
 var VERSION = {
   major: 0,
-  minor: 4,
-  patch: 48,
+  minor: 5,
+  patch: 0,
   prerelease: "",
   // Indicates unstable development
   toString() {
