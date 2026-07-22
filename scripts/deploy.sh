@@ -232,8 +232,15 @@ else
 			info  "Verify NPM_TOKEN is a valid Automation token with publish rights."
 			info  "  https://www.npmjs.com/settings/~/tokens"
 		elif echo "${PUBLISH_OUTPUT}" | grep -qi "404\|not found"; then
-			error "npm publish failed: registry or package not found."
-			info  "Check the package name in package.json and the registry URL."
+			error "npm publish failed: 404 from the registry."
+			info  "For a package that has never been published, a 404 usually means the"
+			info  "token cannot CREATE it — a granular token scoped to selected/existing"
+			info  "packages can't create a new name (npm returns 404, not 403, on purpose)."
+			info  "Fix: publish the first version with a token that has 'Read and write' to"
+			info  "     ALL packages (or a classic Automation token), or run the very first"
+			info  "     'npm publish --access public' manually while logged in; afterwards a"
+			info  "     per-package granular token works for future releases."
+			info  "Otherwise, verify the package name in package.json and the registry URL."
 		else
 			error "npm publish failed (exit ${PUBLISH_EXIT})."
 		fi
