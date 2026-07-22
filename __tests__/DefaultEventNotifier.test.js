@@ -47,11 +47,11 @@ describe('DefaultEventNotifier', () => {
 			expect(notifier.subscriberCount).toBe(0);
 		});
 
-		it('should allow same observer to be added multiple times', () => {
+		it('should deduplicate the same observer subscribed multiple times', () => {
 			const observer = { update: jest.fn() };
 			notifier.subscribe(observer);
 			notifier.subscribe(observer);
-			expect(notifier.subscriberCount).toBe(2);
+			expect(notifier.subscriberCount).toBe(1);
 		});
 
 		it('should create new array reference when subscribing', () => {
@@ -94,11 +94,11 @@ describe('DefaultEventNotifier', () => {
 			expect(notifier.observers).toContain(observer3);
 		});
 
-		it('should remove all occurrences if subscribed multiple times', () => {
+		it('should remove a deduplicated observer with a single unsubscribe', () => {
 			const observer = { update: jest.fn() };
 			notifier.subscribe(observer);
 			notifier.subscribe(observer);
-			expect(notifier.subscriberCount).toBe(2);
+			expect(notifier.subscriberCount).toBe(1);
 			notifier.unsubscribe(observer);
 			expect(notifier.subscriberCount).toBe(0);
 		});

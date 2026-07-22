@@ -67,7 +67,7 @@ Cache key format for both classes: `"METHOD:url"` (e.g. `"GET:https://api.exampl
 
 ### Dependency: `bessa_patterns.ts`
 
-The only runtime dependency is `github:mpbarbosa/bessa_patterns.ts`. It provides `DualObserverSubject`, which is used exclusively inside `DefaultEventNotifier`. It is bundled into dist via `tsup`'s `noExternal` setting.
+The only runtime dependency is the npm package [`bessa_patterns.ts`](https://www.npmjs.com/package/bessa_patterns.ts) (`^0.13.0`). It provides `DualObserverSubject`, which is used exclusively inside `DefaultEventNotifier`. It is bundled into dist via `tsup`'s `noExternal` setting.
 
 ## Code conventions
 

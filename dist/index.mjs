@@ -1,5 +1,5 @@
 // node_modules/bessa_patterns.ts/dist/index.mjs
-var i = class {
+var u = class {
   /** Read-only view of object observers subscribed via {@link subscribe}. */
   get observers() {
     return this._observers;
@@ -20,6 +20,9 @@ var i = class {
    * **Immutable Pattern:** Creates a new array using spread operator instead of
    * mutating the existing observers array.
    *
+   * Deduplicated by reference — subscribing the same observer twice registers it
+   * once (and it is notified once).
+   *
    * @param {ObserverObject | null | undefined} observer - Observer object (may have `update` method)
    * @returns {void}
    *
@@ -27,8 +30,8 @@ var i = class {
    * const observer = { update: (source, event) => console.log(event) };
    * subject.subscribe(observer);
    */
-  subscribe(r) {
-    r && (this._observers = [...this._observers, r]);
+  subscribe(e) {
+    e && !this._observers.includes(e) && (this._observers = [...this._observers, e]);
   }
   /**
    * Unsubscribes an object observer from notifications.
@@ -41,8 +44,8 @@ var i = class {
    * @example
    * subject.unsubscribe(myObserver);
    */
-  unsubscribe(r) {
-    this._observers = this._observers.filter((e) => e !== r);
+  unsubscribe(e) {
+    this._observers = this._observers.filter((r) => r !== e);
   }
   /**
    * Notifies all subscribed object observers.
@@ -55,11 +58,11 @@ var i = class {
    * @example
    * subject.notifyObservers(this, 'positionChanged', position, null);
    */
-  notifyObservers(...r) {
-    this._observers.forEach((e) => {
-      if (typeof e.update == "function")
+  notifyObservers(...e) {
+    this._observers.forEach((r) => {
+      if (typeof r.update == "function")
         try {
-          e.update(...r);
+          r.update(...e);
         } catch (s) {
           console.warn("DualObserverSubject: Error notifying observer", s);
         }
@@ -70,6 +73,9 @@ var i = class {
    *
    * **Immutable Pattern:** Creates a new array using spread operator.
    *
+   * Deduplicated by reference — subscribing the same function twice registers it
+   * once (and it is notified once).
+   *
    * @param {ObserverFunction | null | undefined} observerFunction - Callback function
    * @returns {void}
    *
@@ -77,8 +83,8 @@ var i = class {
    * const handler = (source, event, data) => console.log(event);
    * subject.subscribeFunction(handler);
    */
-  subscribeFunction(r) {
-    r && (this._functionObservers = [...this._functionObservers, r]);
+  subscribeFunction(e) {
+    e && !this._functionObservers.includes(e) && (this._functionObservers = [...this._functionObservers, e]);
   }
   /**
    * Unsubscribes a function observer from notifications.
@@ -91,8 +97,8 @@ var i = class {
    * @example
    * subject.unsubscribeFunction(handler);
    */
-  unsubscribeFunction(r) {
-    this._functionObservers = this._functionObservers.filter((e) => e !== r);
+  unsubscribeFunction(e) {
+    this._functionObservers = this._functionObservers.filter((r) => r !== e);
   }
   /**
    * Notifies all subscribed function observers.
@@ -104,11 +110,11 @@ var i = class {
    * @example
    * subject.notifyFunctionObservers(this, 'positionChanged', data);
    */
-  notifyFunctionObservers(...r) {
-    this._functionObservers.forEach((e) => {
-      if (typeof e == "function")
+  notifyFunctionObservers(...e) {
+    this._functionObservers.forEach((r) => {
+      if (typeof r == "function")
         try {
-          e(...r);
+          r(...e);
         } catch (s) {
           console.warn("DualObserverSubject: Error notifying function observer", s);
         }
@@ -155,7 +161,7 @@ var DefaultEventNotifier = class {
    * const notifier = new DefaultEventNotifier();
    */
   constructor() {
-    this._subject = new i();
+    this._subject = new u();
   }
   /**
    * Read-only view of the currently subscribed observers.
@@ -201,14 +207,29 @@ var DefaultEventNotifier = class {
    * Observer errors are isolated — a throwing observer does not prevent
    * subsequent observers from receiving the notification.
    *
+   * **Error isolation:** if an observer's `update()` method throws, the
+   * error is caught and silently discarded by the underlying
+   * `DualObserverSubject`. The notifier does not log, rethrow, or
+   * accumulate these errors. All remaining observers in the subscription
+   * list still receive the notification in the original subscription order.
+   * Isolation applies per-observer: one bad subscriber never affects another.
+   *
    * @param {...unknown} args - Arguments to pass to each observer's update method
+   *
+   * @example
+   * // A throwing observer does not affect others
+   * const notifier = new DefaultEventNotifier();
+   * notifier.subscribe({ update: () => { throw new Error('broken observer'); } });
+   * notifier.subscribe({ update: (event) => console.log('received:', event) });
+   * notifier.notify('success', data);
+   * // logs 'received: success' — the broken observer's error was silently discarded
    *
    * @example
    * // Notify with event type and payload
    * notifier.notify('success', { data: [1, 2, 3] });
    *
    * @example
-   * // Notify with error
+   * // Notify with error event
    * notifier.notify('error', { error: new Error('Failed') });
    */
   notify(...args) {
@@ -254,16 +275,18 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   onRequest;
   onResponse;
   retryStrategy;
+  parseResponse;
+  onMetric;
   /**
    * Creates an IbiraAPIFetcher with a purely functional cache approach
    * This method provides better referential transparency by explicitly managing cache externally
-   * 
+   *
    * @static
    * @param {string} url - The API endpoint URL
    * @param {CacheInterface} cache - External cache instance (must implement Map-like interface)
    * @param {FetcherOptions} [options={}] - Additional configuration options
    * @returns {IbiraAPIFetcher} Configured fetcher instance with external cache
-   * 
+   *
    * @example
    * // Purely functional approach with external cache
    * const sharedCache = new Map();
@@ -278,7 +301,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Creates a default cache with expiration and size limits
-   * 
+   *
    * @private
    * @static
    * @param {FetcherOptions} [options={}] - Cache configuration options
@@ -293,16 +316,16 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   /**
    * Creates an IbiraAPIFetcher with default cache settings
    * Convenient for most use cases with reasonable defaults
-   * 
+   *
    * @static
    * @param {string} url - The API endpoint URL
    * @param {FetcherOptions} [options={}] - Additional configuration options
    * @returns {IbiraAPIFetcher} Configured fetcher instance with default cache
-   * 
+   *
    * @example
    * // Using default cache settings (100 entries, 5 minute expiration)
    * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
-   * 
+   *
    * @example
    * // Custom cache settings
    * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data', {
@@ -317,12 +340,12 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   /**
    * Creates an IbiraAPIFetcher with no caching for maximum referential transparency
    * Every call will result in a fresh network request
-   * 
+   *
    * @static
-   * @param {string} url - The API endpoint URL  
+   * @param {string} url - The API endpoint URL
    * @param {FetcherOptions} [options={}] - Additional configuration options
    * @returns {IbiraAPIFetcher} Configured fetcher instance with no cache
-   * 
+   *
    * @example
    * // No cache - purely functional, always fresh data
    * const fetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
@@ -346,13 +369,13 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   /**
    * Creates an IbiraAPIFetcher with external event notification for maximum referential transparency
    * Events are handled through callback functions instead of mutable observer state
-   * 
+   *
    * @static
    * @param {string} url - The API endpoint URL
    * @param {Function} eventCallback - Function to handle events (event, data) => void
    * @param {FetcherOptions} [options={}] - Additional configuration options
    * @returns {IbiraAPIFetcher} Configured fetcher instance with callback-based events
-   * 
+   *
    * @example
    * // Purely functional event handling
    * const fetcher = IbiraAPIFetcher.withEventCallback(
@@ -383,12 +406,12 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   /**
    * Creates an IbiraAPIFetcher with no event notifications for maximum referential transparency
    * No side effects from event notifications - purely functional data fetching
-   * 
+   *
    * @static
    * @param {string} url - The API endpoint URL
    * @param {FetcherOptions} [options={}] - Additional configuration options
    * @returns {IbiraAPIFetcher} Configured fetcher instance with no event notifications
-   * 
+   *
    * @example
    * // Pure functional approach - no event side effects
    * const fetcher = IbiraAPIFetcher.withoutEvents('https://api.example.com/data');
@@ -413,17 +436,17 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   /**
    * Creates a completely pure IbiraAPIFetcher for maximum referential transparency
    * Use this when you want to handle all side effects (caching, events) externally
-   * 
+   *
    * @static
    * @param {string} url - The API endpoint URL
    * @param {FetcherOptions} [options={}] - Additional configuration options
    * @returns {IbiraAPIFetcher} Configured fetcher instance for pure functional usage
-   * 
+   *
    * @example
    * // Maximum purity - handle all effects externally
    * const fetcher = IbiraAPIFetcher.pure('https://api.example.com/data');
    * let cacheState = new Map();
-   * 
+   *
    * const result = await fetcher.fetchDataPure(cacheState, Date.now());
    * if (result.success) {
    *   cacheState = result.newCacheState; // Update cache externally
@@ -459,7 +482,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Creates an IbiraAPIFetcher instance
-   * 
+   *
    * @param {string} url - The API endpoint URL
    * @param {CacheInterface} cache - Cache instance (must implement Map-like interface with has/get/set/delete/clear/entries methods)
    * @param {FetcherOptions} [options={}] - Configuration options
@@ -484,7 +507,9 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
     this.maxRetries = options.maxRetries ?? 3;
     this.retryDelay = options.retryDelay ?? 1e3;
     this.retryMultiplier = options.retryMultiplier ?? 2;
-    this.retryableStatusCodes = Object.freeze([...options.retryableStatusCodes || [408, 429, 500, 502, 503, 504]]);
+    this.retryableStatusCodes = Object.freeze([
+      ...options.retryableStatusCodes || [408, 429, 500, 502, 503, 504]
+    ]);
     this.validateStatus = options.validateStatus || ((status) => status >= 200 && status < 300);
     this.method = (options.method || "GET").toUpperCase();
     this.body = options.body !== void 0 ? options.body : null;
@@ -492,12 +517,14 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
     this.onRequest = options.onRequest ?? null;
     this.onResponse = options.onResponse ?? null;
     this.retryStrategy = options.retryStrategy ?? null;
+    this.parseResponse = options.parseResponse ?? null;
+    this.onMetric = options.onMetric ?? null;
     Object.freeze(this);
   }
   /**
    * Generates a unique cache key for this fetcher.
    * Includes the HTTP method so POST /url and GET /url cache independently.
-   * 
+   *
    * @returns {string} The cache key (`METHOD:url`)
    */
   getCacheKey() {
@@ -506,7 +533,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   /**
    * Creates a cache entry with timestamp for expiration tracking
    * Uses cache's own expiration configuration for better encapsulation
-   * 
+   *
    * @private
    * @param {any} data - The data to cache
    * @param {number} currentTime - Current timestamp in milliseconds
@@ -523,7 +550,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Checks if a cache entry is still valid (not expired)
-   * 
+   *
    * @private
    * @param {Object} cacheEntry - The cache entry to check
    * @param {number} currentTime - Current timestamp in milliseconds
@@ -535,7 +562,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   /**
    * Identifies expired cache entries that should be removed
    * This is a pure function that returns keys to delete without mutating state
-   * 
+   *
    * @private
    * @param {Map} cache - The cache map to check
    * @param {number} currentTime - Current timestamp in milliseconds
@@ -552,7 +579,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Determines if an error is retryable based on error type and status code
-   * 
+   *
    * @private
    * @param {Error} error - The error to check
    * @returns {boolean} True if the error is retryable
@@ -575,7 +602,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Calculates the delay for the next retry attempt using exponential backoff
-   * 
+   *
    * @private
    * @param {number} attempt - The current attempt number (0-based)
    * @returns {number} Delay in milliseconds
@@ -587,7 +614,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Sleeps for the specified number of milliseconds
-   * 
+   *
    * @private
    * @param {number} ms - Milliseconds to sleep
    * @returns {Promise<void>} Promise that resolves after the delay
@@ -597,7 +624,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Performs a single network request with timeout handling
-   * 
+   *
    * @private
    * @param {AbortController} abortController - Controller for request cancellation
    * @param {AbortSignal} [externalSignal] - Optional external signal for consumer-level cancellation
@@ -651,7 +678,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Subscribes an observer to receive event notifications
-   * 
+   *
    * @param {Observer} observer - Observer object with an update method
    */
   subscribe(observer) {
@@ -659,7 +686,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Unsubscribes an observer from event notifications
-   * 
+   *
    * @param {Observer} observer - Observer object to remove
    */
   unsubscribe(observer) {
@@ -667,7 +694,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Notifies all subscribed observers with event data
-   * 
+   *
    * @param {...*} args - Arguments to pass to observers (typically eventType and payload)
    */
   notifyObservers(...args) {
@@ -675,29 +702,29 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * PURE FUNCTIONAL VERSION: Computes fetch result without side effects
-   * 
+   *
    * This is the pure, referentially transparent core of the fetching logic.
    * It performs all computations without mutating external state, returning
    * a complete description of what should happen (data, cache operations, events).
-   * 
+   *
    * **Pure Referential Transparency:**
    * - ✅ No external state mutations
    * - ✅ Deterministic given same inputs (when time is provided)
    * - ✅ No side effects (network calls return descriptions)
    * - ✅ Returns immutable result objects
    * - ✅ Same input always produces same output structure
-   * 
+   *
    * @param {Map} currentCacheState - Current cache state (not mutated)
    * @param {number} [currentTime] - Current timestamp for deterministic behavior
    * @param {Function} [networkProvider] - Pure network function for testing
    * @param {AbortSignal} [signal] - Optional external AbortSignal for consumer-level cancellation
    * @returns {Promise<FetchResult>} Pure result object describing what should happen
-   * 
+   *
    * @example
    * // Pure functional usage - no side effects
    * const fetcher = IbiraAPIFetcher.withoutCache('https://api.example.com/data');
    * const result = await fetcher.fetchDataPure(new Map(), Date.now());
-   * 
+   *
    * // Result structure:
    * // {
    * //   success: true,
@@ -707,7 +734,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
    * //   events: [{ type: 'loading-start', payload: {...} }],
    * //   newCacheState: Map {...}
    * // }
-   * 
+   *
    * @example
    * // With external AbortSignal
    * const controller = new AbortController();
@@ -751,7 +778,8 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
     ];
     try {
       const networkFn = networkProvider || (() => this._performSingleRequest(new AbortController(), signal));
-      const data = await networkFn();
+      const rawData = await networkFn();
+      const data = this.parseResponse ? this.parseResponse(rawData) : rawData;
       const cacheEntry = this._createCacheEntry(data, currentTime, this.cache);
       const newCacheState = new Map(cleanedCache);
       newCacheState.set(cacheKey, cacheEntry);
@@ -762,12 +790,11 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
         fromCache: false,
         cacheOperations: Object.freeze([
           Object.freeze({ type: "set", key: cacheKey, value: cacheEntry }),
-          ...this._calculateCacheEvictions(newCacheState, finalCacheState).map((op) => Object.freeze(op))
+          ...this._calculateCacheEvictions(newCacheState, finalCacheState).map(
+            (op) => Object.freeze(op)
+          )
         ]),
-        events: Object.freeze([
-          ...events,
-          { type: "success", payload: data }
-        ]),
+        events: Object.freeze([...events, { type: "success", payload: data }]),
         newCacheState: finalCacheState,
         meta: Object.freeze({
           cacheKey,
@@ -800,7 +827,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Pure function to apply cache size limits without mutations
-   * 
+   *
    * @private
    * @param {Map} cacheState - Current cache state
    * @returns {Map} New cache state with size limits applied
@@ -817,7 +844,7 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * Pure function to calculate what cache evictions occurred
-   * 
+   *
    * @private
    * @param {Map} beforeState - Cache state before size limits
    * @param {Map} afterState - Cache state after size limits
@@ -834,11 +861,11 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
   }
   /**
    * PRACTICAL WRAPPER: Applies side effects from pure computation
-   * 
+   *
    * This method uses the pure core but applies the side effects (cache mutations,
    * event notifications) for practical usage. It maintains the current API while
    * enabling pure functional testing and reasoning.
-   * 
+   *
    * @async
    * @param {Object} [cacheOverride] - Optional cache instance to use instead of the default
    * @param {AbortSignal} [signal] - Optional AbortSignal for consumer-level request cancellation
@@ -849,46 +876,134 @@ var IbiraAPIFetcher = class _IbiraAPIFetcher {
    *   - JSON parsing errors from `response.json()`
    *   - Errors thrown by `onRequest` or `onResponse` interceptors
    *   - `AbortError` when `signal` is aborted externally (not retried)
-   * 
+   *
+   * **Retry exhaustion:** the fetcher makes up to `maxRetries + 1` total
+   * attempts (1 initial + `maxRetries` retries). Only retryable errors
+   * (matching `retryableStatusCodes` or the custom `retryStrategy`) trigger
+   * a retry. After the last attempt the **original** error from that attempt
+   * is re-thrown directly — it is never wrapped. Setting `maxRetries: 0`
+   * disables retries entirely; any failure throws immediately after the
+   * single attempt. Externally aborted requests (`signal.aborted`) are never
+   * retried, regardless of `maxRetries`.
+   *
    * @example
    * // Practical usage - handles side effects automatically
    * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
    * const data = await fetcher.fetchData();
    * console.log(data); // Retrieved data
-   * 
+   *
+   * @example
+   * // Retry exhaustion: catching the error thrown after all attempts fail
+   * const fetcher = IbiraAPIFetcher.withDefaultCache(url); // maxRetries defaults to 3
+   * try {
+   *   const data = await fetcher.fetchData(); // up to 4 total attempts
+   * } catch (error) {
+   *   // error is the original Error from the final attempt — never wrapped
+   *   console.error('All retries exhausted:', error.message);
+   * }
+   *
+   * @example
+   * // maxRetries: 0 — disable retries; throw immediately on first failure
+   * const noRetry = IbiraAPIFetcher.withDefaultCache(url, { maxRetries: 0 });
+   * try {
+   *   await noRetry.fetchData();
+   * } catch (error) {
+   *   console.error('Failed (no retries):', error.message);
+   * }
+   *
    * @example
    * // Cancel an in-flight request
    * const controller = new AbortController();
    * setTimeout(() => controller.abort(), 1000);
    * const data = await fetcher.fetchData(null, controller.signal);
-   * 
-   * @example
-   * // Pure functional testing
-   * const mockNetwork = () => Promise.resolve({ test: 'data' });
-   * const result = await fetcher.fetchDataPure(new Map(), Date.now(), mockNetwork);
-   * // Test result without side effects
    */
   async fetchData(cacheOverride = null, signal = null) {
     const activeCache = cacheOverride || this.cache;
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-      const result = await this.fetchDataPure(activeCache, Date.now(), null, signal);
+      const t0 = Date.now();
+      const result = await this.fetchDataPure(activeCache, t0, null, signal);
+      const durationMs = Date.now() - t0;
       this._applySideEffects(result, activeCache);
       if (result.success) {
+        if (this.onMetric) {
+          if (result.fromCache) {
+            this.onMetric({ type: "cache-hit", url: this.url, durationMs });
+          } else {
+            this.onMetric({ type: "cache-miss", url: this.url });
+            this.onMetric({ type: "fetch-success", url: this.url, durationMs, attempt: attempt + 1 });
+          }
+        }
         return result.data;
+      }
+      if (this.onMetric) {
+        this.onMetric({ type: "cache-miss", url: this.url });
       }
       const isLastAttempt = attempt >= this.maxRetries;
       const isExternallyAborted = signal?.aborted ?? false;
       const shouldRetry = this.retryStrategy ? this.retryStrategy(attempt, result.error) : this._isRetryableError(result.error);
       if (isLastAttempt || !shouldRetry || isExternallyAborted) {
+        if (this.onMetric) {
+          this.onMetric({ type: "fetch-error", url: this.url, durationMs, attempt: attempt + 1, error: result.error });
+        }
         throw result.error;
       }
-      await this._sleep(this._calculateRetryDelay(attempt));
+      const delayMs = this._calculateRetryDelay(attempt);
+      if (this.onMetric) {
+        this.onMetric({ type: "retry", url: this.url, attempt: attempt + 1, delayMs, error: result.error });
+      }
+      await this._sleep(delayMs);
     }
     throw new Error("Unexpected retry loop exit");
   }
   /**
+   * Fetch data and return a `Result<T>` instead of throwing.
+   *
+   * This is a type-safe alternative to `fetchData()` for callers who prefer explicit
+   * error handling over try/catch. It accepts the same arguments, applies the same
+   * retry logic, and emits the same observer events — the only difference is the
+   * return shape.
+   *
+   * On success the resolved value is `{ ok: true, value: T }`.
+   * On any failure (network error, HTTP error, retry exhaustion, abort) the resolved
+   * value is `{ ok: false, error: Error }`. The method itself never rejects.
+   *
+   * @template T - Expected type of the fetched data. Defaults to `unknown`.
+   * @param {CacheInterface | null} [cacheOverride] - Optional cache instance to use instead of the default
+   * @param {AbortSignal | null} [signal] - Optional AbortSignal for consumer-level request cancellation
+   * @returns {Promise<Result<T>>} Always resolves; never rejects.
+   *
+   * @example
+   * // Basic usage — no try/catch needed
+   * const result = await fetcher.fetchSafe<User[]>();
+   * if (result.ok) {
+   *   renderUsers(result.value);
+   * } else {
+   *   showError(result.error.message);
+   * }
+   *
+   * @example
+   * // With AbortController
+   * const controller = new AbortController();
+   * setTimeout(() => controller.abort(), 2000);
+   * const result = await fetcher.fetchSafe(null, controller.signal);
+   * if (!result.ok) {
+   *   console.log('Cancelled or failed:', result.error.message);
+   * }
+   */
+  async fetchSafe(cacheOverride = null, signal = null) {
+    try {
+      const data = await this.fetchData(cacheOverride, signal);
+      return { ok: true, value: data };
+    } catch (error) {
+      return {
+        ok: false,
+        error: error instanceof Error ? error : new Error(String(error))
+      };
+    }
+  }
+  /**
    * Applies side effects based on pure computation results
-   * 
+   *
    * @private
    * @param {FetchResult} result - Result from fetchDataPure
    * @param {Object} activeCache - Cache to apply operations to
@@ -925,11 +1040,12 @@ var IbiraAPIFetchManager = class {
   defaultRetryMultiplier;
   defaultRetryableStatusCodes;
   cleanupTimer;
+  cleanupStrategy;
   /**
    * Creates a new IbiraAPIFetchManager instance
-   * 
+   *
    * @param {ManagerOptions} [options={}] - Configuration options
-   * 
+   *
    * @example
    * // Create manager with custom settings
    * const manager = new IbiraAPIFetchManager({
@@ -944,18 +1060,28 @@ var IbiraAPIFetchManager = class {
     this.globalCache = /* @__PURE__ */ new Map();
     this.maxCacheSize = options.maxCacheSize || 100;
     this.cacheExpiration = options.cacheExpiration || 3e5;
-    this.cleanupInterval = options.cleanupInterval || 6e4;
+    this.cleanupInterval = options.cleanupInterval ?? 6e4;
+    this.cleanupStrategy = options.cleanupStrategy ?? "interval";
     this.lastCleanup = Date.now();
     this.defaultMaxRetries = options.maxRetries || 3;
     this.defaultRetryDelay = options.retryDelay || 1e3;
     this.defaultRetryMultiplier = options.retryMultiplier || 2;
-    this.defaultRetryableStatusCodes = options.retryableStatusCodes || [408, 429, 500, 502, 503, 504];
+    this.defaultRetryableStatusCodes = options.retryableStatusCodes || [
+      408,
+      429,
+      500,
+      502,
+      503,
+      504
+    ];
     this.cleanupTimer = null;
-    this._startPeriodicCleanup();
+    if (this.cleanupStrategy === "interval" && this.cleanupInterval > 0) {
+      this._startPeriodicCleanup();
+    }
   }
   /**
    * Creates or retrieves a fetcher instance for the given URL and method.
-   * 
+   *
    * @param {string} url - The API endpoint URL
    * @param {Object} [options={}] - Configuration options for the fetcher
    * @param {number} [options.timeout] - Request timeout in milliseconds
@@ -967,7 +1093,7 @@ var IbiraAPIFetchManager = class {
    * @param {Object|string|FormData|Blob|null} [options.body=null] - Request body
    * @param {Object} [options.headers={}] - Additional request headers
    * @returns {IbiraAPIFetcher} The fetcher instance for this URL + method combination
-   * 
+   *
    * @example
    * const fetcher = manager.getFetcher('https://api.example.com/data', {
    *   timeout: 5000,
@@ -997,7 +1123,7 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Starts periodic cleanup of expired cache entries
-   * 
+   *
    * @private
    */
   _startPeriodicCleanup() {
@@ -1008,7 +1134,7 @@ var IbiraAPIFetchManager = class {
   /**
    * Identifies expired cache entries that should be removed
    * This is a pure function that returns keys to delete without mutating state
-   * 
+   *
    * @private
    * @param {Map} cache - The cache map to check
    * @param {number} currentTime - Current timestamp in milliseconds
@@ -1025,11 +1151,15 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Performs periodic cleanup of expired cache entries and enforces size limits
-   * 
+   *
    * @private
    */
   _performPeriodicCleanup() {
     const now = Date.now();
+    if (this.globalCache.size === 0) {
+      this.lastCleanup = now;
+      return;
+    }
     const expiredKeys = this._getExpiredCacheKeys(this.globalCache, now);
     expiredKeys.forEach((key) => this.globalCache.delete(key));
     this._enforceCacheSizeLimit();
@@ -1038,7 +1168,7 @@ var IbiraAPIFetchManager = class {
   /**
    * Enforces cache size limits by removing oldest entries
    * Uses LRU (Least Recently Used) eviction strategy
-   * 
+   *
    * @private
    */
   _enforceCacheSizeLimit() {
@@ -1048,13 +1178,13 @@ var IbiraAPIFetchManager = class {
     const entries = Array.from(this.globalCache.entries());
     entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
     const entriesToRemove = this.globalCache.size - this.maxCacheSize;
-    for (let i2 = 0; i2 < entriesToRemove; i2++) {
-      this.globalCache.delete(entries[i2][0]);
+    for (let i = 0; i < entriesToRemove; i++) {
+      this.globalCache.delete(entries[i][0]);
     }
   }
   /**
    * Checks if a cache entry is still valid (not expired)
-   * 
+   *
    * @private
    * @param {Object} cacheEntry - The cache entry to check
    * @param {number} currentTime - Current timestamp in milliseconds
@@ -1065,11 +1195,11 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Fetches data with race condition protection and request deduplication
-   * 
+   *
    * This method ensures that multiple concurrent calls to the same endpoint
    * are deduplicated, preventing unnecessary network requests and potential
    * race conditions.
-   * 
+   *
    * @async
    * @param {string} url - The API endpoint URL
    * @param {Object} [options={}] - Configuration options
@@ -1083,7 +1213,7 @@ var IbiraAPIFetchManager = class {
    * @param {Object} [options.headers={}] - Additional request headers
    * @returns {Promise<*>} Promise that resolves to the fetched data
    * @throws {Error} Network errors, HTTP errors, or JSON parsing errors
-   * 
+   *
    * @example
    * try {
    *   const data = await manager.fetch('https://api.example.com/users');
@@ -1093,6 +1223,12 @@ var IbiraAPIFetchManager = class {
    * }
    */
   async fetch(url, options = {}) {
+    if (this.cleanupStrategy === "lazy" && this.cleanupInterval > 0) {
+      const now = Date.now();
+      if (now - this.lastCleanup >= this.cleanupInterval) {
+        this._performPeriodicCleanup();
+      }
+    }
     const fetcher = this.getFetcher(url, options);
     const cacheKey = fetcher.getCacheKey();
     if (this.pendingRequests.has(cacheKey)) {
@@ -1109,7 +1245,7 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Internal method to execute the actual fetch operation
-   * 
+   *
    * @private
    * @async
    * @param {IbiraAPIFetcher} fetcher - The fetcher instance to use
@@ -1120,12 +1256,12 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Fetches multiple URLs concurrently with proper coordination
-   * 
+   *
    * @async
    * @param {string[]} urls - Array of URLs to fetch
    * @param {Object} [options={}] - Configuration options applied to all fetchers
    * @returns {Promise<PromiseSettledResult[]>} Promise that resolves to array of results with status and value/reason
-   * 
+   *
    * @example
    * const urls = [
    *   'https://api.example.com/users',
@@ -1146,11 +1282,11 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Subscribe to updates from a specific fetcher
-   * 
+   *
    * @param {string} url - The URL of the fetcher to subscribe to
    * @param {Object} observer - Observer object with update method
    * @param {Function} observer.update - Method called with (eventType, payload) on events
-   * 
+   *
    * @example
    * manager.subscribe('https://api.example.com/data', {
    *   update: (eventType, payload) => {
@@ -1164,7 +1300,7 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Unsubscribe from updates from a specific fetcher
-   * 
+   *
    * @param {string} url - The URL of the fetcher to unsubscribe from
    * @param {Object} observer - Observer object to remove
    */
@@ -1176,10 +1312,10 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Check if there's a pending request for a specific URL
-   * 
+   *
    * @param {string} url - The URL to check pending status for
    * @returns {boolean} Whether there's a pending request for this URL
-   * 
+   *
    * @example
    * if (manager.isLoading('https://api.example.com/data')) {
    *   console.log('Request in progress...');
@@ -1192,10 +1328,10 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Get cached data for a specific URL without triggering a fetch
-   * 
+   *
    * @param {string} url - The URL to get cached data for
    * @returns {*|null} Cached data or null if not found or expired
-   * 
+   *
    * @example
    * const cached = manager.getCachedData('https://api.example.com/data');
    * if (cached) {
@@ -1220,13 +1356,13 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Clear cached data for a specific URL or all cached data
-   * 
+   *
    * @param {string} [url] - Optional URL to clear cache for. If not provided, clears all cache
-   * 
+   *
    * @example
    * // Clear specific URL cache
    * manager.clearCache('https://api.example.com/data');
-   * 
+   *
    * @example
    * // Clear all cache
    * manager.clearCache();
@@ -1243,7 +1379,7 @@ var IbiraAPIFetchManager = class {
   /**
    * Clean up resources and cancel pending requests
    * Call this when the manager is no longer needed
-   * 
+   *
    * @example
    * // Clean up when component unmounts
    * useEffect(() => {
@@ -1263,9 +1399,9 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Get statistics about the current state of the manager
-   * 
+   *
    * @returns {ManagerStats} Statistics object with current state information
-   * 
+   *
    * @example
    * const stats = manager.getStats();
    * console.log(`Cache: ${stats.cacheSize}/${stats.maxCacheSize} (${stats.cacheUtilization}%)`);
@@ -1287,7 +1423,7 @@ var IbiraAPIFetchManager = class {
   /**
    * Manually trigger cache cleanup
    * Useful for testing or when you want to force cleanup
-   * 
+   *
    * @example
    * // Force cleanup before important operation
    * manager.triggerCleanup();
@@ -1297,9 +1433,9 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Set cache expiration time for new entries
-   * 
+   *
    * @param {number} milliseconds - Cache expiration time in milliseconds
-   * 
+   *
    * @example
    * // Set cache expiration to 10 minutes
    * manager.setCacheExpiration(10 * 60 * 1000);
@@ -1309,9 +1445,9 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Set maximum cache size
-   * 
+   *
    * @param {number} size - Maximum number of cache entries
-   * 
+   *
    * @example
    * // Increase cache size for better performance
    * manager.setMaxCacheSize(500);
@@ -1322,9 +1458,9 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Set default retry configuration for new fetchers
-   * 
+   *
    * @param {RetryConfig} [retryConfig={}] - Retry configuration object
-   * 
+   *
    * @example
    * manager.setRetryConfig({
    *   maxRetries: 5,
@@ -1348,9 +1484,9 @@ var IbiraAPIFetchManager = class {
   }
   /**
    * Get current retry configuration
-   * 
+   *
    * @returns {RetryConfig} Current retry configuration
-   * 
+   *
    * @example
    * const config = manager.getRetryConfig();
    * console.log(`Max retries: ${config.maxRetries}`);
@@ -1367,10 +1503,10 @@ var IbiraAPIFetchManager = class {
    * Set retry configuration for a specific URL
    * Creates a new immutable fetcher instance with updated configuration
    * instead of modifying existing properties (which would fail due to Object.freeze)
-   * 
+   *
    * @param {string} url - The URL to configure retries for
    * @param {RetryConfig} [retryConfig={}] - Retry configuration object
-   * 
+   *
    * @example
    * // Set higher retries for critical endpoint
    * manager.setRetryConfigForUrl('https://api.example.com/critical', {
@@ -1388,7 +1524,9 @@ var IbiraAPIFetchManager = class {
         maxRetries: retryConfig.maxRetries !== void 0 ? retryConfig.maxRetries : oldFetcher.maxRetries,
         retryDelay: retryConfig.retryDelay !== void 0 ? retryConfig.retryDelay : oldFetcher.retryDelay,
         retryMultiplier: retryConfig.retryMultiplier !== void 0 ? retryConfig.retryMultiplier : oldFetcher.retryMultiplier,
-        retryableStatusCodes: retryConfig.retryableStatusCodes || [...oldFetcher.retryableStatusCodes],
+        retryableStatusCodes: retryConfig.retryableStatusCodes || [
+          ...oldFetcher.retryableStatusCodes
+        ],
         eventNotifier: oldFetcher.eventNotifier,
         method: oldFetcher.method,
         body: oldFetcher.body,
@@ -1409,9 +1547,9 @@ var DefaultCache = class {
   expiration;
   /**
    * Creates a new DefaultCache instance
-   * 
+   *
    * @param {CacheOptions} [options={}] - Cache configuration options
-   * 
+   *
    * @example
    * const cache = new DefaultCache({ maxSize: 200, expiration: 600000 });
    */
@@ -1422,10 +1560,10 @@ var DefaultCache = class {
   }
   /**
    * Checks if a key exists in the cache
-   * 
+   *
    * @param {string} key - The cache key to check
    * @returns {boolean} True if the key exists, false otherwise
-   * 
+   *
    * @example
    * if (cache.has('myKey')) {
    *   console.log('Key exists');
@@ -1436,10 +1574,10 @@ var DefaultCache = class {
   }
   /**
    * Retrieves a value from the cache
-   * 
+   *
    * @param {string} key - The cache key to retrieve
    * @returns {CacheEntry | undefined} The cached value or undefined if not found
-   * 
+   *
    * @example
    * const data = cache.get('myKey');
    * if (data) console.log('Found:', data);
@@ -1448,14 +1586,26 @@ var DefaultCache = class {
     return this.storage.get(key);
   }
   /**
-   * Stores a value in the cache
-   * Automatically enforces size limits using LRU eviction
-   * 
+   * Stores a value in the cache.
+   * Automatically enforces size limits via LRU eviction.
+   *
+   * **Cache overflow behaviour:** if adding this entry causes `storage.size`
+   * to exceed `maxSize`, the entry with the lowest `timestamp` (least
+   * recently used) is evicted synchronously before this method returns.
+   * The cache never holds more than `maxSize` entries at any point.
+   * During a burst where multiple entries share the same `timestamp`,
+   * eviction order among them is stable but arbitrary (first-inserted wins).
+   *
    * @param {string} key - The cache key
    * @param {CacheEntry} value - The value to cache
-   * 
+   *
    * @example
-   * cache.set('user:123', { data: { name: 'John' }, timestamp: Date.now(), expiresAt: Date.now() + 300000 });
+   * const cache = new DefaultCache({ maxSize: 2, expiration: 60_000 });
+   * // entries helper: { data, timestamp: Date.now(), expiresAt: Date.now() + 60_000 }
+   * cache.set('a', entryA);
+   * cache.set('b', entryB);
+   * cache.set('c', entryC); // 'a' is evicted — it has the oldest timestamp
+   * console.log(cache.size); // 2
    */
   set(key, value) {
     this.storage.set(key, value);
@@ -1463,10 +1613,10 @@ var DefaultCache = class {
   }
   /**
    * Removes a value from the cache
-   * 
+   *
    * @param {string} key - The cache key to delete
    * @returns {boolean} True if the entry was deleted, false otherwise
-   * 
+   *
    * @example
    * const deleted = cache.delete('myKey');
    * console.log(deleted ? 'Deleted' : 'Not found');
@@ -1476,7 +1626,7 @@ var DefaultCache = class {
   }
   /**
    * Clears all entries from the cache
-   * 
+   *
    * @example
    * cache.clear();
    * console.log('Cache cleared, size:', cache.size);
@@ -1486,9 +1636,9 @@ var DefaultCache = class {
   }
   /**
    * Gets the current number of entries in the cache
-   * 
+   *
    * @returns {number} The number of cached entries
-   * 
+   *
    * @example
    * console.log(`Cache has ${cache.size} entries`);
    */
@@ -1497,9 +1647,9 @@ var DefaultCache = class {
   }
   /**
    * Returns an iterator over all cache entries
-   * 
+   *
    * @returns {IterableIterator<[string, CacheEntry]>} Iterator over [key, value] pairs
-   * 
+   *
    * @example
    * for (const [key, value] of cache.entries()) {
    *   console.log(key, value);
@@ -1509,9 +1659,11 @@ var DefaultCache = class {
     return this.storage.entries();
   }
   /**
-   * Enforces the maximum cache size by removing oldest entries
-   * Uses LRU (Least Recently Used) eviction strategy
-   * 
+   * Synchronously evicts entries to bring the cache back within `maxSize`.
+   * Sorts all current entries by `timestamp` ascending and removes the
+   * oldest `(size - maxSize)` entries. Called on every `set()`, so the
+   * cache is always within bounds when `set()` returns.
+   *
    * @private
    */
   _enforceSizeLimit() {
@@ -1521,8 +1673,8 @@ var DefaultCache = class {
     const entries = Array.from(this.storage.entries());
     entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
     const entriesToRemove = this.storage.size - this.maxSize;
-    for (let i2 = 0; i2 < entriesToRemove; i2++) {
-      this.storage.delete(entries[i2][0]);
+    for (let i = 0; i < entriesToRemove; i++) {
+      this.storage.delete(entries[i][0]);
     }
   }
 };
@@ -1604,14 +1756,258 @@ function debounce(fn, wait) {
 var VERSION = {
   major: 0,
   minor: 4,
-  patch: 22,
-  prerelease: "alpha",
+  patch: 48,
+  prerelease: "",
   // Indicates unstable development
   toString() {
     return this.prerelease ? `${this.major}.${this.minor}.${this.patch}-${this.prerelease}` : `${this.major}.${this.minor}.${this.patch}`;
   }
 };
+
+// src/resilience/CircuitBreaker.ts
+var CircuitBreaker = class {
+  _state = "closed";
+  _failureCount = 0;
+  _successCount = 0;
+  _nextRetryTime = 0;
+  _url;
+  _failureThreshold;
+  _successThreshold;
+  _timeout;
+  _onStateChange;
+  constructor(url, config = {}) {
+    this._url = url;
+    this._failureThreshold = config.failureThreshold ?? 5;
+    this._successThreshold = config.successThreshold ?? 2;
+    this._timeout = config.timeout ?? 6e4;
+    this._onStateChange = config.onStateChange ?? null;
+  }
+  /**
+   * Returns `true` if a request should be allowed through.
+   *
+   * - **Closed**: always `true`
+   * - **Half-open**: always `true` (probe is in flight)
+   * - **Open**: `false`, unless the timeout has elapsed — in that case the
+   *   breaker transitions to half-open and returns `true`
+   */
+  canAttempt() {
+    if (this._state === "closed" || this._state === "half-open") {
+      return true;
+    }
+    if (Date.now() >= this._nextRetryTime) {
+      this._transition("half-open");
+      return true;
+    }
+    return false;
+  }
+  /**
+   * Records a successful response.
+   *
+   * - **Half-open**: increments `successCount`; if threshold reached, closes.
+   * - **Closed**: resets `failureCount` (streak broken).
+   * - **Open**: no-op (should not be called while open).
+   */
+  recordSuccess() {
+    if (this._state === "half-open") {
+      this._successCount++;
+      if (this._successCount >= this._successThreshold) {
+        this._failureCount = 0;
+        this._successCount = 0;
+        this._transition("closed");
+      }
+    } else if (this._state === "closed") {
+      this._failureCount = 0;
+    }
+  }
+  /**
+   * Records a failed response.
+   *
+   * - **Closed**: increments `failureCount`; if threshold reached, opens.
+   * - **Half-open**: probe failed — reopens the circuit (resets `successCount`).
+   * - **Open**: no-op.
+   *
+   * @param _error - The error that occurred. Accepted for API symmetry and
+   *   future use (e.g., filtering certain error types).
+   */
+  recordFailure(_error) {
+    if (this._state === "closed") {
+      this._failureCount++;
+      if (this._failureCount >= this._failureThreshold) {
+        this._transition("open");
+      }
+    } else if (this._state === "half-open") {
+      this._successCount = 0;
+      this._transition("open");
+    }
+  }
+  /** Returns the current circuit state without triggering any transition. */
+  getState() {
+    return this._state;
+  }
+  /**
+   * Manually resets the breaker to closed with zeroed counters.
+   *
+   * Intended for administrative overrides (e.g., after a deployment or hotfix).
+   * Does **not** fire `onStateChange`.
+   */
+  reset() {
+    this._state = "closed";
+    this._failureCount = 0;
+    this._successCount = 0;
+    this._nextRetryTime = 0;
+  }
+  /** The URL this breaker is guarding. */
+  get url() {
+    return this._url;
+  }
+  /** Current consecutive failure count (informational). */
+  get failureCount() {
+    return this._failureCount;
+  }
+  /** Current consecutive success count in half-open (informational). */
+  get successCount() {
+    return this._successCount;
+  }
+  /**
+   * Timestamp (ms since epoch) at which the breaker will transition from
+   * open → half-open. `0` when not in the open state.
+   */
+  get nextRetryTime() {
+    return this._nextRetryTime;
+  }
+  _transition(to) {
+    const from = this._state;
+    if (from === to) return;
+    if (to === "open") {
+      this._nextRetryTime = Date.now() + this._timeout;
+      this._successCount = 0;
+    } else if (to === "half-open") {
+      this._successCount = 0;
+    } else {
+      this._nextRetryTime = 0;
+    }
+    this._state = to;
+    this._onStateChange?.(from, to, this._url);
+  }
+};
+
+// src/resilience/CircuitOpenError.ts
+var CircuitOpenError = class _CircuitOpenError extends Error {
+  /** The URL whose circuit is open. */
+  url;
+  /**
+   * Timestamp (ms since epoch) at which the breaker transitions to half-open
+   * and a probe may be attempted.
+   */
+  retryAfter;
+  constructor(url, retryAfter) {
+    super(`Circuit breaker open for ${url}. Retry after ${new Date(retryAfter).toISOString()}`);
+    this.name = "CircuitOpenError";
+    this.url = url;
+    this.retryAfter = retryAfter;
+    Object.setPrototypeOf(this, _CircuitOpenError.prototype);
+  }
+};
+
+// src/resilience/CircuitBreakerManager.ts
+var CircuitBreakerManager = class {
+  _inner;
+  _breakers = /* @__PURE__ */ new Map();
+  _config;
+  _fallback;
+  _notifier;
+  constructor(inner, config = {}, fallback) {
+    this._inner = inner;
+    this._config = config;
+    this._fallback = fallback ?? null;
+    this._notifier = new DefaultEventNotifier();
+  }
+  /**
+   * Fetches `url` through the circuit breaker.
+   *
+   * @throws {CircuitOpenError} When the circuit is open and no fallback is configured.
+   * @throws {Error} Any error thrown by the inner manager (re-thrown after recording failure).
+   */
+  async fetch(url, options = {}) {
+    const breaker = this._getOrCreateBreaker(url);
+    if (!breaker.canAttempt()) {
+      if (this._fallback !== null) {
+        return this._fallback(url);
+      }
+      throw new CircuitOpenError(url, breaker.nextRetryTime);
+    }
+    try {
+      const data = await this._inner.fetch(url, options);
+      breaker.recordSuccess();
+      return data;
+    } catch (error) {
+      breaker.recordFailure(error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
+  }
+  /**
+   * Subscribes an observer to receive breaker state-transition events.
+   *
+   * Events: `'breaker-open'`, `'breaker-half-open'`, `'breaker-closed'`.
+   * Each call passes `(eventName: string, payload: BreakerEventPayload)`.
+   */
+  subscribe(observer) {
+    this._notifier.subscribe(observer);
+  }
+  /** Removes a previously subscribed observer. */
+  unsubscribe(observer) {
+    this._notifier.unsubscribe(observer);
+  }
+  /** Number of currently subscribed observers. */
+  get subscriberCount() {
+    return this._notifier.subscriberCount;
+  }
+  /**
+   * Returns the `CircuitBreaker` instance for `url`, creating one if none exists.
+   *
+   * Useful for inspection and testing — do not mutate the returned breaker.
+   */
+  getBreakerForUrl(url) {
+    return this._getOrCreateBreaker(url);
+  }
+  /** Destroys the inner manager (stops timers, clears cache). */
+  destroy() {
+    this._inner.destroy();
+  }
+  _getOrCreateBreaker(url) {
+    let breaker = this._breakers.get(url);
+    if (breaker === void 0) {
+      const userOnStateChange = this._config.onStateChange;
+      const config = {
+        ...this._config,
+        onStateChange: (from, to, breakerUrl) => {
+          this._emitStateEvent(to, breakerUrl);
+          userOnStateChange?.(from, to, breakerUrl);
+        }
+      };
+      breaker = new CircuitBreaker(url, config);
+      this._breakers.set(url, breaker);
+    }
+    return breaker;
+  }
+  _emitStateEvent(to, url) {
+    const breaker = this._breakers.get(url);
+    if (breaker === void 0) return;
+    const payload = { url, failureCount: breaker.failureCount };
+    if (to === "open") {
+      payload.retryAfter = breaker.nextRetryTime;
+      this._notifier.notify("breaker-open", payload);
+    } else if (to === "half-open") {
+      this._notifier.notify("breaker-half-open", payload);
+    } else {
+      this._notifier.notify("breaker-closed", payload);
+    }
+  }
+};
 export {
+  CircuitBreaker,
+  CircuitBreakerManager,
+  CircuitOpenError,
   DefaultCache,
   DefaultEventNotifier,
   IbiraAPIFetchManager,
@@ -1664,6 +2060,24 @@ export {
  * @see {@link https://semver.org/|Semantic Versioning 2.0.0}
  */
 /**
+ * @fileoverview Circuit breaker state machine — pure class with no I/O
+ * @module resilience/CircuitBreaker
+ * @license MIT
+ * @copyright 2026 Marcelo Pereira Barbosa
+ */
+/**
+ * @fileoverview Typed error thrown when a circuit breaker blocks a request
+ * @module resilience/CircuitOpenError
+ * @license MIT
+ * @copyright 2026 Marcelo Pereira Barbosa
+ */
+/**
+ * @fileoverview Circuit-breaker wrapper around IbiraAPIFetchManager
+ * @module resilience/CircuitBreakerManager
+ * @license MIT
+ * @copyright 2026 Marcelo Pereira Barbosa
+ */
+/**
  * @fileoverview ibira.js - A JavaScript library for fetching and caching API data with observer pattern support
  * @module ibira.js
  * @version 0.4.20-alpha
@@ -1671,7 +2085,7 @@ export {
  * @author Marcelo Pereira Barbosa
  * @copyright 2026 Marcelo Pereira Barbosa
  * @see {@link https://github.com/mpbarbosa/ibira.js|GitHub Repository}
- * 
+ *
  * @description
  * A powerful JavaScript library providing:
  * - Intelligent API data fetching and caching
@@ -1680,18 +2094,18 @@ export {
  * - Robust error management with retry logic
  * - Request deduplication and race condition protection
  * - Configurable cache with expiration and size limits
- * 
+ *
  * @example
  * // Basic usage with default cache
  * import { IbiraAPIFetcher } from 'ibira.js';
- * 
+ *
  * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
  * const data = await fetcher.fetchData();
- * 
+ *
  * @example
  * // Advanced usage with manager
  * import { IbiraAPIFetchManager } from 'ibira.js';
- * 
+ *
  * const manager = new IbiraAPIFetchManager({ maxCacheSize: 200 });
  * const data = await manager.fetch('https://api.example.com/data');
  */

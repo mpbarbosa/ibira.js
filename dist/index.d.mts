@@ -86,14 +86,26 @@ declare class DefaultCache<T = unknown> {
      */
     get(key: string): CacheEntry<T> | undefined;
     /**
-     * Stores a value in the cache
-     * Automatically enforces size limits using LRU eviction
+     * Stores a value in the cache.
+     * Automatically enforces size limits via LRU eviction.
+     *
+     * **Cache overflow behaviour:** if adding this entry causes `storage.size`
+     * to exceed `maxSize`, the entry with the lowest `timestamp` (least
+     * recently used) is evicted synchronously before this method returns.
+     * The cache never holds more than `maxSize` entries at any point.
+     * During a burst where multiple entries share the same `timestamp`,
+     * eviction order among them is stable but arbitrary (first-inserted wins).
      *
      * @param {string} key - The cache key
      * @param {CacheEntry} value - The value to cache
      *
      * @example
-     * cache.set('user:123', { data: { name: 'John' }, timestamp: Date.now(), expiresAt: Date.now() + 300000 });
+     * const cache = new DefaultCache({ maxSize: 2, expiration: 60_000 });
+     * // entries helper: { data, timestamp: Date.now(), expiresAt: Date.now() + 60_000 }
+     * cache.set('a', entryA);
+     * cache.set('b', entryB);
+     * cache.set('c', entryC); // 'a' is evicted — it has the oldest timestamp
+     * console.log(cache.size); // 2
      */
     set(key: string, value: CacheEntry<T>): void;
     /**
@@ -136,8 +148,10 @@ declare class DefaultCache<T = unknown> {
      */
     entries(): IterableIterator<[string, CacheEntry<T>]>;
     /**
-     * Enforces the maximum cache size by removing oldest entries
-     * Uses LRU (Least Recently Used) eviction strategy
+     * Synchronously evicts entries to bring the cache back within `maxSize`.
+     * Sorts all current entries by `timestamp` ascending and removes the
+     * oldest `(size - maxSize)` entries. Called on every `set()`, so the
+     * cache is always within bounds when `set()` returns.
      *
      * @private
      */
@@ -236,14 +250,29 @@ declare class DefaultEventNotifier {
      * Observer errors are isolated — a throwing observer does not prevent
      * subsequent observers from receiving the notification.
      *
+     * **Error isolation:** if an observer's `update()` method throws, the
+     * error is caught and silently discarded by the underlying
+     * `DualObserverSubject`. The notifier does not log, rethrow, or
+     * accumulate these errors. All remaining observers in the subscription
+     * list still receive the notification in the original subscription order.
+     * Isolation applies per-observer: one bad subscriber never affects another.
+     *
      * @param {...unknown} args - Arguments to pass to each observer's update method
+     *
+     * @example
+     * // A throwing observer does not affect others
+     * const notifier = new DefaultEventNotifier();
+     * notifier.subscribe({ update: () => { throw new Error('broken observer'); } });
+     * notifier.subscribe({ update: (event) => console.log('received:', event) });
+     * notifier.notify('success', data);
+     * // logs 'received: success' — the broken observer's error was silently discarded
      *
      * @example
      * // Notify with event type and payload
      * notifier.notify('success', { data: [1, 2, 3] });
      *
      * @example
-     * // Notify with error
+     * // Notify with error event
      * notifier.notify('error', { error: new Error('Failed') });
      */
     notify(...args: unknown[]): void;
@@ -338,6 +367,34 @@ interface FetcherOptions {
     onRequest?: (options: RequestInit) => RequestInit | Promise<RequestInit>;
     onResponse?: (response: Response) => Response | Promise<Response>;
     retryStrategy?: (attempt: number, error: Error) => boolean;
+    /**
+     * Optional runtime validation / parsing function applied to the raw JSON response
+     * before the data is cached or returned to the caller.
+     *
+     * Throw inside this function to reject the response as invalid — the thrown error
+     * propagates through the retry loop just like a network error. Use any schema
+     * library (Zod, io-ts, Valibot, etc.) or write your own guard:
+     *
+     * ```typescript
+     * import { z } from 'zod';
+     * const UserSchema = z.object({ id: z.number(), name: z.string() });
+     *
+     * const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
+     *   parseResponse: (data) => UserSchema.parse(data), // throws ZodError if invalid
+     * });
+     * ```
+     */
+    parseResponse?: (data: unknown) => unknown;
+    /**
+     * Optional callback for performance observability metrics.
+     *
+     * Called synchronously during `fetchData()` at each lifecycle event (cache hit/miss,
+     * network success/failure, retry). Errors thrown inside `onMetric` propagate to the caller —
+     * keep the callback lightweight and non-throwing.
+     *
+     * @see {@link MetricEvent} for the full discriminated union.
+     */
+    onMetric?: (event: MetricEvent) => void;
 }
 /**
  * @typedef {Object} CacheOperation
@@ -387,6 +444,76 @@ interface FetchResult {
     newCacheState: Map<string, CacheEntry>;
     meta: FetchMeta;
 }
+/**
+ * A discriminated union of metric events fired by `IbiraAPIFetcher.fetchData()` via `onMetric`.
+ *
+ * Each variant corresponds to a distinct observable event in the fetch lifecycle:
+ * - `cache-hit`     — request served from cache; no network I/O
+ * - `cache-miss`    — cache did not have valid data; network request attempted
+ * - `fetch-success` — network request completed successfully
+ * - `fetch-error`   — all retry attempts exhausted; final error being thrown
+ * - `retry`         — a retry is about to be scheduled after a transient failure
+ *
+ * @example
+ * const fetcher = IbiraAPIFetcher.withDefaultCache(url, {
+ *   onMetric: (m) => {
+ *     if (m.type === 'cache-hit')     metrics.cacheHits++;
+ *     if (m.type === 'cache-miss')    metrics.cacheMisses++;
+ *     if (m.type === 'fetch-success') histogram.record(m.durationMs);
+ *     if (m.type === 'retry')         metrics.retryCount++;
+ *   },
+ * });
+ */
+type MetricEvent = {
+    readonly type: 'cache-hit';
+    readonly url: string;
+    readonly durationMs: number;
+} | {
+    readonly type: 'cache-miss';
+    readonly url: string;
+} | {
+    readonly type: 'fetch-success';
+    readonly url: string;
+    readonly durationMs: number;
+    readonly attempt: number;
+} | {
+    readonly type: 'fetch-error';
+    readonly url: string;
+    readonly durationMs: number;
+    readonly attempt: number;
+    readonly error: Error;
+} | {
+    readonly type: 'retry';
+    readonly url: string;
+    readonly attempt: number;
+    readonly delayMs: number;
+    readonly error: Error;
+};
+/**
+ * A discriminated union representing the outcome of a fetch operation.
+ *
+ * Use `fetchSafe()` to obtain a `Result` instead of wrapping `fetchData()` in a try/catch.
+ * Narrow the union with `result.ok`:
+ *
+ * ```typescript
+ * const result = await fetcher.fetchSafe<User[]>();
+ * if (result.ok) {
+ *   renderUsers(result.value); // typed as User[]
+ * } else {
+ *   console.error(result.error.message);
+ * }
+ * ```
+ *
+ * @template T - The type of the successful value. Defaults to `unknown`.
+ * @template E - The error type. Defaults to `Error`.
+ */
+type Result<T = unknown, E extends Error = Error> = {
+    readonly ok: true;
+    readonly value: T;
+} | {
+    readonly ok: false;
+    readonly error: E;
+};
 /**
  * IbiraAPIFetcher - Core class for fetching and caching API data
  *
@@ -441,6 +568,8 @@ declare class IbiraAPIFetcher {
     readonly onRequest: ((options: RequestInit) => RequestInit | Promise<RequestInit>) | null;
     readonly onResponse: ((response: Response) => Response | Promise<Response>) | null;
     readonly retryStrategy: ((attempt: number, error: Error) => boolean) | null;
+    readonly parseResponse: ((data: unknown) => unknown) | null;
+    readonly onMetric: ((event: MetricEvent) => void) | null;
     /**
      * Creates an IbiraAPIFetcher with a purely functional cache approach
      * This method provides better referential transparency by explicitly managing cache externally
@@ -748,6 +877,15 @@ declare class IbiraAPIFetcher {
      *   - Errors thrown by `onRequest` or `onResponse` interceptors
      *   - `AbortError` when `signal` is aborted externally (not retried)
      *
+     * **Retry exhaustion:** the fetcher makes up to `maxRetries + 1` total
+     * attempts (1 initial + `maxRetries` retries). Only retryable errors
+     * (matching `retryableStatusCodes` or the custom `retryStrategy`) trigger
+     * a retry. After the last attempt the **original** error from that attempt
+     * is re-thrown directly — it is never wrapped. Setting `maxRetries: 0`
+     * disables retries entirely; any failure throws immediately after the
+     * single attempt. Externally aborted requests (`signal.aborted`) are never
+     * retried, regardless of `maxRetries`.
+     *
      * @example
      * // Practical usage - handles side effects automatically
      * const fetcher = IbiraAPIFetcher.withDefaultCache('https://api.example.com/data');
@@ -755,18 +893,67 @@ declare class IbiraAPIFetcher {
      * console.log(data); // Retrieved data
      *
      * @example
+     * // Retry exhaustion: catching the error thrown after all attempts fail
+     * const fetcher = IbiraAPIFetcher.withDefaultCache(url); // maxRetries defaults to 3
+     * try {
+     *   const data = await fetcher.fetchData(); // up to 4 total attempts
+     * } catch (error) {
+     *   // error is the original Error from the final attempt — never wrapped
+     *   console.error('All retries exhausted:', error.message);
+     * }
+     *
+     * @example
+     * // maxRetries: 0 — disable retries; throw immediately on first failure
+     * const noRetry = IbiraAPIFetcher.withDefaultCache(url, { maxRetries: 0 });
+     * try {
+     *   await noRetry.fetchData();
+     * } catch (error) {
+     *   console.error('Failed (no retries):', error.message);
+     * }
+     *
+     * @example
      * // Cancel an in-flight request
      * const controller = new AbortController();
      * setTimeout(() => controller.abort(), 1000);
      * const data = await fetcher.fetchData(null, controller.signal);
-     *
-     * @example
-     * // Pure functional testing
-     * const mockNetwork = () => Promise.resolve({ test: 'data' });
-     * const result = await fetcher.fetchDataPure(new Map(), Date.now(), mockNetwork);
-     * // Test result without side effects
      */
     fetchData(cacheOverride?: CacheInterface | null, signal?: AbortSignal | null): Promise<unknown>;
+    /**
+     * Fetch data and return a `Result<T>` instead of throwing.
+     *
+     * This is a type-safe alternative to `fetchData()` for callers who prefer explicit
+     * error handling over try/catch. It accepts the same arguments, applies the same
+     * retry logic, and emits the same observer events — the only difference is the
+     * return shape.
+     *
+     * On success the resolved value is `{ ok: true, value: T }`.
+     * On any failure (network error, HTTP error, retry exhaustion, abort) the resolved
+     * value is `{ ok: false, error: Error }`. The method itself never rejects.
+     *
+     * @template T - Expected type of the fetched data. Defaults to `unknown`.
+     * @param {CacheInterface | null} [cacheOverride] - Optional cache instance to use instead of the default
+     * @param {AbortSignal | null} [signal] - Optional AbortSignal for consumer-level request cancellation
+     * @returns {Promise<Result<T>>} Always resolves; never rejects.
+     *
+     * @example
+     * // Basic usage — no try/catch needed
+     * const result = await fetcher.fetchSafe<User[]>();
+     * if (result.ok) {
+     *   renderUsers(result.value);
+     * } else {
+     *   showError(result.error.message);
+     * }
+     *
+     * @example
+     * // With AbortController
+     * const controller = new AbortController();
+     * setTimeout(() => controller.abort(), 2000);
+     * const result = await fetcher.fetchSafe(null, controller.signal);
+     * if (!result.ok) {
+     *   console.log('Cancelled or failed:', result.error.message);
+     * }
+     */
+    fetchSafe<T = unknown>(cacheOverride?: CacheInterface | null, signal?: AbortSignal | null): Promise<Result<T>>;
     /**
      * Applies side effects based on pure computation results
      *
@@ -797,7 +984,23 @@ declare class IbiraAPIFetcher {
 interface ManagerOptions {
     maxCacheSize?: number;
     cacheExpiration?: number;
+    /**
+     * Milliseconds between automatic cache cleanups (default: 60 000).
+     * Set to `0` to disable automatic cleanup entirely.
+     * Ignored when `cleanupStrategy` is `'lazy'`.
+     */
     cleanupInterval?: number;
+    /**
+     * Controls when expired-entry cleanup runs.
+     *
+     * - `'interval'` (default) — a `setInterval` fires every `cleanupInterval` ms.
+     *   Works well in long-running Node.js processes and browsers.
+     * - `'lazy'` — no timer is created; cleanup runs inside `fetch()` whenever
+     *   `cleanupInterval` ms have elapsed since the last cleanup pass.
+     *   Ideal for serverless / edge environments where `setInterval` is costly
+     *   or unavailable.
+     */
+    cleanupStrategy?: 'interval' | 'lazy';
     maxRetries?: number;
     retryDelay?: number;
     retryMultiplier?: number;
@@ -902,6 +1105,7 @@ declare class IbiraAPIFetchManager {
     defaultRetryMultiplier: number;
     defaultRetryableStatusCodes: number[];
     cleanupTimer: ReturnType<typeof setInterval> | null;
+    cleanupStrategy: 'interval' | 'lazy';
     /**
      * Creates a new IbiraAPIFetchManager instance
      *
@@ -1353,7 +1557,7 @@ declare function debounce<TArgs extends unknown[], TReturn>(fn: (...args: TArgs)
  *
  * @example
  * import { VERSION } from 'ibira.js';
- * console.log(VERSION.toString()); // "0.4.22-alpha"
+ * console.log(VERSION.toString()); // "0.4.48"
  * console.log(`v${VERSION.major}.${VERSION.minor}.${VERSION.patch}`);
  */
 declare const VERSION: {
@@ -1364,4 +1568,243 @@ declare const VERSION: {
     toString(): string;
 };
 
-export { type CacheEntry, type CacheInterface, type CacheOperation, type CacheOptions, DefaultCache, DefaultEventNotifier, type FetchEvent, type FetchMeta, type FetchResult, type FetcherOptions, type HttpMethod, IbiraAPIFetchManager, IbiraAPIFetcher, VERSION, debounce, throttle };
+/**
+ * @fileoverview Circuit breaker state machine — pure class with no I/O
+ * @module resilience/CircuitBreaker
+ * @license MIT
+ * @copyright 2026 Marcelo Pereira Barbosa
+ */
+/** The three states a circuit breaker can be in. */
+type CircuitState = 'closed' | 'open' | 'half-open';
+/**
+ * Configuration for a `CircuitBreaker` instance.
+ *
+ * All fields are optional and fall back to sensible defaults.
+ */
+interface CircuitBreakerConfig {
+    /** Consecutive failures before tripping open. Default: `5`. */
+    failureThreshold?: number;
+    /** Consecutive successes in half-open before closing. Default: `2`. */
+    successThreshold?: number;
+    /** Milliseconds to wait in open state before probing (half-open). Default: `60000`. */
+    timeout?: number;
+    /** Called whenever the state changes. Useful for metrics and logging. */
+    onStateChange?: (from: CircuitState, to: CircuitState, url: string) => void;
+}
+/**
+ * Pure state machine implementing the three-state circuit breaker pattern.
+ *
+ * ```text
+ * CLOSED ──(N failures)──> OPEN
+ *   ^                        |
+ *   |                   (timeout)
+ *   |                        v
+ *   └──(M successes)── HALF-OPEN
+ * ```
+ *
+ * This class is deliberately free of I/O and timers — it reads `Date.now()`
+ * only inside `canAttempt()` to decide whether the timeout has elapsed.
+ *
+ * @example
+ * const breaker = new CircuitBreaker('https://api.example.com', { failureThreshold: 3 });
+ * if (breaker.canAttempt()) {
+ *   try {
+ *     const data = await fetch(...);
+ *     breaker.recordSuccess();
+ *   } catch (err) {
+ *     breaker.recordFailure(err instanceof Error ? err : new Error(String(err)));
+ *     throw err;
+ *   }
+ * }
+ */
+declare class CircuitBreaker {
+    private _state;
+    private _failureCount;
+    private _successCount;
+    private _nextRetryTime;
+    private readonly _url;
+    private readonly _failureThreshold;
+    private readonly _successThreshold;
+    private readonly _timeout;
+    private readonly _onStateChange;
+    constructor(url: string, config?: CircuitBreakerConfig);
+    /**
+     * Returns `true` if a request should be allowed through.
+     *
+     * - **Closed**: always `true`
+     * - **Half-open**: always `true` (probe is in flight)
+     * - **Open**: `false`, unless the timeout has elapsed — in that case the
+     *   breaker transitions to half-open and returns `true`
+     */
+    canAttempt(): boolean;
+    /**
+     * Records a successful response.
+     *
+     * - **Half-open**: increments `successCount`; if threshold reached, closes.
+     * - **Closed**: resets `failureCount` (streak broken).
+     * - **Open**: no-op (should not be called while open).
+     */
+    recordSuccess(): void;
+    /**
+     * Records a failed response.
+     *
+     * - **Closed**: increments `failureCount`; if threshold reached, opens.
+     * - **Half-open**: probe failed — reopens the circuit (resets `successCount`).
+     * - **Open**: no-op.
+     *
+     * @param _error - The error that occurred. Accepted for API symmetry and
+     *   future use (e.g., filtering certain error types).
+     */
+    recordFailure(_error: Error): void;
+    /** Returns the current circuit state without triggering any transition. */
+    getState(): CircuitState;
+    /**
+     * Manually resets the breaker to closed with zeroed counters.
+     *
+     * Intended for administrative overrides (e.g., after a deployment or hotfix).
+     * Does **not** fire `onStateChange`.
+     */
+    reset(): void;
+    /** The URL this breaker is guarding. */
+    get url(): string;
+    /** Current consecutive failure count (informational). */
+    get failureCount(): number;
+    /** Current consecutive success count in half-open (informational). */
+    get successCount(): number;
+    /**
+     * Timestamp (ms since epoch) at which the breaker will transition from
+     * open → half-open. `0` when not in the open state.
+     */
+    get nextRetryTime(): number;
+    private _transition;
+}
+
+/**
+ * @fileoverview Circuit-breaker wrapper around IbiraAPIFetchManager
+ * @module resilience/CircuitBreakerManager
+ * @license MIT
+ * @copyright 2026 Marcelo Pereira Barbosa
+ */
+
+/**
+ * Payload carried by breaker state-transition events.
+ *
+ * | Event             | `retryAfter` present? |
+ * | ----------------- | --------------------- |
+ * | `'breaker-open'`  | yes                   |
+ * | `'breaker-half-open'` | no               |
+ * | `'breaker-closed'` | no                  |
+ */
+interface BreakerEventPayload {
+    url: string;
+    failureCount: number;
+    retryAfter?: number;
+}
+/**
+ * Thin wrapper around `IbiraAPIFetchManager` that adds per-URL circuit breaking
+ * and fires observer events on every state transition.
+ *
+ * ```text
+ * CircuitBreakerManager
+ *   ├─> breakers: Map<url, CircuitBreaker>   // per-URL state machines
+ *   ├─> notifier: DefaultEventNotifier       // 'breaker-open' | '-half-open' | '-closed'
+ *   └─> inner: IbiraAPIFetchManager          // fetch + cache + dedup layer
+ * ```
+ *
+ * On each `fetch(url, options)` call the manager:
+ * 1. Looks up (or lazily creates) the `CircuitBreaker` for that URL.
+ * 2. If `!breaker.canAttempt()` — calls `fallback(url)` if provided, otherwise
+ *    throws `CircuitOpenError`.
+ * 3. Delegates to the inner manager's `fetch()`.
+ * 4. Records success or failure on the breaker.
+ * 5. Re-throws on failure after recording.
+ *
+ * **State-transition events** are emitted through an internal
+ * `DefaultEventNotifier`. Subscribe with `manager.subscribe(observer)`:
+ *
+ * ```ts
+ * manager.subscribe({
+ *   update(event: string, payload: BreakerEventPayload) {
+ *     if (event === 'breaker-open') console.warn('Circuit open!', payload.retryAfter);
+ *   }
+ * });
+ * ```
+ *
+ * @example
+ * const inner = new IbiraAPIFetchManager({ maxCacheSize: 200 });
+ * const manager = new CircuitBreakerManager(inner, { failureThreshold: 3 });
+ * const data = await manager.fetch('https://api.example.com/data');
+ *
+ * @example
+ * // With a stale-cache fallback
+ * const manager = new CircuitBreakerManager(inner, {}, (url) => staleCache.get(url));
+ */
+declare class CircuitBreakerManager {
+    private readonly _inner;
+    private readonly _breakers;
+    private readonly _config;
+    private readonly _fallback;
+    private readonly _notifier;
+    constructor(inner: IbiraAPIFetchManager, config?: CircuitBreakerConfig, fallback?: (url: string) => unknown);
+    /**
+     * Fetches `url` through the circuit breaker.
+     *
+     * @throws {CircuitOpenError} When the circuit is open and no fallback is configured.
+     * @throws {Error} Any error thrown by the inner manager (re-thrown after recording failure).
+     */
+    fetch(url: string, options?: FetcherOptions): Promise<unknown>;
+    /**
+     * Subscribes an observer to receive breaker state-transition events.
+     *
+     * Events: `'breaker-open'`, `'breaker-half-open'`, `'breaker-closed'`.
+     * Each call passes `(eventName: string, payload: BreakerEventPayload)`.
+     */
+    subscribe(observer: Observer): void;
+    /** Removes a previously subscribed observer. */
+    unsubscribe(observer: Observer): void;
+    /** Number of currently subscribed observers. */
+    get subscriberCount(): number;
+    /**
+     * Returns the `CircuitBreaker` instance for `url`, creating one if none exists.
+     *
+     * Useful for inspection and testing — do not mutate the returned breaker.
+     */
+    getBreakerForUrl(url: string): CircuitBreaker;
+    /** Destroys the inner manager (stops timers, clears cache). */
+    destroy(): void;
+    private _getOrCreateBreaker;
+    private _emitStateEvent;
+}
+
+/**
+ * @fileoverview Typed error thrown when a circuit breaker blocks a request
+ * @module resilience/CircuitOpenError
+ * @license MIT
+ * @copyright 2026 Marcelo Pereira Barbosa
+ */
+/**
+ * Thrown by `CircuitBreakerManager` when the circuit is open and no fallback
+ * is configured. Carries enough context for callers to surface a meaningful
+ * message or implement back-pressure.
+ *
+ * @example
+ * try {
+ *   await cbManager.fetch(url);
+ * } catch (err) {
+ *   if (err instanceof CircuitOpenError) {
+ *     console.log(`Retry after ${new Date(err.retryAfter).toISOString()}`);
+ *   }
+ * }
+ */
+declare class CircuitOpenError extends Error {
+    /** The URL whose circuit is open. */
+    readonly url: string;
+    /**
+     * Timestamp (ms since epoch) at which the breaker transitions to half-open
+     * and a probe may be attempted.
+     */
+    readonly retryAfter: number;
+    constructor(url: string, retryAfter: number);
+}
+
+export { type BreakerEventPayload, type CacheEntry, type CacheInterface, type CacheOperation, type CacheOptions, CircuitBreaker, type CircuitBreakerConfig, CircuitBreakerManager, CircuitOpenError, type CircuitState, DefaultCache, DefaultEventNotifier, type FetchEvent, type FetchMeta, type FetchResult, type FetcherOptions, type HttpMethod, IbiraAPIFetchManager, IbiraAPIFetcher, type MetricEvent, type Result, VERSION, debounce, throttle };
