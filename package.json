@@ -29,6 +29,7 @@
     "validate": "npx tsc --noEmit",
     "version:sync": "node scripts/sync-version.js",
     "version:check": "node scripts/sync-version.js --check",
+    "version": "npm run version:sync && git add src/config/version.ts",
     "test:all": "npm run version:check && npm run validate && npm test",
     "prepublishOnly": "npm run validate && npm test && npm run build",
     "lint": "eslint src/ __tests__/ test/",

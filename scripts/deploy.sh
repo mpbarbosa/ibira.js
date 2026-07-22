@@ -17,6 +17,18 @@
 #   NPM_TOKEN must be set (via environment or ./.env); working tree must be
 #   clean; tests must pass; build must succeed.
 #
+# PRE-FLIGHT — verify NPM_TOKEN *before* deploying:
+#   This script fails fast (exit 1) if NPM_TOKEN is missing, but that guard runs
+#   only once deploy starts. In a release pipeline where earlier steps
+#   (version-bump, commit, push) run *before* this script, a missing token
+#   leaves `main` bumped and pushed with NO matching git tag and NO npm publish
+#   — i.e. main is ahead of the last real release. To avoid that drift, confirm
+#   the token is present up front, before the pipeline bumps the version:
+#     [[ -n "${NPM_TOKEN:-}" ]] || grep -q '^NPM_TOKEN=' ./.env || \
+#       { echo "Set NPM_TOKEN before releasing"; exit 1; }
+#   Gate the bump/push steps behind that check (or behind a successful deploy)
+#   so a token problem never advances the version.
+#
 # Exit codes:
 #   0 — success
 #   1 — git working tree is dirty (or detached HEAD), or NPM_TOKEN missing
