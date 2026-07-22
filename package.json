@@ -92,7 +92,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mpbarbosa/ibira.js.git"
+    "url": "git+https://github.com/mpbarbosa/ibira.js.git"
   },
   "bugs": {
     "url": "https://github.com/mpbarbosa/ibira.js/issues"
